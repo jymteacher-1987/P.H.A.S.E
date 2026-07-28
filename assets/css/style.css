@@ -407,6 +407,12 @@ iframe.viewer-frame{ width:100%; height:100%; border:none; background:#fff; }
   .site-nav .nav-links{ display:none; }
   .hero{ padding: 40px 0 24px; }
   .stat-card{ min-width: 120px; padding:14px 18px; }
+  /* footer: email flush left, credit flush right on the same line
+     (spans the full width so "Made by P.H.A.S.E" hugs the true right
+     edge instead of just trailing the email text with blank space
+     after it); admin-link then wraps to its own line, still pushed to
+     the right via its existing margin-left:auto. */
+  .footer-contact{ width:100%; justify-content:space-between; }
 }
 @media (max-width: 480px){
   .wrap{ padding: 0 16px; }
