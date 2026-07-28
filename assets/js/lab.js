@@ -145,7 +145,7 @@
         <a class="exp-card ${isNew(e) ? "new" : ""}" href="${url}">
           <div class="exp-preview" data-src="${e.path}"><span class="ph">🧪</span></div>
           <div class="body">
-            <span class="tag">${c.icon} ${c.name}</span>
+            <span class="tag" data-cat="${e.category}">${c.icon} ${c.name}</span>
             <h3>${e.title}</h3>
             <p>${e.description || ""}</p>
             <div class="meta"><span>${e.date || ""}</span><span class="go">열어보기 →</span></div>

@@ -19,5 +19,6 @@
   titleEl.textContent = exp.title;
   const c = categories.find((c) => c.id === exp.category);
   catEl.textContent = c ? `${c.icon} ${c.name}` : "";
+  if (exp.category) catEl.dataset.cat = exp.category;
   frame.src = exp.path;
 })();

@@ -256,6 +256,32 @@ input, button, textarea, select{ font-family: inherit; }
   color: var(--accent-2); background: rgba(8,145,178,.08);
   border:1px solid rgba(8,145,178,.22); padding:4px 10px; border-radius:999px; margin-bottom:12px;
 }
+/* One color per category (7 fixed categories, see data/experiments.json),
+   so the tags on the card grid are visually distinguishable at a glance
+   instead of all sharing the same teal. Applied via data-cat, set in
+   lab.js/view.js from each experiment's category id — keep that in sync
+   if a category is ever added/renamed. */
+.exp-card .tag[data-cat="fundamentals"], .cat-tag[data-cat="fundamentals"]{
+  color:#3563e8; background:rgba(53,99,232,.08); border-color:rgba(53,99,232,.22);
+}
+.exp-card .tag[data-cat="mechanics"], .cat-tag[data-cat="mechanics"]{
+  color:#d17d06; background:rgba(245,158,11,.1); border-color:rgba(245,158,11,.28);
+}
+.exp-card .tag[data-cat="thermal"], .cat-tag[data-cat="thermal"]{
+  color:#e0453b; background:rgba(224,69,59,.08); border-color:rgba(224,69,59,.22);
+}
+.exp-card .tag[data-cat="waves-optics"], .cat-tag[data-cat="waves-optics"]{
+  color:#0891b2; background:rgba(8,145,178,.08); border-color:rgba(8,145,178,.22);
+}
+.exp-card .tag[data-cat="electromagnetism"], .cat-tag[data-cat="electromagnetism"]{
+  color:#7c3aed; background:rgba(124,58,237,.08); border-color:rgba(124,58,237,.22);
+}
+.exp-card .tag[data-cat="relativity"], .cat-tag[data-cat="relativity"]{
+  color:#db2777; background:rgba(219,39,119,.08); border-color:rgba(219,39,119,.22);
+}
+.exp-card .tag[data-cat="modern-physics"], .cat-tag[data-cat="modern-physics"]{
+  color:#0f9d6e; background:rgba(15,157,110,.08); border-color:rgba(15,157,110,.22);
+}
 .exp-card h3{ font-size:17px; margin:0 0 8px; font-weight:700; letter-spacing:-.01em; color: var(--text); }
 .exp-card p{ font-size:13.5px; color: var(--text-dim); margin:0 0 16px; flex:1; }
 .exp-card .meta{ display:flex; justify-content:space-between; align-items:center; font-size:12px; color: var(--text-faint); }
