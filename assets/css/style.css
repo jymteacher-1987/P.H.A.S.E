@@ -20,7 +20,7 @@
 }
 
 *{ box-sizing: border-box; }
-html,body{ margin:0; padding:0; }
+html,body{ margin:0; padding:0; overflow-x:hidden; width:100%; }
 body{
   background:
     radial-gradient(1100px 500px at 12% -10%, rgba(53,99,232,.08), transparent 60%),
@@ -49,9 +49,9 @@ input, button, textarea, select{ font-family: inherit; }
 }
 .site-nav .wrap{
   display:flex; align-items:center; justify-content:space-between;
-  height: 68px;
+  height: 68px; gap:10px;
 }
-.brand{ display:flex; align-items:center; gap:10px; font-weight:800; font-size:18px; letter-spacing:-.02em; }
+.brand{ display:flex; align-items:center; gap:10px; font-weight:800; font-size:18px; letter-spacing:-.02em; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .brand .dot{
   width:10px; height:10px; border-radius:50%;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
@@ -264,16 +264,19 @@ input, button, textarea, select{ font-family: inherit; }
 }
 .exp-card{ position:relative; }
 
-/* live preview thumbnail — fixed 1280x800 virtual canvas, scaled to fit;
-   aspect-ratio keeps every card's preview box the exact same proportions
-   so nothing gets cropped or looks inconsistent between cards */
+/* live preview thumbnail — every card's box is the exact same fixed
+   proportions (aspect-ratio), and the iframe fills it 100%. Experiment
+   pages are themselves mobile-responsive, so filling the real box size
+   (instead of rendering a fixed 1280x800 canvas and scaling it down)
+   makes every preview look consistently "full", including experiments
+   that internally cap their own content width. */
 .exp-preview{
-  position:relative; width:100%; aspect-ratio: 1280 / 800; background: var(--surface-2);
+  position:relative; width:100%; aspect-ratio: 4 / 3; background: var(--surface-2);
   overflow:hidden; border-bottom:1px solid var(--border);
 }
 .exp-preview iframe{
-  position:absolute; top:0; left:0; width:1280px; height:800px; border:none;
-  pointer-events:none; transform-origin: top left; background:#fff;
+  position:absolute; inset:0; width:100%; height:100%; border:none;
+  pointer-events:none; background:#fff;
 }
 .exp-preview .ph{
   position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
@@ -284,7 +287,9 @@ input, button, textarea, select{ font-family: inherit; }
   .lab-shell{ grid-template-columns: 1fr; }
   .lab-sidebar{
     position:static; display:flex; overflow-x:auto; gap:6px; padding:10px;
+    scrollbar-width:none; -ms-overflow-style:none;
   }
+  .lab-sidebar::-webkit-scrollbar{ display:none; }
   .side-item{ flex:0 0 auto; white-space:nowrap; margin-bottom:0; }
 }
 
@@ -382,7 +387,27 @@ iframe.viewer-frame{ width:100%; height:100%; border:none; background:#fff; }
   .hero-visual{ order:-1; max-width:460px; margin:0 auto; }
 }
 @media (max-width: 640px){
+  .site-nav{ position: static; }
   .site-nav .nav-links{ display:none; }
   .hero{ padding: 40px 0 24px; }
   .stat-card{ min-width: 120px; padding:14px 18px; }
+}
+@media (max-width: 480px){
+  .wrap{ padding: 0 16px; }
+  .site-nav .wrap{ height:60px; }
+  .brand{ font-size:15px; gap:7px; }
+  .brand .dot{ width:8px; height:8px; }
+  .nav-cta{ font-size:11px; padding:6px 11px; }
+  .nav-btn{ font-size:12px; padding:7px 14px; }
+  .stat-card{ min-width: 100%; }
+  .stats-row{ flex-direction:column; }
+}
+/* 휴대폰 가로모드: 세로 공간이 좁으니 위아래 여백을 줄여서
+   한 화면에 최대한 들어오도록 함 (너비가 아니라 높이 기준 미디어쿼리) */
+@media (max-height: 480px) and (orientation: landscape){
+  .site-nav .wrap{ height:52px; }
+  .hero{ padding: 20px 0 16px; }
+  .hero .wrap{ gap:24px; }
+  .stats-row{ margin-bottom:0; }
+  .lab-sidebar{ position:static; }
 }
