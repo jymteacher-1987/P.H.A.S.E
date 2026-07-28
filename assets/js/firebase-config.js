@@ -5,12 +5,12 @@
 // (배포 가이드 문서 2단계 참고)
 // ================================================================
 window.FIREBASE_CONFIG = {
-  apiKey: "여기에-API-KEY-입력",
-  authDomain: "여기에-PROJECT_ID.firebaseapp.com",
-  projectId: "여기에-PROJECT_ID",
-  storageBucket: "여기에-PROJECT_ID.appspot.com",
-  messagingSenderId: "여기에-SENDER_ID",
-  appId: "여기에-APP_ID"
+  apiKey: "AIzaSyBTv7FPJQBtED1cqefzV8zyi3dqvJ5PAqE",
+  authDomain: "physics-lab-b0591.firebaseapp.com",
+  projectId: "physics-lab-b0591",
+  storageBucket: "physics-lab-b0591.firebasestorage.app",
+  messagingSenderId: "678968269888",
+  appId: "1:678968269888:web:40fc6804666d0546f493a5"
 };
 
 // 관리자 로그인에 사용할 이메일 (Firebase Authentication에 등록한 계정)
