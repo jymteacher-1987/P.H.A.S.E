@@ -78,6 +78,17 @@
     els.expGrid.querySelectorAll(".exp-preview[data-src]").forEach((box) => previewObserver.observe(box));
   }
 
+  // Virtual "desktop-style" viewport every experiment is rendered at inside
+  // its preview iframe (see .exp-preview iframe in style.css — fixed
+  // 900x675, same 4:3 ratio as the card). This keeps the source page out of
+  // its own mobile breakpoint so it shows its normal roomy layout, and the
+  // scale below always slightly OVER-covers the real card size so there is
+  // never visible empty margin — some experiments don't use their full
+  // canvas width/height, and a bit of edge-cropping on those looks far
+  // better than dead space around the preview.
+  const PREVIEW_W = 900;
+  const PREVIEW_OVERSCALE = 1.18;
+
   function loadPreview(box) {
     const src = box.dataset.src;
     if (!src) return;
@@ -90,14 +101,12 @@
     if (ph) ph.remove();
     box.appendChild(iframe);
 
-    // ResizeObserver, not a one-off width read: this guarantees the scale is
-    // always correct (initial layout timing, window resize, responsive grid
-    // reflow all fire this), so every card's preview stays the same
-    // proportions instead of looking randomly zoomed in/out.
-    const ro = new ResizeObserver((entries) => {
-      const w = entries[0].contentRect.width || 270;
-      iframe.style.transform = `scale(${w / 1280})`;
-    });
+    function fitPreview() {
+      const scale = (box.clientWidth / PREVIEW_W) * PREVIEW_OVERSCALE;
+      iframe.style.transform = `translate(-50%, -50%) scale(${scale})`;
+    }
+    fitPreview();
+    const ro = new ResizeObserver(fitPreview);
     ro.observe(box);
   }
 
