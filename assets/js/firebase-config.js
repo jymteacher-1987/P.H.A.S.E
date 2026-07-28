@@ -16,4 +16,4 @@ window.FIREBASE_CONFIG = {
 // 관리자 로그인에 사용할 이메일 (Firebase Authentication에 등록한 계정)
 // 이 값은 "누가 관리자 UI를 볼 수 있는지"를 프론트에서 표시용으로만 쓰는 값이고,
 // 실제 쓰기 권한은 firestore.rules / storage.rules 에서 강제됩니다.
-window.ADMIN_EMAIL = "extraboy2@gmail.com";
+window.ADMIN_EMAIL = "phase@phase.com";

@@ -3,7 +3,7 @@
 // Firebase 콘솔 > Firestore Database > 규칙(Rules) 탭에 이 내용을
 // 그대로 붙여넣고 "게시(Publish)" 버튼을 누르세요.
 //
-// extraboy2@gmail.com 을 다른 관리자 이메일로 바꾸고 싶다면
+// phase@phase.com 을 다른 관리자 이메일로 바꾸고 싶다면
 // 아래 두 곳의 이메일 주소를 함께 바꿔주세요.
 // ================================================================
 rules_version = '2';
@@ -14,7 +14,7 @@ service cloud.firestore {
     match /experiments/{docId} {
       allow read: if true;
       allow write: if request.auth != null
-                   && request.auth.token.email == 'extraboy2@gmail.com';
+                   && request.auth.token.email == 'phase@phase.com';
     }
 
     // 방문자 카운터: 누구나 읽을 수 있고, "1씩 증가"하는 요청만 허용
