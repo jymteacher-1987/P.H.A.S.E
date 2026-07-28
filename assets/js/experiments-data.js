@@ -1,0 +1,219 @@
+window.EXPERIMENTS_DATA = {
+  "categories": [
+    {
+      "id": "fundamentals",
+      "name": "과학의 기초",
+      "icon": "📐",
+      "description": "단위와 측정 등 통합과학 기초 개념"
+    },
+    {
+      "id": "mechanics",
+      "name": "역학과 에너지",
+      "icon": "🚀",
+      "description": "물체의 운동과 힘을 다룹니다"
+    },
+    {
+      "id": "thermal",
+      "name": "열",
+      "icon": "🌡️",
+      "description": "열과 에너지 전환을 다룹니다"
+    },
+    {
+      "id": "waves-optics",
+      "name": "파동 및 광학",
+      "icon": "🌈",
+      "description": "빛의 파동성, 렌즈, 색을 다룹니다"
+    },
+    {
+      "id": "electromagnetism",
+      "name": "전자기학",
+      "icon": "⚡",
+      "description": "전류, 저항, 전자기 유도를 다룹니다"
+    },
+    {
+      "id": "relativity",
+      "name": "상대성이론",
+      "icon": "🌌",
+      "description": "특수·일반 상대성이론"
+    },
+    {
+      "id": "modern-physics",
+      "name": "현대물리",
+      "icon": "⚛️",
+      "description": "양자역학 등 현대물리 개념"
+    }
+  ],
+  "experiments": [
+    {
+      "id": "si-prefixes",
+      "title": "SI 단위 접두어 탐험",
+      "category": "fundamentals",
+      "description": "통합과학의 기초, SI 단위와 접두어를 시각적으로 탐험합니다.",
+      "path": "experiments/si-prefixes.html",
+      "date": "2026-07-28",
+      "tags": [
+        "단위",
+        "측정",
+        "통합과학"
+      ]
+    },
+    {
+      "id": "newton-laws",
+      "title": "뉴턴 운동 법칙 시뮬레이터",
+      "category": "mechanics",
+      "description": "뉴턴의 운동 법칙을 직접 조작하며 확인하는 시뮬레이터.",
+      "path": "experiments/newton-laws.html",
+      "date": "2026-07-28",
+      "tags": [
+        "뉴턴",
+        "운동법칙",
+        "힘"
+      ]
+    },
+    {
+      "id": "newton-prism",
+      "title": "뉴턴의 프리즘 실험",
+      "category": "waves-optics",
+      "description": "프리즘을 통과한 빛이 분산되는 과정을 가상 실험실에서 재현합니다.",
+      "path": "experiments/newton-prism.html",
+      "date": "2026-07-28",
+      "tags": [
+        "프리즘",
+        "빛의 분산",
+        "뉴턴"
+      ]
+    },
+    {
+      "id": "shm-circular-motion",
+      "title": "원운동과 단진동",
+      "category": "mechanics",
+      "description": "원운동과 단진동의 관계를 시뮬레이션으로 비교합니다.",
+      "path": "experiments/shm-circular-motion.html",
+      "date": "2026-07-28",
+      "tags": [
+        "단진동",
+        "원운동",
+        "주기운동"
+      ]
+    },
+    {
+      "id": "rocket-motion",
+      "title": "로켓 운동 비교 — 질량 고정 vs 질량 변화",
+      "category": "mechanics",
+      "description": "질량이 변하는 로켓 운동과 질량이 고정된 경우를 비교 시뮬레이션합니다.",
+      "path": "experiments/rocket-motion.html",
+      "date": "2026-07-28",
+      "tags": [
+        "로켓",
+        "운동량",
+        "질량변화"
+      ]
+    },
+    {
+      "id": "motion-analysis",
+      "title": "물체 운동 분석 실험실",
+      "category": "mechanics",
+      "description": "물체의 운동을 그래프와 데이터로 분석하는 실험실.",
+      "path": "experiments/motion-analysis.html",
+      "date": "2026-07-28",
+      "tags": [
+        "운동분석",
+        "그래프",
+        "속도"
+      ]
+    },
+    {
+      "id": "generator-principle",
+      "title": "발전기의 원리 — 교류 발전 시뮬레이션",
+      "category": "electromagnetism",
+      "description": "코일과 자석의 상대 운동으로 교류가 발생하는 원리를 시뮬레이션합니다.",
+      "path": "experiments/generator-principle.html",
+      "date": "2026-07-28",
+      "tags": [
+        "발전기",
+        "교류",
+        "전자기유도"
+      ]
+    },
+    {
+      "id": "convex-lens-focus",
+      "title": "볼록 렌즈 초점 거리 찾기 실험",
+      "category": "waves-optics",
+      "description": "단계별로 볼록렌즈의 초점 거리를 찾아가는 가상 실험.",
+      "path": "experiments/convex-lens-focus.html",
+      "date": "2026-07-28",
+      "tags": [
+        "볼록렌즈",
+        "초점거리",
+        "상"
+      ]
+    },
+    {
+      "id": "rgb-cmy-light",
+      "title": "빛의 3원색 vs 색의 3원색(물감)",
+      "category": "waves-optics",
+      "description": "빛의 3원색(RGB)과 색의 3원색(CMY)의 혼합 원리를 비교합니다.",
+      "path": "experiments/rgb-cmy-light.html",
+      "date": "2026-07-28",
+      "tags": [
+        "빛의 3원색",
+        "색의 3원색",
+        "RGB",
+        "CMY"
+      ]
+    },
+    {
+      "id": "momentum-conservation",
+      "title": "일차원 충돌에서 운동량 보존 확인하기",
+      "category": "mechanics",
+      "description": "1차원 충돌 상황을 통해 운동량 보존 법칙을 확인합니다.",
+      "path": "experiments/momentum-conservation.html",
+      "date": "2026-07-28",
+      "tags": [
+        "운동량 보존",
+        "충돌",
+        "역학"
+      ]
+    },
+    {
+      "id": "free-fall-projectile",
+      "title": "자유낙하 vs 수평 투사 비교 실험",
+      "category": "mechanics",
+      "description": "자유낙하와 수평으로 던진 물체의 운동을 비교합니다.",
+      "path": "experiments/free-fall-projectile.html",
+      "date": "2026-07-28",
+      "tags": [
+        "자유낙하",
+        "수평투사",
+        "포물선운동"
+      ]
+    },
+    {
+      "id": "resistor-series-parallel",
+      "title": "저항의 직렬·병렬연결에서 전류와 전압 측정하기",
+      "category": "electromagnetism",
+      "description": "저항의 직렬연결과 병렬연결에서 전류와 전압을 측정하는 가상실험.",
+      "path": "experiments/resistor-series-parallel.html",
+      "date": "2026-07-28",
+      "tags": [
+        "저항",
+        "직렬",
+        "병렬",
+        "옴의법칙"
+      ]
+    },
+    {
+      "id": "electromagnetic-induction",
+      "title": "전자기 유도 탐구: 코일, 자석, 상대운동",
+      "category": "electromagnetism",
+      "description": "코일과 자석의 상대 운동에 따른 전자기 유도 현상을 탐구합니다.",
+      "path": "experiments/electromagnetic-induction.html",
+      "date": "2026-07-28",
+      "tags": [
+        "전자기유도",
+        "코일",
+        "자석"
+      ]
+    }
+  ]
+};

@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>일차원 충돌 상황에서 운동량 보존 확인하기</title>
+<style>
+  :root{
+    --blue:#2563eb; --blue-d:#1e40af; --blue-l:#eff6ff;
+    --red:#dc2626;  --red-d:#991b1b;
+    --ink:#0f172a; --muted:#64748b; --line:#e2e8f0;
+    --bg:#eef2f7; --card:#fff; --ok:#16a34a; --warn:#d97706;
+    --sh:0 1px 3px rgba(15,23,42,.08);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.4;
+    word-break:keep-all; overflow-wrap:break-word;
+    -webkit-user-select:none; user-select:none;
+  }
+  textarea{-webkit-user-select:text; user-select:text;}
+  .app{padding:9px; display:flex; flex-direction:column; gap:9px;}
+
+  /* ── 헤더 ── */
+  .top{background:linear-gradient(135deg,#1e3a8a,#0284c7); color:#fff;
+    border-radius:12px; padding:9px 14px; box-shadow:var(--sh);
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;}
+  .top h1{margin:0; font-size:16px; letter-spacing:-.3px; white-space:nowrap;}
+  .top .sub{font-size:11.5px; opacity:.85; flex:1; min-width:120px;}
+  .switch{display:inline-flex; background:rgba(255,255,255,.18); border-radius:999px; padding:3px; gap:2px;}
+  .switch button{border:0; background:transparent; padding:5px 12px; border-radius:999px;
+    font-weight:700; font-size:12px; color:rgba(255,255,255,.75); cursor:pointer; white-space:nowrap;}
+  .switch button.on{background:#fff; color:var(--blue-d);}
+  .switch button.on.w{color:var(--warn);}
+
+  .card{background:var(--card); border:1px solid var(--line); border-radius:12px; box-shadow:var(--sh);}
+  .card>h2{margin:0; padding:8px 12px 6px; font-size:13px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+  .badge{font-size:10px; background:var(--blue-l); color:var(--blue-d); padding:2px 8px; border-radius:999px; font-weight:700; white-space:nowrap;}
+  .badge.g{background:#f0fdf4; color:var(--ok);}
+  .badge.w{background:#fffbeb; color:var(--warn);}
+  .spacer{flex:1;}
+
+  /* ── 중앙 ── */
+  .mid{display:flex; flex-direction:column; gap:9px;}
+  .stagecard{display:flex; flex-direction:column; overflow:hidden;}
+  .stagecard>h2{flex:none;}
+  #rail{width:100%; height:238px; display:block; background:linear-gradient(#f0f7ff,#dbeafe);}
+  .vtwrap{border-top:1px solid var(--line); background:#fcfdff; flex:none;}
+  .vthead{font-size:10px; color:#94a3b8; font-weight:700; padding:4px 10px 0; text-align:right; letter-spacing:-.2px;}
+  #vt{width:100%; height:126px; display:block;}
+
+  /* ── 사이드 ── */
+  .side{display:flex; flex-direction:column; gap:9px;}
+  .sec{padding:11px 13px 13px; display:flex; flex-direction:column;}
+  .sec.grow{flex:1 1 auto; min-height:0;}
+  .sec.grow .read{flex:1 1 auto; min-height:70px; overflow:hidden;
+    display:flex; flex-direction:column; justify-content:center;}
+  .sec.grow .btn{margin-top:9px; flex:none;}
+  .sechead{font-size:12.5px; font-weight:800; margin-bottom:9px; display:flex; align-items:center; gap:6px; flex-wrap:wrap; flex:none;}
+
+  .mrow{display:flex; align-items:center; gap:8px; margin:8px 0;}
+  .mrow .tag{width:50px; font-size:12px; font-weight:800; flex:none;}
+  .mrow.c1 .tag{color:var(--blue-d);} .mrow.c2 .tag{color:var(--red-d);}
+  .stepper{display:flex; align-items:center; gap:4px; flex:none;}
+  .stepper button{width:29px; height:29px; border-radius:9px; border:1px solid var(--line);
+    background:#f8fafc; font-size:17px; font-weight:800; color:var(--ink); cursor:pointer; line-height:1;}
+  .stepper button:active{background:#e2e8f0;}
+  .stepper button:disabled{opacity:.3; cursor:not-allowed;}
+  .stepper .cnt{width:56px; text-align:center; font-size:11.5px; color:var(--muted); font-weight:700;}
+  .scale{flex:1; min-width:0; text-align:right; font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:14.5px; font-weight:800; background:#0f172a; color:#7dd3fc; border-radius:7px;
+    padding:5px 8px; letter-spacing:-.4px;}
+  .mrow.c2 .scale{color:#fca5a5;}
+
+  .chips{display:flex; gap:6px; flex-wrap:wrap;}
+  .chip{border:1.5px solid var(--line); background:#f8fafc; border-radius:999px;
+    padding:6px 12px; font-size:12px; cursor:pointer; white-space:nowrap; font-weight:700; color:var(--muted);}
+  .chip.sel{background:var(--blue-l); border-color:var(--blue); color:var(--blue-d);}
+  /* 충돌 방식: 두 칸이 박스 가로를 꽉 채움 */
+  #bumper{display:grid; grid-template-columns:1fr 1fr; gap:7px;}
+  #bumper .chip{text-align:center; padding:9px 4px; font-size:12.5px;}
+
+  .pads{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+  .pad{position:relative; overflow:hidden; border:0; border-radius:12px; padding:11px 8px 9px;
+    color:#fff; cursor:pointer; touch-action:none; text-align:center; font:inherit;
+    box-shadow:0 2px 0 rgba(0,0,0,.18);}
+  .pad.p1{background:linear-gradient(135deg,#3b82f6,#1d4ed8);}
+  .pad.p2{background:linear-gradient(135deg,#ef4444,#b91c1c);}
+  .pad:disabled{opacity:.32; box-shadow:none; cursor:default;}
+  .pad .pl{font-size:12.5px; font-weight:800; display:block; white-space:nowrap;}
+  .pad .pk{font-size:10px; opacity:.85; display:block; margin-top:1px;}
+  .pad .bar{height:7px; border-radius:99px; background:rgba(0,0,0,.28); margin-top:7px; overflow:hidden;}
+  .pad .bar i{display:block; height:100%; width:0%; background:#fde047; border-radius:99px;}
+  .pad.hold{transform:translateY(2px); box-shadow:none;}
+
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:5px; border:0;
+    border-radius:10px; padding:9px 10px; font-size:12.5px; font-weight:800; cursor:pointer;
+    width:100%; white-space:nowrap; font-family:inherit; touch-action:manipulation;}
+  .btn.primary{background:var(--blue); color:#fff;}
+  .btn.ok{background:var(--ok); color:#fff;}
+  .btn.ghost{background:#eef2f7; color:var(--ink);}
+  .btn.ghost.on{background:#fef3c7; color:#92400e;}
+  .btn:disabled{opacity:.35; cursor:not-allowed;}
+  .btnrow{display:flex; gap:6px;} .btnrow .btn{flex:1;}
+
+  .read{background:#0f172a; border-radius:10px; padding:11px 12px; color:#cbd5e1;
+    font-family:ui-monospace,Menlo,Consolas,monospace; font-size:13.5px;}
+  .read .rt{display:flex; justify-content:space-between; align-items:baseline; gap:10px; padding:4px 0;}
+  .read .rt>b{font-weight:700; color:#94a3b8; font-size:12px; font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif; white-space:nowrap;}
+  .read .rt>span{font-variant-numeric:tabular-nums; letter-spacing:-.2px; white-space:nowrap;}
+  .read .c1v{color:#7dd3fc;} .read .c2v{color:#fca5a5;}
+  .read .sep{height:1px; background:#334155; margin:7px 0;}
+  .read .sum{color:#fde047; font-weight:800; font-size:15px;}
+  .read .sum>b{color:#eab308; font-size:12.5px;}
+  .read .rel{color:#86efac; font-weight:800; font-size:14.5px;}
+  .read .rel>b{color:#4ade80; font-size:12.5px;}
+  .read.idle{color:#475569;}
+  .read.idle .c1v,.read.idle .c2v,.read.idle .sum,.read.idle .rel{color:#475569;}
+  .read.idle .rt>b{color:#475569;}
+
+  .hint{font-size:11px; color:var(--muted); margin-top:6px; line-height:1.5;}
+  .hint b{color:var(--blue-d);}
+  .tiny{font-size:10px; color:#94a3b8; font-weight:700;}
+  .topbtn{border:0; background:rgba(255,255,255,.18); color:#fff; white-space:nowrap;
+    border-radius:8px; padding:6px 11px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit;}
+  .topbtn:active{background:rgba(255,255,255,.32);}
+  #btnFull{display:none;}
+  @media (hover:none){ #btnFull{display:inline-block;} }
+
+  /* ── 표 (가로 스크롤 없이 한눈에) ── */
+  .datacard>h2{padding:7px 10px 6px; gap:5px; font-size:12.5px;}
+  .datacard>h2 .btn{width:auto; padding:5px 9px; font-size:11px;}
+  .note-rule{font-size:9.5px; color:var(--muted); font-weight:600; white-space:normal; line-height:1.35; max-width:230px;}
+  .note-rule b{color:var(--ink);}
+  .tablewrap{overflow:auto; -webkit-overflow-scrolling:touch; border-top:1px solid var(--line);}
+  table{border-collapse:collapse; width:100%; font-size:10px; table-layout:fixed;}
+  th,td{padding:3.5px 1px; text-align:center; border-bottom:1px solid var(--line); white-space:nowrap; overflow:hidden;}
+  thead th{position:sticky; top:24px; background:#f1f5f9; font-size:8.5px; color:#475569; z-index:2; font-weight:800;}
+  thead tr.g1 th{top:0; background:#e2e8f0; font-size:9px; border-bottom:1px solid #cbd5e1; z-index:3;
+    padding:3px 2px; white-space:normal; line-height:1.25; letter-spacing:-.3px;}
+  col.cRn{width:4.4%;} col.cM{width:5.9%;} col.cV{width:6.2%;} col.cS{width:6.4%;} col.cK{width:10.4%;}
+  td.num{font-variant-numeric:tabular-nums; font-family:ui-monospace,Menlo,Consolas,monospace; letter-spacing:-.4px;}
+  td.rn{font-weight:800; background:#f8fafc; font-size:10px;}
+  .pos{color:var(--blue-d);} .neg{color:var(--red-d);}
+  .keep{color:var(--ok); font-weight:800;} .almost{color:var(--warn); font-weight:800;} .bad{color:var(--red-d); font-weight:800;}
+  .pct{font-size:9px; opacity:.75; font-weight:700;}
+  .sepL{border-left:2px solid #cbd5e1;}
+  tbody tr.blank td{color:#cbd5e1;}
+  tbody tr.hl{background:#fefce8;}
+  @media (max-width:999px){ table{table-layout:auto; min-width:900px; font-size:11px;} th,td{padding:5px 6px;} }
+
+  /* ── 모달 ── */
+  .mask{position:fixed; inset:0; background:rgba(15,23,42,.55); display:flex; align-items:flex-start;
+    justify-content:center; padding:16px; z-index:50; overflow:auto;}
+  .modal{background:#fff; border-radius:16px; width:min(760px,100%); padding:16px 18px 20px; margin:auto;}
+  .modal h3{margin:0 0 4px; font-size:17px;}
+  .modal .close{float:right; border:0; background:#eef2f7; border-radius:8px;
+    width:30px; height:30px; font-size:16px; cursor:pointer; font-weight:800;}
+  #chart{width:100%; height:250px; display:block; margin:8px 0 2px;}
+  .concl{background:#f0f9ff; border:1px solid #bae6fd; border-radius:10px; padding:11px 13px; font-size:13px; line-height:1.65;}
+  .concl b{color:var(--blue-d);}
+  .qcard{background:#fff; border:1px solid var(--line); border-radius:10px; padding:11px; margin-top:9px;}
+  .qcard .q{font-weight:800; font-size:13px; margin-bottom:7px;}
+  textarea{width:100%; border:1px solid var(--line); border-radius:9px; padding:9px; font:inherit;
+    font-size:13px; resize:vertical; min-height:70px;}
+  .toast{position:fixed; left:50%; bottom:26px; transform:translateX(-50%) translateY(20px);
+    background:#0f172a; color:#fff; padding:10px 18px; border-radius:999px; font-size:13px;
+    font-weight:700; opacity:0; transition:.22s; pointer-events:none; z-index:80;}
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  .hidden{display:none !important;}
+
+  /* ── 세로 모드 안내 (폰·태블릿) ── */
+  .rotate{display:none;}
+  @media (hover:none) and (orientation:portrait){
+    .rotate{display:flex; position:fixed; inset:0; z-index:200;
+      background:linear-gradient(150deg,#1e3a8a,#0284c7); color:#fff;
+      align-items:center; justify-content:center; text-align:center; padding:28px;}
+    .rotbox{max-width:340px;}
+    .rotico{font-size:56px; margin-bottom:14px; animation:sway 1.6s ease-in-out infinite;}
+    .rottit{font-size:19px; font-weight:800; margin-bottom:8px;}
+    .rotsub{font-size:13.5px; opacity:.9; line-height:1.7;}
+    @keyframes sway{0%,100%{transform:rotate(-12deg)}50%{transform:rotate(78deg)}}
+    .app{filter:blur(2px);}
+  }
+
+  /* ── 가로 대시보드: 스크롤 없이 한 화면 ──
+     [실험대] [조작]
+     [ 표  ] [조작]   ← 표 = 실험대와 같은 가로폭, 조작 칸은 위아래 전체 높이 */
+  @media (min-width:820px) and (min-height:400px){
+    html,body{height:100%; overflow:hidden;}
+    .app{height:100%; padding:9px 11px;}
+    .mid{
+      flex:1; min-height:0; display:grid; gap:9px;
+      grid-template-columns:minmax(0,1fr) clamp(258px,25vw,340px);
+      grid-template-rows:minmax(0,1fr) auto;
+      grid-template-areas:"stage side" "data side";
+    }
+    .stagecard{grid-area:stage; min-height:0;}
+    /* 조작 칸: 표 하단까지 꽉 채우고, 남으면 판독 카드가 흡수 / 모자라면 JS가 자동 축척 */
+    .side{grid-area:side; min-height:0; height:100%; overflow:hidden;}
+    .side{zoom:1;}
+    .datacard{grid-area:data; min-width:0;}
+    #rail{flex:1 1 0; height:auto; min-height:124px;}
+    #vt{height:clamp(78px,14vh,116px);}
+    .tablewrap{max-height:none;}
+    .top h1{font-size:16.5px;}
+  }
+  /* 낮은 화면(폰 가로 등)에서 더 촘촘하게 */
+  @media (min-width:820px) and (max-height:620px){
+    .app{padding:6px 8px; gap:6px;}
+    .mid{gap:6px;}
+    .top{padding:5px 10px; gap:8px;} .top h1{font-size:13.5px;} .top .sub{display:none;}
+    .switch button{padding:4px 9px; font-size:11px;}
+    .card>h2{padding:5px 8px 4px; font-size:11.5px;}
+    .sec{padding:7px 9px 8px;}
+    .side{gap:6px;}
+    .sechead{font-size:11.5px; margin-bottom:5px;}
+    .mrow{margin:5px 0; gap:6px;}
+    .mrow .tag{width:42px; font-size:11px;}
+    .stepper button{width:25px; height:25px; font-size:15px;}
+    .stepper .cnt{width:38px; font-size:10.5px;}
+    .scale{font-size:12.5px; padding:3px 6px;}
+    .chip{padding:4px 9px; font-size:11px;}
+    .pad{padding:7px 6px 6px;} .pad .pl{font-size:11px;} .pad .pk{font-size:9px;}
+    .btn{padding:6px 8px; font-size:11.5px;}
+    .read{padding:7px 9px; font-size:11.5px;} .read .rt{padding:2px 0;}
+    .read .rt>b{font-size:10.5px;} .read .sum{font-size:12.5px;} .read .rel{font-size:12px;}
+    .read .sep{margin:4px 0;}
+    .hint{font-size:9.5px; margin-top:4px;}
+    .vthead{font-size:9px; padding:2px 8px 0;}
+    th,td{padding:2px 1px;} table{font-size:9px;}
+    thead th{font-size:7.5px; top:20px;} thead tr.g1 th{font-size:8px; padding:2px 1px;}
+    .note-rule{display:none;}
+    .datacard>h2 .btn{padding:4px 7px; font-size:10px;}
+  }
+  @media (min-width:1400px){ .mid{grid-template-columns:minmax(0,1fr) 372px;} }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="top">
+    <h1>🛤️ 일차원 충돌에서 운동량 보존 확인하기</h1>
+    <span class="sub">수레를 직접 밀어 충돌시키고, MBL 센서로 충돌 전후 속도를 측정한다</span>
+    <div class="switch" id="modeSw">
+      <button id="mIdeal" class="on">이상 모드</button>
+      <button id="mReal">현실 모드</button>
+    </div>
+    <button class="topbtn" id="btnResetAll" title="질량·표·설정을 모두 처음 상태로">⟲ 전체 초기화</button>
+    <button class="topbtn" id="btnFull">⛶ 전체화면</button>
+  </header>
+
+  <div class="mid">
+
+    <section class="card stagecard">
+      <h2>실험대 <span class="badge" id="phaseBadge">준비</span>
+        <span class="spacer"></span>
+        <span class="badge" id="roundBadge">1회차</span></h2>
+      <canvas id="rail"></canvas>
+      <div class="vtwrap">
+        <div class="vthead">MBL 무선 센서 — 속도 v (m/s) · 시간 t (s) 그래프</div>
+        <canvas id="vt"></canvas>
+      </div>
+    </section>
+
+    <div class="side" id="side">
+
+      <section class="card sec">
+        <div class="sechead">① 실험 조건 <span class="badge">전자저울</span>
+          <span class="spacer"></span>
+          <span class="tiny">수레 0.500 + 추 0.100 kg</span></div>
+        <div class="mrow c1">
+          <span class="tag">수레 1</span>
+          <span class="stepper"><button data-w="1" data-d="-1">−</button>
+            <span class="cnt" id="w1c">추 0</span>
+            <button data-w="1" data-d="1">＋</button></span>
+          <span class="scale" id="m1s">0.500 kg</span>
+        </div>
+        <div class="mrow c2">
+          <span class="tag">수레 2</span>
+          <span class="stepper"><button data-w="2" data-d="-1">−</button>
+            <span class="cnt" id="w2c">추 0</span>
+            <button data-w="2" data-d="1">＋</button></span>
+          <span class="scale" id="m2s">0.500 kg</span>
+        </div>
+        <div class="chips" id="bumper" style="margin-top:8px;">
+          <div class="chip sel" data-b="spring">↔️ 튕기는 충돌</div>
+          <div class="chip" data-b="velcro">🪝 붙는 충돌</div>
+        </div>
+        <div class="hint">회차마다 추 개수를 바꿔 5회 반복한다. 튕기는 충돌과 붙는 충돌에서 모두 보존되는지 확인해 보자.</div>
+      </section>
+
+      <section class="card sec">
+        <div class="sechead">② 수레 밀기</div>
+        <div class="pads">
+          <button class="pad p1" id="pad1"><span class="pl">수레 1 밀기 →</span><span class="pk">누르고 있기 · F 키</span><span class="bar"><i id="bar1"></i></span></button>
+          <button class="pad p2" id="pad2"><span class="pl">← 수레 2 밀기</span><span class="pk">누르고 있기 · J 키</span><span class="bar"><i id="bar2"></i></span></button>
+        </div>
+        <div class="btnrow" style="margin-top:7px;">
+          <button class="btn ghost" id="btnAuto">🎲 자동</button>
+          <button class="btn ghost" id="btnSlow">🐢 슬로우 모드</button>
+          <button class="btn ghost" id="btnRetry">↻ 다시</button>
+        </div>
+        <div class="hint">버튼을 오래 누를수록 수레가 세게 밀린다. 손으로 미는 것이라 <b>속도가 매번 달라지므로</b>, 충돌 전후 속도는 센서로 <b>측정</b>해서 알아낸다.<br>
+        두 손가락으로(컴퓨터는 <b>F·J 키</b>) 동시에 밀 수 있고, 한쪽을 먼저 밀어도 된다.</div>
+      </section>
+
+      <section class="card sec grow" id="cardRead">
+        <div class="sechead">③ 센서 판독 <span class="badge" id="readBadge">대기 중</span></div>
+        <div class="read" id="readout"><div class="empty">아직 충돌 데이터가 없습니다</div></div>
+        <button class="btn ok" id="btnRec" disabled>📋 이번 회차 표에 기록</button>
+      </section>
+
+    </div>
+
+  <section class="card datacard">
+    <h2>실험 및 관찰 5 — 데이터 <span class="badge" id="cntBadge">0 / 5회</span>
+      <span class="badge" id="modeBadge">이상 모드</span>
+      <span class="badge w" id="tipBadge">추를 바꿔가며 5회 반복</span>
+      <span class="spacer"></span>
+      <span class="note-rule">보존 판정: <b>|Δp| ÷ (|p₁|+|p₂|)</b> — 1% 미만 보존 · 3% 미만 거의 보존</span>
+      <button class="btn primary" id="btnAnalyze" disabled>📈 분석 &amp; 토의</button>
+      <button class="btn ghost" id="btnCsv">⬇ CSV</button>
+      <button class="btn ghost" id="btnClear">🗑 초기화</button>
+    </h2>
+    <div class="tablewrap">
+      <table>
+        <colgroup>
+          <col class="cRn"><col class="cM"><col class="cM">
+          <col class="cV"><col class="cV"><col class="cV"><col class="cV">
+          <col class="cV"><col class="cV"><col class="cV"><col class="cV">
+          <col class="cS"><col class="cS"><col class="cS"><col class="cK">
+        </colgroup>
+        <thead>
+          <tr class="g1">
+            <th rowspan="2">회차</th>
+            <th colspan="2">질량 m (kg)</th>
+            <th colspan="2" class="sepL">충돌 직전 속도 v (m/s)</th>
+            <th colspan="2" class="sepL">충돌 직전 운동량 p (kg·m/s)</th>
+            <th colspan="2" class="sepL">충돌 직후 속도 v′ (m/s)</th>
+            <th colspan="2" class="sepL">충돌 직후 운동량 p′ (kg·m/s)</th>
+            <th colspan="4" class="sepL">운동량의 합 비교 (kg·m/s)</th>
+          </tr>
+          <tr>
+            <th>수레1</th><th>수레2</th>
+            <th class="sepL">수레1</th><th>수레2</th>
+            <th class="sepL">수레1</th><th>수레2</th>
+            <th class="sepL">수레1</th><th>수레2</th>
+            <th class="sepL">수레1</th><th>수레2</th>
+            <th class="sepL">충돌 전 Σp</th><th>충돌 후 Σp</th><th>차이 |Δp|</th><th>보존 여부</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </section>
+  </div>
+</div>
+
+<div class="rotate" id="rotate">
+  <div class="rotbox">
+    <div class="rotico">📱↻</div>
+    <div class="rottit">기기를 가로로 돌려 주세요</div>
+    <div class="rotsub">실험대·조작판·데이터 표를 한 화면에서 함께 보려면<br>가로 모드가 필요합니다.</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="mask hidden" id="mask">
+  <div class="modal">
+    <button class="close" id="btnClose">✕</button>
+    <h3>분석 및 토의</h3>
+    <div style="font-size:12.5px;color:#64748b;">
+      막대 = 각 수레의 운동량 p₁·p₂ &nbsp;/&nbsp; 굵은 가로선 = 두 운동량의 합 Σp<br>
+      <b style="color:#0f172a;">개별 운동량은 크게 바뀌지만, 합을 나타내는 가로선의 높이는 충돌 전후로 거의 그대로다.</b>
+    </div>
+    <canvas id="chart"></canvas>
+    <div class="concl" id="conclText"></div>
+    <div class="qcard">
+      <div class="q">Q1. 충돌 전후 운동량이 보존되었나요?</div>
+      <div class="chips" data-q="1">
+        <div class="chip" data-v="보존됨">보존됨</div>
+        <div class="chip" data-v="거의 보존됨">거의 보존됨</div>
+        <div class="chip" data-v="보존되지 않음">보존되지 않음</div>
+      </div>
+    </div>
+    <div class="qcard">
+      <div class="q">Q2. 예상과 결과가 다르다면 그 까닭은? (복수 선택)</div>
+      <div class="chips" data-q="2" data-multi="1">
+        <div class="chip" data-v="마찰">레일·바퀴의 미세한 마찰</div>
+        <div class="chip" data-v="공기저항">공기 저항</div>
+        <div class="chip" data-v="유효숫자">센서 측정 한계(유효숫자)</div>
+        <div class="chip" data-v="오차없음">오차가 거의 없었음</div>
+      </div>
+    </div>
+    <div class="qcard">
+      <div class="q">나의 결론 (자유 서술)</div>
+      <textarea id="myConcl" placeholder="예: 질량이 달라도, 충돌이 튕기든 붙든 충돌 전후 운동량의 합은 (거의) 같았다. 따라서…"></textarea>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ══════════ 상수 ══════════ */
+const RAIL_L = 2.00, HW = 0.085;
+const CART_M = 0.500, WGT_M = 0.100;
+const X1_0 = 0.26, X2_0 = RAIL_L - 0.26;
+const CHARGE_T = 1.15;
+const V_MIN = 0.18, V_MAX = 0.62;
+const MU_A  = 0.014;      // 현실 모드 감속도 (m/s²)
+const NOISE = 0.003;      // 센서 잡음 (m/s)
+
+/* ══════════ 상태 ══════════ */
+const S = {
+  mode:'ideal', bumper:'spring', slow:false,
+  w1:0, w2:0, m1:CART_M, m2:CART_M,
+  phase:'ready',
+  c1:{x:X1_0, v:0, launched:false},
+  c2:{x:X2_0, v:0, launched:false},
+  stuck:false, collided:false, tCol:null, flash:0, sparks:[],
+  t:0, trace:[], reading:null, rows:[],
+  charge:{1:null,2:null}, answers:{1:null,2:[]}
+};
+
+const $  = id => document.getElementById(id);
+/* 소수 셋째 자리 반올림 — 0.5는 항상 절댓값이 커지는 쪽으로 (음수도 대칭).
+   JS 기본 Math.round 는 −257.5 → −257 로 올려 버려 부호에 따라 결과가 달라진다. */
+const r3 = x => (x<0?-1:1)*Math.round(Math.abs(x)*1000)/1000;
+const f3 = x => (x<0?'−':'')+Math.abs(x).toFixed(3);
+const sg = x => (x>=0?'+':'−')+Math.abs(x).toFixed(3);
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');
+  clearTimeout(toast._h);toast._h=setTimeout(()=>t.classList.remove('show'),1800);}
+
+/* ══════════ 물리 ══════════ */
+/* 1차원 충돌 해석해 — 운동량 보존 + 반발계수 e를 동시에 만족 */
+function collide(m1,m2,u1,u2,e){
+  const M=m1+m2, P=m1*u1+m2*u2, d=u1-u2;
+  return [ (P - m2*e*d)/M , (P + m1*e*d)/M ];
+}
+const eNow = () => S.bumper==='velcro' ? 0 : (S.mode==='real' ? 0.90+Math.random()*0.07 : 1);
+const sensor = v => r3(S.mode==='real' ? v + (Math.random()*2-1)*NOISE : v);
+
+function stepPhysics(dt){
+  const a = S.mode==='real' ? MU_A : 0;
+  for(const c of [S.c1,S.c2]){
+    if(c.v!==0){
+      const s=Math.sign(c.v);
+      c.v -= s*a*dt;
+      if(Math.sign(c.v)!==s) c.v=0;
+      c.x += c.v*dt;
+    }
+  }
+  if(S.stuck){ S.c2.x = S.c1.x + 2*HW; S.c2.v = S.c1.v; }
+
+  const gap = (S.c2.x - S.c1.x) - 2*HW;
+  if(!S.stuck && gap<=0 && (S.c1.v - S.c2.v)>0){
+    const u1=S.c1.v, u2=S.c2.v, e=eNow();
+    const ov = -gap + 0.002;                    // 즉시 완전히 분리 → 붙어서 멈춘 듯 보이지 않게
+    S.c1.x -= ov/2; S.c2.x += ov/2;
+    const [p1,p2] = collide(S.m1,S.m2,u1,u2,e);
+    S.c1.v=p1; S.c2.v=p2;
+    if(e===0){ S.stuck=true; S.c2.v=S.c1.v; S.c2.x=S.c1.x+2*HW; }
+    if(!S.collided){                            // 측정은 첫 충돌에서 1회만
+      S.collided=true; S.tCol=S.t; S.flash=1; makeSparks();
+      S.reading={ mode:S.mode, raw:{v1:u1,v2:u2,v1p:p1,v2p:p2},
+                  v1:sensor(u1), v2:sensor(u2), v1p:sensor(p1), v2p:sensor(p2) };
+      renderReadout();
+      $('btnRec').disabled=false;
+      $('readBadge').textContent='측정 완료';
+      $('phaseBadge').textContent='✅ 충돌 측정 완료';
+      $('pad1').disabled=true; $('pad2').disabled=true;
+    }
+  }
+  // 레일 끝 완충 스토퍼 — 수레를 받아 세운다 (측정이 끝난 뒤이므로 데이터에 영향 없음)
+  if(S.stuck){
+    if(S.c1.x-HW<0){ S.c1.x=HW; S.c1.v=0; }
+    if(S.c2.x+HW>RAIL_L){ S.c1.x=RAIL_L-3*HW; S.c1.v=0; }
+    S.c2.x=S.c1.x+2*HW; S.c2.v=S.c1.v;
+  }else{
+    for(const c of [S.c1,S.c2]){
+      if(c.x-HW<0){ c.x=HW; c.v=0; }
+      if(c.x+HW>RAIL_L){ c.x=RAIL_L-HW; c.v=0; }
+    }
+  }
+}
+
+function makeSparks(){
+  const cx=(S.c1.x+S.c2.x)/2;
+  S.sparks=[];
+  for(let i=0;i<12;i++){
+    const a=Math.PI*(0.15+Math.random()*0.7)*(Math.random()<.5?1:-1)+(Math.random()<.5?0:Math.PI);
+    S.sparks.push({x:cx, y:0, vx:Math.cos(a)*(0.4+Math.random()*0.8), vy:-Math.abs(Math.sin(a))*(40+Math.random()*60), life:1});
+  }
+}
+
+function launch(n, power){
+  const c = n===1?S.c1:S.c2;
+  if(c.launched || S.collided || S.phase==='done') return;
+  const jitter = 1 + (Math.random()*2-1)*0.035;
+  let sp = (V_MIN + (V_MAX-V_MIN)*(power/100)) * jitter;
+  /* 이상 모드: 속력을 0.01 m/s 단위로 맞춘다.
+     질량이 0.1 kg의 배수이므로 p=mv 가 소수 셋째 자리에서 정확히 떨어지고,
+     반올림 오차 없이 Σp(전)=Σp(후) 가 성립한다. */
+  if(S.mode==='ideal') sp = Math.round(sp*100)/100;
+  c.v = n===1 ? sp : -sp;
+  c.launched = true;
+  if(S.phase==='ready'){ S.phase='running'; S.t=0; S.trace=[]; }
+  $('phaseBadge').textContent='📡 데이터 수집 중';
+  setMassLock(true);
+  $('pad'+n).disabled=true;
+  $('bar'+n).style.width='0%';
+}
+
+function resetRun(){
+  S.phase='ready'; S.t=0; S.trace=[]; S.sparks=[];
+  S.c1={x:X1_0,v:0,launched:false}; S.c2={x:X2_0,v:0,launched:false};
+  S.stuck=false; S.collided=false; S.tCol=null; S.flash=0;
+  S.reading=null; S.charge={1:null,2:null};
+  [1,2].forEach(n=>{ $('pad'+n).disabled=false; $('pad'+n).classList.remove('hold'); $('bar'+n).style.width='0%'; });
+  $('btnRec').disabled=true;
+  $('readBadge').textContent='대기 중';
+  $('phaseBadge').textContent='준비';
+  setMassLock(false);
+  renderReadout();
+}
+
+/* ══════════ 밀기 입력 ══════════ */
+function holdStart(n){
+  if(S.phase==='done' || S.collided) return;
+  const c=n===1?S.c1:S.c2;
+  if(c.launched || S.charge[n]) return;
+  S.charge[n]={p:0};
+  $('pad'+n).classList.add('hold');
+}
+function holdEnd(n){
+  const ch=S.charge[n]; if(!ch) return;
+  S.charge[n]=null;
+  $('pad'+n).classList.remove('hold');
+  launch(n, Math.max(6, ch.p));
+}
+[1,2].forEach(n=>{
+  const pad=$('pad'+n);
+  pad.addEventListener('pointerdown',e=>{e.preventDefault(); try{pad.setPointerCapture(e.pointerId);}catch(_){} holdStart(n);});
+  pad.addEventListener('pointerup',  e=>{e.preventDefault(); holdEnd(n);});
+  pad.addEventListener('pointercancel',()=>holdEnd(n));
+  pad.addEventListener('lostpointercapture',()=>holdEnd(n));
+  pad.addEventListener('contextmenu',e=>e.preventDefault());
+});
+const KEYMAP={f:1,j:2,'ㄹ':1,'ㅓ':2};
+addEventListener('keydown',e=>{
+  if(e.repeat || e.target.tagName==='TEXTAREA') return;
+  const n=KEYMAP[e.key.toLowerCase()]; if(!n) return;
+  e.preventDefault(); holdStart(n);
+});
+addEventListener('keyup',e=>{
+  const n=KEYMAP[e.key.toLowerCase()]; if(!n) return;
+  e.preventDefault(); holdEnd(n);
+});
+
+$('btnAuto').onclick=()=>{
+  if(S.phase!=='ready' || S.c1.launched || S.c2.launched) resetRun();
+  setTimeout(()=>launch(1, 40+Math.random()*55), 40);
+  setTimeout(()=>launch(2, 40+Math.random()*55), 40+Math.random()*300);
+};
+$('btnRetry').onclick=()=>resetRun();
+$('btnSlow').onclick=()=>{ S.slow=!S.slow; $('btnSlow').classList.toggle('on',S.slow);
+  $('btnSlow').textContent = S.slow?'🐢 슬로우 ON':'🐢 슬로우 모드'; };
+
+/* ══════════ 질량 ══════════ */
+function setMassLock(lock){
+  document.querySelectorAll('.stepper button').forEach(b=>b.disabled=lock);
+  if(!lock) syncMassBtns();
+}
+function syncMassBtns(){
+  document.querySelectorAll('.stepper button').forEach(b=>{
+    const w=+b.dataset.w, d=+b.dataset.d, cur=w===1?S.w1:S.w2;
+    b.disabled=(d>0&&cur>=4)||(d<0&&cur<=0);
+  });
+}
+function updateMass(){
+  S.m1=r3(CART_M+S.w1*WGT_M); S.m2=r3(CART_M+S.w2*WGT_M);
+  $('m1s').textContent=S.m1.toFixed(3)+' kg';
+  $('m2s').textContent=S.m2.toFixed(3)+' kg';
+  $('w1c').textContent='추 '+S.w1;
+  $('w2c').textContent='추 '+S.w2;
+  syncMassBtns();
+}
+document.querySelectorAll('.stepper button').forEach(b=>{
+  b.onclick=()=>{
+    const w=+b.dataset.w,d=+b.dataset.d;
+    if(w===1) S.w1=Math.min(4,Math.max(0,S.w1+d)); else S.w2=Math.min(4,Math.max(0,S.w2+d));
+    updateMass();
+  };
+});
+
+/* ══════════ 범퍼 / 모드 ══════════ */
+$('bumper').onclick=e=>{
+  const c=e.target.closest('.chip'); if(!c) return;
+  S.bumper=c.dataset.b;
+  $('bumper').querySelectorAll('.chip').forEach(x=>x.classList.toggle('sel',x===c));
+};
+function paintMode(){
+  const m=S.mode;
+  $('mReal').classList.toggle('on',m==='real'); $('mReal').classList.toggle('w',m==='real');
+  $('mIdeal').classList.toggle('on',m==='ideal');
+  $('modeBadge').textContent = m==='ideal'?'이상 모드':'현실 모드';
+  $('modeBadge').classList.toggle('w',m==='real');
+}
+/* 모드가 다르면 실험 조건이 다르므로 한 표에 섞을 수 없다 → 전환 시 전체 초기화 */
+function setMode(m){
+  if(S.mode===m) return;
+  if(S.rows.length){
+    if(!confirm(
+      (m==='ideal'?'이상 모드':'현실 모드')+'로 바꾸면 실험 조건이 달라집니다.\n'+
+      '두 모드의 데이터는 한 표에 섞을 수 없으므로 지금까지 기록한 '+S.rows.length+'회 데이터가 모두 지워집니다.\n\n전환할까요?'
+    )) return;
+  }
+  S.mode=m; S.rows=[]; S.answers={1:null,2:[]};
+  document.querySelectorAll('.modal .chip').forEach(c=>c.classList.remove('sel'));
+  const ta=$('myConcl'); if(ta) ta.value='';
+  paintMode(); renderTable(); resetRun();
+  toast((m==='ideal'?'이상':'현실')+' 모드로 전환 — 표를 초기화했습니다');
+}
+$('mReal').onclick=()=>setMode('real');
+$('mIdeal').onclick=()=>setMode('ideal');
+
+/* ══════════ 운동량 계산 ══════════
+   이상 모드: 마찰·센서 오차가 없는 이론적 상황 → 반올림은 마지막에 한 번만 (유효숫자 규칙)
+              ⇒ 충돌 전 Σp 와 충돌 후 Σp 가 완전히 같게 나온다.
+   현실 모드: 센서가 소수 넷째 자리부터 버린 값으로 계산 → 아주 작은 차이가 남는다. */
+function analyze(R,m1,m2){
+  const exact = R.mode==='ideal';
+  const V = exact ? R.raw : {v1:R.v1,v2:R.v2,v1p:R.v1p,v2p:R.v2p};
+  const P1=m1*V.v1, P2=m2*V.v2, P1p=m1*V.v1p, P2p=m2*V.v2p;
+  const p1=r3(P1), p2=r3(P2);
+  const pre=r3(p1+p2);
+  let p1p=r3(P1p), p2p=r3(P2p);
+  if(exact){
+    /* 이상 모드에서는 m1u1+m2u2 = m1v1'+m2v2' 이 정확히 성립한다.
+       두 값이 동시에 …5 로 끝나 반올림이 갈릴 때만 총합이 0.001 어긋나므로,
+       그 경우 p2' 를 합에 맞는 쪽 반올림값으로 택한다(두 값 모두 정당한 반올림). */
+    const alt=r3(pre-p1p);
+    if(Math.abs(alt-P2p)<=0.00051) p2p=alt;
+  }
+  const post=r3(p1p+p2p);
+  return { v1:R.v1, v2:R.v2, v1p:R.v1p, v2p:R.v2p,
+           p1, p2, p1p, p2p, pre, post, diff:r3(Math.abs(post-pre)) };
+}
+
+/* ══════════ 판정 기준 ══════════ */
+/* |Δp| 를 두 수레 운동량 크기의 합(Σ|p|)과 비교 — 합이 0에 가까울 때도 공정한 판정 */
+function metrics(r){
+  const scale=Math.abs(r.p1)+Math.abs(r.p2);
+  const rel = scale>1e-9 ? r.diff/scale : 0;
+  let txt,cls;
+  if(rel<0.01){txt='보존';cls='keep';}
+  else if(rel<0.03){txt='거의 보존';cls='almost';}
+  else {txt='차이 있음';cls='bad';}
+  return {scale,rel,txt,cls};
+}
+
+/* ══════════ 판독 패널 ══════════ */
+/* 값이 없을 때도 같은 줄 수·같은 높이를 유지한다 (조작 칸이 커졌다 작아졌다 하지 않게) */
+function renderReadout(){
+  const R=S.reading, el=$('readout');
+  const has=!!R;
+  const A=has?analyze(R,S.m1,S.m2):null;
+  const m=has?metrics(A):null;
+  const D='–';
+  const pair=(a,b)=> has ? `<span class="c1v">${sg(a)}</span> / <span class="c2v">${sg(b)}</span>`
+                         : `<span class="c1v">${D}</span> / <span class="c2v">${D}</span>`;
+  el.className='read'+(has?'':' idle');
+  el.innerHTML=
+   `<div class="rt"><b>충돌 직전 v</b><span>${pair(has&&R.v1, has&&R.v2)}</span></div>`+
+   `<div class="rt"><b>충돌 직전 p</b><span>${pair(has&&A.p1, has&&A.p2)}</span></div>`+
+   `<div class="sep"></div>`+
+   `<div class="rt"><b>충돌 직후 v′</b><span>${pair(has&&R.v1p, has&&R.v2p)}</span></div>`+
+   `<div class="rt"><b>충돌 직후 p′</b><span>${pair(has&&A.p1p, has&&A.p2p)}</span></div>`+
+   `<div class="sep"></div>`+
+   `<div class="rt sum"><b>Σp 전 → 후</b><span>${has?`${sg(A.pre)} → ${sg(A.post)}`:`${D} → ${D}`}</span></div>`+
+   `<div class="rt"><b>차이 |Δp|</b><span>${has?A.diff.toFixed(3):D}</span></div>`+
+   `<div class="rt"><b>운동량 규모 Σ|p|</b><span>${has?m.scale.toFixed(3):D}</span></div>`+
+   `<div class="rt rel"><b>상대 오차</b><span>${has?`${(m.rel*100).toFixed(2)} %  →  ${m.txt}`:D}</span></div>`;
+}
+
+/* ══════════ 표 ══════════ */
+function renderTable(){
+  const tb=$('tbody'); tb.innerHTML='';
+  for(let i=0;i<5;i++){
+    const r=S.rows[i], tr=document.createElement('tr');
+    if(!r){
+      tr.className='blank';
+      tr.innerHTML=`<td class="rn">${i+1}회</td><td>·</td><td>·</td>`+
+        '<td class="sepL">·</td><td>·</td><td class="sepL">·</td><td>·</td>'+
+        '<td class="sepL">·</td><td>·</td><td class="sepL">·</td><td>·</td>'+
+        '<td class="sepL">·</td><td>·</td><td>·</td><td>·</td>';
+    }else{
+      const m=metrics(r);
+      const n=(v,ex='')=>`<td class="num ${ex} ${v<0?'neg':'pos'}">${f3(v)}</td>`;
+      tr.innerHTML=`<td class="rn">${i+1}회</td>`+
+        `<td class="num">${r.m1.toFixed(3)}</td><td class="num">${r.m2.toFixed(3)}</td>`+
+        n(r.v1,'sepL')+n(r.v2)+n(r.p1,'sepL')+n(r.p2)+
+        n(r.v1p,'sepL')+n(r.v2p)+n(r.p1p,'sepL')+n(r.p2p)+
+        `<td class="num sepL">${f3(r.pre)}</td><td class="num">${f3(r.post)}</td>`+
+        `<td class="num">${r.diff.toFixed(3)}</td>`+
+        `<td class="${m.cls}">${m.txt} <span class="pct">${(m.rel*100).toFixed(2)}%</span></td>`;
+      if(i===S.rows.length-1) tr.className='hl';
+    }
+    tb.appendChild(tr);
+  }
+  $('cntBadge').textContent=`${S.rows.length} / 5회`;
+  $('btnAnalyze').disabled=S.rows.length<1;
+  $('roundBadge').textContent=Math.min(5,S.rows.length+1)+'회차';
+  $('tipBadge').textContent=S.rows.length>=5?'5회 완료 — 분석해 보자'
+    :(S.rows.length>0?'추 개수를 바꿔 다시 실험':'추를 바꿔가며 5회 반복');
+}
+
+$('btnRec').onclick=()=>{
+  if(!S.reading) return;
+  if(S.rows.length>=5){ toast('이미 5회를 모두 기록했습니다'); return; }
+  S.rows.push(Object.assign({m1:S.m1,m2:S.m2,bumper:S.bumper,mode:S.mode},
+              analyze(S.reading,S.m1,S.m2)));
+  renderTable();
+  toast(S.rows.length>=5?'5회 완료! 분석해 보자 📈':`${S.rows.length}회차 기록 완료 — 추를 바꿔 다시!`);
+  resetRun();
+  if(S.rows.length>=5) setTimeout(openModal,650);
+};
+$('btnClear').onclick=()=>{ if(S.rows.length&&confirm('기록한 데이터를 모두 지울까요?')){S.rows=[];renderTable();resetRun();} };
+$('btnCsv').onclick=()=>{
+  if(!S.rows.length){toast('기록된 데이터가 없습니다');return;}
+  const head=['회차','m1(kg)','m2(kg)','전 v1','전 v2','전 p1','전 p2',"후 v1'","후 v2'","후 p1'","후 p2'",'전 Σp','후 Σp','차이','상대오차(%)','보존 여부','충돌방식','모드'];
+  const lines=[head.join(',')].concat(S.rows.map((r,i)=>{const m=metrics(r);
+    return [i+1,r.m1.toFixed(3),r.m2.toFixed(3),r.v1,r.v2,r.p1,r.p2,r.v1p,r.v2p,r.p1p,r.p2p,
+      r.pre,r.post,r.diff,(m.rel*100).toFixed(2),m.txt,
+      r.bumper==='velcro'?'붙는 충돌':'튕기는 충돌', r.mode==='real'?'현실':'이상'].join(',');}));
+  const blob=new Blob(['﻿'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='운동량보존_실험데이터.csv'; a.click(); URL.revokeObjectURL(a.href);
+};
+
+/* ══════════ 분석 모달 ══════════ */
+function openModal(){ $('mask').classList.remove('hidden'); requestAnimationFrame(()=>{drawChart();}); writeConcl(); }
+$('btnAnalyze').onclick=openModal;
+$('btnClose').onclick=()=>$('mask').classList.add('hidden');
+$('mask').onclick=e=>{ if(e.target===$('mask')) $('mask').classList.add('hidden'); };
+document.querySelectorAll('.modal .chips').forEach(box=>{
+  box.onclick=e=>{
+    const c=e.target.closest('.chip'); if(!c) return;
+    if(box.dataset.multi){ c.classList.toggle('sel');
+      S.answers[2]=[...box.querySelectorAll('.chip.sel')].map(x=>x.dataset.v);
+    }else{ box.querySelectorAll('.chip').forEach(x=>x.classList.toggle('sel',x===c)); S.answers[1]=c.dataset.v; }
+  };
+});
+
+function writeConcl(){
+  const rs=S.rows, n=rs.length;
+  const ms=rs.map(metrics);
+  const avgRel=ms.reduce((a,m)=>a+m.rel,0)/n*100;
+  const maxRel=Math.max(...ms.map(m=>m.rel))*100;
+  const kept=ms.filter(m=>m.rel<0.03).length;
+  const mixed=new Set(rs.map(r=>r.bumper)).size>1;
+  const massVary=new Set(rs.map(r=>r.m1+'/'+r.m2)).size>1;
+  // 개별 운동량은 얼마나 바뀌었나
+  const chg=rs.map(r=>Math.abs(r.p1p-r.p1)).reduce((a,b)=>a+b,0)/n;
+  const dif=rs.map(r=>r.diff).reduce((a,b)=>a+b,0)/n;
+  const real = rs.some(r=>r.mode==='real');
+  $('conclText').innerHTML=
+   `충돌하면서 수레 1의 운동량은 회차마다 평균 <b>${chg.toFixed(3)} kg·m/s</b>씩 바뀌었다. `+
+   (dif===0
+     ? `그런데 두 수레의 운동량을 <b>합</b>해 보면 충돌 전과 충돌 후가 <b>정확히 같다</b>.`
+     : `그런데 두 수레의 운동량을 <b>합</b>해 보면 충돌 전후 차이가 평균 <b>${dif.toFixed(3)} kg·m/s</b>에 그친다.`)+
+   ` 한 수레가 잃은 운동량을 다른 수레가 <b>그대로 받아 간</b> 것이다.<br><br>`+
+   `운동량 규모(|p₁|+|p₂|)에 대한 상대 오차는 평균 <b>${avgRel.toFixed(2)}%</b>, 가장 큰 회차도 <b>${maxRel.toFixed(2)}%</b>였고, ${n}회 중 <b>${kept}회</b>가 (거의) 보존으로 판정되었다.<br><br>`+
+   (massVary?'두 수레의 <b>질량을 다르게</b> 해도, ':'')+(mixed?'충돌이 <b>튕기든 붙든</b>, ':'')+
+   `충돌 전 운동량의 합과 충돌 후 운동량의 합은 같았다. 외부에서 힘이 작용하지 않으면 <b>운동량은 보존</b>된다.<br><br>`+
+   (real
+     ? `그래도 회차마다 ${maxRel.toFixed(2)}% 이내의 작은 차이가 남는다. 레일과 바퀴의 미세한 마찰, 공기 저항, 그리고 센서가 소수 넷째 자리부터 버리는 <b>측정의 한계</b> 때문이다. 실험이 잘못된 것이 아니라, 현실의 측정에서는 원래 이 정도 오차가 따라온다.`
+     : `이상 모드에서는 마찰도 측정 오차도 없어 충돌 전후의 합이 완전히 일치한다. 이제 <b>현실 모드</b>로도 실험해, 실제 실험실에서 얻는 데이터와 어떻게 다른지 비교해 보자.`);
+}
+
+/* ══════════ 분석 그래프 ══════════ */
+function drawChart(){
+  const cv=$('chart'), dpr=devicePixelRatio||1;
+  const W=cv.clientWidth||640, H=250;
+  cv.width=W*dpr; cv.height=H*dpr;
+  const g=cv.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,W,H);
+  const rs=S.rows, n=rs.length;
+  const pad={l:48,r:12,t:26,b:34};
+  const iw=W-pad.l-pad.r, ih=H-pad.t-pad.b;
+  const mx=Math.max(0.06,...rs.flatMap(r=>[r.p1,r.p2,r.p1p,r.p2p,r.pre,r.post].map(Math.abs)))*1.22;
+  const Y=v=>pad.t+ih/2-(ih/2)*(v/mx);
+
+  g.font='10px system-ui'; g.textAlign='right';
+  for(let i=-2;i<=2;i++){
+    const v=mx*i/2, y=Y(v);
+    g.strokeStyle= i===0?'#94a3b8':'#eef2f7'; g.lineWidth= i===0?1.4:1;
+    g.beginPath(); g.moveTo(pad.l,y); g.lineTo(W-pad.r,y); g.stroke();
+    g.fillStyle='#94a3b8'; g.fillText(v.toFixed(2),pad.l-6,y+3);
+  }
+  const gw=iw/n;
+  rs.forEach((r,i)=>{
+    const gx=pad.l+gw*i, cxA=gx+gw*0.30, cxB=gx+gw*0.70;
+    const bw=Math.min(15,gw*0.11);
+    const bar=(cx,off,v,col)=>{
+      const y0=Y(0), y1=Y(v);
+      g.fillStyle=col; g.fillRect(cx+off-bw/2, Math.min(y0,y1), bw, Math.abs(y1-y0)||1);
+    };
+    bar(cxA,-bw*0.65,r.p1,'#3b82f6'); bar(cxA,bw*0.65,r.p2,'#ef4444');
+    bar(cxB,-bw*0.65,r.p1p,'#3b82f6'); bar(cxB,bw*0.65,r.p2p,'#ef4444');
+    // Σp 가로선
+    const sw=gw*0.30;
+    g.fillStyle='#0f172a';
+    g.fillRect(cxA-sw/2,Y(r.pre)-2,sw,4);
+    g.fillRect(cxB-sw/2,Y(r.post)-2,sw,4);
+    g.strokeStyle='#0f172a'; g.setLineDash([3,3]); g.lineWidth=1.4;
+    g.beginPath(); g.moveTo(cxA+sw/2,Y(r.pre)); g.lineTo(cxB-sw/2,Y(r.post)); g.stroke(); g.setLineDash([]);
+    // 라벨
+    g.textAlign='center'; g.font='bold 9.5px ui-monospace,monospace'; g.fillStyle='#0f172a';
+    g.fillText(f3(r.pre),cxA,Y(r.pre)+(r.pre>=0?-7:15));
+    g.fillText(f3(r.post),cxB,Y(r.post)+(r.post>=0?-7:15));
+    g.font='9.5px system-ui'; g.fillStyle='#94a3b8';
+    g.fillText('전',cxA,H-20); g.fillText('후',cxB,H-20);
+    g.font='bold 10.5px system-ui'; g.fillStyle='#475569';
+    g.fillText((i+1)+'회',gx+gw/2,H-6);
+    if(i>0){ g.strokeStyle='#f1f5f9'; g.lineWidth=1; g.beginPath(); g.moveTo(gx,pad.t); g.lineTo(gx,H-pad.b+4); g.stroke(); }
+  });
+  // 범례
+  g.textAlign='left'; g.font='10.5px system-ui';
+  let lx=4;
+  const leg=(col,txt,box)=>{ g.fillStyle=col;
+    if(box==='line') g.fillRect(lx,8,14,4); else g.fillRect(lx,4,10,10);
+    g.fillStyle='#334155'; g.fillText(txt,lx+18,13); lx+=g.measureText(txt).width+34; };
+  leg('#3b82f6','p₁'); leg('#ef4444','p₂'); leg('#0f172a','합 Σp (kg·m/s)','line');
+}
+
+/* ══════════ 캔버스 유틸 ══════════ */
+const rail=$('rail'), vtc=$('vt');
+function fit(cv){
+  const dpr=devicePixelRatio||1, w=cv.clientWidth, h=cv.clientHeight;
+  if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){ cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr); }
+  const g=cv.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0);
+  return {w,h,g};
+}
+function rr(g,x,y,w,h,r){
+  g.beginPath(); g.moveTo(x+r,y);
+  g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r);
+  g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath();
+}
+
+/* ══════════ 레일 렌더링 ══════════ */
+function drawRail(){
+  const {w,h,g}=fit(rail);
+  g.clearRect(0,0,w,h);
+  const mL=26,mR=26;
+  const px = m => mL+(w-mL-mR)*(m/RAIL_L);
+  const scale=(w-mL-mR)/RAIL_L;
+  const railY=Math.round(h*0.70);
+
+  // 눈금 (숫자 없이 — 글자 겹침 방지)
+  g.strokeStyle='rgba(37,99,235,.13)'; g.lineWidth=1;
+  for(let m=0;m<=RAIL_L+1e-9;m+=0.1){
+    const x=px(m), long=Math.abs(m%0.5)<1e-6;
+    g.beginPath(); g.moveTo(x,railY-5); g.lineTo(x,railY+(long?11:6)); g.stroke();
+  }
+  // 레일 · 스토퍼 · 다리
+  g.fillStyle='#cbd5e1'; g.fillRect(mL-8,railY,w-mL-mR+16,7);
+  g.fillStyle='#94a3b8'; g.fillRect(mL-8,railY+7,w-mL-mR+16,3);
+  g.fillStyle='#64748b'; g.fillRect(mL-15,railY-24,8,26); g.fillRect(w-mR+7,railY-24,8,26);
+  g.fillStyle='#a8b4c4';
+  [0.1,0.5,0.9].forEach(f=>{const x=mL+(w-mL-mR)*f; g.fillRect(x-4,railY+10,8,12); g.fillRect(x-13,railY+22,26,4);});
+  g.fillStyle='#b6c2d1'; g.font='9.5px system-ui'; g.textAlign='right';
+  g.fillText('레일 2.0 m',w-mR,railY+34);
+
+  // 충돌 섬광 + 파편
+  if(S.flash>0){
+    const cx=px((S.c1.x+S.c2.x)/2), cy=railY-18;
+    g.save(); g.globalAlpha=S.flash;
+    const rad=16+40*(1-S.flash);
+    const gr=g.createRadialGradient(cx,cy,2,cx,cy,rad);
+    gr.addColorStop(0,'rgba(253,224,71,.95)'); gr.addColorStop(1,'rgba(253,224,71,0)');
+    g.fillStyle=gr; g.beginPath(); g.arc(cx,cy,rad,0,7); g.fill(); g.restore();
+  }
+  S.sparks.forEach(s=>{ if(s.life<=0) return;
+    g.save(); g.globalAlpha=s.life;
+    g.fillStyle='#f59e0b'; g.beginPath(); g.arc(px(s.x),railY-16+s.y,2.2,0,7); g.fill(); g.restore(); });
+
+  // 수레 본체
+  const boxes=[];
+  boxes.push(drawCart(g,px,scale,railY,S.c1,1));
+  boxes.push(drawCart(g,px,scale,railY,S.c2,2));
+
+  // 속도 라벨 (겹침 회피: 최소 y 보장 + 서로 겹치면 위로 밀어 올림)
+  const TOPBAR=26;
+  const labs=[S.c1,S.c2].map((c,i)=>{
+    const b=boxes[i];
+    const txt=(c.v>=0?'+':'−')+Math.abs(c.v).toFixed(3)+' m/s';
+    g.font='bold 11.5px ui-monospace,monospace';
+    const tw=g.measureText(txt).width+12;
+    return {c,i,txt,tw,cx:b.cx,y:Math.max(TOPBAR+13,b.top-14),show:(S.phase!=='ready'||Math.abs(c.v)>0.001)};
+  });
+  if(labs[0].show&&labs[1].show){
+    const a=labs[0],b=labs[1];
+    if(Math.abs(a.cx-b.cx) < (a.tw+b.tw)/2+4 && Math.abs(a.y-b.y)<19){
+      const hi=a.y<=b.y?a:b; hi.y=Math.max(TOPBAR+13,Math.min(a.y,b.y)-20);
+    }
+  }
+  labs.forEach(L=>{
+    if(!L.show) return;
+    g.font='bold 11.5px ui-monospace,monospace'; g.textAlign='center';
+    g.fillStyle=L.i===0?'rgba(30,64,175,.94)':'rgba(153,27,27,.94)';
+    rr(g,L.cx-L.tw/2,L.y-11,L.tw,16,8); g.fill();
+    g.fillStyle='#fff'; g.fillText(L.txt,L.cx,L.y+1);
+  });
+
+  // 상단 상태 바 (라벨 영역과 분리)
+  g.textAlign='left'; g.font='bold 12px system-ui'; g.fillStyle='#1e3a8a';
+  let msg='';
+  if(S.phase==='ready') msg='⏸ 두 수레를 밀어 충돌시키세요';
+  else if(!S.collided) msg='📡 데이터 수집 중…';
+  else msg='✅ 충돌 측정 완료 — 오른쪽 센서 판독값을 확인하세요';
+  if(S.phase==='running'&&!S.collided&&!S.c1.launched) msg='📡 수집 중 — 수레 1도 밀어 보세요';
+  if(S.phase==='running'&&!S.collided&&!S.c2.launched) msg='📡 수집 중 — 수레 2도 밀어 보세요';
+  g.fillText(msg,10,17);
+  if(S.phase!=='ready'){
+    g.textAlign='right'; g.font='11px ui-monospace,monospace'; g.fillStyle='#94a3b8';
+    g.fillText('t = '+S.t.toFixed(2)+' s',w-10,17);
+  }
+}
+
+function drawCart(g,px,scale,railY,c,n){
+  const blue=n===1;
+  const cw=2*HW*scale, ch=30;
+  const x=px(c.x)-cw/2, y=railY-ch-4;
+  const wc=blue?S.w1:S.w2;
+
+  for(let i=0;i<wc;i++){
+    const bh=8, bwd=cw*0.5;
+    g.fillStyle=i%2?'#475569':'#334155';
+    rr(g,x+cw/2-bwd/2,y-(i+1)*(bh+1.5),bwd,bh,2); g.fill();
+    g.fillStyle='rgba(255,255,255,.32)'; g.fillRect(x+cw/2-bwd/2+3,y-(i+1)*(bh+1.5)+2,bwd-6,1.5);
+  }
+  const gr=g.createLinearGradient(x,y,x,y+ch);
+  if(blue){gr.addColorStop(0,'#60a5fa');gr.addColorStop(1,'#1d4ed8');}
+  else{gr.addColorStop(0,'#f87171');gr.addColorStop(1,'#b91c1c');}
+  g.fillStyle=gr; rr(g,x,y,cw,ch,5); g.fill();
+  g.fillStyle='rgba(255,255,255,.88)'; rr(g,x+6,y+5,cw-12,11,3); g.fill();
+  g.fillStyle=blue?'#1e40af':'#991b1b'; g.font='bold 9px system-ui'; g.textAlign='center';
+  g.fillText('수레 '+n,x+cw/2,y+14);
+  // 범퍼 (수레가 마주 보는 쪽)
+  const bx=blue?x+cw:x-4;
+  if(S.bumper==='velcro'){ g.fillStyle='#fbbf24'; g.fillRect(bx,y+ch*0.32,4,ch*0.42); }
+  else{ g.strokeStyle='#cbd5e1'; g.lineWidth=2; g.beginPath();
+        for(let i=0;i<4;i++){ g.moveTo(bx+(blue?0:4),y+ch*0.34+i*3.2); g.lineTo(bx+(blue?5:-1),y+ch*0.34+i*3.2+1.6); }
+        g.stroke(); }
+  g.fillStyle='#0f172a';
+  [0.25,0.75].forEach(f=>{g.beginPath(); g.arc(x+cw*f,y+ch+3,4.5,0,7); g.fill();});
+
+  // 방향 화살표
+  if(Math.abs(c.v)>0.01){
+    const d=Math.sign(c.v), ax=x+cw/2+d*(cw/2+7), ay=y+ch/2, len=9+Math.abs(c.v)*22;
+    g.strokeStyle=blue?'#1d4ed8':'#b91c1c'; g.lineWidth=2.5;
+    g.beginPath(); g.moveTo(ax,ay); g.lineTo(ax+d*len,ay); g.stroke();
+    const tp=ax+d*len; g.beginPath();
+    g.moveTo(tp+d*5,ay); g.lineTo(tp-d*2,ay-4.5); g.lineTo(tp-d*2,ay+4.5); g.closePath();
+    g.fillStyle=blue?'#1d4ed8':'#b91c1c'; g.fill();
+  }
+  // 미는 손 + 게이지
+  const chg=S.charge[n];
+  if(chg){
+    g.font='16px system-ui'; g.textAlign='center';
+    g.fillText(blue?'👉':'👈',x+(blue?-15:cw+15),y+ch/2+6);
+    const bwd=44,bh=6,bx2=x+cw/2-bwd/2,by=y+ch+12;
+    g.fillStyle='rgba(15,23,42,.15)'; rr(g,bx2,by,bwd,bh,3); g.fill();
+    g.fillStyle=chg.p>85?'#ef4444':'#facc15'; rr(g,bx2,by,bwd*chg.p/100,bh,3); g.fill();
+  }
+  return {cx:x+cw/2, top:y-wc*9.5};
+}
+
+/* ══════════ v-t 그래프 ══════════ */
+function drawVT(){
+  const {w,h,g}=fit(vtc);
+  g.clearRect(0,0,w,h);
+  const pad={l:46,r:12,t:22,b:16};
+  const iw=w-pad.l-pad.r, ih=h-pad.t-pad.b;
+  const TSPAN=8.0, VMAX=0.75;
+  const X=t=>pad.l+iw*Math.min(1,t/TSPAN);
+  const Y=v=>pad.t+ih/2-(ih/2)*(v/VMAX);
+
+  // 격자 · 축
+  g.lineWidth=1;
+  for(const v of [-0.6,-0.3,0.3,0.6]){ g.strokeStyle='#eef2f7'; g.beginPath(); g.moveTo(pad.l,Y(v)); g.lineTo(w-pad.r,Y(v)); g.stroke(); }
+  g.strokeStyle='#94a3b8'; g.lineWidth=1.2;
+  g.beginPath(); g.moveTo(pad.l,Y(0)); g.lineTo(w-pad.r,Y(0)); g.stroke();          // t축 (v=0)
+  g.beginPath(); g.moveTo(pad.l,pad.t); g.lineTo(pad.l,h-pad.b); g.stroke();        // v축
+  // 축 화살표
+  g.fillStyle='#94a3b8';
+  g.beginPath(); g.moveTo(w-pad.r+5,Y(0)); g.lineTo(w-pad.r-2,Y(0)-3.2); g.lineTo(w-pad.r-2,Y(0)+3.2); g.closePath(); g.fill();
+  g.beginPath(); g.moveTo(pad.l,pad.t-5); g.lineTo(pad.l-3.2,pad.t+2); g.lineTo(pad.l+3.2,pad.t+2); g.closePath(); g.fill();
+  // v 눈금값
+  g.fillStyle='#94a3b8'; g.font='9.5px system-ui'; g.textAlign='right';
+  for(const v of [0.6,0.3,-0.3,-0.6]) g.fillText(v.toFixed(1),pad.l-6,Y(v)+3);
+  g.fillText('0',pad.l-6,Y(0)+3);
+  // t 눈금 (1초 간격)
+  g.strokeStyle='#cbd5e1'; g.lineWidth=1; g.textAlign='center'; g.font='9px system-ui';
+  for(let t=1;t<TSPAN;t++){
+    const x=X(t); if(x>w-pad.r-56) break;
+    g.beginPath(); g.moveTo(x,Y(0)); g.lineTo(x,Y(0)+4); g.stroke();
+    g.fillStyle='#b6c2d1'; g.fillText(t,x,Y(0)+13);
+  }
+  // 축 이름
+  g.fillStyle='#64748b'; g.font='bold 10px system-ui';
+  g.textAlign='left';  g.fillText('속도 v (m/s)',4,11);
+  g.textAlign='right'; g.fillText('시간 t (s)',w-pad.r,Y(0)+15);
+
+  if(!S.trace.length){
+    g.textAlign='center'; g.fillStyle='#cbd5e1'; g.font='11.5px system-ui';
+    g.fillText('수레를 밀면 센서가 속도를 기록합니다',pad.l+iw/2,Y(0)-8);
+    return;
+  }
+  if(S.tCol!=null){
+    g.strokeStyle='#f59e0b'; g.setLineDash([4,3]); g.lineWidth=1.5;
+    g.beginPath(); g.moveTo(X(S.tCol),pad.t); g.lineTo(X(S.tCol),h-pad.b); g.stroke(); g.setLineDash([]);
+    g.fillStyle='#b45309'; g.font='bold 10px system-ui'; g.textAlign='center';
+    g.fillText('충돌',X(S.tCol),pad.t+8);
+  }
+  [['v1','#2563eb'],['v2','#dc2626']].forEach(([k,col],idx)=>{
+    g.strokeStyle=col; g.lineWidth=2.2; g.beginPath();
+    S.trace.forEach((p,i)=>{const x=X(p.t),y=Y(idx?p.v2:p.v1); i?g.lineTo(x,y):g.moveTo(x,y);});
+    g.stroke();
+  });
+  if(S.reading&&S.tCol!=null){
+    const R=S.reading;
+    g.font='bold 9.5px ui-monospace,monospace';
+    const mk=(v,col,off,al)=>{const x=X(S.tCol)+off,y=Y(v);
+      g.fillStyle=col; g.beginPath(); g.arc(x,y,3.2,0,7); g.fill();
+      g.textAlign=al; g.fillText((v>=0?'+':'−')+Math.abs(v).toFixed(3),x+(al==='right'?-5:5),y-5);};
+    mk(R.v1,'#2563eb',-3,'right'); mk(R.v2,'#dc2626',-3,'right');
+    mk(R.v1p,'#2563eb',3,'left');  mk(R.v2p,'#dc2626',3,'left');
+  }
+}
+
+/* ══════════ 메인 루프 ══════════ */
+let last=performance.now();
+function loop(now){
+  let dt=Math.min(0.05,(now-last)/1000); last=now;
+  [1,2].forEach(n=>{const c=S.charge[n];
+    if(c){c.p=Math.min(100,c.p+dt/CHARGE_T*100); $('bar'+n).style.width=c.p+'%';}});
+
+  if(S.phase==='running'){
+    const sdt=(S.slow?dt*0.28:dt)/8;
+    for(let i=0;i<8;i++){ S.t+=sdt; stepPhysics(sdt); }
+    if(!S.trace.length||S.t-S.trace[S.trace.length-1].t>1/70) S.trace.push({t:S.t,v1:S.c1.v,v2:S.c2.v});
+    if(S.trace.length>1200) S.trace.shift();
+
+    // 수레가 레일 끝 스토퍼에 닿아 완전히 멈출 때까지 계속 굴러간다 (도중에 얼어붙지 않음)
+    const still=Math.abs(S.c1.v)<0.004&&Math.abs(S.c2.v)<0.004;
+    if(S.collided&&still){ S.phase='done'; }
+    else if(!S.collided&&still&&S.t>0.5){
+      // 너무 약하게 밀어 충돌하지 못한 경우 → 다시 밀 수 있게 (실제 실험처럼)
+      S.c1.launched=false; S.c2.launched=false;
+      $('pad1').disabled=false; $('pad2').disabled=false;
+      $('phaseBadge').textContent='다시 밀어 주세요';
+    }
+    if(S.t>25) S.phase='done';
+  }
+  if(S.phase==='done') $('phaseBadge').textContent = S.collided?'✅ 충돌 측정 완료':'준비';
+  if(S.flash>0) S.flash=Math.max(0,S.flash-dt*2.2);
+  S.sparks.forEach(s=>{ if(s.life>0){ s.x+=s.vx*dt*0.25; s.y+=s.vy*dt; s.vy+=260*dt; s.life-=dt*1.4; } });
+
+  drawRail(); drawVT();
+  requestAnimationFrame(loop);
+}
+
+/* ══════════ 전체 초기화 ══════════
+   ↻ 이번 실험 다시 = 방금 회차만 되돌림 (질량·표 유지)
+   ⟲ 전체 초기화   = 표·질량·충돌 방식·모드까지 모두 처음 상태로 */
+$('btnResetAll').onclick=()=>{
+  if(S.rows.length && !confirm(
+      '기록한 '+S.rows.length+'회 데이터와 질량·충돌 방식·모드 설정을 모두 처음 상태로 되돌립니다.\n\n초기화할까요?')) return;
+  S.rows=[]; S.answers={1:null,2:[]};
+  S.w1=0; S.w2=0; S.bumper='spring'; S.mode='ideal';
+  S.slow=false; $('btnSlow').classList.remove('on'); $('btnSlow').textContent='🐢 슬로우 모드';
+  $('bumper').querySelectorAll('.chip').forEach(x=>x.classList.toggle('sel',x.dataset.b==='spring'));
+  document.querySelectorAll('.modal .chip').forEach(c=>c.classList.remove('sel'));
+  const ta=$('myConcl'); if(ta) ta.value='';
+  $('mask').classList.add('hidden');
+  updateMass(); paintMode(); renderTable(); resetRun();
+  toast('처음 상태로 초기화했습니다');
+};
+
+/* ══════════ 조작 칸 자동 맞춤 ══════════
+   내용이 세로로 넘치면 스크롤 대신 살짝 축소해 항상 한 화면에 딱 들어가게 한다. */
+const DASH = matchMedia('(min-width:820px) and (min-height:400px)');
+let fitPending=false;
+const ZOOM_OK = 'zoom' in document.documentElement.style;
+function fitSide(){
+  const side=$('side'); if(!side) return;
+  side.style.zoom='';
+  if(!DASH.matches) return;
+  if(!ZOOM_OK){ side.style.overflow='auto'; return; }   /* zoom 미지원 브라우저 대비 */
+  const card=$('cardRead');
+  const prev=card.style.flex; card.style.flex='0 0 auto';   // 자연 높이로 측정
+  const kids=[...side.children];
+  const gap=parseFloat(getComputedStyle(side).rowGap)||0;
+  const need=kids.reduce((a,el)=>a+el.getBoundingClientRect().height,0)+gap*(kids.length-1);
+  card.style.flex=prev;
+  const avail=side.clientHeight;
+  if(need>avail && avail>0) side.style.zoom=Math.max(0.6,(avail/need)*0.995);
+}
+function scheduleFit(){ if(fitPending) return; fitPending=true;
+  requestAnimationFrame(()=>{ fitPending=false; fitSide(); }); }
+addEventListener('resize',scheduleFit);
+addEventListener('orientationchange',()=>setTimeout(fitSide,300));
+if(window.ResizeObserver){ const mid=document.querySelector('.mid');
+  if(mid) new ResizeObserver(scheduleFit).observe(mid); }   /* .side 자체를 보면 zoom 변경이 되먹임됨 */
+
+/* ══════════ 전체화면 (태블릿·폰 가로 사용) ══════════ */
+$('btnFull').onclick=async()=>{
+  try{
+    if(!document.fullscreenElement){
+      await document.documentElement.requestFullscreen();
+      if(screen.orientation&&screen.orientation.lock){ try{await screen.orientation.lock('landscape');}catch(_){} }
+    }else{ await document.exitFullscreen(); }
+  }catch(_){ toast('이 브라우저에서는 전체화면을 지원하지 않습니다'); }
+};
+
+/* ══════════ 초기화 ══════════ */
+updateMass(); renderTable(); renderReadout(); paintMode();
+addEventListener('resize',()=>{ if(!$('mask').classList.contains('hidden')) drawChart(); });
+addEventListener('load',()=>setTimeout(fitSide,60));
+setTimeout(fitSide,120);
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

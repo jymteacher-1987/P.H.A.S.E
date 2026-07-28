@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>로켓 운동 비교 — 질량 고정 vs 질량 변화</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#05060f;
+    --panel:rgba(16,20,38,0.72);
+    --panel-border:rgba(120,150,255,0.18);
+    --grid:rgba(120,150,255,0.12);
+    --text:#e8ecff;
+    --muted:#8b93b8;
+    --A:#ff5a6a;      /* 로켓 A : 질량 고정 */
+    --A-soft:rgba(255,90,106,0.16);
+    --B:#3ad8ff;      /* 로켓 B : 실제 로켓 */
+    --B-soft:rgba(58,216,255,0.16);
+    --accent:#ffd36b;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:"Noto Sans KR",system-ui,sans-serif;
+    background:
+      radial-gradient(1200px 800px at 80% -10%, rgba(58,216,255,0.10), transparent 55%),
+      radial-gradient(1000px 700px at 0% 110%, rgba(255,90,106,0.10), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    overflow:hidden;
+    height:100dvh;
+  }
+  #app{
+    display:flex;
+    flex-direction:column;
+    height:100dvh;
+    padding:10px;
+    gap:10px;
+  }
+  header{
+    display:flex; align-items:baseline; justify-content:space-between;
+    gap:10px; flex-wrap:wrap; flex:0 0 auto;
+  }
+  header h1{
+    margin:0; font-family:"Orbitron",sans-serif; font-weight:900;
+    font-size:clamp(15px,3.4vw,24px); letter-spacing:1px;
+    background:linear-gradient(90deg,var(--A),#fff 45%,var(--B));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  header .sub{font-size:clamp(10px,2.2vw,13px); color:var(--muted);}
+  header .sub b{color:var(--accent); font-weight:700;}
+
+  /* 메인 레이아웃: 가로화면=좌우 / 세로화면=상하 */
+  main{
+    flex:1 1 auto; min-height:0;
+    display:grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0,0.8fr) minmax(0,1.4fr);
+    gap:10px;
+  }
+  @media (orientation:landscape) and (min-width:760px){
+    main{
+      grid-template-columns: minmax(0,1fr) minmax(0,1.1fr);
+      grid-template-rows: minmax(0,1fr);
+    }
+  }
+
+  .card{
+    position:relative;
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:16px;
+    backdrop-filter:blur(6px);
+    overflow:hidden;
+  }
+  .stage{min-height:0;}
+  .stage canvas{display:block; width:100%; height:100%;}
+
+  .right{
+    min-height:0;
+    display:flex; flex-direction:column; gap:10px;
+  }
+
+  /* 수치 패널 */
+  .readouts{
+    flex:0 0 auto;
+    display:grid; grid-template-columns:1fr 1fr; gap:8px;
+  }
+  .rk{
+    border-radius:14px; padding:7px 10px;
+    border:1px solid var(--panel-border);
+    background:var(--panel);
+  }
+  .rk.A{border-color:rgba(255,90,106,0.45); background:linear-gradient(180deg,var(--A-soft),transparent);}
+  .rk.B{border-color:rgba(58,216,255,0.45); background:linear-gradient(180deg,var(--B-soft),transparent);}
+  .rk .name{font-family:"Orbitron",sans-serif; font-weight:700; font-size:12px; display:flex; align-items:center; gap:6px;}
+  .rk.A .name{color:var(--A);} .rk.B .name{color:var(--B);}
+  .rk .tag{font-size:10px; color:var(--muted); font-family:"Noto Sans KR";}
+  .rows{margin-top:6px; display:grid; gap:3px;}
+  .row{display:flex; justify-content:space-between; align-items:baseline; font-size:12px;}
+  .row .lbl{color:var(--muted);}
+  .row .val{font-family:"Orbitron",sans-serif; font-weight:700; font-size:clamp(13px,2.6vw,16px); letter-spacing:.5px;}
+  .row .val small{font-size:10px; color:var(--muted); font-weight:500; margin-left:2px;}
+
+  /* 그래프 */
+  .graph{flex:1 1 0; min-height:0;}
+  .graph canvas{display:block; width:100%; height:100%;}
+
+  /* 컨트롤 */
+  .controls{
+    flex:0 0 auto;
+    display:flex; gap:8px; align-items:center; flex-wrap:nowrap;
+  }
+  button.ctl{
+    font-family:"Orbitron",sans-serif; font-weight:700; letter-spacing:.3px;
+    border:1px solid var(--panel-border); background:rgba(40,48,82,0.6);
+    color:var(--text); border-radius:12px; padding:10px 10px; font-size:13px;
+    cursor:pointer; flex:1 1 auto; min-width:0; white-space:nowrap; transition:transform .08s, background .15s, border-color .15s;
+  }
+  button.ctl:active{transform:scale(0.95);}
+  button.ctl.play{background:linear-gradient(180deg,rgba(58,216,255,.25),rgba(58,216,255,.08)); border-color:rgba(58,216,255,.55);}
+  button.ctl.reset{background:rgba(40,48,82,0.6);}
+  .speeds{display:flex; gap:6px; align-items:center; margin-left:auto; flex-shrink:0;}
+  .speeds span{font-size:11px; color:var(--muted);}
+  .spd{
+    border:1px solid var(--panel-border); background:transparent; color:var(--muted);
+    border-radius:9px; padding:7px 8px; font-size:12px; cursor:pointer; font-family:"Orbitron";
+  }
+  .spd.on{color:var(--text); border-color:var(--accent); background:rgba(255,211,107,0.12);}
+
+  .clock{
+    position:absolute; top:8px; left:10px;
+    font-family:"Orbitron",sans-serif; font-size:12px; color:var(--muted);
+    background:rgba(5,6,15,0.45); padding:3px 8px; border-radius:8px;
+    border:1px solid var(--panel-border);
+  }
+  .clock b{color:var(--accent);}
+  .stagehint{
+    position:absolute; bottom:8px; left:0; right:0; text-align:center;
+    font-size:10px; color:var(--muted); pointer-events:none;
+  }
+  .countdown{
+    position:absolute; inset:0; display:none; align-items:center; justify-content:center;
+    font-family:"Orbitron",sans-serif; font-weight:900; color:var(--accent);
+    font-size:clamp(46px,13vw,120px); text-shadow:0 0 34px rgba(255,211,107,.65);
+    background:radial-gradient(circle,rgba(5,6,15,0.25),rgba(5,6,15,0.55));
+    z-index:5; pointer-events:none; letter-spacing:2px;
+  }
+  .countdown.pop{animation:cdpop .55s cubic-bezier(.2,.9,.3,1.2);}
+  @keyframes cdpop{0%{transform:scale(.25);opacity:0;}45%{opacity:1;}100%{transform:scale(1);opacity:1;}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>로켓 운동 비교 시뮬레이터</h1>
+    <div class="sub">
+      <b>로켓 A</b> 질량 1000kg 고정 가정 &nbsp;vs&nbsp; <b>로켓 B</b> 연료 분사로 질량 감소 (실제)
+    </div>
+  </header>
+
+  <main>
+    <!-- 비행 화면 -->
+    <section class="card stage">
+      <div class="clock">T + <b id="clock">0.0</b> s</div>
+      <canvas id="sky"></canvas>
+      <div class="countdown" id="cd">3</div>
+      <div class="stagehint">발사대(0 m) 기준 · 두 로켓의 고도 차이를 비교하세요</div>
+    </section>
+
+    <!-- 데이터 + 그래프 + 컨트롤 -->
+    <section class="right">
+      <div class="readouts">
+        <div class="rk A">
+          <div class="name">🟥 ROCKET A <span class="tag">질량 고정</span></div>
+          <div class="rows">
+            <div class="row"><span class="lbl">질량 m</span><span class="val" id="A-mass">1000<small>kg</small></span></div>
+            <div class="row"><span class="lbl">속도 v</span><span class="val" id="A-vel">0<small>m/s</small></span></div>
+            <div class="row"><span class="lbl">거리 s</span><span class="val" id="A-dist">0<small>m</small></span></div>
+            <div class="row"><span class="lbl">가속도 a</span><span class="val" id="A-acc">3.00<small>m/s²</small></span></div>
+          </div>
+        </div>
+        <div class="rk B">
+          <div class="name">🟦 ROCKET B <span class="tag">질량 감소</span></div>
+          <div class="rows">
+            <div class="row"><span class="lbl">질량 m</span><span class="val" id="B-mass">1000<small>kg</small></span></div>
+            <div class="row"><span class="lbl">속도 v</span><span class="val" id="B-vel">0<small>m/s</small></span></div>
+            <div class="row"><span class="lbl">거리 s</span><span class="val" id="B-dist">0<small>m</small></span></div>
+            <div class="row"><span class="lbl">가속도 a</span><span class="val" id="B-acc">3.00<small>m/s²</small></span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card graph">
+        <canvas id="chart"></canvas>
+      </div>
+
+      <div class="controls">
+        <button class="ctl play" id="btnPlay">🚀 발사!</button>
+        <button class="ctl reset" id="btnReset">↺ 초기화</button>
+        <div class="speeds">
+          <span>배속</span>
+          <button class="spd on" data-spd="1">1×</button>
+          <button class="spd" data-spd="2">2×</button>
+          <button class="spd" data-spd="4">4×</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+/* ===================== 물리 상수 ===================== */
+const M0       = 1000;   // 초기 질량 (kg)
+const FUEL     = 600;    // 연료 (kg)
+const THRUST   = 3000;   // 추력 (N)
+const BURN     = 20;     // 연소율 dm/dt (kg/s)
+const DRY      = M0 - FUEL;        // 연료 소진 후 질량 = 400 kg
+const BURN_T   = FUEL / BURN;      // 연소 지속 시간 = 30 s
+
+/* ===================== 시뮬 상태 ===================== */
+const S = {
+  t:0, running:false, speed:1,
+  A:{v:0, x:0}, B:{v:0, x:0}
+};
+
+/* 시각 t 에서의 가속도 */
+function accA(t){ return t < BURN_T ? THRUST / M0 : 0; }              // 항상 a=F/M0=3 m/s² (질량 변화 무시)
+function massA(t){ return M0; }                                       // 질량 1000kg 고정 가정
+function accB(t){ return t < BURN_T ? THRUST / (M0 - BURN*t) : 0; }   // 질량 감소로 가속도 증가
+function massB(t){ return t < BURN_T ? (M0 - BURN*t) : DRY; }
+function fuelLeft(t){ return Math.max(0, FUEL - BURN*t); }
+
+/* 작은 스텝으로 적분(정확도 확보) */
+function step(dt){
+  const SUB = 8;
+  const h = dt / SUB;
+  for(let i=0;i<SUB;i++){
+    const t = S.t;
+    S.A.v += accA(t)*h; S.A.x += S.A.v*h;
+    S.B.v += accB(t)*h; S.B.x += S.B.v*h;
+    S.t += h;
+  }
+}
+
+/* ===================== 캔버스 준비 ===================== */
+const sky = document.getElementById('sky');
+const skyCtx = sky.getContext('2d');
+const chart = document.getElementById('chart');
+const chCtx = chart.getContext('2d');
+let DPR = Math.min(window.devicePixelRatio||1, 2);
+
+function fit(canvas){
+  const r = canvas.getBoundingClientRect();
+  canvas.width  = Math.max(1, Math.round(r.width  * DPR));
+  canvas.height = Math.max(1, Math.round(r.height * DPR));
+}
+function fitAll(){
+  DPR = Math.min(window.devicePixelRatio||1, 2);
+  fit(sky); fit(chart);
+  buildStars();
+  draw();
+}
+window.addEventListener('resize', fitAll);
+window.addEventListener('orientationchange', ()=>setTimeout(fitAll,150));
+
+/* 별 배경 */
+let stars=[];
+function buildStars(){
+  stars=[];
+  const n = Math.round((sky.width*sky.height)/(14000*DPR));
+  for(let i=0;i<n;i++){
+    stars.push({x:Math.random(), y:Math.random(), r:(Math.random()*1.3+0.3)*DPR, a:Math.random()*0.6+0.2});
+  }
+}
+
+/* ===================== 비행 화면 그리기 ===================== */
+function drawSky(){
+  const W=sky.width, H=sky.height;
+  skyCtx.clearRect(0,0,W,H);
+
+  // 우주 그라데이션
+  const g = skyCtx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#070a1c'); g.addColorStop(1,'#0c1230');
+  skyCtx.fillStyle=g; skyCtx.fillRect(0,0,W,H);
+  // 별
+  for(const s of stars){
+    skyCtx.globalAlpha=s.a; skyCtx.fillStyle='#cfe0ff';
+    skyCtx.beginPath(); skyCtx.arc(s.x*W, s.y*H, s.r,0,7); skyCtx.fill();
+  }
+  skyCtx.globalAlpha=1;
+
+  const padTop = 26*DPR, padBot = 34*DPR;
+  const groundY = H - padBot;
+  const usableH = groundY - padTop;
+
+  // 두 로켓 레인 x 좌표
+  const xA = W*0.33, xB = W*0.67;
+
+  // 고도 스케일: 더 높은 로켓이 화면 상단 부근에 오도록 자동 줌
+  const maxX = Math.max(S.A.x, S.B.x, 120); // 최소 스케일
+  const scale = usableH / (maxX*1.18);      // m → px
+
+  const mToY = (m)=> groundY - m*scale;
+
+  // 고도 눈금
+  skyCtx.font = `${11*DPR}px Orbitron, sans-serif`;
+  skyCtx.textBaseline='middle';
+  const niceStep = niceTick(maxX*1.18/4);
+  skyCtx.strokeStyle='rgba(120,150,255,0.10)';
+  skyCtx.lineWidth=1*DPR;
+  for(let m=0; m<=maxX*1.18; m+=niceStep){
+    const y=mToY(m);
+    if(y<padTop-2) break;
+    skyCtx.beginPath(); skyCtx.moveTo(36*DPR,y); skyCtx.lineTo(W,y); skyCtx.stroke();
+    skyCtx.fillStyle='rgba(139,147,184,0.7)';
+    skyCtx.textAlign='left';
+    skyCtx.fillText(fmt(m)+'m', 4*DPR, y);
+  }
+
+  // 발사대 바닥
+  skyCtx.strokeStyle='rgba(255,211,107,0.5)';
+  skyCtx.lineWidth=2*DPR;
+  skyCtx.beginPath(); skyCtx.moveTo(0,groundY); skyCtx.lineTo(W,groundY); skyCtx.stroke();
+
+  // 레인 라벨 (상단으로 — 하단 힌트와 겹침 방지)
+  skyCtx.textAlign='center'; skyCtx.textBaseline='top';
+  skyCtx.font = `700 ${13*DPR}px Orbitron, sans-serif`;
+  skyCtx.fillStyle='#ff5a6a'; skyCtx.fillText('A', xA, 6*DPR);
+  skyCtx.fillStyle='#3ad8ff'; skyCtx.fillText('B', xB, 6*DPR);
+
+  // 로켓 그리기
+  const burningA = S.t < BURN_T;
+  const burningB = S.t < BURN_T;
+  drawRocket(skyCtx, xA, mToY(S.A.x), '#ff5a6a', burningA);
+  drawRocket(skyCtx, xB, mToY(S.B.x), '#3ad8ff', burningB);
+
+  // 각 로켓 고도에 색깔 점선 → 거리차 가시화
+  if(S.t>0){
+    const yA=mToY(S.A.x), yB=mToY(S.B.x);
+    skyCtx.setLineDash([5*DPR,5*DPR]); skyCtx.lineWidth=1.2*DPR;
+    skyCtx.strokeStyle='rgba(255,90,106,0.5)';   // A
+    skyCtx.beginPath(); skyCtx.moveTo(0,yA); skyCtx.lineTo(W,yA); skyCtx.stroke();
+    skyCtx.strokeStyle='rgba(58,216,255,0.5)';   // B
+    skyCtx.beginPath(); skyCtx.moveTo(0,yB); skyCtx.lineTo(W,yB); skyCtx.stroke();
+    skyCtx.setLineDash([]);
+
+    // 거리차 텍스트 (두 점선 사이 오른쪽)
+    const diff = Math.abs(S.A.x - S.B.x);
+    const ymid = (yA+yB)/2;
+    skyCtx.fillStyle='#ffd36b';
+    skyCtx.font=`700 ${12*DPR}px Orbitron`;
+    skyCtx.textAlign='right'; skyCtx.textBaseline='middle';
+    skyCtx.fillText('거리차 '+Math.round(diff).toLocaleString()+' m', W-8*DPR, ymid);
+  }
+}
+
+function drawRocket(ctx,x,y,color,burning){
+  const s = 9*DPR;          // 로켓 크기 단위
+  ctx.save();
+  ctx.translate(x,y);
+
+  // 화염
+  if(burning && S.running){
+    const fl = (Math.random()*0.5+0.8);
+    const fg = ctx.createLinearGradient(0,s*1.0,0,s*4.5*fl);
+    fg.addColorStop(0,'rgba(255,211,107,0.95)');
+    fg.addColorStop(0.5,'rgba(255,120,60,0.7)');
+    fg.addColorStop(1,'rgba(255,60,60,0)');
+    ctx.fillStyle=fg;
+    ctx.beginPath();
+    ctx.moveTo(-s*0.7, s*1.0);
+    ctx.quadraticCurveTo(0, s*4.6*fl, s*0.7, s*1.0);
+    ctx.closePath(); ctx.fill();
+  }
+
+  // 동체
+  ctx.fillStyle=color;
+  ctx.beginPath();
+  ctx.moveTo(0,-s*2.0);                       // 노즈콘 끝
+  ctx.quadraticCurveTo(s*0.95,-s*0.6, s*0.8, s*1.0);
+  ctx.lineTo(-s*0.8, s*1.0);
+  ctx.quadraticCurveTo(-s*0.95,-s*0.6, 0,-s*2.0);
+  ctx.closePath(); ctx.fill();
+  // 핀
+  ctx.beginPath();
+  ctx.moveTo(s*0.8,s*0.3); ctx.lineTo(s*1.5,s*1.2); ctx.lineTo(s*0.8,s*1.0); ctx.closePath();
+  ctx.moveTo(-s*0.8,s*0.3); ctx.lineTo(-s*1.5,s*1.2); ctx.lineTo(-s*0.8,s*1.0); ctx.closePath();
+  ctx.fill();
+  // 창문
+  ctx.fillStyle='rgba(255,255,255,0.85)';
+  ctx.beginPath(); ctx.arc(0,-s*0.3,s*0.32,0,7); ctx.fill();
+  ctx.restore();
+}
+
+/* ===================== v-t 그래프 ===================== */
+// 연료 소진(30초)까지만 표시
+let chartTmax = BURN_T;
+function drawChart(){
+  const W=chart.width, H=chart.height;
+  chCtx.clearRect(0,0,W,H);
+
+  const padL=42*DPR, padR=10*DPR, padT=16*DPR, padB=24*DPR;
+  const pw=W-padL-padR, ph=H-padT-padB;
+
+  // 시간축: 연료 소진 시점(30초)까지 고정
+  const tmax = chartTmax;
+  // 속도축: 곡선이 화면을 꽉 채우도록 타이트하게 (137.4 → 150)
+  const vMaxData = Math.max(150*Math.log(M0/DRY), 100);
+  const vmax = Math.ceil(vMaxData/50)*50;
+
+  const tx=(t)=> padL + (t/tmax)*pw;
+  const vy=(v)=> padT + ph - (v/vmax)*ph;
+
+  // 격자 + 축 라벨
+  chCtx.font=`${10*DPR}px Orbitron`;
+  chCtx.strokeStyle='rgba(120,150,255,0.12)'; chCtx.lineWidth=1*DPR;
+  chCtx.fillStyle='rgba(139,147,184,0.85)';
+  // 가로 격자(속도)
+  const vStep=niceTick(vmax/4);
+  chCtx.textAlign='right'; chCtx.textBaseline='middle';
+  for(let v=0; v<=vmax+0.1; v+=vStep){
+    const y=vy(v);
+    chCtx.beginPath(); chCtx.moveTo(padL,y); chCtx.lineTo(W-padR,y); chCtx.stroke();
+    chCtx.fillText(Math.round(v), padL-5*DPR, y);
+  }
+  // 세로 격자(시간)
+  const tStep=niceTick(tmax/5);
+  chCtx.textAlign='center'; chCtx.textBaseline='top';
+  for(let t=0; t<=tmax+0.1; t+=tStep){
+    const x=tx(t);
+    chCtx.beginPath(); chCtx.moveTo(x,padT); chCtx.lineTo(x,padT+ph); chCtx.stroke();
+    chCtx.fillText(t, x, padT+ph+5*DPR);
+  }
+  // 축 제목
+  chCtx.fillStyle='#8b93b8';
+  chCtx.textAlign='left'; chCtx.textBaseline='top';
+  chCtx.fillText('v (m/s)', padL-36*DPR, padT-13*DPR);
+  chCtx.textAlign='right'; chCtx.textBaseline='bottom';
+  chCtx.fillText('t (s)', W-padR, H-2*DPR);
+
+  // 연료 소진 시점 표시선
+  if(BURN_T<=tmax){
+    const xb=tx(BURN_T);
+    chCtx.setLineDash([3*DPR,4*DPR]);
+    chCtx.strokeStyle='rgba(255,211,107,0.5)';
+    chCtx.beginPath(); chCtx.moveTo(xb,padT); chCtx.lineTo(xb,padT+ph); chCtx.stroke();
+    chCtx.setLineDash([]);
+    chCtx.fillStyle='rgba(255,211,107,0.85)';
+    chCtx.font=`${9*DPR}px Noto Sans KR`;
+    chCtx.textAlign='right'; chCtx.textBaseline='top';
+    chCtx.fillText('연료 소진', xb-4*DPR, padT+2*DPR);
+  }
+
+  // A·B 곡선 사이 영역 채우기 → 속도 차이를 한눈에
+  const tEnd=Math.min(S.t,tmax);
+  if(tEnd>0){
+    const N=120;
+    chCtx.beginPath();
+    for(let i=0;i<=N;i++){ const t=(i/N)*tEnd; const x=tx(t),y=vy(theoV_B(t)); i?chCtx.lineTo(x,y):chCtx.moveTo(x,y); }
+    for(let i=N;i>=0;i--){ const t=(i/N)*tEnd; chCtx.lineTo(tx(t),vy(theoV_A(t))); }
+    chCtx.closePath();
+    chCtx.fillStyle='rgba(255,211,107,0.14)';
+    chCtx.fill();
+  }
+
+  // 실제 진행분만 그림 — 발사(t>0)해야 곡선이 그려짐
+  plotTheory(tx,vy,Math.min(S.t,tmax), '#ff5a6a', (t)=> theoV_A(t), 1, 3);
+  plotTheory(tx,vy,Math.min(S.t,tmax), '#3ad8ff', (t)=> theoV_B(t), 1, 3);
+
+  // 현재 점 (발사 후에만)
+  if(S.t>0){
+    dot(tx(Math.min(S.t,tmax)), vy(Math.min(S.A.v,vmax)), '#ff5a6a');
+    dot(tx(Math.min(S.t,tmax)), vy(Math.min(S.B.v,vmax)), '#3ad8ff');
+  }
+}
+// 이론 속도(그래프 곡선용) — 표시 일관성을 위해 해석해 사용
+function theoV_A(t){ return (t<BURN_T? 3*t : 3*BURN_T); }
+function theoV_B(t){
+  if(t<BURN_T) return 150*Math.log(M0/(M0-BURN*t));
+  return 150*Math.log(M0/DRY);
+}
+function plotTheory(tx,vy,tEnd,color,fn,alpha,lw){
+  if(tEnd<=0) return;
+  chCtx.globalAlpha=alpha;
+  chCtx.strokeStyle=color; chCtx.lineWidth=(lw||2)*DPR;
+  chCtx.lineJoin='round';
+  chCtx.beginPath();
+  const N=160;
+  for(let i=0;i<=N;i++){
+    const t=(i/N)*tEnd;
+    const x=tx(t), y=vy(fn(t));
+    if(i===0) chCtx.moveTo(x,y); else chCtx.lineTo(x,y);
+  }
+  chCtx.stroke();
+  chCtx.globalAlpha=1;
+}
+function dot(x,y,c){
+  chCtx.fillStyle=c; chCtx.beginPath(); chCtx.arc(x,y,3.5*DPR,0,7); chCtx.fill();
+  chCtx.strokeStyle='#fff'; chCtx.lineWidth=1*DPR; chCtx.stroke();
+}
+
+/* ===================== 숫자 유틸 ===================== */
+function niceTick(x){
+  if(x<=0) return 1;
+  const p=Math.pow(10,Math.floor(Math.log10(x)));
+  const f=x/p;
+  let n; if(f<1.5)n=1; else if(f<3)n=2; else if(f<7)n=5; else n=10;
+  return n*p;
+}
+function fmt(n){
+  if(n>=1000) return (n/1000).toFixed(n>=10000?0:1)+'k';
+  return Math.round(n).toString();
+}
+
+/* ===================== HUD 갱신 ===================== */
+const el = id=>document.getElementById(id);
+function updateHUD(){
+  el('clock').textContent = S.t.toFixed(1);
+  el('A-mass').innerHTML = Math.round(massA(S.t)).toLocaleString()+'<small>kg</small>';
+  el('A-vel').innerHTML  = S.A.v.toFixed(1)+'<small>m/s</small>';
+  el('A-dist').innerHTML = Math.round(S.A.x).toLocaleString()+'<small>m</small>';
+  el('A-acc').innerHTML  = accA(S.t).toFixed(2)+'<small>m/s²</small>';
+  el('B-mass').innerHTML = Math.round(massB(S.t)).toLocaleString()+'<small>kg</small>';
+  el('B-vel').innerHTML  = S.B.v.toFixed(1)+'<small>m/s</small>';
+  el('B-dist').innerHTML = Math.round(S.B.x).toLocaleString()+'<small>m</small>';
+  el('B-acc').innerHTML  = accB(S.t).toFixed(2)+'<small>m/s²</small>';
+}
+
+function draw(){ drawSky(); drawChart(); updateHUD(); }
+
+/* ===================== 루프 ===================== */
+let last=0;
+function loop(ts){
+  if(!last) last=ts;
+  let dt=(ts-last)/1000; last=ts;
+  if(dt>0.05) dt=0.05;            // 탭 전환 등 큰 점프 방지
+  if(S.running){
+    let adv = dt*S.speed;
+    const rem = BURN_T - S.t;
+    if(adv > rem) adv = rem;
+    step(adv);
+    if(S.t >= BURN_T - 1e-6){          // 연료 소진 → 시뮬 종료
+      S.t = BURN_T; S.running = false;
+      el('btnPlay').textContent = '↺ 다시 발사';
+    }
+  }
+  draw();
+  requestAnimationFrame(loop);
+}
+
+/* ===================== 컨트롤 ===================== */
+let counting=false;
+function setPlay(on){
+  S.running=on;
+  el('btnPlay').textContent = on ? '⏸ 일시정지' : (S.t>0 ? '▶ 계속' : '🚀 발사!');
+}
+function doReset(){
+  counting=false; el('cd').style.display='none';
+  S.t=0; S.A={v:0,x:0}; S.B={v:0,x:0}; last=0;
+  setPlay(false); draw();
+}
+function launch(){
+  if(counting) return;
+  if(S.t >= BURN_T - 1e-6 && !S.running){ doReset(); }  // 종료 상태 → 먼저 초기화
+  // 처음 발사일 때만 카운트다운 연출
+  if(S.t===0 && !S.running){
+    counting=true;
+    const ov=el('cd');
+    const seq=['3','2','1','발사!'];
+    let i=0;
+    ov.style.display='flex';
+    el('btnPlay').textContent='카운트다운…';
+    const tick=()=>{
+      ov.textContent=seq[i];
+      ov.classList.remove('pop'); void ov.offsetWidth; ov.classList.add('pop');
+      i++;
+      if(i<seq.length){ setTimeout(tick,750); }
+      else { setTimeout(()=>{ ov.style.display='none'; counting=false; last=0; setPlay(true); }, 550); }
+    };
+    tick();
+  } else {
+    setPlay(!S.running);
+  }
+}
+el('btnPlay').addEventListener('click', launch);
+el('btnReset').addEventListener('click', doReset);
+document.querySelectorAll('.spd').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    document.querySelectorAll('.spd').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); S.speed=parseFloat(b.dataset.spd);
+  });
+});
+
+/* ===================== 시작 ===================== */
+window.addEventListener('load', ()=>{ fitAll(); requestAnimationFrame(loop); });
+fitAll();
+</script>
+</body>
+</html>

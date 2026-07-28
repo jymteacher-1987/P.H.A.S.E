@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>관리자 — 물리 실험실</title>
+<link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+<div class="wrap">
+  <!-- 로그인 화면 -->
+  <div class="admin-card" id="loginCard">
+    <h1>🔐 관리자 로그인</h1>
+    <p class="desc">등록된 관리자 계정으로만 접근할 수 있습니다.</p>
+    <div class="msg error" id="loginMsg"></div>
+    <div class="field">
+      <label>이메일</label>
+      <input type="email" id="loginEmail" placeholder="extraboy2@gmail.com" />
+    </div>
+    <div class="field">
+      <label>비밀번호</label>
+      <input type="password" id="loginPassword" placeholder="비밀번호" />
+    </div>
+    <button class="btn-primary" id="loginBtn">로그인</button>
+  </div>
+
+  <!-- 업로드 대시보드 (로그인 후) -->
+  <div class="admin-card" id="dashCard" style="display:none;">
+    <div class="admin-header">
+      <h1>🧪 실험 업로드</h1>
+      <a href="#" class="admin-logout" id="logoutBtn">로그아웃</a>
+    </div>
+    <p class="desc">새 실험 HTML 파일을 업로드하면 사이트에 바로 반영됩니다.</p>
+
+    <div class="msg" id="uploadMsg"></div>
+
+    <form id="uploadForm">
+      <div class="field">
+        <label>실험 제목</label>
+        <input type="text" id="fTitle" placeholder="예: 관성의 법칙 실험" required />
+      </div>
+      <div class="field">
+        <label>카테고리</label>
+        <select id="fCategory" required></select>
+      </div>
+      <div class="field">
+        <label>설명</label>
+        <textarea id="fDesc" placeholder="이 실험에 대한 짧은 설명"></textarea>
+      </div>
+      <div class="field">
+        <label>태그 (쉼표로 구분)</label>
+        <input type="text" id="fTags" placeholder="예: 관성, 힘, 뉴턴" />
+      </div>
+      <div class="field">
+        <label>실험 HTML 파일</label>
+        <input type="file" id="fFile" accept=".html,text/html" required />
+      </div>
+      <button class="btn-primary" id="uploadBtn" type="submit">업로드</button>
+    </form>
+
+    <div class="admin-list">
+      <h2>내가 업로드한 실험</h2>
+      <div id="uploadedList"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="assets/js/experiments-data.js"></script>
+<script src="assets/js/firebase-config.js"></script>
+<script src="assets/js/admin.js"></script>
+</body>
+</html>

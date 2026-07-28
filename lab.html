@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>실험실 — 물리 실험실</title>
+<meta name="description" content="과학의 기초부터 현대물리까지 — 영역별로 실험을 찾아보고 검색해보세요." />
+<link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="dot"></span> 물리 실험실</a>
+    <div class="nav-links">
+      <a href="index.html">메인으로</a>
+      <a href="#catSection">영역별 보기</a>
+    </div>
+    <span class="nav-cta">🧪 실시간 운영중</span>
+  </div>
+</nav>
+
+<header class="hero" style="padding: 44px 0 20px;">
+  <div class="wrap" style="display:block;">
+    <div class="hero-copy" style="max-width:none;">
+      <span class="eyebrow">🧪 실험실</span>
+      <h1 style="font-size: clamp(26px, 3.6vw, 38px);">모든 실험, 한 곳에서</h1>
+      <p class="sub" style="max-width:640px;">영역을 골라 둘러보거나, 원하는 실험을 검색해보세요.</p>
+
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input id="searchInput" type="text" placeholder="실험 이름, 키워드로 검색 (예: 렌즈, 저항, 운동량)" />
+        <button id="searchBtn">검색</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="lab-shell" id="catSection">
+    <aside class="lab-sidebar" id="sideMenu"></aside>
+
+    <section id="expSection">
+      <div class="section-title">
+        <h2 id="expSectionTitle">전체 실험</h2>
+        <span class="count" id="expCount"></span>
+      </div>
+      <div class="exp-grid" id="expGrid"></div>
+    </section>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap" style="display:flex; justify-content:space-between; width:100%; flex-wrap:wrap; gap:10px;">
+    <span>문의: jymteacher@naver.com</span>
+    <span class="credit">Made by P.H.A.S.E</span>
+  </div>
+</footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="assets/js/experiments-data.js"></script>
+<script src="assets/js/firebase-config.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/lab.js"></script>
+</body>
+</html>

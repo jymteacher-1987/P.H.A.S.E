@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>실험 보기 — 물리 실험실</title>
+<link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+<div class="viewer-bar">
+  <a class="back" href="lab.html">← 실험실로</a>
+  <span class="title" id="expTitle">불러오는 중…</span>
+  <span class="cat-tag" id="expCat"></span>
+</div>
+<div class="viewer-frame-wrap">
+  <iframe id="expFrame" class="viewer-frame" title="실험 화면" allowfullscreen></iframe>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="assets/js/experiments-data.js"></script>
+<script src="assets/js/firebase-config.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/view.js"></script>
+</body>
+</html>
