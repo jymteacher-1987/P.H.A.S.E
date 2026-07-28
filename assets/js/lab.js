@@ -86,6 +86,13 @@
   // never visible empty margin — some experiments don't use their full
   // canvas width/height, and a bit of edge-cropping on those looks far
   // better than dead space around the preview.
+  //
+  // The crop is anchored to the TOP-LEFT corner (see transform-origin:
+  // top left + top:0/left:0 in style.css), not the center. Experiment
+  // titles/headings almost always sit at the top (and often start near
+  // the left), so any spare overscaled area is pushed off the bottom and
+  // right edges instead of being split evenly around all four sides —
+  // that keeps the title fully visible instead of clipping its top line.
   const PREVIEW_W = 900;
   const PREVIEW_OVERSCALE = 1.18;
 
@@ -103,7 +110,7 @@
 
     function fitPreview() {
       const scale = (box.clientWidth / PREVIEW_W) * PREVIEW_OVERSCALE;
-      iframe.style.transform = `translate(-50%, -50%) scale(${scale})`;
+      iframe.style.transform = `scale(${scale})`;
     }
     fitPreview();
     const ro = new ResizeObserver(fitPreview);

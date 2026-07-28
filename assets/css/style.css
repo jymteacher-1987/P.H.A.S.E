@@ -279,9 +279,9 @@ input, button, textarea, select{ font-family: inherit; }
   overflow:hidden; border-bottom:1px solid var(--border);
 }
 .exp-preview iframe{
-  position:absolute; top:50%; left:50%; width:900px; height:675px;
+  position:absolute; top:0; left:0; width:900px; height:675px;
   border:none; pointer-events:none; background:#fff;
-  transform-origin: center center;
+  transform-origin: top left;
 }
 .exp-preview .ph{
   position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
@@ -307,7 +307,17 @@ input, button, textarea, select{ font-family: inherit; }
 .site-footer{
   border-top:1px solid var(--border); margin-top: 60px; padding: 34px 0 60px;
   color: var(--text-faint); font-size:13px;
-  display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+}
+/* .footer-wrap holds two flex children: the contact+credit group, and the
+   admin link. margin-left:auto on .admin-link pushes it to the right end
+   of whichever line it's on — including when it wraps alone onto its own
+   line on narrow screens, so it still lands bottom-right instead of
+   bottom-left. */
+.footer-wrap{
+  display:flex; align-items:center; flex-wrap:wrap; gap:10px 16px;
+}
+.footer-contact{
+  display:flex; align-items:center; flex-wrap:wrap; gap:6px 14px;
 }
 .site-footer a{ color: var(--text-faint); }
 .site-footer a:hover{ color: var(--accent-2); }
@@ -316,6 +326,7 @@ input, button, textarea, select{ font-family: inherit; }
   letter-spacing:.02em; color: var(--text-faint); opacity:.7;
 }
 .admin-link{
+  margin-left:auto;
   font-size:11px; color: var(--text-faint); opacity:.35;
   text-decoration:none; transition: opacity .15s;
 }
