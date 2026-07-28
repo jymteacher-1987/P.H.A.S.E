@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>전자기 유도 탐구: 코일, 자석, 상대운동</title>
+<style>
+:root{
+  --bg:#eef2f7; --card:#ffffff; --ink:#1e293b; --sub:#64748b;
+  --accent:#2563eb; --line:#dbe3ee;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:system-ui,-apple-system,"Segoe UI","Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+  background:var(--bg);color:var(--ink);line-height:1.4;
+  padding-bottom:env(safe-area-inset-bottom)}
+header{max-width:1080px;margin:0 auto;padding:10px 14px 0;
+  display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px}
+h1{font-size:clamp(16px,2.2vw,20px);margin:0}
+header p{margin:0;color:var(--sub);font-size:12.5px}
+main{max-width:1080px;margin:0 auto;padding:8px 10px 20px;
+  display:flex;flex-direction:column;gap:10px}
+#stage-wrap{background:#ffffff;border:1px solid var(--line);border-radius:12px;overflow:hidden;position:relative}
+.floating-btn{position:absolute;bottom:12px;right:12px;z-index:10;background:rgba(255,255,255,0.85);box-shadow:0 2px 8px rgba(0,0,0,0.1);backdrop-filter:blur(4px);border:1px solid var(--line);font-size:13px;border-radius:20px;padding:6px 14px;color:var(--ink);transition:all 0.2s;cursor:pointer;font-weight:600}
+@media (max-width: 500px) {
+  .floating-btn { bottom: 8px; right: 8px; font-size: 11.5px; padding: 4px 10px; }
+}
+.floating-btn:hover{background:#ffffff;box-shadow:0 4px 12px rgba(0,0,0,0.15)}
+.floating-btn.active{background:var(--accent);color:#ffffff;border-color:var(--accent)}
+#stage{display:block;width:100%;touch-action:none;outline:none;cursor:grab}
+#stage:focus-visible{box-shadow:inset 0 0 0 3px #60a5fa}
+#stage-hint{font-size:11px;color:var(--sub);background:#f6f9fc;border-top:1px solid var(--line);padding:5px 10px;text-align:center}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+#ctrl .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:8px}
+fieldset{border:1px solid var(--line);border-radius:10px;margin:0;padding:6px 9px 8px;min-width:0}
+legend{font-size:12px;font-weight:700;color:var(--accent);padding:0 4px}
+label.rng{display:block;font-size:12.5px;margin:1px 0}
+input[type=range]{width:100%;min-height:34px;margin:0;accent-color:var(--accent)}
+.seg{display:flex;flex-wrap:wrap;gap:5px;margin:3px 0}
+.seg label{position:relative;flex:1;min-width:62px}
+.seg input{position:absolute;opacity:0;width:1px;height:1px}
+.seg span{display:flex;min-height:36px;align-items:center;justify-content:center;border:1px solid var(--line);
+  border-radius:8px;background:#f8fafc;font-size:12.5px;padding:2px 5px;text-align:center;cursor:pointer;user-select:none}
+.seg input:checked+span{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.seg input:focus-visible+span{outline:2px solid #60a5fa;outline-offset:1px}
+button{min-height:36px;padding:4px 10px;border-radius:8px;border:1px solid var(--line);background:#f8fafc;
+  color:var(--ink);font-size:12.5px;font-weight:600;cursor:pointer}
+button:hover{background:#eef2f7}
+button:focus-visible{outline:2px solid #60a5fa;outline-offset:1px}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.active{background:#0f766e;border-color:#0f766e;color:#fff}
+button:disabled{opacity:.4;cursor:default}
+.btnrow{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
+.btnrow button{flex:1;min-width:86px;white-space:nowrap}
+@media (pointer:coarse){
+  button,.seg span{min-height:44px}
+  input[type=range]{min-height:44px}
+}
+.note{font-size:11.5px;color:var(--sub);margin:5px 0 0}
+.badge{display:inline-block;font-size:11.5px;font-weight:700;border-radius:6px;padding:1px 7px;background:#e0f2fe;color:#0369a1;vertical-align:1px}
+.badge.dense{background:#dcfce7;color:#15803d}
+.badge.sparse{background:#ffedd5;color:#c2410c}
+</style>
+</head>
+<body>
+<header>
+  <h1>전자기 유도 탐구: 코일, 자석, 상대운동</h1>
+  <p>자석과 코일의 상대운동이 자속을 변화시키면 유도 전류가 생깁니다.</p>
+</header>
+<main>
+  <section id="stage-wrap">
+    <div style="position:relative">
+      <button id="slowBtn" type="button" class="floating-btn">🐢 슬로우 모션</button>
+      <canvas id="stage" tabindex="0" aria-label="전자기 유도 실험 영역. 자석과 코일을 드래그하세요. 방향키는 코일, A/D키는 자석을 움직입니다."></canvas>
+    </div>
+    <div id="stage-hint">🖐 자석·코일 드래그 | ⌨ 방향키=코일 · A/D=자석 · Shift=빠르게 · <b>Space=순간포착(찰나의 전류 방향 관찰)</b> · R=초기화 · F=극 뒤집기</div>
+  </section>
+
+  <section id="ctrl" class="card">
+    <div class="grid">
+      <fieldset>
+        <legend>코일</legend>
+        <label class="rng">감은수 N: <b id="nVal">60</b>회
+          <input type="range" id="nRange" min="10" max="200" step="2" value="60" aria-label="코일 감은수">
+        </label>
+        <label class="rng">길이 L: <b id="lVal">12.0</b> cm
+          <input type="range" id="lRange" min="60" max="260" step="5" value="120" aria-label="코일 길이">
+        </label>
+        <div style="font-size:12.5px">n = N/L = <b id="nPerCm">5.0</b> 회/cm
+          <span id="densLabel" class="badge">보통 코일</span></div>
+        <label style="display:flex;align-items:center;gap:7px;min-height:32px;font-size:12.5px;margin-top:3px">
+          <input type="checkbox" id="indBChk" checked style="width:18px;height:18px"> 코일 내부 유도 자기장 표시
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>자석</legend>
+        <div class="seg" role="radiogroup" aria-label="자석 세기">
+          <label><input type="radio" name="str" value="weak"><span>약한 자석</span></label>
+          <label><input type="radio" name="str" value="strong" checked><span>강한 자석</span></label>
+        </div>
+        <div class="btnrow"><button id="flipBtn" type="button">🔄 N–S극 뒤집기 (F)</button></div>
+        <label style="display:flex;align-items:center;gap:7px;min-height:32px;font-size:12.5px;margin-top:3px">
+          <input type="checkbox" id="fieldChk" checked style="width:18px;height:18px"> 자기력선 표시
+        </label>
+        <p class="note" style="margin-top:0;">※ 그려진 선 밖에도 자기장은 존재하므로 자석이 멀리서 움직여도 미세한 유도 전류가 흐릅니다.</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>연결 장치</legend>
+        <div class="seg" role="radiogroup" aria-label="연결 장치">
+          <label><input type="radio" name="dev" value="bulb" checked><span>💡 전구</span></label>
+          <label><input type="radio" name="dev" value="led"><span>LED</span></label>
+          <label><input type="radio" name="dev" value="galvo"><span>검류계</span></label>
+        </div>
+        <div class="btnrow"><button id="ledFlipBtn" type="button" disabled>↔ LED 방향 뒤집기</button></div>
+        <p class="note" id="devNote">전구는 전류의 방향과 무관하게, 전류가 클수록 밝게 빛납니다.</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>운동</legend>
+        <div class="seg" role="radiogroup" aria-label="자동 운동 모드">
+          <label><input type="radio" name="mode" value="magnet" checked><span>자석만</span></label>
+          <label><input type="radio" name="mode" value="coil"><span>코일만</span></label>
+          <label><input type="radio" name="mode" value="both"><span>둘 다<br>같은 방향</span></label>
+          <label><input type="radio" name="mode" value="opposite"><span>둘 다<br>반대 방향</span></label>
+        </div>
+        <div class="seg" role="radiogroup" aria-label="왕복 속도">
+          <label><input type="radio" name="spd" value="slow"><span>느리게</span></label>
+          <label><input type="radio" name="spd" value="mid" checked><span>보통</span></label>
+          <label><input type="radio" name="spd" value="fast"><span>빠르게</span></label>
+        </div>
+        <div class="btnrow">
+          <button id="autoBtn" class="primary" type="button">▶ 자동 왕복</button>
+          <button id="pauseBtn" type="button">📸 순간 포착</button>
+          <button id="resetBtn" type="button">↺ 초기화</button>
+        </div>
+      </fieldset>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+'use strict';
+
+/* ============================================================
+   전자기 유도 시뮬레이션
+   좌표계: 화면 오른쪽 = +x. 코일 중심축 = x축(수평 점선).
+
+   [코일 감긴 방향과 +전류의 정의 — 화면 표현과 물리가 일치]
+   코일은 나선(helix)으로 감겨 있다: 앞면 도선은 위→아래(↘)로
+   비스듬히 내려가고, 뒷면 도선은 뒤로 돌아 올라간다.
+   +전류: 이 나선을 따라 흐르는 전류
+        → 코일 오른쪽(+x)에서 볼 때 반시계 방향
+        → 앞면 도선에서는 ↘ 방향
+        → 코일 내부에 +x 방향 자기장 (오른손 법칙).
+   −전류: 모든 방향이 반대.
+   ============================================================ */
+
+var canvas = document.getElementById('stage');
+var ctx = canvas.getContext('2d');
+var wrap = document.getElementById('stage-wrap');
+var RM = false;
+try { RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch(e){}
+
+var R_CIRCUIT = 100;   // 회로 저항 : I = ε / R
+var EMF_BRIGHT = 480;  // 이 정도 |ε|면 전구 최대 밝기
+var I_REF = 5;         // 검류계 최대 눈금 전류
+var MAG_W = 92, MAG_H = 30, SPREAD = 55;
+
+var state = {
+  N: 60, Lpx: 120,
+  strong: true,
+  polarity: 1,        // +1: N극이 +x(오른쪽)
+  device: 'bulb', ledDir: 1,
+  mode: 'magnet',
+  auto: false, paused: false, slow: false, showField: true, showIndB: true,
+  spdF: 1,            // 자동 왕복 속도 배율 (실제 운동 속도 → 유도 효과에 영향)
+  xM: 150, xC: 420,
+  vM: 0, vC: 0,
+  lambda: 0, prevLambda: 0,
+  emfS: 0, dLam: 0,
+  I: 0,               // 실제 회로 전류 (LED 역방향이면 0)
+  bulbGlow: 0, ledGlow: 0, needle: 0,
+  dotPhase: 0, autoT: 0, autoRef: null
+};
+var W = 600, H = 320, skipEmf = true, inited = false;
+var keys = {};
+var pointers = {};
+
+function B0(){ return state.strong ? 2.2 : 1.0; }
+function geom(){
+  var Rc = Math.min(52, H*0.16);
+  var coilY = H*0.56;
+  return { coilY: coilY, Rc: Rc, devY: coilY - Rc - 62 };
+}
+
+/* ================= 물리 모델 ================= */
+
+/* 자석 중심에서 거리 d인 지점의 축방향 자기장 (단순화 쌍극자형) */
+function magB(d){
+  var u = d / SPREAD;
+  return state.polarity * B0() / Math.pow(1 + u*u, 1.5);
+}
+
+/* 자속 결합량 lambda:
+   단위길이당 감은수 n = N/L (촘촘함),
+   lambda ≈ n × ∫ B(x − xMagnet) dx  (코일 구간 수치적분) */
+function lambdaAt(xMagnet){
+  var n = state.N / state.Lpx;
+  var M = 24;
+  var x0 = state.xC - state.Lpx/2;
+  var dx = state.Lpx / M;
+  var sum = 0;
+  for (var i = 0; i <= M; i++) sum += magB(x0 + i*dx - xMagnet);
+  return n * sum * dx;
+}
+function computeLambda(){ return lambdaAt(state.xM); }
+
+/* ---------- 자동 왕복 ---------- */
+var OMEGA = RM ? 0.9 : 1.7;
+function startAuto(){
+  var target, start, amp = RM ? 55 : 75;
+  state.autoT = 0;
+  if (state.mode === 'magnet'){
+    start = state.xM; target = state.xC;
+    if (Math.abs(target - start) < 80) start = target - 190;
+    state.autoRef = { kind:'m', mid:(start+target)/2, amp:(target-start)/2 };
+  } else if (state.mode === 'coil'){
+    start = state.xC; target = state.xM;
+    if (Math.abs(target - start) < 80) start = target + 190;
+    state.autoRef = { kind:'c', mid:(start+target)/2, amp:(target-start)/2 };
+  } else if (state.mode === 'both'){
+    state.autoRef = { kind:'b', xM0: state.xM, xC0: state.xC, amp: amp };
+  } else {
+    state.autoRef = { kind:'o', xM0: state.xM, xC0: state.xC, amp: amp };
+  }
+  state.auto = true;
+  setPaused(false);
+  syncAutoBtn();
+}
+function stopAuto(){ state.auto = false; syncAutoBtn(); }
+function applyAuto(){
+  var r = state.autoRef; if (!r) return;
+  var t = state.autoT;
+  if (r.kind === 'm'){
+    state.xM = r.mid - r.amp * Math.cos(OMEGA * state.spdF * t);
+  } else if (r.kind === 'c'){
+    state.xC = r.mid - r.amp * Math.cos(OMEGA * state.spdF * t);
+  } else if (r.kind === 'b'){
+    /* 같은 방향·같은 속도 → 상대속도 0 → 유도 전류 없음 */
+    var d = r.amp * Math.sin(OMEGA * state.spdF * t);
+    state.xM = r.xM0 + d; state.xC = r.xC0 + d;
+  } else if (r.kind === 'o'){
+    /* 반대 방향 → 상대속도 2배 → 유도 효과 커짐 */
+    var d2 = r.amp * Math.sin(OMEGA * state.spdF * t);
+    state.xM = r.xM0 + d2; state.xC = r.xC0 - d2;
+  }
+}
+function clampPositions(){
+  var m = 40;
+  state.xM = Math.max(m, Math.min(W - m, state.xM));
+  state.xC = Math.max(m + 30, Math.min(W - m - 30, state.xC));
+}
+
+/* ============ 프레임 업데이트 (dt = 시뮬레이션 시간) ============ */
+function update(dt){
+  if (state.prevXM === undefined) { state.prevXM = state.xM; state.prevXC = state.xC; }
+  var xMp = state.prevXM, xCp = state.prevXC;
+
+  var fast = keys['ShiftLeft'] || keys['ShiftRight'];
+  var sp = fast ? 430 : 170;
+  var kb = false;
+  /* 방향키 = 코일(오른쪽 물체), A/D = 자석(왼쪽 물체) */
+  if (keys['ArrowLeft'])  { state.xC -= sp*dt; kb = true; }
+  if (keys['ArrowRight']) { state.xC += sp*dt; kb = true; }
+  if (keys['KeyA'])       { state.xM -= sp*dt; kb = true; }
+  if (keys['KeyD'])       { state.xM += sp*dt; kb = true; }
+  if (kb && state.auto) stopAuto();
+
+  if (state.auto){ state.autoT += dt; applyAuto(); }
+  clampPositions();
+
+  /* 속도: 마우스(프레임 간) + 키보드/자동(프레임 내) 모든 변위를 합산 */
+  var a = Math.min(1, dt*12);
+  state.vM += ((state.xM - xMp)/dt - state.vM) * a;
+  state.vC += ((state.xC - xCp)/dt - state.vC) * a;
+  state.prevXM = state.xM;
+  state.prevXC = state.xC;
+
+  /* 패러데이 법칙 (해석적 유도): ε = -dΦ/dt 
+     코일 양 끝단에서의 자기장 세기 차이와 상대 속도로 즉각적이고 정확한 기전력 계산
+     (수치 적분과 스무딩으로 인한 중심점 통과 시의 위상 지연 완벽 해결) */
+  var xR = state.xC + state.Lpx/2 - state.xM;
+  var xL = state.xC - state.Lpx/2 - state.xM;
+  var BR = magB(xR);
+  var BL = magB(xL);
+  var n = state.N / state.Lpx;
+  var vRel = state.vM - state.vC;
+  
+  var emf = vRel * n * (BR - BL);
+  if (skipEmf) emf = 0;
+  skipEmf = false;
+  state.emfS = emf; // 스무딩 제거, 물리적으로 완벽히 즉각 반응
+  state.dLam = -state.emfS;
+  state.lambda = computeLambda();
+  state.prevLambda = state.lambda;
+
+  /* 전류 방향: I = ε/R (부호 = 방향)
+     LED 연결 시 이상적 다이오드 → 역방향이면 회로 전류 완전 차단 */
+  var Iraw = state.emfS / R_CIRCUIT;
+  if (state.device === 'led' && Iraw * state.ledDir < 0) state.I = 0;
+  else state.I = Iraw;
+
+  /* 장치 반응: 전구 P∝I²+잔광 / LED 순방향만 / 검류계 방향+세기 */
+  var p = Math.min(1, Math.pow(Math.abs(state.I) * R_CIRCUIT / EMF_BRIGHT, 2));
+  var rate = (p > state.bulbGlow) ? 14 : 3.2;
+  state.bulbGlow += (p - state.bulbGlow) * Math.min(1, dt*rate);
+  var rateL = (p > state.ledGlow) ? 22 : 12;
+  state.ledGlow += (p - state.ledGlow) * Math.min(1, dt*rateL);
+  /* 검류계 바늘 극성: 화면의 회로에서 전류가 '시계 방향'으로 돌 때
+     바늘이 오른쪽(+)으로 가도록 배선 (직관적으로 보이게 한 약속) */
+  var nT = Math.max(-1, Math.min(1, -state.I / I_REF));
+  state.needle += (nT - state.needle) * Math.min(1, dt*10);
+
+  /* 전류 화살표 이동 (I에 비례, 부호에 따라 반대로 흐름) */
+  state.dotPhase += state.I * R_CIRCUIT * 0.2 * dt;
+}
+
+/* ================= 그리기 ================= */
+function rr(x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.arcTo(x+w, y, x+w, y+h, r);
+  ctx.arcTo(x+w, y+h, x, y+h, r);
+  ctx.arcTo(x, y+h, x, y, r);
+  ctx.arcTo(x, y, x+w, y, r);
+  ctx.closePath();
+}
+function arrowHead(x, y, ang, size, col){
+  ctx.fillStyle = col;
+  ctx.beginPath();
+  ctx.moveTo(x + size*Math.cos(ang), y + size*Math.sin(ang));
+  ctx.lineTo(x + size*Math.cos(ang + 2.5), y + size*Math.sin(ang + 2.5));
+  ctx.lineTo(x + size*Math.cos(ang - 2.5), y + size*Math.sin(ang - 2.5));
+  ctx.closePath(); ctx.fill();
+}
+function arrowLine(x1, y1, x2, y2, size, col, lw){
+  ctx.strokeStyle = col; ctx.lineWidth = lw || 2;
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  arrowHead(x2, y2, Math.atan2(y2-y1, x2-x1), size, col);
+}
+/* 전류용 굵은 화살표 (흰 테두리로 또렷하게) */
+function boldArrow(x, y, ang, size){
+  ctx.save();
+  ctx.translate(x, y); ctx.rotate(ang);
+  ctx.beginPath();
+  ctx.moveTo(size, 0);
+  ctx.lineTo(-size*0.75, size*0.66);
+  ctx.lineTo(-size*0.35, 0);
+  ctx.lineTo(-size*0.75, -size*0.66);
+  ctx.closePath();
+  ctx.fillStyle = '#0891b2';
+  ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.4;
+  ctx.fill(); ctx.stroke();
+  ctx.restore();
+}
+
+function drawBackground(){
+  var grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, '#fdfeff');
+  grad.addColorStop(1, '#e9f0f9');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+}
+function drawAxis(g){
+  ctx.save();
+  ctx.strokeStyle = 'rgba(100,116,139,0.3)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([5, 6]);
+  ctx.beginPath(); ctx.moveTo(0, g.coilY); ctx.lineTo(W, g.coilY); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.restore();
+}
+
+/* ---------- 자기력선 (쌍극자 모델 수치적분) ----------
+   N극을 샘(source), S극을 싱크(sink)로 두고, 각 점에서의 실제
+   자기장 방향 B̂ = (r−rN)/|r−rN|³ − (r−rS)/|r−rS|³ 를 따라가며
+   자기력선을 적분해 그린다. → 교과서 그림과 같은 모양:
+   N극에서 사방으로 퍼져나가고, 휘어져 돌아 S극으로 수렴한다. */
+function fieldDir(x, y, pN, pS){
+  var dxn = x - pN[0], dyn = y - pN[1];
+  var dxs = x - pS[0], dys = y - pS[1];
+  var rn2 = dxn*dxn + dyn*dyn + 1e-6;
+  var rs2 = dxs*dxs + dys*dys + 1e-6;
+  var rn = Math.sqrt(rn2), rs = Math.sqrt(rs2);
+  var bx = dxn/(rn*rn2) - dxs/(rs*rs2);   // N에서 나가고 S로 들어감
+  var by = dyn/(rn*rn2) - dys/(rs*rs2);
+  var m = Math.hypot(bx, by) + 1e-12;
+  return [bx/m, by/m];
+}
+function drawFieldLines(g){
+  if (!state.showField) return;
+  var pol = state.polarity, cy = g.coilY;
+  // 실제 자석의 양극은 끝에서 살짝 안쪽에 위치한다고 모델링 (effective poles)
+  // 선들이 떡지지(면처럼 보이지) 않도록 끝단에서 살짝만 안쪽으로 여유를 줌
+  var effW = MAG_W * 0.88; 
+  var pN = [state.xM + pol*effW/2, cy];   // N극
+  var pS = [state.xM - pol*effW/2, cy];   // S극
+  var strong = state.strong;
+  // 극에서 출발하는 각도(그 극의 바깥 축 기준, 도 단위)
+  var angles = strong
+    ? [0, 16, 32, 48, 65, 86, 104, 120, -16, -32, -48, -65, -86, -104, -120] 
+    : [0, 35, 95, 125, -35, -95, -125]; 
+  // 떡짐 방지를 위해 투명도와 선 굵기 조절
+  var alpha = strong ? 0.48 : 0.35;
+  var col = 'rgba(34,139,79,' + alpha + ')';
+  var mx0 = state.xM - MAG_W/2 - 2, mx1 = state.xM + MAG_W/2 + 2;
+  var my0 = cy - MAG_H/2 - 2, my1 = cy + MAG_H/2 + 2;
+  
+  ctx.save();
+  ctx.strokeStyle = col; ctx.lineWidth = 0.9;
+  /* 두 극 모두에서 자기력선을 추적한다:
+     side 0 = N극에서 자기장 방향(순방향)으로 추적 → N의 방사형 팬 + 연결 곡선
+     side 1 = S극에서 역방향으로 추적 → S로 들어오는 방사형 팬
+     (S에서 추적한 선이 N에 도달하면 N쪽과 중복이므로 그리지 않는다) */
+  for (var side = 0; side < 2; side++){
+    var fromN = (side === 0);
+    var P0 = fromN ? pN : pS;
+    var tgt = fromN ? pS : pN;
+    var sgn = fromN ? 1 : -1;                       // 역방향 추적 부호
+    var baseAng = fromN ? (pol > 0 ? 0 : Math.PI) : (pol > 0 ? Math.PI : 0);
+    for (var ai = 0; ai < angles.length; ai++){
+      var a = baseAng + angles[ai]*Math.PI/180;
+      var x = P0[0] + Math.cos(a)*4;
+      var y = P0[1] + Math.sin(a)*4;
+      var pts = [[x, y]];
+      var reachedOther = false;
+      for (var i2 = 0; i2 < 350; i2++){
+        var d = fieldDir(x, y, pN, pS);
+        x += sgn*d[0]*4; y += sgn*d[1]*4; // step size 4 for smoother curves
+        pts.push([x, y]);
+        if (Math.hypot(x - tgt[0], y - tgt[1]) < 8){ reachedOther = true; break; }
+        
+        // 화면을 크게 벗어나면 종료
+        if (x < -50 || x > W+50 || y < -50 || y > H+50) break;
+        
+        // 가로 방향은 그림처럼 일정 선에서 잘라내고, 세로는 인위적으로 끊지 않아 루프가 무조건 닫히게 함
+        var limitX = strong ? MAG_W * 2.4 : MAG_W * 1.4; // 약한 자석의 뻗어나가는 선 길이가 강한 자석보다 명확히 짧아보이도록 한계 축소
+        var limitY = 1000; 
+        if (Math.abs(x - state.xM) > limitX || Math.abs(y - cy) > limitY) break;
+      }
+      if (!fromN && reachedOther) continue;   // 중복 곡선 생략
+      ctx.beginPath();
+      ctx.moveTo(pts[0][0], pts[0][1]);
+      for (var j = 1; j < pts.length; j++) ctx.lineTo(pts[j][0], pts[j][1]);
+      ctx.stroke();
+      
+      // 화살표 그리기 (자석 바깥에 있는 부분에만, 그림처럼 선당 1개씩 깔끔하게)
+      var outIndices = [];
+      for(var j=1; j<pts.length; j++){
+         var px = pts[j][0], py = pts[j][1];
+         if (!(px > mx0 && px < mx1 && py > my0 && py < my1)) {
+            outIndices.push(j);
+         }
+      }
+      if (outIndices.length > 8) {
+         var marks = [ outIndices[Math.floor(outIndices.length*0.5)] ];
+         for (var q = 0; q < marks.length; q++){
+           var idx = marks[q];
+           if(idx === undefined) continue;
+           var P = pts[idx], Q = pts[idx-1];
+           var ang2 = Math.atan2(sgn*(P[1]-Q[1]), sgn*(P[0]-Q[0]));
+           arrowHead(P[0], P[1], ang2, 5, col);
+         }
+      }
+    }
+  }
+  ctx.restore();
+}
+
+function drawMagnet(g){
+  var x = state.xM - MAG_W/2, y = g.coilY - MAG_H/2;
+  var nRight = state.polarity > 0;
+  ctx.save();
+  ctx.shadowColor = 'rgba(30,41,59,0.25)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 2;
+  rr(x, y, MAG_W, MAG_H, 5);
+  ctx.fillStyle = '#334155'; ctx.fill();
+  ctx.shadowColor = 'transparent';
+  ctx.save();
+  rr(x, y, MAG_W, MAG_H, 5); ctx.clip();
+  ctx.fillStyle = nRight ? '#3b6fe0' : '#e04444';
+  ctx.fillRect(x, y, MAG_W/2, MAG_H);
+  ctx.fillStyle = nRight ? '#e04444' : '#3b6fe0';
+  ctx.fillRect(x + MAG_W/2, y, MAG_W/2, MAG_H);
+  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.fillRect(x, y, MAG_W, MAG_H*0.32);
+  ctx.restore();
+  rr(x, y, MAG_W, MAG_H, 5);
+  ctx.strokeStyle = '#334155'; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.fillStyle = '#fff';
+  ctx.font = '700 14px sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(nRight ? 'S' : 'N', x + MAG_W/4, g.coilY + 0.5);
+  ctx.fillText(nRight ? 'N' : 'S', x + 3*MAG_W/4, g.coilY + 0.5);
+  ctx.restore();
+}
+
+function coilTurns(){
+  // 대표 감김 수: N에 비례(상한). 간격 = L/감김수 → N/L이 시각적 밀도로.
+  return Math.max(5, Math.min(60, Math.round(state.N/3)));
+}
+function coilPitch(){ return state.Lpx / coilTurns(); }
+
+/* 코일 나선: 앞면 도선 위→아래(↘, 진하게), 뒷면 아래→위(연하게) */
+function drawCoilBack(g){
+  var T = coilTurns(), p = coilPitch();
+  var xl = state.xC - state.Lpx/2;
+  var top = g.coilY - g.Rc, bot = g.coilY + g.Rc;
+  ctx.save();
+  ctx.strokeStyle = 'rgba(180,83,9,0.3)'; ctx.lineWidth = 2;
+  for (var i = 0; i < T; i++){
+    var x0 = xl + i*p;
+    ctx.beginPath();
+    ctx.moveTo(x0 + p/2, bot);
+    ctx.quadraticCurveTo(x0 + p*0.78, g.coilY, x0 + p, top);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+function drawCoilFront(g){
+  var T = coilTurns(), p = coilPitch();
+  var xl = state.xC - state.Lpx/2, xr = state.xC + state.Lpx/2;
+  var top = g.coilY - g.Rc, bot = g.coilY + g.Rc;
+  ctx.save();
+  ctx.strokeStyle = 'rgba(148,163,184,0.3)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(xl-6, top); ctx.lineTo(xr+6, top); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(xl-6, bot); ctx.lineTo(xr+6, bot); ctx.stroke();
+  ctx.strokeStyle = '#b45309'; ctx.lineWidth = 2.6; ctx.lineCap = 'round';
+  for (var i = 0; i < T; i++){
+    var x0 = xl + i*p;
+    ctx.beginPath();
+    ctx.moveTo(x0, top);
+    ctx.quadraticCurveTo(x0 + p*0.28, g.coilY, x0 + p/2, bot);
+    ctx.stroke();
+  }
+  ctx.fillStyle = '#94a3b8'; ctx.font = '11px sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  ctx.fillText('코일', xl - 2, bot + 6);
+  ctx.restore();
+}
+
+/* ---------- 코일 앞면 전류 화살표 (크고 또렷하게) ----------
+   +전류: 앞면 도선 ↘ / −전류: ↖. 전류 0이면 없음. */
+function drawCoilCurrentArrows(g){
+  var ii = state.I * R_CIRCUIT;
+  // 미세한 유도 전류도 표시하여 멀리서 움직일 때 자속 변화가 없다는 오개념 방지
+  var alpha = Math.min(1, Math.abs(ii)/60);
+  if (alpha < 0.05) return;
+  var size = 9 + Math.min(1, Math.abs(ii)/500)*4;
+  var T = coilTurns(), p = coilPitch();
+  var xl = state.xC - state.Lpx/2;
+  var top = g.coilY - g.Rc, bot = g.coilY + g.Rc;
+  var step = Math.max(1, Math.round(T/7));
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  for (var i = 0; i < T; i += step){
+    var x0 = xl + i*p;
+    var ang = Math.atan2(bot - top, p/2);   // ↘ (+전류)
+    if (ii < 0) ang += Math.PI;              // ↖ (−전류)
+    boldArrow(x0 + p*0.27, g.coilY, ang, size);
+  }
+  ctx.restore();
+}
+
+/* ---------- 코일이 만드는 유도 자기장 (렌츠 법칙, 토글 가능) ----------
+   솔레노이드 내부의 자기장은 축 방향으로 거의 균일하므로,
+   코일 '내부'에만 화살표를 그려 바깥 자기력선과 혼동되지 않게 한다.
+   +전류 → 내부 +x 방향 / −전류 → 내부 −x 방향 (오른손 법칙) */
+function drawInducedB(g){
+  if (!state.showIndB) return;
+  var ii = state.I * R_CIRCUIT;
+  if (Math.abs(ii) < 30) return;
+  var dir = ii > 0 ? 1 : -1;
+  var half = Math.min(state.Lpx/2 - 10, 44);
+  ctx.save();
+  ctx.globalAlpha = Math.min(0.9, Math.abs(ii)/220);
+  // 코일 보어 안쪽, 자석을 가리지 않도록 축 위/아래에 두 줄
+  for (var s = -1; s <= 1; s += 2){
+    var y = g.coilY + s * g.Rc * 0.55;
+    arrowLine(state.xC - dir*half, y, state.xC + dir*half, y, 7, '#7c3aed', 2.5);
+  }
+  ctx.fillStyle = '#7c3aed'; ctx.font = '700 10.5px sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  ctx.fillText('코일 내부 유도 자기장', state.xC, g.coilY + g.Rc + 8);
+  ctx.restore();
+}
+
+/* ---------- 외부 회로 ----------
+   +전류: 코일 오른쪽 단자 → 장치(오른쪽→왼쪽) → 왼쪽 단자.
+   (나선 감김 방향과 기하학적으로 일치) */
+function wirePaths(g){
+  var xl = state.xC - state.Lpx/2, xr = state.xC + state.Lpx/2;
+  var topY = g.coilY - g.Rc, dy = g.devY;
+  return {
+    A: [[xr, topY], [xr, dy], [state.xC + 38, dy]],
+    B: [[state.xC - 38, dy], [xl, dy], [xl, topY]]
+  };
+}
+function drawPolyline(pts){
+  ctx.beginPath();
+  ctx.moveTo(pts[0][0], pts[0][1]);
+  for (var i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+  ctx.stroke();
+}
+function polyLen(pts){
+  var L = 0;
+  for (var i = 1; i < pts.length; i++)
+    L += Math.hypot(pts[i][0]-pts[i-1][0], pts[i][1]-pts[i-1][1]);
+  return L;
+}
+function pointAt(pts, d){
+  for (var i = 1; i < pts.length; i++){
+    var seg = Math.hypot(pts[i][0]-pts[i-1][0], pts[i][1]-pts[i-1][1]);
+    if (d <= seg || i === pts.length-1){
+      var t = seg ? Math.max(0, Math.min(1, d/seg)) : 0;
+      return [pts[i-1][0] + (pts[i][0]-pts[i-1][0])*t,
+              pts[i-1][1] + (pts[i][1]-pts[i-1][1])*t];
+    }
+    d -= seg;
+  }
+  return pts[pts.length-1];
+}
+/* ---------- 전선 위 전류 화살표 (동그라미 대신 방향 화살표) ----------
+   +I: A→B 순방향으로 흐르며 화살표도 진행 방향을 가리킨다.
+   −I: 반대로 흐르고 화살표도 반대를 가리킨다. */
+function drawCurrentFlow(wp){
+  var ii = state.I * R_CIRCUIT;
+  if (Math.abs(ii) < 2) return; // 오개념 방지를 위해 미세한 전류도 화살표가 흐르도록 임계값 낮춤
+  var lenA = polyLen(wp.A), lenB = polyLen(wp.B);
+  var total = lenA + lenB;
+  var spacing = 34;
+  var off = ((state.dotPhase % spacing) + spacing) % spacing;
+  var size = 7 + Math.min(1, Math.abs(ii)/500)*3;
+  var sgn = ii >= 0 ? 1 : -1;
+  // 전류가 흐르는 전선을 살짝 강조
+  ctx.save();
+  ctx.strokeStyle = 'rgba(8,145,178,' + Math.min(0.5, Math.abs(ii)/600).toFixed(3) + ')';
+  ctx.lineWidth = 4.5;
+  drawPolyline(wp.A); drawPolyline(wp.B);
+  ctx.restore();
+  for (var d = off; d < total; d += spacing){
+    var p  = (d < lenA) ? pointAt(wp.A, d) : pointAt(wp.B, d - lenA);
+    var d2 = Math.min(total - 0.5, d + 2);
+    var p2 = (d2 < lenA) ? pointAt(wp.A, d2) : pointAt(wp.B, d2 - lenA);
+    var ang = Math.atan2(p2[1]-p[1], p2[0]-p[0]);
+    if (sgn < 0) ang += Math.PI;
+    boldArrow(p[0], p[1], ang, size);
+  }
+}
+
+function drawDevice(g){
+  var wp = wirePaths(g);
+  var dy = g.devY, xC = state.xC;
+  ctx.save();
+  ctx.strokeStyle = '#475569'; ctx.lineWidth = 2.4;
+  drawPolyline(wp.A); drawPolyline(wp.B);
+
+  var name = '';
+  if (state.device === 'galvo'){
+    name = '검류계';
+    var gw = 84, gh = 54;
+    ctx.shadowColor = 'rgba(30,41,59,0.2)'; ctx.shadowBlur = 5; ctx.shadowOffsetY = 2;
+    rr(xC - gw/2, dy - gh/2, gw, gh, 8);
+    ctx.fillStyle = '#ffffff'; ctx.fill();
+    ctx.shadowColor = 'transparent';
+    ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.5; ctx.stroke();
+    var px = xC, py = dy + gh/2 - 12;
+    ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1;
+    for (var k = -2; k <= 2; k++){
+      var a1 = k * 0.44;
+      ctx.beginPath();
+      ctx.moveTo(px + Math.sin(a1)*30, py - Math.cos(a1)*30);
+      ctx.lineTo(px + Math.sin(a1)*35, py - Math.cos(a1)*35);
+      ctx.stroke();
+    }
+    ctx.fillStyle = '#64748b'; ctx.font = '700 10px sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('−', px - 30, py - 24);
+    ctx.fillText('0', px, py - 40);
+    ctx.fillText('+', px + 30, py - 24);
+    var na = state.needle * 0.88;   // 전류 부호 = 바늘 방향
+    ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(px, py);
+    ctx.lineTo(px + Math.sin(na)*33, py - Math.cos(na)*33);
+    ctx.stroke();
+    ctx.fillStyle = '#334155';
+    ctx.beginPath(); ctx.arc(px, py, 3, 0, Math.PI*2); ctx.fill();
+  }
+  else {
+    ctx.shadowColor = 'rgba(30,41,59,0.2)'; ctx.shadowBlur = 5; ctx.shadowOffsetY = 2;
+    rr(xC - 38, dy - 26, 76, 52, 9);
+    ctx.fillStyle = '#ffffff'; ctx.fill();
+    ctx.shadowColor = 'transparent';
+    ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.5; ctx.stroke();
+
+    if (state.device === 'bulb'){
+      name = '전구';
+      var gl = state.bulbGlow;
+      if (gl > 0.02){
+        var grad = ctx.createRadialGradient(xC, dy, 2, xC, dy, 30 + 26*gl);
+        grad.addColorStop(0, 'rgba(255,200,60,' + (0.95*gl).toFixed(3) + ')');
+        grad.addColorStop(1, 'rgba(255,200,60,0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath(); ctx.arc(xC, dy, 30 + 26*gl, 0, Math.PI*2); ctx.fill();
+      }
+      ctx.beginPath(); ctx.arc(xC, dy - 4, 13, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(255,215,110,' + (0.1 + 0.85*gl).toFixed(3) + ')';
+      ctx.fill();
+      ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.strokeStyle = 'rgba(200,110,20,' + (0.5 + 0.5*gl).toFixed(3) + ')';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(xC - 6, dy - 1); ctx.lineTo(xC - 2, dy - 8);
+      ctx.lineTo(xC + 2, dy - 1); ctx.lineTo(xC + 6, dy - 8);
+      ctx.stroke();
+      ctx.fillStyle = '#94a3b8'; ctx.fillRect(xC - 5, dy + 9, 10, 6);
+    }
+    else {
+      name = 'LED';
+      var gl2 = state.ledGlow;
+      if (gl2 > 0.02){
+        var grad2 = ctx.createRadialGradient(xC, dy, 2, xC, dy, 26 + 22*gl2);
+        grad2.addColorStop(0, 'rgba(255,70,70,' + (0.9*gl2).toFixed(3) + ')');
+        grad2.addColorStop(1, 'rgba(255,70,70,0)');
+        ctx.fillStyle = grad2;
+        ctx.beginPath(); ctx.arc(xC, dy, 26 + 22*gl2, 0, Math.PI*2); ctx.fill();
+      }
+      /* 다이오드 기호: 삼각형 방향 = 전류가 통과할 수 있는 방향.
+         ledDir=+1 → +전류(장치를 오른쪽→왼쪽 통과)만 → 삼각형 왼쪽 향함 */
+      var dd = -state.ledDir;
+      ctx.fillStyle = gl2 > 0.15 ? '#ef4444' : '#475569';
+      ctx.strokeStyle = '#475569'; ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(xC - 10*dd, dy - 10);
+      ctx.lineTo(xC - 10*dd, dy + 10);
+      ctx.lineTo(xC + 9*dd, dy);
+      ctx.closePath(); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(xC + 10*dd, dy - 11); ctx.lineTo(xC + 10*dd, dy + 11);
+      ctx.stroke();
+      if (gl2 > 0.15){
+        ctx.strokeStyle = 'rgba(239,68,68,' + gl2.toFixed(3) + ')';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(xC + 4, dy - 14); ctx.lineTo(xC + 11, dy - 21); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(xC + 10, dy - 10); ctx.lineTo(xC + 17, dy - 17); ctx.stroke();
+      }
+    }
+  }
+  ctx.fillStyle = '#64748b'; ctx.font = '11px sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  ctx.fillText(name, xC, dy + 30);
+  ctx.restore();
+}
+
+/* 속도 화살표 (드래그·키보드·자동 동일하게 표시) */
+function drawVelocities(g){
+  ctx.save();
+  ctx.font = '11px sans-serif'; ctx.textBaseline = 'middle';
+  var y1 = g.coilY + g.Rc + 40, y2 = g.coilY + g.Rc + 57;
+  if (Math.abs(state.vM) > 6){
+    var l1 = Math.max(-70, Math.min(70, state.vM * 0.22));
+    arrowLine(state.xM, y1, state.xM + l1, y1, 7, '#db2777', 2.5);
+    ctx.fillStyle = '#db2777'; ctx.textAlign = state.vM > 0 ? 'right' : 'left';
+    ctx.fillText('자석 v', state.xM - Math.sign(state.vM)*8, y1);
+  }
+  if (Math.abs(state.vC) > 6){
+    var l2 = Math.max(-70, Math.min(70, state.vC * 0.22));
+    arrowLine(state.xC, y2, state.xC + l2, y2, 7, '#65a30d', 2.5);
+    ctx.fillStyle = '#65a30d'; ctx.textAlign = state.vC > 0 ? 'right' : 'left';
+    ctx.fillText('코일 v', state.xC - Math.sign(state.vC)*8, y2);
+  }
+  ctx.restore();
+}
+
+function render(){
+  drawBackground();
+  var g = geom();
+  drawAxis(g);
+  drawFieldLines(g);
+  drawCoilBack(g);
+  drawMagnet(g);
+  drawCoilFront(g);
+  drawDevice(g);
+  drawCurrentFlow(wirePaths(g));
+  drawCoilCurrentArrows(g);
+  drawInducedB(g);
+  drawVelocities(g);
+
+  // 좌상단 상태 표시
+  var ii = state.I * R_CIRCUIT;
+  ctx.font = '700 12.5px sans-serif';
+  ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+  if (state.device === 'led' && state.I === 0 && Math.abs(state.emfS) > 5){
+    ctx.fillStyle = '#dc2626';
+    ctx.fillText('LED 역방향 → 전류 차단 (I = 0)', 12, 12);
+  } else if (Math.abs(ii) >= 1){
+    ctx.fillStyle = '#0891b2';
+    ctx.fillText(ii > 0 ? '유도 전류: ＋ (반시계 방향)' : '유도 전류: − (시계 방향)', 12, 12);
+  } else {
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText('유도 전류 없음', 12, 12);
+  }
+
+  ctx.textAlign = 'right';
+  var by = 50; // 우측 상단 플로팅 버튼과 겹치지 않도록 아래로 이동
+  if (state.paused){
+    ctx.fillStyle = '#0284c7';
+    ctx.fillText('📸 순간 포착됨 — 찰나의 전류 방향을 관찰하세요 (Space로 재생)', W - 12, by);
+  }
+}
+
+/* ================= UI ================= */
+var $ = function(id){ return document.getElementById(id); };
+function updateCoilLabels(){
+  $('nVal').textContent = state.N;
+  $('lVal').textContent = (state.Lpx/10).toFixed(1);
+  var npc = state.N / (state.Lpx/10);
+  $('nPerCm').textContent = npc.toFixed(1);
+  var dl = $('densLabel');
+  if (npc >= 8){ dl.textContent = '촘촘한 코일'; dl.className = 'badge dense'; }
+  else if (npc <= 4){ dl.textContent = '성근 코일'; dl.className = 'badge sparse'; }
+  else { dl.textContent = '보통 코일'; dl.className = 'badge'; }
+}
+
+/* ---------- 입력 (Pointer Events: 마우스+터치) ---------- */
+function canvasPos(e){
+  var r = canvas.getBoundingClientRect();
+  return { x: e.clientX - r.left, y: e.clientY - r.top };
+}
+function hitTest(p){
+  var g = geom();
+  if (Math.abs(p.x - state.xM) < MAG_W/2 + 18 && Math.abs(p.y - g.coilY) < MAG_H/2 + 22) return 'magnet';
+  if (Math.abs(p.x - state.xC) < state.Lpx/2 + 22 && Math.abs(p.y - g.coilY) < g.Rc + 18) return 'coil';
+  return null;
+}
+canvas.addEventListener('pointerdown', function(e){
+  var p = canvasPos(e);
+  var t = hitTest(p);
+  if (!t) return;
+  for (var id in pointers){
+    if (pointers[id].target === t){
+      t = (t === 'magnet') ? 'coil' : 'magnet';
+      var ok = (t === 'magnet')
+        ? Math.abs(p.x - state.xM) < MAG_W/2 + 40
+        : Math.abs(p.x - state.xC) < state.Lpx/2 + 40;
+      if (!ok) return;
+    }
+  }
+  if (state.auto) stopAuto();
+  var cx = (t === 'magnet') ? state.xM : state.xC;
+  pointers[e.pointerId] = { target: t, off: cx - p.x };
+  try { canvas.setPointerCapture(e.pointerId); } catch(err){}
+  e.preventDefault();
+});
+canvas.addEventListener('pointermove', function(e){
+  var pt = pointers[e.pointerId];
+  if (!pt) return;
+  var p = canvasPos(e);
+  if (pt.target === 'magnet') state.xM = p.x + pt.off;
+  else state.xC = p.x + pt.off;
+  clampPositions();
+  e.preventDefault();
+});
+function endPointer(e){
+  if (pointers[e.pointerId]) delete pointers[e.pointerId];
+}
+canvas.addEventListener('pointerup', endPointer);
+canvas.addEventListener('pointercancel', endPointer);
+
+window.addEventListener('keydown', function(e){
+  var tag = (e.target && e.target.tagName) || '';
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'BUTTON' || tag === 'SUMMARY') return;
+  keys[e.code] = true;
+  if (e.code === 'Space'){ setPaused(!state.paused); e.preventDefault(); }
+  else if (e.code === 'KeyR'){ reset(); }
+  else if (e.code === 'KeyF'){ flipMagnet(); }
+  if (e.code.indexOf('Arrow') === 0) e.preventDefault();
+});
+window.addEventListener('keyup', function(e){ keys[e.code] = false; });
+window.addEventListener('blur', function(){ keys = {}; });
+
+function setPaused(v){
+  /* 일시정지: 그 순간의 전류 방향·화살표·바늘·밝기가 그대로 유지 */
+  state.paused = v;
+  if (!v) skipEmf = true;
+  $('pauseBtn').textContent = v ? '▶ 다시 재생' : '📸 순간 포착';
+}
+function syncAutoBtn(){
+  $('autoBtn').textContent = state.auto ? '⏹ 왕복 멈춤' : '▶ 자동 왕복';
+}
+function flipMagnet(){
+  state.polarity *= -1;
+  skipEmf = true;
+  state.prevLambda = computeLambda();
+}
+function reset(){
+  stopAuto();
+  setPaused(false);
+  state.xM = W * 0.20; state.xC = W * 0.62;
+  state.vM = 0; state.vC = 0;
+  state.emfS = 0; state.dLam = 0; state.I = 0;
+  state.bulbGlow = 0; state.ledGlow = 0; state.needle = 0;
+  skipEmf = true;
+  state.prevLambda = computeLambda();
+}
+$('nRange').addEventListener('input', function(){
+  state.N = +this.value; updateCoilLabels(); skipEmf = true;
+  state.prevLambda = computeLambda();
+});
+$('lRange').addEventListener('input', function(){
+  state.Lpx = +this.value; clampPositions(); updateCoilLabels(); skipEmf = true;
+  state.prevLambda = computeLambda();
+});
+function bindRadios(name, fn){
+  var els = document.querySelectorAll('input[name="' + name + '"]');
+  for (var i = 0; i < els.length; i++){
+    els[i].addEventListener('change', function(){ fn(this.value); });
+  }
+}
+bindRadios('str', function(v){ state.strong = (v === 'strong'); skipEmf = true; state.prevLambda = computeLambda(); });
+bindRadios('dev', function(v){
+  state.device = v;
+  $('ledFlipBtn').disabled = (v !== 'led');
+  var note = $('devNote');
+  if (v === 'bulb') note.textContent = '전구는 전류의 방향과 무관하게, 전류가 클수록 밝게 빛납니다.';
+  else if (v === 'led') note.textContent = 'LED는 순방향 전류만 통과시킵니다. 역방향이면 회로에 전류가 흐르지 않습니다.';
+  else note.textContent = '검류계는 전류의 방향(+/−)과 세기를 바늘로 보여줍니다.';
+});
+bindRadios('mode', function(v){ state.mode = v; });
+bindRadios('spd', function(v){
+  var f = (v === 'slow') ? 0.55 : (v === 'fast') ? 1.9 : 1;
+  /* 위상 연속: 진동 중에 속도를 바꿔도 위치가 튀지 않게 t를 보정 */
+  if (state.auto) state.autoT = state.autoT * (state.spdF / f);
+  state.spdF = f;
+});
+$('flipBtn').addEventListener('click', flipMagnet);
+$('ledFlipBtn').addEventListener('click', function(){ state.ledDir *= -1; });
+$('autoBtn').addEventListener('click', function(){ state.auto ? stopAuto() : startAuto(); });
+$('pauseBtn').addEventListener('click', function(){ setPaused(!state.paused); });
+$('slowBtn').addEventListener('click', function(){
+  state.slow = !state.slow;
+  this.classList.toggle('active', state.slow);
+});
+$('resetBtn').addEventListener('click', reset);
+$('fieldChk').addEventListener('change', function(){ state.showField = this.checked; });
+$('indBChk').addEventListener('change', function(){ state.showIndB = this.checked; });
+
+/* ---------- 크기 조정 ---------- */
+function resize(){
+  var w = wrap.clientWidth || 600;
+  var h = Math.max(280, Math.min(460, Math.round(w * 0.5)));
+  var relM = inited ? state.xM / W : 0.20;
+  var relC = inited ? state.xC / W : 0.62;
+  W = w; H = h;
+  var dpr = window.devicePixelRatio || 1;
+  canvas.style.height = h + 'px';
+  canvas.width = Math.round(w * dpr);
+  canvas.height = Math.round(h * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  state.xM = relM * W; state.xC = relC * W;
+  clampPositions();
+  skipEmf = true;
+  state.prevLambda = computeLambda();
+  inited = true;
+}
+window.addEventListener('resize', resize);
+if (window.visualViewport) window.visualViewport.addEventListener('resize', resize);
+if (typeof ResizeObserver !== 'undefined'){
+  new ResizeObserver(function(){ resize(); }).observe(wrap);
+}
+
+/* ---------- 메인 루프 (슬로우 모션 = 시간 배율) ---------- */
+var last = performance.now();
+function frame(now){
+  var dt = (now - last) / 1000;
+  last = now;
+  if (dt > 0.06){ dt = 0.06; skipEmf = true; }
+  if (dt > 0 && !state.paused){
+    update(dt * (state.slow ? 0.3 : 1));
+  }
+  render();
+  requestAnimationFrame(frame);
+}
+resize();
+reset();
+updateCoilLabels();
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

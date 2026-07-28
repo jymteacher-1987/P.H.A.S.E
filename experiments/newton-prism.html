@@ -1,0 +1,886 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>뉴턴의 프리즘 실험 — 가상 실험실</title>
+<style>
+:root{
+  --bg:#070c16; --card:#121c31; --card2:#18243d; --line:#28395a;
+  --tx:#eaf1ff; --tx2:#a9bcdd; --tx3:#7688aa;
+  --acc:#4d8cff; --acc2:#86b4ff;
+  --gap:9px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--tx);
+  font-family:"Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  -webkit-text-size-adjust:100%}
+body{background:radial-gradient(1100px 600px at 20% -12%,#152747 0%,var(--bg) 62%)}
+
+.app{height:100dvh;padding:var(--gap);display:grid;
+  grid-template-rows:auto auto minmax(0,1fr) auto;gap:var(--gap);max-width:1560px;margin:0 auto}
+
+header{display:flex;align-items:center;gap:10px}
+.badge{flex:none;width:34px;height:34px;border-radius:10px;
+  background:linear-gradient(140deg,#ff4d4d,#ffd24d 28%,#4dff8f 52%,#4d8cff 76%,#a04dff);
+  box-shadow:0 4px 14px rgba(77,140,255,.32)}
+h1{margin:0;font-size:clamp(14px,2.2vw,19px);font-weight:800;letter-spacing:-.4px;white-space:nowrap}
+
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:var(--card);
+  border:1px solid var(--line);border-radius:12px;padding:5px}
+.tab{border:0;background:transparent;color:var(--tx3);border-radius:9px;padding:9px 4px;cursor:pointer;
+  font-size:clamp(11px,1.7vw,13.5px);font-weight:700;line-height:1.25;min-height:46px;
+  display:flex;flex-direction:column;justify-content:center;gap:2px}
+.tab b{font-size:.76em;font-weight:800;opacity:.72}
+.tab.on{background:linear-gradient(160deg,var(--acc),#3a6fd8);color:#fff;box-shadow:0 3px 12px rgba(77,140,255,.3)}
+
+main{display:grid;grid-template-columns:minmax(0,1.62fr) minmax(0,1fr);gap:var(--gap);min-height:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:13px;min-height:0}
+.stage{position:relative;overflow:hidden;padding:0}
+canvas{display:block;width:100%;height:100%}
+
+.side{display:flex;flex-direction:column;overflow:hidden}
+.side-in{overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px;min-height:0}
+.blk{background:var(--card2);border:1px solid var(--line);border-radius:11px;padding:9px 11px}
+.blk h3{margin:0 0 8px;font-size:11.5px;font-weight:800;color:var(--acc2);display:flex;align-items:center;gap:6px}
+.blk h3::before{content:"";width:3px;height:12px;border-radius:2px;background:var(--acc)}
+ul.pts{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+ul.pts li{position:relative;padding-left:14px;font-size:12px;line-height:1.5;color:var(--tx2)}
+ul.pts li::before{content:"";position:absolute;left:2px;top:8px;width:5px;height:5px;border-radius:50%;background:var(--acc)}
+
+table.m{width:100%;border-collapse:collapse;font-size:12.5px}
+table.m tr+tr td,table.m tr+tr th{border-top:1px solid var(--line)}
+table.m th{text-align:left;font-weight:600;color:var(--tx3);padding:4.5px 0;white-space:nowrap;font-size:11.5px}
+table.m td{text-align:right;font-weight:800;color:var(--tx);padding:4.5px 0;font-size:12px;font-variant-numeric:tabular-nums}
+.swatch{display:inline-block;width:11px;height:11px;border-radius:3px;vertical-align:-1px;margin-right:5px;
+  border:1px solid rgba(255,255,255,.35)}
+.bar{height:7px;border-radius:4px;background:#0b1425;border:1px solid var(--line);overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#4dff8f,#ffd24d 55%,#ff5c5c);transition:width .1s}
+.note{margin:7px 0 0;font-size:11.5px;line-height:1.55;color:var(--tx3)}
+.flag{margin-top:8px;border-radius:8px;padding:8px 9px;font-size:12.5px;font-weight:800;text-align:center;
+  background:#0f1e36;border:1px solid #2f5a94;color:var(--tx3)}
+.flag.hit{background:#0f3524;border-color:#2f8f5a;color:#7dffb0}
+.spec{font-size:11px;line-height:1.6;color:var(--tx3);margin:0}
+.spec b{color:var(--tx2);font-weight:700}
+
+.dock{padding:var(--gap);display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:var(--gap);align-items:stretch}
+.dock .cell{background:var(--card2);border:1px solid var(--line);border-radius:11px;
+  padding:8px 12px;display:flex;align-items:center;gap:12px;min-height:56px}
+.dock .name{font-size:12.5px;font-weight:800;color:var(--tx2);white-space:nowrap}
+.dock .val{font-size:12.5px;font-weight:800;color:var(--acc2);white-space:nowrap;min-width:70px;text-align:right;
+  font-variant-numeric:tabular-nums}
+.dock .msg{margin:0;font-size:12.5px;color:var(--tx3);line-height:1.55;padding:8px 4px;
+  display:flex;align-items:center;min-height:56px}
+input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:26px;background:transparent;margin:0;cursor:pointer;min-width:0}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:#0b1425;border:1px solid var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;
+  background:var(--acc);border:3px solid #fff;margin-top:-10px;box-shadow:0 2px 7px rgba(0,0,0,.6)}
+input[type=range]::-moz-range-track{height:6px;border-radius:3px;background:#0b1425;border:1px solid var(--line)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--acc);border:3px solid #fff}
+
+@media (max-width:900px){
+  .app{height:auto;min-height:100dvh}
+  main{grid-template-columns:1fr}
+  .stage{aspect-ratio:2000/1560}
+  .side{overflow:visible}.side-in{overflow:visible}
+  .dock{grid-template-columns:1fr}
+  .dock .cell{flex-wrap:wrap}
+  .dock .cell input[type=range]{flex:1 0 100%;order:3}
+  .dock .val{margin-left:auto}
+}
+@media (max-width:900px) and (orientation:landscape){ .stage{aspect-ratio:auto;height:78dvh} }
+@media (max-width:400px){ :root{--gap:7px} }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="badge"></div>
+    <div style="min-width:0"><h1>뉴턴의 프리즘 실험 — 가상 실험실</h1></div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button class="tab on" data-i="0"><b>실험 1</b>백색광의 분산</button>
+    <button class="tab" data-i="1"><b>탐구 (1)</b>한 색깔 빛 + 프리즘</button>
+    <button class="tab" data-i="2"><b>탐구 (2)</b>반원 유리로 모으기</button>
+  </nav>
+
+  <main>
+    <section class="card stage" id="stage"><canvas id="cv"></canvas></section>
+    <aside class="card side"><div class="side-in" id="side"></div></aside>
+  </main>
+
+  <section class="card dock" id="dock"></section>
+</div>
+
+<script>
+"use strict";
+/* ================= 벡터 ================= */
+const add=(a,b)=>[a[0]+b[0],a[1]+b[1]];
+const sub=(a,b)=>[a[0]-b[0],a[1]-b[1]];
+const mul=(a,s)=>[a[0]*s,a[1]*s];
+const dot=(a,b)=>a[0]*b[0]+a[1]*b[1];
+const nrm=a=>{const l=Math.hypot(a[0],a[1])||1;return[a[0]/l,a[1]/l];};
+const rot=(v,a)=>{const c=Math.cos(a),s=Math.sin(a);return[v[0]*c-v[1]*s,v[0]*s+v[1]*c];};
+const perp=v=>[-v[1],v[0]];
+const RAD=Math.PI/180, DEG=x=>x/RAD;
+
+/* ============ 실제 광학 유리의 굴절률 (셀마이어 분산식) ============
+   프리즘 : Schott F2 플린트 유리   n(400)=1.6522  n(550)=1.6237  n(700)=1.6126
+   반원유리: Schott N-BK7 크라운 유리 n(400)=1.5308  n(700)=1.5131            */
+const sellmeier=(B,C)=>wl=>{const L=(wl/1000)**2;let s=1;
+  for(let i=0;i<3;i++)s+=B[i]*L/(L-C[i]);return Math.sqrt(s);};
+const nPrism=sellmeier([1.34533359,0.209073176,0.937357162],
+                       [0.00997743871,0.0470450767,111.886764]);
+const nLens =sellmeier([1.03961212,0.231792344,1.01046945],
+                       [0.00600069867,0.0200179144,103.560653]);
+
+function wl2rgb(wl){
+  let r=0,g=0,b=0;
+  if(wl<440){r=-(wl-440)/60;b=1;}
+  else if(wl<490){g=(wl-440)/50;b=1;}
+  else if(wl<510){g=1;b=-(wl-510)/20;}
+  else if(wl<580){r=(wl-510)/70;g=1;}
+  else if(wl<645){r=1;g=-(wl-645)/65;}
+  else r=1;
+  let f=1;
+  if(wl<420)f=.35+.65*(wl-380)/40; else if(wl>680)f=.35+.65*(780-wl)/100;
+  const G=.8;
+  return[Math.round(255*Math.pow(r*f,G)),Math.round(255*Math.pow(g*f,G)),Math.round(255*Math.pow(b*f,G))];
+}
+/* 400~700nm를 모두 더했을 때 정확히 중성 백색이 되도록 맞춘 계수
+   (그냥 더하면 R44096:G39238:B25194 로 노랗게 치우친다) */
+const WB=[1.000,1.124,1.750];
+function cName(wl){
+  if(wl>=625)return"빨강"; if(wl>=590)return"주황"; if(wl>=565)return"노랑";
+  if(wl>=520)return"초록"; if(wl>=490)return"청록"; if(wl>=460)return"파랑";
+  if(wl>=435)return"남색"; return"보라";
+}
+function bright(rgb){const k=.5,m=Math.max(...rgb)||1,g=Math.min(1.9,255/m);
+  return`rgb(${rgb.map(v=>Math.round(Math.min(255,v*g*(1-k)+255*k))).join(",")})`;}
+
+/* ================= 도형 ================= */
+function poly(pts,type,nFn){
+  let cx=0,cy=0;pts.forEach(p=>{cx+=p[0];cy+=p[1];});cx/=pts.length;cy/=pts.length;
+  const norms=[];
+  for(let i=0;i<pts.length;i++){
+    const a=pts[i],b=pts[(i+1)%pts.length];
+    let n=nrm([b[1]-a[1],-(b[0]-a[0])]);
+    const m=[(a[0]+b[0])/2,(a[1]+b[1])/2];
+    if(dot(n,sub(m,[cx,cy]))<0)n=mul(n,-1);
+    norms.push(n);
+  }
+  return{poly:pts,norms,type,n:nFn||nPrism,c:[cx,cy]};
+}
+function prism(c,h,A,th){
+  const hb=h*Math.tan(A/2*RAD);
+  return poly([[0,-2*h/3],[-hb,h/3],[hb,h/3]].map(p=>add(c,rot(p,th))),"glass");
+}
+/* 곡면은 240조각으로 세분 — 조각 경계에서 법선이 튀지 않게 */
+function halfGlass(c,R,th,N){
+  const l=[];for(let i=0;i<=N;i++){const a=(90+180*i/N)*RAD;l.push([R*Math.cos(a),R*Math.sin(a)]);}
+  return poly(l.map(p=>add(c,rot(p,th))),"glass",nLens);
+}
+function plate(c,u,p,off,gap,len,half){
+  const mk=(y0,y1)=>poly([[-half,y0],[half,y0],[half,y1],[-half,y1]]
+      .map(q=>add(c,add(mul(u,q[0]),mul(p,q[1])))),"block");
+  return[mk(off+gap/2,off+gap/2+len),mk(off-gap/2-len,off-gap/2)];
+}
+
+/* ================= 광선 추적 (스넬 법칙) ================= */
+function hitPoly(p,d,el){
+  let best=null;const P=el.poly;
+  for(let i=0;i<P.length;i++){
+    const a=P[i],b=P[(i+1)%P.length];
+    const ex=b[0]-a[0],ey=b[1]-a[1];
+    const det=ex*d[1]-d[0]*ey; if(Math.abs(det)<1e-12)continue;
+    const ax=a[0]-p[0],ay=a[1]-p[1];
+    const t=(-ax*ey+ex*ay)/det, u=(d[0]*ay-d[1]*ax)/det;
+    if(t>1e-5&&u>=0&&u<=1&&(!best||t<best.t))
+      best={t,p:[p[0]+d[0]*t,p[1]+d[1]*t],n:el.norms[i]};
+  }
+  return best;
+}
+function hitSeg(p,d,a,b){
+  const ex=b[0]-a[0],ey=b[1]-a[1];
+  const det=ex*d[1]-d[0]*ey; if(Math.abs(det)<1e-12)return null;
+  const ax=a[0]-p[0],ay=a[1]-p[1];
+  const t=(-ax*ey+ex*ay)/det, u=(d[0]*ay-d[1]*ax)/det;
+  return(t>1e-5&&u>=0&&u<=1)?{t,p:[p[0]+d[0]*t,p[1]+d[1]*t],u}:null;
+}
+function trace(o,d0,wl,els,sc){
+  const pts=[o.slice()];let p=o.slice(),d=nrm(d0),u=null;
+  for(let k=0;k<24;k++){
+    let best=null;
+    for(const el of els){const h=hitPoly(p,d,el);if(h&&(!best||h.t<best.t))best={...h,el};}
+    if(sc){const hs=hitSeg(p,d,sc.a,sc.b);if(hs&&(!best||hs.t<best.t)){pts.push(hs.p);u=hs.u;break;}}
+    if(!best){pts.push(add(p,mul(d,3000)));break;}
+    pts.push(best.p);
+    if(best.el.type==="block")break;
+    let N=best.n,ci=-dot(d,N),n1,n2;
+    if(ci>0){n1=1;n2=best.el.n(wl);}else{n1=best.el.n(wl);n2=1;N=mul(N,-1);ci=-ci;}
+    const e=n1/n2,s2=e*e*(1-ci*ci);
+    d=(s2>1)?nrm(add(d,mul(N,2*ci))):nrm(add(mul(d,e),mul(N,e*ci-Math.sqrt(1-s2))));
+    p=add(best.p,mul(d,.02));
+  }
+  return{pts,u};
+}
+
+/* ================= 장치 (1 단위 = 1 mm) ================= */
+const W=2000,H=1560,DIAG=1200;
+const APEX=60;                       /* 정삼각형 프리즘 — 교과서와 동일 */
+const LAMP=[30,560], BEAM=-24.27, SLIT_D=200, GAP1=3, GAP2=2.5;
+const NRAY=3;
+const WLS=[];for(let w=400;w<=700;w+=1)WLS.push(w);
+
+const BDIR=[Math.cos(BEAM*RAD),Math.sin(BEAM*RAD)], BPERP=perp(BDIR);
+const SLIT_C=add(LAMP,mul(BDIR,SLIT_D));
+const SLIT_ELS=plate(SLIT_C,BDIR,BPERP,0,GAP1,200,7);
+const PRISM1=prism([740,452],380,APEX,0);
+const BASE_ELS=[...SLIT_ELS,PRISM1];
+const SRC=(()=>{const o=[];for(let i=0;i<NRAY;i++){
+  const f=(i/(NRAY-1)-.5)*GAP1*.9;
+  o.push({o:add(add(SLIT_C,mul(BPERP,f)),mul(BDIR,-SLIT_D-20)),d:BDIR});}return o;})();
+
+const AXIS=(()=>{
+  const r=trace(SRC[1].o,SRC[1].d,550,BASE_ELS,null),n=r.pts.length;
+  const q=r.pts[n-2],v=nrm(sub(r.pts[n-1],q));
+  return{q,u:v,p:perp(v),th:Math.atan2(v[1],v[0])};
+})();
+const AX=t=>add(AXIS.q,mul(AXIS.u,t));
+const mkScreen=(c,d,half)=>{const p=perp(d);return{a:add(c,mul(p,-half)),b:add(c,mul(p,half)),c,dir:d,half};};
+
+/* 실험 1의 스크린 자리 = 탐구 (1)에서 슬릿을 놓는 자리 */
+const SCR1=AX(1050);
+const slit2Els=off=>plate(SCR1,AXIS.u,AXIS.p,off,GAP2,200,7);
+
+/* 탐구 (1) 두 번째 장치 */
+const STATION2=(()=>{
+  const CEN=0, e0=[...BASE_ELS,...slit2Els(CEN)];
+  const far=mkScreen(AX(1600),AXIS.u,900);
+  let c=null;
+  for(const wl of WLS){
+    for(const r of SRC){const t=trace(r.o,r.d,wl,e0,far);
+      if(t.u!=null){const n=t.pts.length;
+        c={wl,p0:t.pts[n-2],dir:nrm(sub(t.pts[n-1],t.pts[n-2]))};break;}}
+    if(c)break;
+  }
+  const tt=dot(sub(SCR1,c.p0),AXIS.u)/dot(c.dir,AXIS.u);
+  const sp=add(c.p0,mul(c.dir,tt));
+  const P2c=add(sp,mul(c.dir,300));
+  /* 프리즘 2는 프리즘 1과 같은 자세로 놓는다 */
+  const P2=prism(P2c,240,APEX,Math.atan2(c.dir[1],c.dir[0])+24.27*RAD);
+  const f2=mkScreen(add(P2c,mul(c.dir,900)),c.dir,1200);
+  let ed=null,ep=null;
+  for(const r of SRC){const t=trace(r.o,r.d,c.wl,[...e0,P2],f2);
+    if(t.u!=null){const k=t.pts.length;ed=nrm(sub(t.pts[k-1],t.pts[k-2]));ep=t.pts[k-2];break;}}
+  /* 빛이 프리즘 2의 꼭짓점 근처를 지나도록 프리즘을 꼭짓점 방향으로 당겨 놓는다
+     (편향각은 통과 위치와 무관하므로 물리는 그대로, 유리 속 경로만 짧아져 더 밝다) */
+  const aD=nrm(sub(P2.poly[0],P2.c)), SH=mul(aD,-135);
+  const P2b=poly(P2.poly.map(q=>add(q,SH)),"glass");
+  return{P2:P2b,P2c:P2b.c,CEN,aD,screen:mkScreen(add(ep,mul(ed,300)),ed,150)};
+})();
+/* 슬릿을 옮기면 프리즘 2도 그 빛줄기를 받도록 나란히 옮기고,
+   어느 색이든 프리즘의 '같은 자리(꼭짓점에서 약 40mm)'로 들어오도록 꼭짓점 방향으로도 맞춰 준다.
+   편향각은 통과 위치와 무관하므로 물리 결과는 달라지지 않는다. */
+const APEX_FIX=0.2735;
+const P2shift=()=>add(mul(AXIS.p,st.sel-STATION2.CEN),
+                      mul(STATION2.aD,-APEX_FIX*(st.sel-STATION2.CEN)));
+const P2now=()=>{const d=P2shift();return poly(STATION2.P2.poly.map(p=>add(p,d)),"glass");};
+
+/* 탐구 (2) 반원 모양 유리 — 스크린 가까운 곳에 고정 */
+const LENS=halfGlass(AX(1000),110,AXIS.th,240);
+
+let st={tab:0, sel:0, scr:1450};
+
+function buildScene(){
+  const parts=[{k:"lamp",c:LAMP,label:"손전등"},
+               {k:"slit",c:SLIT_C,label:"슬릿",u:BDIR,p:BPERP,gap:GAP1,len:85},
+               {k:"prism",c:PRISM1.c,label:"프리즘",el:PRISM1}];
+  let els=BASE_ELS.slice(), screen;
+  if(st.tab===0) screen=mkScreen(SCR1,AXIS.u,150);
+  else if(st.tab===1){
+    const p2=P2now();
+    els=els.concat(slit2Els(st.sel)); els.push(p2);
+    parts.push({k:"slit2",c:add(SCR1,mul(AXIS.p,st.sel)),label:"슬릿",u:AXIS.u,p:AXIS.p,gap:GAP2,len:95});
+    parts.push({k:"prism2",c:add(STATION2.P2c,P2shift()),label:"프리즘 2",el:p2});
+    screen=STATION2.screen;
+  }else{
+    els.push(LENS);
+    parts.push({k:"lens",c:AX(1000),label:"반원 모양 유리",el:LENS});
+    screen=mkScreen(AX(st.scr),AXIS.u,150);
+  }
+  parts.push({k:"screen",c:screen.c,label:"스크린",sc:screen});
+  return{els,screen,parts};
+}
+
+/* 프리즘 1의 편향각 (들어온 방향과 나간 방향 사이의 전체 각) */
+function deviation(wl){
+  const t=trace(SRC[1].o,SRC[1].d,wl,BASE_ELS,null),n=t.pts.length;
+  if(n<4)return null;
+  const din=nrm(sub(t.pts[1],t.pts[0])),dout=nrm(sub(t.pts[n-1],t.pts[n-2]));
+  return{deg:DEG(Math.atan2(dout[1],dout[0])-Math.atan2(din[1],din[0])),
+         q:t.pts[n-2],pIn:t.pts[1],pOut:t.pts[n-2],din,dout};
+}
+/* 프리즘 2의 입사각 · 편향각 */
+function dev2(){
+  const p2=P2now(), els=[...BASE_ELS,...slit2Els(st.sel),p2], pass=[];
+  for(const wl of WLS){
+    for(const r of SRC){if(trace(r.o,r.d,wl,els,STATION2.screen).u!=null){pass.push(wl);break;}}
+  }
+  if(!pass.length)return null;
+  const mid=pass[Math.floor(pass.length/2)];
+  for(const r of SRC){
+    const t=trace(r.o,r.d,mid,els,STATION2.screen);
+    if(t.u==null)continue;
+    const n=t.pts.length; if(n<6)return null;
+    const din=nrm(sub(t.pts[3],t.pts[2])),dout=nrm(sub(t.pts[5],t.pts[4]));
+    let fi=0,bd=1e9,P=p2.poly;
+    for(let i=0;i<P.length;i++){
+      const a=P[i],b=P[(i+1)%P.length],L=Math.hypot(b[0]-a[0],b[1]-a[1]);
+      const dd=Math.abs((b[0]-a[0])*(a[1]-t.pts[3][1])-(a[0]-t.pts[3][0])*(b[1]-a[1]))/L;
+      if(dd<bd){bd=dd;fi=i;}
+    }
+    return{wl:mid,lo:pass[0],hi:pass[pass.length-1],n:p2.n(mid),
+      inc:Math.acos(Math.min(1,Math.abs(dot(din,p2.norms[fi]))))/RAD,
+      deg:DEG(Math.atan2(dout[1],dout[0])-Math.atan2(din[1],din[0])),
+      din,dout,pIn:t.pts[3],pOut:t.pts[4]};
+  }
+  return null;
+}
+
+/* ================= 렌더 ================= */
+const cv=document.getElementById("cv"),ctx=cv.getContext("2d");
+let SC=1,OX=0,OY=0,BOXES=[],DIAGH=0,FS=12;
+const X=x=>OX+x*SC, Y=y=>OY+y*SC;
+
+/* 화면에 실제로 그려질 장치 범위 — 탭마다 여기에 꽉 차게 맞춘다 */
+function contentBox(S){
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  const acc=p=>{if(p[0]<x0)x0=p[0];if(p[0]>x1)x1=p[0];if(p[1]<y0)y0=p[1];if(p[1]>y1)y1=p[1];};
+  acc(add(LAMP,mul(BDIR,-70)));
+  acc(add(SLIT_C,mul(BPERP, 90)));acc(add(SLIT_C,mul(BPERP,-90)));
+  S.els.forEach(el=>{
+    if(el.type==="glass")el.poly.forEach(acc);
+    else{                                   /* 차폐판은 틈 주변만 */
+      const c=el.c,dv=nrm(sub(el.poly[2],el.poly[1]));
+      acc(add(c,mul(dv,90)));acc(add(c,mul(dv,-90)));
+    }
+  });
+  acc(S.screen.a);acc(S.screen.b);
+  /* '굴절 안 했을 때' 점선이 들어갈 자리도 확보 */
+  acc(add(PRISM1.c,mul(BDIR,GUIDE_LEN*1.5)));
+  acc(add(STATION2.P2c,mul(BDIR,GUIDE_LEN*1.2)));
+  return{x0,y0,x1,y1};
+}
+const GUIDE_LEN=430;
+function fit(){
+  const b=document.getElementById("stage").getBoundingClientRect();
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  cv.width=Math.max(1,Math.round(b.width*dpr));cv.height=Math.max(1,Math.round(b.height*dpr));
+  draw();
+}
+/* 탭마다 한 번만 계산하는 고정 시야 — 조절기를 움직여도 화면이 흔들리지 않게
+   (슬라이더 양 끝 상태를 모두 포함하는 범위를 쓴다) */
+let VIEW=null;
+function viewBox(){
+  if(VIEW)return VIEW;
+  const keep={sel:st.sel,scr:st.scr,tab:st.tab};
+  const boxes=[];
+  for(const tab of [0,1,2]){
+    st.tab=tab;
+    for(const v of (tab===1?[-70,0,70]:tab===2?[1020,1450]:[0])){
+      if(tab===1)st.sel=v; else if(tab===2)st.scr=v;
+      boxes.push(contentBox(buildScene()));
+    }
+  }
+  st.sel=keep.sel;st.scr=keep.scr;st.tab=keep.tab;
+  VIEW={x0:Math.min(...boxes.map(b=>b.x0)),y0:Math.min(...boxes.map(b=>b.y0)),
+        x1:Math.max(...boxes.map(b=>b.x1)),y1:Math.max(...boxes.map(b=>b.y1))};
+  return VIEW;
+}
+function layout(){
+  DIAGH=cv.height*0.735;
+  FS=Math.max(11,Math.min(cv.width*0.0175,cv.height*0.033));
+  const bb=viewBox(), pad=FS*4.2;
+  const bw=bb.x1-bb.x0, bh=bb.y1-bb.y0;
+  SC=Math.min((cv.width-2*pad)/bw,(DIAGH-2*pad)/bh);
+  OX=(cv.width-bw*SC)/2-bb.x0*SC;
+  OY=(DIAGH-bh*SC)/2-bb.y0*SC;
+}
+function pathOf(P){ctx.beginPath();P.forEach((p,i)=>i?ctx.lineTo(X(p[0]),Y(p[1])):ctx.moveTo(X(p[0]),Y(p[1])));ctx.closePath();}
+
+function draw(){
+  const S=buildScene();
+  BOXES=[];
+  layout();
+  initGrid();
+  ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,cv.width,cv.height);
+  const g=ctx.createLinearGradient(0,0,0,cv.height);
+  g.addColorStop(0,"#0a1120");g.addColorStop(1,"#05080f");
+  ctx.fillStyle=g;ctx.fillRect(0,0,cv.width,cv.height);
+
+  drawLampCone();
+
+  S.els.forEach(el=>{if(el.type!=="glass")return;
+    pathOf(el.poly);
+    const gg=ctx.createLinearGradient(X(el.c[0]-140),Y(el.c[1]-140),X(el.c[0]+140),Y(el.c[1]+140));
+    gg.addColorStop(0,"rgba(190,220,255,.17)");gg.addColorStop(.5,"rgba(150,190,240,.07)");
+    gg.addColorStop(1,"rgba(210,235,255,.18)");
+    ctx.fillStyle=gg;ctx.fill();});
+
+  const hits=[];
+  ctx.save();ctx.globalCompositeOperation="lighter";ctx.lineCap="round";ctx.lineJoin="round";
+  const lw=Math.max(.8,2.2*SC);
+  for(const wl of WLS){
+    const[r,gc,b]=wl2rgb(wl);
+    ctx.strokeStyle=`rgba(${Math.min(255,r*WB[0])|0},${Math.min(255,gc*WB[1])|0},${Math.min(255,b*WB[2])|0},.10)`;
+    ctx.lineWidth=lw;
+    const mark=(wl%15===0);
+    for(const ry of SRC){
+      const t=trace(ry.o,ry.d,wl,S.els,S.screen);
+      ctx.beginPath();
+      t.pts.forEach((p,i)=>i?ctx.lineTo(X(p[0]),Y(p[1])):ctx.moveTo(X(p[0]),Y(p[1])));
+      ctx.stroke();
+      if(mark)markPath(t.pts,3,CELL*1.1);
+      if(t.u!=null)hits.push({u:t.u,wl,rgb:[r,gc,b]});
+    }
+  }
+  ctx.restore();
+  /* 유리·스크린도 글씨가 피하도록 표시 */
+  S.els.forEach(el=>{if(el.type==="glass")markPath([...el.poly,el.poly[0]],2,CELL*.6);});
+  markSeg(X(S.screen.a[0]),Y(S.screen.a[1]),X(S.screen.b[0]),Y(S.screen.b[1]),2,CELL*.8);
+
+  S.els.forEach(el=>{
+    if(el.type!=="glass")return;
+    pathOf(el.poly);
+    ctx.strokeStyle="rgba(205,230,255,.75)";ctx.lineWidth=Math.max(1,1.5*SC);ctx.stroke();
+  });
+  S.parts.filter(p=>p.k==="slit"||p.k==="slit2").forEach(drawSlitPlate);
+
+  drawLamp();
+  drawScreen(S.screen,hits);
+  if(st.tab===0)drawAngles();
+  if(st.tab===1)drawAngles2();
+  drawLabels(S);
+  drawStrip(hits,S);
+  updateSide(hits,S);
+}
+
+/* 슬릿 — 실제 틈은 2~3mm라 화면에선 안 보이므로 틈을 최소 8px로 벌려 그린다 */
+function drawSlitPlate(pt){
+  const halfVis=Math.max(4,pt.gap*SC/2);
+  const th=Math.max(3,7*SC);
+  ctx.save();ctx.lineCap="butt";
+  for(const sgn of [1,-1]){
+    const a=add(pt.c,mul(pt.p,sgn*halfVis/SC));
+    const b=add(pt.c,mul(pt.p,sgn*pt.len));
+    ctx.strokeStyle="#0c1424";ctx.lineWidth=th;
+    ctx.beginPath();ctx.moveTo(X(a[0]),Y(a[1]));ctx.lineTo(X(b[0]),Y(b[1]));ctx.stroke();
+    ctx.strokeStyle="rgba(160,190,230,.75)";ctx.lineWidth=Math.max(1,th*.18);
+    ctx.beginPath();ctx.moveTo(X(a[0]),Y(a[1]));ctx.lineTo(X(b[0]),Y(b[1]));ctx.stroke();
+    markSeg(X(a[0]),Y(a[1]),X(b[0]),Y(b[1]),2,CELL*.6);
+  }
+  ctx.restore();
+}
+function drawLampCone(){
+  const o=add(LAMP,mul(BDIR,44));
+  const A=add(o,mul(BPERP,-14)),B=add(o,mul(BPERP,14));
+  const C=add(add(SLIT_C,mul(BPERP,70)),mul(BDIR,-10));
+  const D=add(add(SLIT_C,mul(BPERP,-70)),mul(BDIR,-10));
+  ctx.save();ctx.globalCompositeOperation="lighter";
+  const gg=ctx.createLinearGradient(X(o[0]),Y(o[1]),X(SLIT_C[0]),Y(SLIT_C[1]));
+  gg.addColorStop(0,"rgba(255,252,225,.34)");gg.addColorStop(1,"rgba(255,252,225,.08)");
+  ctx.fillStyle=gg;pathOf([A,B,C,D]);ctx.fill();ctx.restore();
+}
+function drawLamp(){
+  const s=SC*2;
+  ctx.save();ctx.translate(X(LAMP[0]),Y(LAMP[1]));ctx.rotate(BEAM*RAD);
+  ctx.fillStyle="#12161f";ctx.strokeStyle="#59667c";ctx.lineWidth=Math.max(1,1.3*s);
+  ctx.beginPath();ctx.roundRect(-48*s,-11*s,46*s,22*s,4*s);ctx.fill();ctx.stroke();
+  ctx.strokeStyle="#333a48";ctx.lineWidth=Math.max(.6,1*s);
+  for(let i=-40;i<-14;i+=5){ctx.beginPath();ctx.moveTo(i*s,-10*s);ctx.lineTo(i*s,10*s);ctx.stroke();}
+  ctx.fillStyle="#1a2130";ctx.strokeStyle="#6c7a92";ctx.lineWidth=Math.max(1,1.3*s);
+  ctx.beginPath();ctx.moveTo(-2*s,-12*s);ctx.lineTo(18*s,-16*s);ctx.lineTo(18*s,16*s);ctx.lineTo(-2*s,12*s);
+  ctx.closePath();ctx.fill();ctx.stroke();
+  ctx.beginPath();ctx.ellipse(18*s,0,3.8*s,15*s,0,0,7);
+  ctx.fillStyle="rgba(255,253,232,.95)";ctx.fill();
+  ctx.restore();
+}
+function drawScreen(sc,hits){
+  ctx.save();ctx.lineCap="butt";
+  ctx.strokeStyle="#cbd8ea";ctx.lineWidth=Math.max(2.5,10*SC);
+  ctx.beginPath();ctx.moveTo(X(sc.a[0]),Y(sc.a[1]));ctx.lineTo(X(sc.b[0]),Y(sc.b[1]));ctx.stroke();
+  ctx.strokeStyle="rgba(115,135,165,.75)";ctx.lineWidth=Math.max(1,1.2*SC);ctx.stroke();
+  ctx.globalCompositeOperation="lighter";
+  const al=Math.min(.5,120/Math.max(1,hits.length));
+  hits.forEach(h=>{
+    const q=add(sc.a,mul(sub(sc.b,sc.a),h.u));
+    ctx.fillStyle=`rgba(${Math.min(255,h.rgb[0]*WB[0])|0},${Math.min(255,h.rgb[1]*WB[1])|0},${Math.min(255,h.rgb[2]*WB[2])|0},${al})`;
+    ctx.beginPath();ctx.arc(X(q[0]),Y(q[1]),9*SC,0,7);ctx.fill();
+  });
+  ctx.restore();
+}
+
+/* ---- 라벨 겹침 방지 ---- */
+/* ---- 점유 격자: 빛줄기·유리·안내선이 지나는 칸을 표시해 두고
+       글씨는 그 칸을 가장 적게 덮는 자리에 놓는다 ---- */
+let GRID=null,GW=0,GH=0,CELL=8;
+function initGrid(){
+  CELL=Math.max(5,FS*.45);
+  GW=Math.ceil(cv.width/CELL);GH=Math.ceil(DIAGH/CELL);
+  GRID=new Uint8Array(GW*GH);
+}
+function markPx(x,y,v){
+  const gx=(x/CELL)|0, gy=(y/CELL)|0;
+  if(gx<0||gy<0||gx>=GW||gy>=GH)return;
+  if(GRID[gy*GW+gx]<v)GRID[gy*GW+gx]=v;
+}
+function markSeg(ax,ay,bx,by,v,rad){
+  const L=Math.hypot(bx-ax,by-ay);
+  const n=Math.min(400,Math.max(1,Math.ceil(L/(CELL*.7))));
+  const R=Math.max(1,Math.round((rad||CELL)/CELL));
+  for(let k=0;k<=n;k++){
+    const t=k/n,x=ax+(bx-ax)*t,y=ay+(by-ay)*t;
+    for(let iy=-R;iy<=R;iy++)for(let ix=-R;ix<=R;ix++)markPx(x+ix*CELL,y+iy*CELL,v);
+  }
+}
+function markPath(pts,v,rad){
+  for(let i=0;i<pts.length-1;i++)
+    markSeg(X(pts[i][0]),Y(pts[i][1]),X(pts[i+1][0]),Y(pts[i+1][1]),v,rad);
+}
+function boxCost(x,y,w,h){
+  let c=0;
+  const g0=Math.max(0,((x)/CELL)|0), g1=Math.min(GW-1,((x+w)/CELL)|0);
+  const r0=Math.max(0,((y)/CELL)|0), r1=Math.min(GH-1,((y+h)/CELL)|0);
+  for(let r=r0;r<=r1;r++)for(let g=g0;g<=g1;g++)c+=GRID[r*GW+g];
+  return c;
+}
+const overlaps=(b,o)=>!(b.x+b.w<o.x||o.x+o.w<b.x||b.y+b.h<o.y||o.y+o.h<b.y);
+/* 부품 주변 24방향 × 3거리 후보 중 가장 덜 가리는 자리를 고른다 */
+function placeLabel(ax,ay,rad,w,h,prefer){
+  const mx=w/2+FS*.35, my=h/2+FS*.35;
+  const cX=v=>Math.min(Math.max(v,mx),cv.width-mx);
+  const cY=v=>Math.min(Math.max(v,my),DIAGH-my);
+  let best=null;
+  for(let ring=0;ring<3;ring++){
+    const d=rad+h*(0.95+ring*0.85);
+    for(let k=0;k<24;k++){
+      const a=k/24*Math.PI*2;
+      const cx=cX(ax+Math.cos(a)*d), cy=cY(ay+Math.sin(a)*d);
+      const b={x:cx-w/2,y:cy-h/2,w,h};
+      let cost=boxCost(b.x,b.y,b.w,b.h)*3;
+      for(const o of BOXES)if(overlaps(b,o))cost+=400;
+      cost+=ring*25;
+      cost+=Math.hypot(cx-ax,cy-ay)*0.05;
+      if(prefer)cost+=(1-(Math.cos(a)*prefer[0]+Math.sin(a)*prefer[1]))*18;
+      if(!best||cost<best.cost)best={cx,cy,cost,b};
+    }
+    if(best&&best.cost<30)break;
+  }
+  BOXES.push(best.b);
+  return[best.cx,best.cy];
+}
+/* 상자 없이 흰 글씨 + 어두운 후광 */
+function plainText(t,x,y,f,col){
+  ctx.save();
+  ctx.font=`700 ${f}px system-ui,-apple-system,"Malgun Gothic",sans-serif`;
+  ctx.textAlign="center";ctx.textBaseline="middle";
+  ctx.shadowColor="rgba(0,0,0,.95)";
+  ctx.lineJoin="round";ctx.strokeStyle="rgba(3,6,14,.92)";ctx.lineWidth=f*.34;
+  ctx.shadowBlur=f*.55;ctx.strokeText(t,x,y);
+  ctx.shadowBlur=f*.3;ctx.strokeText(t,x,y);
+  ctx.shadowBlur=0;ctx.fillStyle=col;ctx.fillText(t,x,y);
+  ctx.restore();
+}
+/* 자리가 막히면 옆 방향으로도 비켜 본다 (화면 밖으로는 절대 안 나감) */
+function settle(lx,ly,w,h,dx,dy,f){
+  const CX=v=>Math.min(Math.max(v,w/2+f*.3),cv.width-w/2-f*.3);
+  const CY=v=>Math.min(Math.max(v,h/2+f*.3),DIAGH-h/2-f*.3);
+  const dirs=[[dx,dy],[-dy,dx],[dy,-dx],[-dx,-dy]];
+  let fb=null;
+  for(const[ux,uy]of dirs){
+    let x=CX(lx),y=CY(ly);
+    for(let i=0;i<10;i++){
+      const b={x:x-w/2,y:y-h/2,w,h};
+      const n=BOXES.filter(o=>overlaps(b,o)).length;
+      if(n===0){BOXES.push(b);return[x,y];}
+      if(!fb||n<fb.n)fb={x,y,n,b};
+      x=CX(x+ux*f*.85);y=CY(y+uy*f*.85);
+    }
+  }
+  BOXES.push(fb.b);return[fb.x,fb.y];
+}
+/* 지시선 없이, 가리킬 지점 바로 옆에 글씨만 놓는다 */
+function rayTag(origin,dir,dist,side,txt,col){
+  const f=FS;
+  ctx.font=`700 ${f}px system-ui,-apple-system,"Malgun Gothic",sans-serif`;
+  const anchor=add(origin,mul(dir,dist)), nv=mul(perp(dir),side);
+  const ax=X(anchor[0]), ay=Y(anchor[1]);
+  const L2=Math.hypot(nv[0],nv[1])||1, dx=nv[0]/L2, dy=nv[1]/L2;
+  const w=ctx.measureText(txt).width+f*.7, h=f*1.4;
+  /* 항상 같은 상대 위치 — 조절기를 움직여도 글씨가 튀지 않게 */
+  let lx=ax+dx*(w*.32+f*.7), ly=ay+dy*(h*.7+f*.5);
+  lx=Math.min(Math.max(lx,w/2+f*.3),cv.width-w/2-f*.3);
+  ly=Math.min(Math.max(ly,h/2+f*.3),DIAGH-h/2-f*.3);
+  [lx,ly]=settle(lx,ly,w,h,dx,dy,f);
+  plainText(txt,lx,ly,f,col);
+}
+/* 두 직선의 교점 */
+function crossPt(p1,d1,p2,d2){
+  const det=-d1[0]*d2[1]+d2[0]*d1[1];
+  if(Math.abs(det)<1e-9)return null;
+  const rx=p2[0]-p1[0],ry=p2[1]-p1[1];
+  return add(p1,mul(d1,(-rx*d2[1]+d2[0]*ry)/det));
+}
+/* 굴절 안 했을 때의 진행 방향 — 눈에 잘 띄는 점선 */
+function guideLine(from,dir,len){
+  const e=add(from,mul(dir,len));
+  ctx.save();
+  ctx.setLineDash([FS*.8,FS*.55]);
+  ctx.strokeStyle="rgba(220,232,255,.7)";
+  ctx.lineWidth=Math.max(1.5,FS*.12);
+  ctx.beginPath();ctx.moveTo(X(from[0]),Y(from[1]));ctx.lineTo(X(e[0]),Y(e[1]));ctx.stroke();
+  ctx.restore();
+  markSeg(X(from[0]),Y(from[1]),X(e[0]),Y(e[1]),1,CELL*.6);
+  return e;
+}
+/* 빨강 vs 보라 편향각 */
+function drawAngles(){
+  const R=deviation(700),V=deviation(400);
+  if(!R||!V)return;
+  const cR=crossPt(R.pIn,R.din,R.pOut,R.dout), cV=crossPt(V.pIn,V.din,V.pOut,V.dout);
+  if(!cR||!cV)return;
+  const dR=Math.hypot(cR[0]-R.pIn[0],cR[1]-R.pIn[1]);
+  const L=dR+GUIDE_LEN;
+  guideLine(R.pIn,R.din,L);                    /* 프리즘 들어가기 전 방향의 연장선 */
+  const a0=Math.atan2(R.din[1],R.din[0]);
+  ctx.save();ctx.globalAlpha=.15;
+  const arc=(c,d,col,rr)=>{const a1=Math.atan2(d[1],d[0]);
+    ctx.beginPath();ctx.moveTo(X(c[0]),Y(c[1]));
+    ctx.arc(X(c[0]),Y(c[1]),rr*SC,a0,a1);ctx.closePath();ctx.fillStyle=col;ctx.fill();};
+  arc(cV,V.dout,"#a24dff",GUIDE_LEN*.85);
+  arc(cR,R.dout,"#ff4d4d",GUIDE_LEN*.62);
+  ctx.restore();
+  rayTag(R.pIn,R.din,L,-1,"굴절 안 했을 때","#dbe6ff");
+  rayTag(cR,R.dout,GUIDE_LEN*.75,-1,"빨강 "+R.deg.toFixed(1)+"°","#ff9c8b");
+  rayTag(cV,V.dout,GUIDE_LEN*1.15,+1,"보라 "+V.deg.toFixed(1)+"°","#cdaeff");
+}
+function drawAngles2(){
+  const d=dev2(); if(!d)return;
+  const rgb=wl2rgb(d.wl);
+  const c=crossPt(d.pIn,d.din,d.pOut,d.dout); if(!c)return;
+  const dIn=Math.hypot(c[0]-d.pIn[0],c[1]-d.pIn[1]);
+  const L=dIn+GUIDE_LEN*.8;
+  guideLine(d.pIn,d.din,L);                    /* 프리즘 2 들어가기 전 방향의 연장선 */
+  const a0=Math.atan2(d.din[1],d.din[0]),a1=Math.atan2(d.dout[1],d.dout[0]);
+  ctx.save();ctx.globalAlpha=.17;
+  ctx.beginPath();ctx.moveTo(X(c[0]),Y(c[1]));
+  ctx.arc(X(c[0]),Y(c[1]),GUIDE_LEN*.6*SC,a0,a1,a1<a0);ctx.closePath();
+  ctx.fillStyle=`rgb(${rgb.join(",")})`;ctx.fill();ctx.restore();
+  const side=(a1-a0)>0?-1:1;
+  rayTag(d.pIn,d.din,L,side,"굴절 안 했을 때","#dbe6ff");
+  rayTag(c,d.dout,GUIDE_LEN*.8,-side,cName(d.wl)+" "+Math.abs(d.deg).toFixed(1)+"°",bright(rgb));
+}
+/* 부품 이름표 — 지시선 없이, 빛과 다른 글씨를 가장 덜 가리는 자리에 */
+function drawLabels(S){
+  const f=FS*.95;
+  ctx.font=`700 ${f}px system-ui,-apple-system,"Malgun Gothic",sans-serif`;
+  ctx.textAlign="center";ctx.textBaseline="middle";
+  /* 부품마다 '항상 같은 자리'에 붙인다 — 움직여도 위치가 바뀌지 않게 */
+  S.parts.forEach(p=>{
+    let ax,ay,dx,dy;
+    const endOf=(A,B)=>{                    /* 막대의 위쪽 끝과 바깥 방향 */
+      const top=A[1]<B[1]?A:B, other=A[1]<B[1]?B:A;
+      const d=nrm(sub(top,other));
+      return[X(top[0]),Y(top[1]),d[0],d[1]];
+    };
+    if(p.k==="screen")            [ax,ay,dx,dy]=endOf(p.sc.a,p.sc.b);
+    else if(p.k==="slit"||p.k==="slit2"){
+      const A=add(p.c,mul(p.p,p.len*.5)), B=add(p.c,mul(p.p,-p.len*.5));
+      [ax,ay,dx,dy]=endOf(A,B);
+    }
+    else if(p.k==="lens"){
+      /* 반원 유리는 곡면 한가운데로 빛이 들어오므로, 이름표는 광축과 수직으로
+         유리 가장자리 바깥(빛이 지나지 않는 쪽)에 놓는다 */
+      const P=p.el.poly;
+      let v=P[0],best=1e9;
+      P.forEach(q=>{const t=dot(sub(q,p.c),AXIS.p);if(t<best){best=t;v=q;}});
+      ax=X(v[0])-AXIS.p[0]*FS*1.3;ay=Y(v[1])-AXIS.p[1]*FS*1.3;
+      dx=-AXIS.p[0];dy=-AXIS.p[1];
+    }
+    else if(p.el){
+      /* 항상 같은 꼭짓점을 쓴다 — 프리즘은 0번 꼭짓점.
+         '가장 먼 점'을 쓰면 도형이 움직일 때 기준점이 바뀌어 글씨가 튄다 */
+      const v=p.el.poly[0], d=nrm(sub(v,p.c));
+      ax=X(v[0]);ay=Y(v[1]);dx=d[0];dy=d[1];
+    }
+    else {ax=X(p.c[0]);ay=Y(p.c[1]);dx=0;dy=-1;}   /* 손전등 */
+    const w=ctx.measureText(p.label).width+f*.9, h=f*1.4;
+    let lx=ax+dx*(w*.35+f*.8), ly=ay+dy*(h*.75+f*.5);
+    lx=Math.min(Math.max(lx,w/2+f*.3),cv.width-w/2-f*.3);
+    ly=Math.min(Math.max(ly,h/2+f*.3),DIAGH-h/2-f*.3);
+    /* 다른 글씨와만 살짝 비켜준다 */
+    [lx,ly]=settle(lx,ly,w,h,dx,dy,f);
+    plainText(p.label,lx,ly,f,"#ffffff");
+  });
+}
+/* 스크린 정면 — 화면 아래 띠 (캔버스 좌표로 직접 그림) */
+function drawStrip(hits,S){
+  const total=S.screen.half*2;
+  const f=FS*.92, pad=cv.width*0.045;
+  const x0=pad, x1=cv.width-pad;
+  const y0=DIAGH+f*.6, y1=cv.height-f*.5;
+  ctx.font=`800 ${f}px system-ui,-apple-system,"Malgun Gothic",sans-serif`;
+  ctx.textAlign="left";ctx.textBaseline="top";
+  ctx.fillStyle="#8ea6cc";ctx.fillText("스크린 정면 — 나타난 빛의 모습",x0,y0);
+  const by0=y0+f*1.9, by1=y1-f*2.0, r=f*.6;
+  ctx.fillStyle="#03060c";
+  ctx.beginPath();ctx.roundRect(x0,by0,x1-x0,by1-by0,r);ctx.fill();
+  ctx.strokeStyle="rgba(130,165,220,.3)";ctx.lineWidth=Math.max(1,f*.08);ctx.stroke();
+  /* 파장별 빛을 픽셀에 누적한 뒤 정규화 — 과포화 없이 실제 스펙트럼처럼 */
+  if(hits.length){
+    const NB=Math.max(2,Math.round(x1-x0));
+    const acc=new Float32Array(NB*3);
+    const hw=Math.max(1.2,(x1-x0)/total*1.4);
+    for(const h of hits){
+      const cx=(x1-x0)*h.u, i0=Math.max(0,Math.floor(cx-hw)), i1=Math.min(NB-1,Math.ceil(cx+hw));
+      for(let i=i0;i<=i1;i++){
+        const t=(i-cx)/hw, wgt=Math.exp(-2.2*t*t);
+        acc[i*3]+=h.rgb[0]*WB[0]*wgt;acc[i*3+1]+=h.rgb[1]*WB[1]*wgt;acc[i*3+2]+=h.rgb[2]*WB[2]*wgt;
+      }
+    }
+    let mx=0;for(let i=0;i<NB*3;i++)if(acc[i]>mx)mx=acc[i];
+    const k=mx>0?255/mx*1.35:0;   /* 살짝 밝게 — 모였을 때 흰색이 확실히 보이도록 */
+    ctx.save();
+    ctx.beginPath();ctx.roundRect(x0,by0,x1-x0,by1-by0,r);ctx.clip();
+    for(let i=0;i<NB;i++){
+      const R=Math.min(255,acc[i*3]*k),G=Math.min(255,acc[i*3+1]*k),B=Math.min(255,acc[i*3+2]*k);
+      if(R+G+B<3)continue;
+      ctx.fillStyle=`rgb(${R|0},${G|0},${B|0})`;
+      ctx.fillRect(x0+i,by0,1.6,by1-by0);
+    }
+    ctx.restore();
+  }
+  ctx.strokeStyle="rgba(150,175,215,.45)";ctx.fillStyle="#7d92b8";
+  ctx.lineWidth=Math.max(1,f*.07);
+  ctx.font=`600 ${f*.82}px system-ui,sans-serif`;
+  ctx.textAlign="center";ctx.textBaseline="top";
+  const step=total>200?40:20;
+  for(let mm=0;mm<=total;mm+=step/2){
+    const x=x0+(x1-x0)*(mm/total),big=Math.abs(mm%step)<1e-6;
+    ctx.beginPath();ctx.moveTo(x,by1+2);ctx.lineTo(x,by1+(big?f*.6:f*.35));ctx.stroke();
+    if(big)ctx.fillText((mm-total/2).toFixed(0),x,by1+f*.72);
+  }
+}
+
+/* ================= 사이드 패널 ================= */
+const INFO=[
+ {t:"실험 1 · 백색광의 분산",
+  pts:["손전등 · 슬릿 · 프리즘 · 스크린을 차례로 놓는다.",
+       "프리즘을 통과한 손전등 빛의 모습을 관찰해 본다."]},
+ {t:"탐구 (1) · 한 색깔 빛을 프리즘에 통과",
+  pts:["<b>스크린을 슬릿으로 바꾸어</b> 한 색으로 보이는 좁은 파장대만 통과시킨다.",
+       "색이 바뀌면 굴절률이 달라져 <b>편향각도 달라진다</b>. 하지만 색은 그대로다."]},
+ {t:"탐구 (2) · 반원 모양 유리로 모으기",
+  pts:["프리즘과 스크린 사이에 <b>반원 모양 유리</b>를 놓는다.",
+       "스크린을 천천히 옮기며 무지갯빛이 <b>하나의 선</b>으로 선명하게 모이는 지점을 찾는다."]}
+];
+function updateSide(hits,S){
+  const i=st.tab,info=INFO[i];
+  let band=0,lo=null,hi=null;
+  if(hits.length){
+    const us=hits.map(h=>h.u);
+    band=(Math.max(...us)-Math.min(...us))*S.screen.half*2;
+    lo=hits[0];hi=hits[0];
+    hits.forEach(h=>{if(h.u<lo.u)lo=h;if(h.u>hi.u)hi=h;});
+  }
+  const wls=hits.map(h=>h.wl);
+  const sw=r=>`<span class="swatch" style="background:rgb(${r[0]},${r[1]},${r[2]})"></span>`;
+  let rows=`<tr><th>빛 띠 너비</th><td>${hits.length?band.toFixed(1)+" mm":"—"}</td></tr>`;
+
+  if(i===0){
+    rows+=`<tr><th>위쪽 끝 색</th><td>${lo?sw(lo.rgb)+cName(lo.wl):"—"}</td></tr>`;
+    rows+=`<tr><th>아래쪽 끝 색</th><td>${hi?sw(hi.rgb)+cName(hi.wl):"—"}</td></tr>`;
+    const dR=deviation(700),dV=deviation(400);
+    if(dR&&dV){
+      rows+=`<tr><th>빨강 굴절률 n</th><td>${nPrism(700).toFixed(4)}</td></tr>`;
+      rows+=`<tr><th>보라 굴절률 n</th><td>${nPrism(400).toFixed(4)}</td></tr>`;
+      rows+=`<tr><th>빨강 편향각</th><td style="color:#ff8b7b">${dR.deg.toFixed(2)}°</td></tr>`;
+      rows+=`<tr><th>보라 편향각</th><td style="color:#c39bff">${dV.deg.toFixed(2)}°</td></tr>`;
+      rows+=`<tr><th>분산(편향각 차)</th><td>${(dV.deg-dR.deg).toFixed(2)}°</td></tr>`;
+    }
+  }else if(i===1){
+    const d2=dev2();
+    rows+=`<tr><th>통과한 파장대</th><td>${d2?d2.lo+"~"+d2.hi+" nm":"—"}</td></tr>`;
+    rows+=`<tr><th>한 색으로 보임</th><td>${d2?sw(wl2rgb(d2.wl))+cName(d2.wl):"빛 없음"}</td></tr>`;
+    rows+=`<tr><th>프리즘 2 통과 후</th><td>${d2?sw(wl2rgb(d2.wl))+cName(d2.wl):"—"}</td></tr>`;
+    rows+=`<tr><th>새로 생긴 색</th><td>${hits.length?"없음":"—"}</td></tr>`;
+    rows+=`<tr><th>프리즘 2 굴절률 n</th><td>${d2?d2.n.toFixed(4):"—"}</td></tr>`;
+    rows+=`<tr><th>프리즘 2 입사각</th><td>${d2?d2.inc.toFixed(1)+"°":"—"}</td></tr>`;
+    rows+=`<tr><th>프리즘 2 편향각</th><td>${d2?Math.abs(d2.deg).toFixed(2)+"°":"—"}</td></tr>`;
+  }else{
+    rows+=`<tr><th>프리즘~스크린</th><td>${(st.scr/10).toFixed(1)} cm</td></tr>`;
+    rows+=`<tr><th>반원 유리~스크린</th><td>${((st.scr-1000)/10).toFixed(1)} cm</td></tr>`;
+    rows+=`<tr><th>띠 안의 색</th><td>${hits.length?(band<12?"<span class=\"swatch\" style=\"background:#fff\"></span>흰색":band<30?"흰색에 가까움":"무지갯빛"):"—"}</td></tr>`;
+  }
+
+  let flag="";
+  if(i===0&&hits.length)flag=`<div class="flag hit">보라색이 가장 크게, 빨간색이 가장 작게 굴절한다</div>`;
+  if(i===1)flag=hits.length
+      ?`<div class="flag hit">두 번째 프리즘을 지나도 색이 그대로다</div>`
+      :`<div class="flag">슬릿이 무지갯빛을 벗어나 빛이 통과하지 못한다</div>`;
+  if(i===2)flag=hits.length&&band<12
+      ?`<div class="flag hit">여러 파장대가 가장 좁게 겹쳐 백색에 가까워졌다</div>`
+      :`<div class="flag">스크린을 움직여 띠 너비를 가장 작게 만들어 보자</div>`;
+  const gauge=i===2?`<div class="bar"><i style="width:${Math.min(100,band/1.9)}%"></i></div>
+    <p class="note">막대가 짧을수록 빛이 한 곳에 겹친 것</p>`:"";
+
+  document.getElementById("side").innerHTML=
+   `<div class="blk"><h3>${info.t}</h3><ul class="pts">${info.pts.map(p=>`<li>${p}</li>`).join("")}</ul></div>
+    <div class="blk"><h3>관찰 · 측정값</h3><table class="m">${rows}</table>${gauge}${flag}</div>
+    <div class="blk"><h3>장치 순서</h3>
+      <p class="note" style="margin:0;font-size:12px;line-height:1.7;color:var(--tx2)">
+      손전등 → 슬릿 → 프리즘${i===1?" → 슬릿 → 프리즘 2":i===2?" → 반원 모양 유리":""} → 스크린</p></div>`;
+
+  const v=document.getElementById("dockVal");
+  if(v){
+    if(i===1){const d2=dev2();v.textContent=d2?cName(d2.wl):"빛 없음";
+      v.style.color=d2?bright(wl2rgb(d2.wl)):"var(--tx3)";}
+    else{v.textContent=(st.scr/10).toFixed(1)+" cm";v.style.color="var(--acc2)";}
+  }
+}
+
+function renderDock(){
+  const d=document.getElementById("dock");
+  const cell=(name,id,min,max,step,val,vid)=>
+    `<div class="cell"><span class="name">${name}</span>
+       <input type="range" id="${id}" min="${min}" max="${max}" step="${step}" value="${val}">
+       <span class="val" id="${vid}">—</span></div>`;
+  if(st.tab===0){
+    d.innerHTML=`<p class="msg">장치를 모두 고정한 상태입니다. 스크린에 나타난 빛의 색과 순서, 색마다 다른 편향각을 관찰하세요.</p>`;
+  }else if(st.tab===1){
+    d.innerHTML=cell("슬릿 이동 — 한 색으로 보이는 빛 고르기","rg",-70,70,1,st.sel,"dockVal");
+    document.getElementById("rg").addEventListener("input",e=>{st.sel=+e.target.value;draw();});
+  }else{
+    d.innerHTML=cell("스크린 이동 — 빛이 모이는 지점 찾기","rg",1020,1450,2,st.scr,"dockVal");
+    document.getElementById("rg").addEventListener("input",e=>{st.scr=+e.target.value;draw();});
+  }
+}
+document.getElementById("tabs").addEventListener("click",e=>{
+  const b=e.target.closest(".tab");if(!b)return;
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("on"));
+  b.classList.add("on");st.tab=+b.dataset.i;
+  if(st.tab===1)st.sel=0;
+  if(st.tab===2)st.scr=1450;
+  renderDock();draw();
+});
+
+new ResizeObserver(()=>fit()).observe(document.getElementById("stage"));
+window.addEventListener("orientationchange",()=>setTimeout(fit,260));
+renderDock();fit();
+</script>
+</body>
+</html>

@@ -60,13 +60,21 @@ input, button, textarea, select{ font-family: inherit; }
 .nav-links{ display:flex; align-items:center; gap:22px; font-size:14px; color:var(--text-dim); }
 .nav-links a{ transition: color .15s; }
 .nav-links a:hover{ color:var(--text); }
+.nav-btn{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:9px 18px; border-radius:999px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color:#fff !important; font-weight:700; font-size:13.5px;
+  text-decoration:none; transition: transform .15s ease, box-shadow .15s ease;
+}
+.nav-btn:hover{ transform: translateY(-1px); box-shadow: 0 10px 22px rgba(53,99,232,.35); color:#fff; }
 .nav-cta{
   padding:9px 16px; border-radius: 999px;
   background: var(--surface-2); border:1px solid var(--border);
   font-size:13px; color: var(--text-dim);
 }
 .brand-credit{
-  font-size:10.5px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+  font-size:11px; font-weight:600; letter-spacing:.02em;
   color: var(--text-dim); padding-left:14px; margin-left:12px;
   border-left:1px solid var(--border);
 }
@@ -294,9 +302,14 @@ input, button, textarea, select{ font-family: inherit; }
 .site-footer a{ color: var(--text-faint); }
 .site-footer a:hover{ color: var(--accent-2); }
 .site-footer .credit{
-  text-transform:uppercase; font-size:10.5px; font-weight:600;
-  letter-spacing:.14em; color: var(--text-faint); opacity:.7;
+  font-size:11px; font-weight:600;
+  letter-spacing:.02em; color: var(--text-faint); opacity:.7;
 }
+.admin-link{
+  font-size:11px; color: var(--text-faint); opacity:.35;
+  text-decoration:none; transition: opacity .15s;
+}
+.admin-link:hover{ opacity:.8; }
 
 /* ---------- Viewer page ---------- */
 .viewer-bar{

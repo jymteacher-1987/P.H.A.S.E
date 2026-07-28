@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<title>뉴턴 운동 법칙 시뮬레이터</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#eceff4;
+    --paper:#ffffff;
+    --ink:#0f1f3d;
+    --ink-soft:#5a6a85;
+    --line:#dbe1ea;
+    --line-soft:#eef1f6;
+    --blue:#1d4ed8;
+    --blue-soft:#dbe7ff;
+    --red:#dc2626;
+    --red-soft:#fde2e2;
+    --green:#059669;
+    --green-soft:#d3f1e6;
+    --navy:#0f1f3d;
+    --safe-t:env(safe-area-inset-top,0px);
+    --safe-b:env(safe-area-inset-bottom,0px);
+    --safe-l:env(safe-area-inset-left,0px);
+    --safe-r:env(safe-area-inset-right,0px);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;overscroll-behavior:none;}
+  body{
+    font-family:'Noto Sans KR',sans-serif;color:var(--ink);background:var(--bg);
+    -webkit-user-select:none;user-select:none;touch-action:manipulation;
+  }
+  .app{
+    display:flex;flex-direction:column;height:100dvh;min-height:100dvh;max-width:840px;margin:0 auto;
+    padding:calc(var(--safe-t) + 10px) calc(var(--safe-r) + 12px) calc(var(--safe-b) + 8px) calc(var(--safe-l) + 12px);
+    gap:9px;overflow:hidden;
+  }
+
+  /* Header */
+  header{flex:0 0 auto;}
+  .kicker{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:2.5px;color:var(--blue);text-transform:uppercase;}
+  .h-title{font-weight:900;font-size:clamp(18px,4.8vw,24px);line-height:1.1;margin-top:3px;letter-spacing:-.3px;}
+  .h-rule{height:3px;width:46px;background:var(--navy);margin-top:7px;border-radius:2px;}
+
+  /* Tabs */
+  .tabs{flex:0 0 auto;display:flex;gap:4px;border-bottom:1px solid var(--line);}
+  .tab{
+    flex:1 1 0;min-height:54px;border:none;background:transparent;cursor:pointer;
+    font-family:'Noto Sans KR',sans-serif;color:var(--ink-soft);
+    padding:6px 3px 8px;border-bottom:3px solid transparent;margin-bottom:-1px;
+    display:flex;flex-direction:column;align-items:center;gap:2px;transition:color .15s,border-color .15s;line-height:1.1;
+  }
+  .tab .num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--blue);font-weight:700;letter-spacing:1px;}
+  .tab .nm{font-weight:800;font-size:clamp(12px,3.5vw,15px);white-space:nowrap;}
+  .tab .ky{font-weight:600;font-size:clamp(10px,2.9vw,12px);color:var(--ink-soft);white-space:nowrap;}
+  .tab.active{color:var(--navy);border-bottom-color:var(--navy);}
+  .tab.active .num{color:var(--navy);}
+  .tab.active .nm{color:var(--navy);}
+  .tab.active .ky{color:var(--navy);}
+
+  /* Panels */
+  .panel{flex:1 1 auto;display:none;flex-direction:column;gap:9px;min-height:0;}
+  .panel.active{display:flex;}
+
+  .stage{
+    flex:1 1 auto;min-height:0;position:relative;border-radius:12px;overflow:hidden;
+    background:var(--paper);border:1px solid var(--line);
+    box-shadow:0 8px 26px -16px rgba(15,31,61,.35);
+  }
+  .stage::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg,var(--blue),#3b82f6 60%,transparent);z-index:3;pointer-events:none;}
+  canvas{display:block;width:100%;height:100%;}
+
+  /* Telemetry chips on canvas */
+  .chips{position:absolute;top:24px;left:11px;display:flex;gap:7px;flex-wrap:wrap;z-index:2;pointer-events:none;}
+  .chip{background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:8px;padding:5px 9px;min-width:78px;}
+  .chip .l{font-size:9px;font-weight:700;letter-spacing:.6px;color:var(--ink-soft);}
+  .chip .v{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:clamp(14px,4vw,18px);line-height:1.15;}
+  .chip .u{font-size:10px;color:var(--ink-soft);font-weight:500;}
+  .v-blue{color:var(--blue);} .v-red{color:var(--red);} .v-green{color:var(--green);} .v-navy{color:var(--navy);}
+
+  /* Teacher note */
+  .note{
+    flex:0 0 auto;background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--navy);
+    border-radius:10px;padding:9px 12px;display:flex;gap:9px;align-items:flex-start;min-height:58px;
+  }
+  .note .tag{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:1px;color:#fff;
+    background:var(--navy);border-radius:5px;padding:3px 6px;flex:0 0 auto;margin-top:1px;}
+  .note .txt{font-size:13px;line-height:1.5;font-weight:500;}
+  .note.b{border-left-color:var(--blue);} .note.b .tag{background:var(--blue);}
+  .note.r{border-left-color:var(--red);} .note.r .tag{background:var(--red);}
+  .note.g{border-left-color:var(--green);} .note.g .tag{background:var(--green);}
+
+  /* Controls */
+  .controls{flex:0 0 auto;display:flex;flex-direction:column;gap:8px;}
+  .seg{display:flex;gap:7px;}
+  .seg-btn{
+    flex:1 1 0;min-height:50px;border:1px solid var(--line);border-radius:11px;background:var(--paper);
+    color:var(--ink-soft);font-family:'Noto Sans KR',sans-serif;font-weight:700;font-size:12px;line-height:1.15;
+    cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 4px;
+    transition:transform .07s,border-color .15s,background .15s,color .15s;text-align:center;
+  }
+  .seg-btn:active{transform:scale(.96);}
+  .seg-btn .ic{font-size:18px;line-height:1;filter:grayscale(.5);}
+  .seg-btn.active .ic{filter:none;}
+  .seg-btn.active{color:var(--navy);border-color:var(--navy);background:#f4f7fc;box-shadow:inset 0 0 0 1px var(--navy);}
+
+  .row{display:flex;gap:8px;}
+  .field{flex:1 1 0;background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:8px 12px;}
+  .field .top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px;}
+  .field .nm{font-size:12px;font-weight:700;}
+  .field .nm small{color:var(--ink-soft);font-weight:500;}
+  .field .fv{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px;}
+
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:38px;background:transparent;cursor:pointer;margin:0;}
+  input[type=range]:disabled{opacity:.4;cursor:not-allowed;}
+  input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:5px;background:var(--line);}
+  input[type=range]::-moz-range-track{height:6px;border-radius:5px;background:var(--line);}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:28px;height:28px;border-radius:50%;
+    margin-top:-11px;background:#fff;border:3px solid var(--blue);box-shadow:0 2px 7px rgba(15,31,61,.28);}
+  input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:#fff;border:3px solid var(--blue);box-shadow:0 2px 7px rgba(15,31,61,.28);}
+  input.r-red::-webkit-slider-thumb{border-color:var(--red);} input.r-red::-moz-range-thumb{border-color:var(--red);}
+  input.r-navy::-webkit-slider-thumb{border-color:var(--navy);} input.r-navy::-moz-range-thumb{border-color:var(--navy);}
+
+  button.act{
+    flex:1 1 0;min-height:52px;border-radius:12px;cursor:pointer;border:1px solid var(--line);background:var(--paper);
+    font-family:'Noto Sans KR',sans-serif;font-weight:700;font-size:14px;color:var(--ink);
+    display:flex;align-items:center;justify-content:center;gap:6px;transition:transform .07s,background .15s;
+  }
+  button.act:active{transform:scale(.96);}
+  button.act .ic{font-size:17px;}
+  button.primary{flex:2 1 0;color:#fff;font-size:16px;background:var(--blue);border-color:var(--blue);
+    box-shadow:0 6px 16px -8px rgba(29,78,216,.7);}
+  button.primary.active{background:#2f6bff;}
+  button.ghost{color:var(--ink-soft);}
+  button.ghost.active{background:#f4f7fc;color:var(--navy);border-color:var(--line);}
+
+  .formula{
+    background:#f4f7fc;border:1px solid var(--line);border-radius:11px;padding:9px 12px;text-align:center;
+    font-family:'JetBrains Mono',monospace;font-weight:700;font-size:clamp(14px,4.2vw,18px);color:var(--navy);
+  }
+  .formula .hl{color:var(--blue);} .formula .hr{color:var(--red);} .formula .hg{color:var(--green);}
+  .formula small{display:block;font-family:'Noto Sans KR',sans-serif;font-size:10px;color:var(--ink-soft);font-weight:600;letter-spacing:.5px;margin-bottom:3px;}
+
+  @media(min-height:740px){ .note{min-height:66px;} .note .txt{font-size:14px;} }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="kicker">Newton&rsquo;s Laws of Motion</div>
+    <div class="h-title">뉴턴 운동 법칙 시뮬레이터</div>
+    <div class="h-rule"></div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="law1"><span class="num">01</span><span class="nm">제1법칙</span><span class="ky">관성</span></button>
+    <button class="tab" data-tab="law2"><span class="num">02</span><span class="nm">제2법칙</span><span class="ky">가속도</span></button>
+    <button class="tab" data-tab="law3"><span class="num">03</span><span class="nm">제3법칙</span><span class="ky">작용·반작용</span></button>
+  </div>
+
+  <!-- ================= LAW 1 ================= -->
+  <section class="panel active" id="law1">
+    <div class="stage">
+      <div class="chips">
+        <div class="chip"><div class="l">속도</div><div class="v v-green"><span id="l1-speed">0.00</span> <span class="u">m/s</span></div></div>
+        <div class="chip"><div class="l">알짜힘</div><div class="v v-navy"><span id="l1-net">0.0</span> <span class="u">N</span></div></div>
+      </div>
+      <canvas id="cv1"></canvas>
+    </div>
+    <div class="note" id="note1"><span class="tag">NOTE</span><div class="txt" id="note1txt">정지한 물체는 힘을 받기 전까지 계속 멈춰 있습니다. 밀기 버튼을 눌러 보세요.</div></div>
+    <div class="controls">
+      <div class="seg">
+        <button class="seg-btn active" data-floor="normal"><span class="ic">🪨</span>일반 바닥</button>
+        <button class="seg-btn" data-floor="ice"><span class="ic">🧊</span>얼음판</button>
+        <button class="seg-btn" data-floor="none"><span class="ic">✨</span>마찰 없는<br>바닥</button>
+      </div>
+      <div class="row">
+        <button class="act primary" id="l1-push"><span class="ic">👉</span> 밀기 (꾹 누르기)</button>
+        <button class="act ghost" id="l1-reset"><span class="ic">↺</span> 다시</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= LAW 2 ================= -->
+  <section class="panel" id="law2">
+    <div class="stage">
+      <canvas id="cv2"></canvas>
+    </div>
+    <div class="formula" id="l2-formula">
+      <small>현재 가속도</small>
+      a = <span class="hl">F</span> / <span class="hr">m</span> = <span class="hl" id="l2-fF">6</span> / <span class="hr" id="l2-fm">3</span> = <span class="hg" id="l2-fa">2.00</span> m/s²
+    </div>
+    <div class="note b" id="note2"><span class="tag">NOTE</span><div class="txt" id="note2txt">힘이 크거나 질량이 작을수록 가속도가 커집니다. 속도-시간 그래프의 기울기가 바로 그 가속도입니다.</div></div>
+    <div class="controls">
+      <div class="row">
+        <div class="field">
+          <div class="top"><div class="nm">힘 <small>F</small></div><div class="fv v-blue"><span id="l2-Fval">6</span> N</div></div>
+          <input type="range" id="l2-F" min="2" max="12" step="1" value="6">
+        </div>
+        <div class="field">
+          <div class="top"><div class="nm">질량 <small>m</small></div><div class="fv v-navy"><span id="l2-mval">3</span> kg</div></div>
+          <input type="range" id="l2-m" class="r-navy" min="1" max="6" step="1" value="3">
+        </div>
+      </div>
+      <div class="row">
+        <button class="act primary" id="l2-go"><span class="ic">▶</span> 출발</button>
+        <button class="act ghost" id="l2-reset"><span class="ic">↺</span> 다시</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= LAW 3 ================= -->
+  <section class="panel" id="law3">
+    <div class="stage">
+      <canvas id="cv3"></canvas>
+    </div>
+    <div class="formula" id="l3-formula">
+      <small>서로 주고받는 힘 · 작용과 반작용</small>
+      <span class="hr">A가 B를</span> 미는 힘 = <span class="hl">B가 A를</span> 미는 힘
+      <small style="margin-top:6px;margin-bottom:0;">두 힘은 크기가 같고 방향만 반대입니다</small>
+    </div>
+    <div class="note g" id="note3"><span class="tag">NOTE</span><div class="txt" id="note3txt">밀기 버튼을 누르면 두 사람이 맞닿은 채 서로를 밉니다. 이때 주고받는 두 힘은 크기가 같고 방향만 반대입니다.</div></div>
+    <div class="controls">
+      <div class="row">
+        <div class="field">
+          <div class="top"><div class="nm">A 질량 <small>왼쪽</small></div><div class="fv v-blue"><span id="l3-mAval">2</span> kg</div></div>
+          <input type="range" id="l3-mA" min="1" max="8" step="1" value="2">
+        </div>
+        <div class="field">
+          <div class="top"><div class="nm">B 질량 <small>오른쪽</small></div><div class="fv" style="color:#7c3aed"><span id="l3-mBval">6</span> kg</div></div>
+          <input type="range" id="l3-mB" class="r-navy" min="1" max="8" step="1" value="6">
+        </div>
+      </div>
+      <div class="row">
+        <button class="act primary" id="l3-push"><span class="ic">💥</span> 밀기 (꾹 누르기)</button>
+        <button class="act ghost" id="l3-pause"><span class="ic">⏸</span> 일시정지</button>
+        <button class="act ghost" id="l3-reset"><span class="ic">↺</span> 다시</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- shared helpers ----------
+  function setupCanvas(cv){
+    const r = cv.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+    const w = Math.max(1, Math.round(r.width));
+    const h = Math.max(1, Math.round(r.height));
+    cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr);
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    cv._w = w; cv._h = h;
+    return ctx;
+  }
+  function roundRect(ctx,x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);
+    ctx.arcTo(x,y,x+w,y,r);
+    ctx.closePath();
+  }
+  function fmtN(v){ const a=Math.abs(v); return (Number.isInteger(a)?a.toString():a.toFixed(1))+' N'; }
+  // arrow with label + value. labelSide: 'above'(default) | 'below'
+  function arrow(ctx,x1,y1,x2,y2,color,label,valTxt,lineW,labelSide){
+    const w=lineW||5, head=Math.max(11,w*2.1), ang=Math.atan2(y2-y1,x2-x1);
+    ctx.save();
+    ctx.strokeStyle=color; ctx.fillStyle=color; ctx.lineWidth=w; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2-Math.cos(ang)*head, y2-Math.sin(ang)*head); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x2,y2);
+    ctx.lineTo(x2-head*Math.cos(ang-0.42), y2-head*Math.sin(ang-0.42));
+    ctx.lineTo(x2-head*Math.cos(ang+0.42), y2-head*Math.sin(ang+0.42));
+    ctx.closePath(); ctx.fill();
+    const mx=(x1+x2)/2;
+    ctx.textAlign='center'; ctx.fillStyle=color;
+    if(labelSide==='below'){
+      const by=Math.max(y1,y2);
+      if(valTxt){ ctx.font="700 13px 'JetBrains Mono',monospace"; ctx.fillText(valTxt, mx, by+17); }
+      if(label){ ctx.font="700 11px 'Noto Sans KR',sans-serif"; ctx.fillText(label, mx, by+31); }
+    } else {
+      const ty=Math.min(y1,y2);
+      if(label){ ctx.font="700 11px 'Noto Sans KR',sans-serif"; ctx.fillText(label, mx, ty-25); }
+      if(valTxt){ ctx.font="700 13px 'JetBrains Mono',monospace"; ctx.fillText(valTxt, mx, ty-10); }
+    }
+    ctx.restore();
+  }
+  const COL={blue:'#1d4ed8',red:'#dc2626',green:'#059669',navy:'#0f1f3d',ink:'#0f1f3d',soft:'#9aa6ba',line:'#e3e8f0',purple:'#7c3aed'};
+
+  // press & hold binding (mouse + touch)
+  function bindHold(btn, on, off){
+    const a=e=>{e.preventDefault();on();}, b=e=>{e.preventDefault();off();};
+    btn.addEventListener('mousedown',a); btn.addEventListener('touchstart',a,{passive:false});
+    ['mouseup','mouseleave'].forEach(ev=>btn.addEventListener(ev,b));
+    ['touchend','touchcancel'].forEach(ev=>btn.addEventListener(ev,b,{passive:false}));
+    window.addEventListener('mouseup',off);
+  }
+
+  /* ======================================================
+     LAW 1 — INERTIA
+  ====================================================== */
+  const Law1 = (function(){
+    const cv=document.getElementById('cv1'); let ctx=null;
+    const PUSH=10, MAXF=10, PXM=46;
+    const FRIC={normal:8, ice:1, none:0};
+    const s={v:0,dist:0,floor:'normal',pushing:false,appliedNow:0,fricNow:0};
+    let lastKey='';
+    const noteEl=document.getElementById('note1'), noteTx=document.getElementById('note1txt');
+    function setNote(key,cls,txt){ if(key===lastKey)return; lastKey=key; noteEl.className='note '+cls; noteTx.textContent=txt; }
+
+    function resize(){ ctx=setupCanvas(cv); }
+    function reset(){ s.v=0; s.dist=0; s.pushing=false; document.getElementById('l1-push').classList.remove('active'); }
+
+    function update(dt){
+      const eff=FRIC[s.floor];
+      const applied=s.pushing?PUSH:0;
+      s.v += applied*dt;
+      
+      // 착시 완화를 위해 눈금 간격(sp)을 확대한 것만 유지하고, 속도 상한(물리적 오개념)은 두지 않습니다.
+      
+      let fric=0;
+      if(Math.abs(s.v)>1e-6){
+        const dir=Math.sign(s.v); fric=-dir*eff;
+        const dv=eff*dt;
+        if(dv>=Math.abs(s.v)) s.v=0; else s.v-=dir*dv;
+      }
+      if(!s.pushing && Math.abs(s.v)<1e-4) s.v=0;
+      const atRest=(s.v===0 && !s.pushing);
+      let net = atRest?0:(applied+fric);
+      if(atRest) fric=0;
+      s.dist += s.v*dt;
+      s.appliedNow=applied; s.fricNow=Math.abs(fric);
+
+      document.getElementById('l1-speed').textContent=Math.abs(s.v).toFixed(2);
+      const nr=Math.abs(net)<0.05?0:net;
+      document.getElementById('l1-net').textContent=(nr>0?'+':'')+nr.toFixed(1);
+
+      const moving=Math.abs(s.v)>0.02;
+      if(s.pushing) setNote('push','b','미는 힘이 작용해 알짜힘이 0이 아닙니다. 그래서 물체가 점점 빨라집니다.');
+      else if(!moving) setNote('stop','','정지한 물체는 힘을 받기 전까지 계속 멈춰 있습니다. 밀기 버튼을 눌러 보세요.');
+      else if(s.floor==='none') setNote('none','g','마찰이 없어 물체에 작용하는 힘이 하나도 없습니다. 알짜힘이 0이므로 속도가 변하지 않고 계속 나아갑니다.');
+      else if(s.floor==='ice') setNote('ice','b','마찰이 작은 얼음판에서는 아주 천천히 느려집니다. 마찰이 전혀 없다면 어떻게 될까요?');
+      else setNote('fric','r','운동 반대 방향으로 마찰력이 작용해 속도가 점점 줄어듭니다.');
+    }
+
+    function draw(){
+      const W=cv._w,H=cv._h; ctx.clearRect(0,0,W,H);
+      const groundY=H*0.70, boxX=W*0.46, box=Math.max(44,Math.min(74,H*0.16));
+      // floor
+      ctx.fillStyle='#f4f7fc'; ctx.fillRect(0,groundY,W,H-groundY);
+      if(s.floor==='none'){ ctx.fillStyle='rgba(5,150,105,.06)'; ctx.fillRect(0,groundY,W,H-groundY); }
+      else if(s.floor==='ice'){ ctx.fillStyle='rgba(29,78,216,.06)'; ctx.fillRect(0,groundY,W,H-groundY); }
+      ctx.strokeStyle=COL.line; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(0,groundY); ctx.lineTo(W,groundY); ctx.stroke();
+      
+      // 바닥 눈금 (모션 블러 적용: 고속 이동 시 잔상을 선으로 이어주어 방향 헷갈림 완화)
+      const sp=120, off=((s.dist*PXM)%sp+sp)%sp;
+      const dx = s.v * PXM * (1/60); // 1프레임당 이동 픽셀 (대략 60fps 기준)
+      ctx.strokeStyle='#cdd6e3'; ctx.lineWidth=2;
+      for(let x=-sp;x<W+sp;x+=sp){ 
+        const px=x-off; 
+        ctx.beginPath(); 
+        ctx.moveTo(px,groundY+5); 
+        ctx.lineTo(px,groundY+17); 
+        if(Math.abs(dx) > 3) {
+          // 속도가 빠를 때, 이전 프레임 위치 방향으로 가로 꼬리(모션 블러)를 그려줍니다.
+          ctx.moveTo(px, groundY+11);
+          ctx.lineTo(px + dx * 2.5, groundY+11);
+        }
+        ctx.stroke(); 
+      }
+      // motion streaks
+      const spd=Math.abs(s.v);
+      if(spd>0.6){ ctx.save(); ctx.globalAlpha=Math.min(.4,spd/9); ctx.strokeStyle=s.floor!=='normal'?COL.blue:COL.soft; ctx.lineWidth=2;
+        const len=Math.min(38,spd*5);
+        for(let i=0;i<4;i++){ const yy=groundY-box*0.75+i*box*0.18; const sx=boxX-box*0.6-i*8;
+          ctx.beginPath(); ctx.moveTo(sx,yy); ctx.lineTo(sx-len,yy); ctx.stroke(); }
+        ctx.restore(); }
+      // box
+      const top=groundY-box;
+      ctx.save(); ctx.fillStyle='rgba(15,31,61,.12)'; ctx.beginPath(); ctx.ellipse(boxX,groundY+3,box*0.55,6,0,0,7); ctx.fill(); ctx.restore();
+      const g=ctx.createLinearGradient(0,top,0,groundY); g.addColorStop(0,'#2b4a86'); g.addColorStop(1,'#16294d');
+      roundRect(ctx,boxX-box/2,top,box,box,9); ctx.fillStyle=g; ctx.fill();
+      ctx.lineWidth=1.5; ctx.strokeStyle='rgba(15,31,61,.5)'; ctx.stroke();
+      ctx.fillStyle='rgba(255,255,255,.9)'; ctx.font="700 13px 'JetBrains Mono',monospace"; ctx.textAlign='center'; ctx.fillText('1kg',boxX,top+box/2+5);
+      // arrows
+      const midY=top+box/2, edge=box/2+8;
+      const maxL=Math.min(W*0.24,120);
+      if(s.appliedNow>0.01){ const L=(s.appliedNow/MAXF)*maxL+12; arrow(ctx,boxX+edge,midY,boxX+edge+L,midY,COL.blue,'미는 힘',fmtN(s.appliedNow)); }
+      if(s.fricNow>0.01){ const dir=Math.sign(s.v)||1; const L=(s.fricNow/MAXF)*maxL+12; arrow(ctx,boxX-dir*edge,midY,boxX-dir*edge-dir*L,midY,COL.red,'마찰력',fmtN(s.fricNow), 5, dir>0?'below':'above'); }
+    }
+
+    function bind(){
+      document.querySelectorAll('#law1 .seg-btn').forEach(btn=>{
+        btn.addEventListener('click',()=>{ s.floor=btn.dataset.floor; document.querySelectorAll('#law1 .seg-btn').forEach(b=>b.classList.toggle('active',b===btn)); lastKey=''; });
+      });
+      const pb=document.getElementById('l1-push');
+      bindHold(pb, ()=>{s.pushing=true;pb.classList.add('active');}, ()=>{s.pushing=false;pb.classList.remove('active');});
+      document.getElementById('l1-reset').addEventListener('click',reset);
+    }
+    return {resize,reset,update,draw,bind};
+  })();
+
+  /* ======================================================
+     LAW 2 — F = m a
+  ====================================================== */
+  const Law2 = (function(){
+    const cv=document.getElementById('cv2'); let ctx=null;
+    const TRACK=10;          // meters (box loops around it)
+    const RUN_T=12;          // seconds — fixed X-axis
+    const VMAX=20;           // m/s — fixed Y-axis (so equal accel = straight line)
+    const MAXR=6;            // max runs kept for comparison
+    const PALETTE=['#dc2626','#ea580c','#ca8a04','#16a34a','#2563eb','#9333ea'];
+    const s={F:6,m:3,running:false,t:0,v:0,dist:0,runs:[],colorSeq:0}; // runs:{pts,F,m,color}
+    let cur=null;
+    function a(){ return s.F/s.m; }
+    function resize(){ ctx=setupCanvas(cv); }
+    function syncFormula(){
+      document.getElementById('l2-Fval').textContent=s.F;
+      document.getElementById('l2-mval').textContent=s.m;
+      document.getElementById('l2-fF').textContent=s.F;
+      document.getElementById('l2-fm').textContent=s.m;
+      document.getElementById('l2-fa').textContent=a().toFixed(2);
+    }
+    function setLock(lock){
+      document.getElementById('l2-F').disabled=lock;
+      document.getElementById('l2-m').disabled=lock;
+      const go=document.getElementById('l2-go'); go.style.opacity=lock?'.4':'1';
+    }
+    function start(){
+      if(s.running) return;                         // 진행 중엔 무시
+      if(s.runs.length>=MAXR) s.runs.shift();        // 가득 차면 가장 오래된 것 제거
+      cur={pts:[{t:0,v:0}], F:s.F, m:s.m, a:a(), color:PALETTE[s.colorSeq % PALETTE.length]};
+      s.colorSeq++;
+      s.runs.push(cur); s.running=true; s.t=0; s.v=0; s.dist=0;
+      setLock(true);                                 // 그리는 동안 슬라이더 잠금
+      document.getElementById('note2').className='note g';
+      document.getElementById('note2txt').textContent='일정한 힘이 일정한 가속도를 만들어 그래프가 곧은 직선으로 올라갑니다. 다 그려지면 슬라이더가 풀립니다.';
+    }
+    function reset(){
+      s.running=false; s.t=0; s.v=0; s.dist=0; s.runs=[]; cur=null; s.colorSeq=0;
+      setLock(false);
+      document.getElementById('note2').className='note b';
+      document.getElementById('note2txt').textContent='출발할 때마다 속도-시간 그래프가 색깔별로 쌓입니다. 힘이 크거나 질량이 작을수록 기울기, 곧 가속도가 커집니다.';
+    }
+    function update(dt){
+      if(s.running){
+        s.t += dt; s.v += cur.a*dt; s.dist += s.v*dt;   // cur.a = 출발 시점 가속도(중간에 안 바뀜)
+        let stop=null;
+        if(s.v>=VMAX){ s.v=VMAX; stop='top'; }
+        else if(s.t>=RUN_T){ stop='time'; }
+        cur.pts.push({t:Math.min(s.t,RUN_T), v:s.v});
+        if(stop){
+          s.running=false; cur=null; setLock(false);
+          document.getElementById('note2').className='note b';
+          document.getElementById('note2txt').textContent = (stop==='top')
+            ? '속도가 최댓값에 닿아 멈췄지만 기울기는 처음 그대로 일정합니다. 조건을 바꿔 다시 출발하면 다른 색으로 비교됩니다.'
+            : '그래프가 완성되어 그대로 남았습니다. 힘이나 질량을 바꿔 다시 출발하면 다른 색 직선으로 기울기를 비교할 수 있습니다.';
+        }
+      }
+    }
+
+    function draw(){
+      const W=cv._w,H=cv._h; ctx.clearRect(0,0,W,H);
+      const splitY=H*0.46;
+      const Lm=50, Rm=22, usable=W-Lm-Rm;
+      // ---- speed readout (top-left, inside canvas) ----
+      ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+      ctx.fillStyle=COL.soft; ctx.font="600 11px 'Noto Sans KR',sans-serif"; ctx.fillText('속도', Lm, 16);
+      ctx.fillStyle=COL.green; ctx.font="700 16px 'JetBrains Mono',monospace"; ctx.fillText(Math.abs(s.v).toFixed(2)+' m/s', Lm+34, 17);
+      // ---- track (box loops, laps get faster as v grows) ----
+      const baseY=splitY*0.80;
+      ctx.strokeStyle=COL.line; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(Lm,baseY); ctx.lineTo(W-Rm,baseY); ctx.stroke();
+      const bs=Math.max(24,Math.min(38,H*0.09));
+      const lapPos=((s.dist % TRACK)+TRACK)%TRACK;
+      const bx=Lm+(lapPos/TRACK)*usable, top=baseY-bs;
+      // motion streak
+      if(s.v>0.5){ ctx.save(); ctx.globalAlpha=Math.min(.35,s.v/20); ctx.strokeStyle=COL.soft; ctx.lineWidth=2;
+        for(let i=0;i<4;i++){ const yy=top+4+i*(bs-8)/3; ctx.beginPath(); ctx.moveTo(bx-bs/2-i*7,yy); ctx.lineTo(bx-bs/2-i*7-Math.min(30,s.v*2),yy); ctx.stroke(); } ctx.restore(); }
+      const g=ctx.createLinearGradient(0,top,0,baseY); g.addColorStop(0,'#2b4a86'); g.addColorStop(1,'#16294d');
+      roundRect(ctx,bx-bs/2,top,bs,bs,7); ctx.fillStyle=g; ctx.fill();
+      ctx.fillStyle='#fff'; ctx.font="700 10px 'JetBrains Mono',monospace"; ctx.textAlign='center'; ctx.fillText(s.m+'kg',bx,top+bs/2+4);
+      // force arrow (length ∝ F)
+      const maxLen=Math.min(usable*0.4,150); const L=(s.F/12)*maxLen+12;
+      arrow(ctx,bx+bs/2+6,top+bs/2,bx+bs/2+6+L,top+bs/2,COL.blue,'힘 F',fmtN(s.F));
+
+      // ---- graph (full width); legend sits BELOW the graph ----
+      const gx=Lm, gy=splitY+8;
+      const legRows=s.runs.length?Math.ceil(s.runs.length/3):0;
+      const legH=s.runs.length?(legRows*16+22):0;
+      const gw=W-gx-Rm, gh=H-gy-26-legH;
+      ctx.fillStyle='#fafbfd'; roundRect(ctx,gx,gy,gw,gh,6); ctx.fill();
+      ctx.strokeStyle=COL.line; ctx.lineWidth=1; ctx.stroke();
+      ctx.strokeStyle='#c7d0de'; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(gx,gy); ctx.lineTo(gx,gy+gh); ctx.lineTo(gx+gw,gy+gh); ctx.stroke();
+      // axis labels
+      ctx.fillStyle=COL.soft; ctx.font="600 9px 'JetBrains Mono',monospace";
+      ctx.save(); ctx.translate(gx-36, gy+gh/2); ctx.rotate(-Math.PI/2); ctx.textAlign='center'; ctx.fillText('속도 v (m/s)',0,0); ctx.restore();
+      // ---- fixed scale: equal acceleration always renders as a straight line ----
+      const maxT=RUN_T, maxV=VMAX;
+      const X=t=>gx+(t/maxT)*gw, Y=v=>gy+gh-(v/maxV)*gh;
+      ctx.strokeStyle='#eef2f8'; ctx.lineWidth=1;
+      for(let gv=0; gv<=maxV; gv+=5){ const yy=Y(gv); ctx.beginPath(); ctx.moveTo(gx,yy); ctx.lineTo(gx+gw,yy); ctx.stroke();
+        ctx.fillStyle=COL.soft; ctx.font="600 8px 'JetBrains Mono',monospace"; ctx.textAlign='right'; ctx.fillText(gv,gx-3,yy+3); }
+      for(let gt=0; gt<=maxT; gt+=3){ const xx=X(gt); ctx.strokeStyle='#f1f4f9'; ctx.beginPath(); ctx.moveTo(xx,gy); ctx.lineTo(xx,gy+gh); ctx.stroke();
+        ctx.fillStyle=COL.soft; ctx.font="600 8px 'JetBrains Mono',monospace"; ctx.textAlign='center'; ctx.fillText(gt,xx,gy+gh+10); }
+      ctx.fillStyle=COL.soft; ctx.font="600 9px 'JetBrains Mono',monospace"; ctx.textAlign='center'; ctx.fillText('시간 t (s)', gx+gw/2, gy+gh+21);
+      // plot each run
+      for(const r of s.runs){ if(r.pts.length<2) continue; const live=(r===cur);
+        ctx.save(); ctx.globalAlpha=live?1:.92; ctx.strokeStyle=r.color; ctx.lineWidth=live?3:2.4; ctx.lineJoin='round';
+        ctx.beginPath(); ctx.moveTo(X(r.pts[0].t),Y(r.pts[0].v));
+        for(let i=1;i<r.pts.length;i++) ctx.lineTo(X(r.pts[i].t),Y(r.pts[i].v)); ctx.stroke(); ctx.restore(); }
+      // legend — below the graph, in a 3-column grid (outside the plot, never overlaps)
+      if(s.runs.length){
+        const cols=3, cw=gw/cols, ly0=gy+gh+36;
+        ctx.textAlign='left';
+        s.runs.forEach((r,i)=>{
+          const cxp=gx+(i%cols)*cw, cyp=ly0+Math.floor(i/cols)*16;
+          ctx.fillStyle=r.color; roundRect(ctx,cxp,cyp-8,14,5,3); ctx.fill();
+          ctx.fillStyle=COL.ink; ctx.font="700 9px 'JetBrains Mono',monospace";
+          ctx.fillText('F'+r.F+' m'+r.m+' a'+r.a.toFixed(1), cxp+19, cyp-1);
+        });
+      }
+    }
+
+    function bind(){
+      const F=document.getElementById('l2-F'), m=document.getElementById('l2-m');
+      F.addEventListener('input',()=>{s.F=+F.value;syncFormula();});
+      m.addEventListener('input',()=>{s.m=+m.value;syncFormula();});
+      document.getElementById('l2-go').addEventListener('click',start);
+      document.getElementById('l2-reset').addEventListener('click',reset);
+      syncFormula();
+    }
+    return {resize,reset,update,draw,bind};
+  })();
+
+  /* ======================================================
+     LAW 3 — ACTION & REACTION  (forces only while in contact)
+  ====================================================== */
+  const Law3 = (function(){
+    const cv=document.getElementById('cv3'); let ctx=null;
+    const FORCE=24;          // N — 두 물체가 받는 힘의 크기(항상 동일)
+    const SLOW=0.16;         // 접촉 동안 슬로모션 → 힘을 충분히 관찰
+    const GLIDE_SLOW=0.26;   // 분리 후 미끄러짐을 늦춰 관찰 쉽게(비율은 유지)
+    const VMAX_PUSH=3;       // 누적 속도 상한 → 가벼운 쪽이 화면 밖으로 튀지 않게
+    const SCALE=46;          // px per meter
+    
+    // [FIX] paused 상태 추가
+    const s={mA:2,mB:6,vA:0,vB:0,vA0:0,vB0:0,gA:0,gB:0,phase:'idle',pulse:0,paused:false};
+    
+    function resize(){ ctx=setupCanvas(cv); }
+    function note(cls,txt){ document.getElementById('note3').className='note '+cls; document.getElementById('note3txt').textContent=txt; }
+    function boxSize(){ return Math.max(46,Math.min(74,(cv._h||300)*0.19)); }
+    
+    function reset(){
+      s.vA=0; s.vB=0; s.vA0=0; s.vB0=0; s.gA=0; s.gB=0; s.phase='idle'; s.paused=false;
+      const pb = document.getElementById('l3-pause');
+      if(pb){ pb.innerHTML = '<span class="ic">⏸</span> 일시정지'; pb.classList.remove('active'); }
+      note('g','밀기 버튼을 누르면 두 사람이 맞닿은 채 서로를 밉니다. 이때 주고받는 두 힘은 크기가 같고 방향만 반대입니다.');
+    }
+    
+    function startPush(){
+      if(s.phase==='glide') return;          // 미끄러지는 중엔 ‘다시’ 후에
+      s.phase='push';
+      s.paused=false; // 시작 시 일시정지 해제
+      const pb = document.getElementById('l3-pause');
+      if(pb){ pb.innerHTML = '<span class="ic">⏸</span> 일시정지'; pb.classList.remove('active'); }
+      note('r','접촉하는 동안에만 두 힘이 함께 나타납니다. 질량을 바꿔도 두 힘의 크기는 언제나 똑같습니다.');
+    }
+    
+    function gcd(a,b){ return b?gcd(b,a%b):a; }
+    
+    function endPush(){
+      if(s.phase!=='push') return;
+      if(Math.abs(s.vA)<0.02 && Math.abs(s.vB)<0.02){ s.phase='idle'; return; }
+      // 운동량 보존(vA:vB = mB:mA)을 소수 1자리로 깔끔하게 스냅 → 화면 곱이 정확히 일치
+      const g=gcd(s.mA,s.mB), k0=s.mB/g, j0=s.mA/g;
+      const n=Math.max(1, Math.round(Math.abs(s.vA)/(k0/10)));
+      s.vA=-(n*k0/10); s.vB=(n*j0/10);   // A는 왼쪽(−), B는 오른쪽(+)
+      s.vA0=s.vA; s.vB0=s.vB;
+      s.phase='glide';
+      
+      // 일시정지 상태가 아닐 때만 텍스트 갱신 (관찰 방해 방지)
+      if(!s.paused) {
+        note('g','손을 떼면 힘이 사라지고 두 사람은 등속으로 미끄러집니다. 같은 힘을 받아도 가벼운 쪽이 더 빠릅니다.');
+      }
+    }
+    
+    function update(dt){
+      // [FIX] 일시정지 중이면 업데이트 건너뜀
+      if(s.paused) return;
+      
+      s.pulse+=dt;
+      if(s.phase==='push'){
+        // 접촉 유지(위치 고정), 속도만 누적 → 힘은 ‘접촉 중에만’ 존재
+        const aA=FORCE/s.mA, aB=FORCE/s.mB, pdt=dt*SLOW;
+        const nvA=s.vA-aA*pdt, nvB=s.vB+aB*pdt;
+        // 빠른 쪽이 상한에 닿으면 양쪽 누적 정지(운동량 비율 유지 + 관찰성)
+        if(Math.max(Math.abs(nvA),Math.abs(nvB))<=VMAX_PUSH){ s.vA=nvA; s.vB=nvB; }
+      } else if(s.phase==='glide'){
+        s.gA+=s.vA*dt*GLIDE_SLOW; s.gB+=s.vB*dt*GLIDE_SLOW;   // 천천히 미끄러져 관찰 쉬움
+        const W=cv._w||360, box=boxSize(), half=box*0.34, cx0=W/2, lim=box*0.55;
+        if(cx0-half+s.gA*SCALE < lim){ s.gA=(lim-(cx0-half))/SCALE; s.vA=0; }
+        if(cx0+half+s.gB*SCALE > W-lim){ s.gB=((W-lim)-(cx0+half))/SCALE; s.vB=0; }
+      }
+    }
+
+    function skater(cx,cy,col,label,mass,box,lean){
+      ctx.save();
+      ctx.fillStyle='rgba(15,31,61,.12)'; ctx.beginPath(); ctx.ellipse(cx,cy+box*0.55,box*0.5,5,0,0,7); ctx.fill();
+      const g=ctx.createLinearGradient(0,cy-box*0.5,0,cy+box*0.5); g.addColorStop(0,col[0]); g.addColorStop(1,col[1]);
+      roundRect(ctx,cx-box*0.34+lean,cy-box*0.2,box*0.68,box*0.7,8); ctx.fillStyle=g; ctx.fill();
+      ctx.beginPath(); ctx.arc(cx+lean,cy-box*0.38,box*0.2,0,7); ctx.fillStyle=col[0]; ctx.fill();
+      ctx.fillStyle='#fff'; ctx.font="700 12px 'JetBrains Mono',monospace"; ctx.textAlign='center'; ctx.fillText(label, cx+lean, cy+box*0.14);
+      ctx.fillStyle=COL.ink; ctx.font="700 11px 'Noto Sans KR',sans-serif"; ctx.fillText(mass+'kg', cx, cy+box*0.86);
+      ctx.restore();
+    }
+
+    function draw(){
+      const W=cv._w,H=cv._h; ctx.clearRect(0,0,W,H);
+      const cx0=W/2, cy=H*0.44, box=boxSize(), half=box*0.34;
+      // frictionless surface
+      const floorY=cy+box*0.6;
+      ctx.fillStyle='rgba(29,78,216,.05)'; ctx.fillRect(0,floorY,W,H-floorY);
+      ctx.strokeStyle=COL.line; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(0,floorY); ctx.lineTo(W,floorY); ctx.stroke();
+      ctx.fillStyle='rgba(100,116,139,.65)'; ctx.font="600 10px 'Noto Sans KR',sans-serif"; ctx.textAlign='left';
+      ctx.fillText('마찰 없는 면', 12, 18);
+      ctx.strokeStyle='#e7ecf4'; ctx.setLineDash([4,5]); ctx.beginPath(); ctx.moveTo(cx0,cy-box*0.9); ctx.lineTo(cx0,floorY); ctx.stroke(); ctx.setLineDash([]);
+
+      // 접촉 위치(cx0±half) + 분리 변위(g)
+      const ax=cx0-half+s.gA*SCALE, bx=cx0+half+s.gB*SCALE;
+      const lean=(s.phase==='push')?2:0;
+      const midY=cy-box*0.06, e=box*0.34+10;
+
+      // FORCE arrows — only while contacting; force is the hero
+      if(s.phase==='push'){
+        const L=Math.min(W*0.22,98);
+        const pulse=0.8+0.2*Math.sin(s.pulse*8);
+        ctx.save(); ctx.globalAlpha=pulse;
+        arrow(ctx, bx+e, midY, bx+e+L, midY, COL.red, '작용  A→B', FORCE+' N', 8, 'above');
+        arrow(ctx, ax-e, midY, ax-e-L, midY, COL.blue, '반작용  B→A', FORCE+' N', 8, 'above');
+        ctx.restore();
+      }
+
+      skater(ax,cy,['#2b4a86','#16294d'],'A',s.mA,box, lean);
+      skater(bx,cy,['#7c3aed','#4c1d95'],'B',s.mB,box,-lean);
+
+      ctx.textAlign='center';
+      if(s.phase==='push'){
+        // 얼마나 밀고 있는지 게이지로 표시 (누른 만큼 = 떼면 얻는 속도)
+        const prog=Math.min(1, Math.max(Math.abs(s.vA),Math.abs(s.vB))/VMAX_PUSH);
+        const full=prog>=0.999;
+        const gw=Math.min(W*0.58,230), gxx=cx0-gw/2, gyy=H-26, gh=12;
+        ctx.fillStyle='#e9edf3'; roundRect(ctx,gxx,gyy,gw,gh,6); ctx.fill();
+        ctx.fillStyle=full?COL.green:COL.blue; roundRect(ctx,gxx,gyy,Math.max(gh,gw*prog),gh,6); ctx.fill();
+        ctx.fillStyle=full?COL.green:COL.navy; ctx.font="700 12px 'Noto Sans KR',sans-serif";
+        ctx.fillText(full?'충분히 밀었어요 · 손을 떼 보세요':'미는 중… 누른 만큼 밀려납니다', cx0, gyy-7);
+      } else if(s.phase==='glide'){
+        // vA0, vB0는 이미 소수1자리 보존쌍으로 스냅됨 → 곱이 정확히 일치
+        const vAr=Math.abs(s.vA0), vBr=Math.abs(s.vB0), p=s.mA*vAr;
+        if(vAr>0.005){ const L=Math.min(98,Math.max(54,vAr*SCALE*0.8))+8; arrow(ctx,ax-e,midY,ax-e-L,midY,COL.green,'속도',vAr.toFixed(1)+' m/s',3,'above'); }
+        if(vBr>0.005){ const L=Math.min(98,Math.max(54,vBr*SCALE*0.8))+8; arrow(ctx,bx+e,midY,bx+e+L,midY,COL.green,'속도',vBr.toFixed(1)+' m/s',3,'above'); }
+        ctx.fillStyle=COL.green; ctx.font="800 13px 'Noto Sans KR',sans-serif";
+        ctx.fillText('운동량의 크기는 양쪽이 같다', cx0, H-29);
+        ctx.fillStyle=COL.ink; ctx.font="700 11px 'JetBrains Mono',monospace";
+        ctx.fillText('A '+s.mA+'×'+vAr.toFixed(1)+' = B '+s.mB+'×'+vBr.toFixed(1)+' = '+p.toFixed(1)+' kg·m/s', cx0, H-13);
+      } else {
+        ctx.fillStyle=COL.soft; ctx.font="600 13px 'Noto Sans KR',sans-serif";
+        ctx.fillText('‘밀기’를 꾹 눌러 보세요', cx0, H-14);
+      }
+    }
+
+    function bind(){
+      const mA=document.getElementById('l3-mA'), mB=document.getElementById('l3-mB');
+      mA.addEventListener('input',()=>{ s.mA=+mA.value; document.getElementById('l3-mAval').textContent=s.mA; });
+      mB.addEventListener('input',()=>{ s.mB=+mB.value; document.getElementById('l3-mBval').textContent=s.mB; });
+      const pb=document.getElementById('l3-push');
+      bindHold(pb, ()=>{ startPush(); pb.classList.add('active'); }, ()=>{ endPush(); pb.classList.remove('active'); });
+      
+      // [FIX] 일시정지 버튼 이벤트
+      const pauseBtn = document.getElementById('l3-pause');
+      pauseBtn.addEventListener('click', () => {
+        if(s.phase === 'idle') return; // 출발 전에는 무시
+        s.paused = !s.paused;
+        if(s.paused){
+          pauseBtn.innerHTML = '<span class="ic">▶</span> 계속';
+          pauseBtn.classList.add('active');
+        } else {
+          pauseBtn.innerHTML = '<span class="ic">⏸</span> 일시정지';
+          pauseBtn.classList.remove('active');
+        }
+      });
+
+      document.getElementById('l3-reset').addEventListener('click',reset);
+      reset();
+    }
+    return {resize,reset,update,draw,bind};
+  })();
+
+  // ---------- tabs + master loop ----------
+  const sims={law1:Law1, law2:Law2, law3:Law3};
+  let active='law1';
+  function setTab(name){
+    active=name;
+    document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===name));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id===name));
+    sims[name].resize();
+  }
+  document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>setTab(t.dataset.tab)));
+
+  Law1.bind(); Law2.bind(); Law3.bind();
+
+  window.addEventListener('resize',()=>{ sims[active].resize(); },{passive:true});
+  if(window.ResizeObserver){ new ResizeObserver(()=>{ if(sims[active]) sims[active].resize(); }).observe(document.querySelector('.stage')); }
+
+  // init sizes
+  Law1.resize();
+  // pre-size others when first shown via setTab; but size law2/law3 lazily too
+  let last=performance.now();
+  function frame(now){ let dt=(now-last)/1000; last=now; if(dt>0.05) dt=0.05;
+    const s=sims[active]; if(s && cvReady(s)){ s.update(dt); s.draw(); }
+    requestAnimationFrame(frame);
+  }
+  function cvReady(){ return true; }
+  requestAnimationFrame(function(t){ last=t; requestAnimationFrame(frame); });
+})();
+</script>
+</body>
+</html>
