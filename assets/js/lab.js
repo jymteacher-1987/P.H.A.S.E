@@ -129,6 +129,12 @@
       (e) => (state.activeCategory === "all" || e.category === state.activeCategory) && matches(e, state.query)
     );
 
+    // "전체" 보기에서는 experiments.json에 적힌 순서(추가한 순서)가 아니라
+    // 좌측 메뉴와 같은 영역 순서로 묶어서 보여준다. 영역별 순서는 sort()가
+    // stable이라 같은 영역 안에서는 원래 순서가 그대로 유지된다.
+    const catOrder = new Map(state.categories.map((c, i) => [c.id, i]));
+    filtered.sort((a, b) => (catOrder.get(a.category) ?? 999) - (catOrder.get(b.category) ?? 999));
+
     els.expCount.textContent = `${filtered.length}개`;
     els.expSectionTitle.textContent = state.activeCategory === "all" ? "전체 실험" : catInfo(state.activeCategory).name;
 
