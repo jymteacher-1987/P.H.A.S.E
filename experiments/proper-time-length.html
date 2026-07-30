@@ -103,6 +103,40 @@
   summary{cursor:pointer; font-weight:700; font-size:.92rem;}
   details p{margin-top:8px; color:#cdd4f0;}
   footer{text-align:center; color:var(--sub); font-size:.72rem; margin-top:8px;}
+
+  /* ===== 모바일 최적화 ===== */
+  #rotateHint{
+    display:none; background:rgba(57,208,255,.1); border:1px solid rgba(57,208,255,.4);
+    color:var(--cyan); border-radius:10px; padding:9px 12px; font-size:.82rem;
+    text-align:center; margin-bottom:10px; line-height:1.5;
+  }
+  @media (max-width:700px){
+    body{padding:10px;}
+    h1{font-size:1.12rem;}
+    .subtitle{font-size:.78rem;}
+    /* 컨트롤: 세로 배치, 큰 터치 영역 */
+    .controls{flex-direction:column; align-items:stretch; gap:10px; padding:10px;}
+    .frame-toggle{width:100%;}
+    .frame-toggle button{flex:1; padding:11px 8px;}
+    .slider-box{min-width:0; flex-wrap:wrap;}
+    .btns{width:100%;}
+    .btns button{flex:1; padding:11px 8px;}
+    .adv{justify-content:center; font-size:.84rem; padding:4px 0;}
+    /* 장면: 축소 대신 좌우 스크롤로 글씨 크기 유지 */
+    .scene-wrap{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+    #scene{min-width:740px;}
+    #eventBanner{font-size:.8rem; white-space:normal; max-width:86%; text-align:center;}
+    /* 핵심 한 줄 / 카드: 전체 폭 사용 */
+    #keyLine{font-size:.88rem; padding:10px 12px; text-align:left;}
+    .table-card,.graph-card{min-width:0; width:100%; flex:none;}
+    table{font-size:.82rem;}
+    th,td{padding:7px 3px;}
+    .tagY,.tagN{font-size:.68rem; padding:1px 6px;}
+    details{font-size:.84rem;}
+  }
+  @media (max-width:700px) and (orientation:portrait){
+    #rotateHint{display:block;}
+  }
 </style>
 </head>
 <body>
@@ -127,6 +161,8 @@
   </div>
   <label class="adv" id="advLabel" style="display:none"><input type="checkbox" id="chkAdv"> 심화: 행성 시계 보기</label>
 </div>
+
+<div id="rotateHint">📱 폰은 <b>가로로 돌리면</b> 한눈에 보여요 · 세로에서는 그림을 <b>좌우로 밀어서</b> 볼 수 있어요</div>
 
 <div class="scene-wrap">
   <canvas id="scene" width="1020" height="410"></canvas>
