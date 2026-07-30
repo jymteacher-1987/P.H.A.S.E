@@ -214,6 +214,20 @@ window.EXPERIMENTS_DATA = {
         "코일",
         "자석"
       ]
+    },
+    {
+      "id": "pn-junction",
+      "title": "PN 접합 반도체 시뮬레이션",
+      "category": "modern-physics",
+      "description": "p형과 n형 반도체가 만나 만들어지는 공핍층을 관찰하고, 순방향·역방향 바이어스에서 전자와 양공의 움직임, 에너지 띠와 전위 분포가 어떻게 달라지는지 확인합니다.",
+      "path": "experiments/pn-junction.html",
+      "date": "2026-07-30",
+      "tags": [
+        "반도체",
+        "PN 접합",
+        "다이오드",
+        "공핍층"
+      ]
     }
   ]
 };

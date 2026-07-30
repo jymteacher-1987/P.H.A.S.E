@@ -1,0 +1,3953 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PN 접합 반도체 물리 시뮬레이션</title>
+    <!-- Google Fonts for premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            /* 스크롤바 유무에 따른 화면 좌우 튕김 방지 */
+            overflow-y: scroll;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', 'Outfit', sans-serif;
+            background-color: #0b0f19;
+            color: #e2e8f0;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Scrollbar customization */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+        /* App Container */
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            gap: 1.5rem;
+        }
+
+        /* Header */
+        .app-header {
+            text-align: center;
+            padding: 1rem 0;
+        }
+
+        .app-header h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .app-header .subtitle {
+            color: #94a3b8;
+            font-size: 1rem;
+            font-weight: 300;
+        }
+
+        /* Mode Selector (Tabs) */
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            background: rgba(30, 41, 59, 0.5);
+            padding: 0.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+        }
+
+        .mode-btn {
+            flex: 1 1 auto;
+            min-width: 0;
+            max-width: 280px;
+            padding: 0.7rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #94a3b8;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+
+        @media (max-width: 600px) {
+            .mode-selector { gap: 0.3rem; padding: 0.35rem; }
+            .mode-btn { flex: 1 1 0; max-width: none; padding: 0.6rem 0.3rem; font-size: 0.75rem; }
+        }
+
+        .mode-btn:hover {
+            color: #f1f5f9;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .mode-btn.active {
+            color: #ffffff;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Main Layout - 세로 1단: 캔버스 전체폭 위, 컨트롤 카드 3열 아래 */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        /* 하단 컨트롤 카드 3열 배치 — 높이 동일하게 stretch */
+        .control-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+            align-items: stretch;
+        }
+
+        .control-row .control-card {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (max-width: 1024px) {
+            .control-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Simulation Section (Left) - 상하 일렬 배치 */
+        .simulation-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        /* 캔버스 전환 탭 */
+        .canvas-tabs {
+            display: flex;
+            gap: 0.4rem;
+            background: rgba(15, 23, 42, 0.5);
+            padding: 0.35rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .canvas-tab-btn {
+            flex: 1;
+            padding: 0.55rem 0.6rem;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #94a3b8;
+            background: transparent;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .canvas-tab-btn:hover {
+            color: #cbd5e1;
+        }
+
+        .canvas-tab-btn.active {
+            background: rgba(99, 102, 241, 0.18);
+            color: #e2e8f0;
+        }
+
+        @media (max-width: 600px) {
+            .canvas-tab-btn { font-size: 0.72rem; padding: 0.5rem 0.3rem; }
+        }
+
+        /* Canvas Card Layout */
+        .canvas-card {
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 1.2rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(8px);
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
+            min-height: 32px; /* 고정값 대신 최소값으로 완화 — 모바일 줄바꿈 시 늘어날 수 있도록 */
+        }
+
+        .card-header h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #e2e8f0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-width: 0; /* flex 자식이 내용 길이만큼 넘치지 않고 줄어들 수 있도록 */
+        }
+
+        @media (max-width: 600px) {
+            .card-header {
+                flex-wrap: wrap;
+            }
+            .card-header h3 {
+                font-size: 0.95rem;
+                white-space: normal; /* 좁은 화면에서는 줄바꿈 허용 */
+            }
+            .badge {
+                min-width: 0;
+                font-size: 0.72rem;
+                padding: 0.25rem 0.6rem;
+            }
+        }
+
+        .badge {
+            display: inline-block;
+            min-width: 150px; /* 배지 최소 너비 고정 */
+            text-align: center;
+            padding: 0.3rem 0.8rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            border-radius: 20px;
+            background: #ef4444; 
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+            white-space: nowrap;
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1100 / 300;
+            background: #070a13;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 캔버스 크기 제어 */
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        /* 바깥 그림 슬롯만 같은 높이로 유지하고 각 캔버스의 원래 비율은 보존한다.
+           원자·캐리어는 1100:380을 유지한 채 슬롯 높이에 맞춰 축소한다. */
+        #lattice-canvas {
+            width: 78.947%;
+            aspect-ratio: 1100 / 380;
+            background: #020617;
+        }
+
+        #energy-canvas, #potential-canvas {
+            width: 100%;
+            aspect-ratio: 1100 / 340;
+            background: #020617;
+        }
+
+        /* 설명문 길이가 달라도 데스크톱에서는 카드 외곽 높이를 유지한다. */
+        .canvas-notes {
+            height: 4rem;
+            overflow: hidden;
+        }
+
+        /* Overlay for PN Joining */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(2, 6, 23, 0.75);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+            transition: opacity 0.4s ease;
+            z-index: 10;
+        }
+
+        .overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #btn-join-action {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #ffffff;
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        #btn-join-action:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 25px rgba(16, 185, 129, 0.6);
+        }
+
+        /* Control Panel (Right) */
+        .control-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .control-card {
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 1.2rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(8px);
+        }
+
+        .control-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1.2rem;
+            color: #38bdf8;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 0.5rem;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.8rem;
+        }
+
+        .control-btn {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            white-space: nowrap; /* 텍스트 줄바꿈 방지 */
+        }
+
+        .control-btn.primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .control-btn.primary:hover {
+            background: #2563eb;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        }
+
+        .control-btn.secondary {
+            background: #475569;
+            color: #e2e8f0;
+        }
+
+        .control-btn.secondary:hover {
+            background: #334155;
+        }
+
+        /* Sliders */
+        .slider-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .slider-group:last-child {
+            margin-bottom: 0.5rem;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #94a3b8;
+        }
+
+        .value-display {
+            color: #f1f5f9;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #334155;
+            outline: none;
+            margin: 10px 0;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #38bdf8;
+            cursor: pointer;
+            border: 2px solid #0f172a;
+            transition: transform 0.1s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            background: #0ea5e9;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #38bdf8;
+            cursor: pointer;
+            border: 2px solid #0f172a;
+            transition: transform 0.1s ease;
+        }
+
+        input[type="range"]::-moz-range-thumb:hover {
+            transform: scale(1.2);
+            background: #0ea5e9;
+        }
+
+        .slider-ticks {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+
+        /* Status Grid (Instrument) */
+        .status-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .status-item {
+            background: rgba(15, 23, 42, 0.4);
+            padding: 0.8rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .status-title {
+            display: block;
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-bottom: 0.2rem;
+        }
+
+        .status-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #10b981; 
+        }
+
+        /* Legend Grid */
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.6rem;
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+
+        .legend-conditional {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.35rem 0.8rem;
+            margin-top: 0.55rem;
+            padding-top: 0.5rem;
+            height: 2.4rem;
+            box-sizing: border-box;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.72rem;
+            color: #94a3b8;
+        }
+
+        /* 조건부 항목이 없어도 같은 공간을 남겨 범례 카드 높이가 바뀌지 않게 한다. */
+        .legend-conditional.hidden {
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .legend-item.hidden,
+        .scale-note.hidden {
+            display: none;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .color-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .color-dot.si { background-color: #64748b; border: 1px solid #94a3b8; }
+        .color-dot.acceptor { background-color: #f43f5e; box-shadow: 0 0 8px #f43f5e; }
+        .color-dot.donor { background-color: #3b82f6; box-shadow: 0 0 8px #3b82f6; }
+        .color-dot.electron { background-color: #38bdf8; box-shadow: 0 0 5px #38bdf8; }
+        .color-dot.hole { border: 2px solid #ef4444; width: 10px; height: 10px; border-radius: 50%; background: transparent; box-shadow: 0 0 5px #ef4444; }
+        .color-dot.valence-electron { background-color: #94a3b8; border: 1px solid #475569; }
+        .color-dot.recombine {
+            position: relative;
+            width: 20px;
+            height: 20px;
+            flex: 0 0 20px;
+            overflow: visible;
+            border: 0;
+            background: radial-gradient(circle, #e2e8f0 0 2px, transparent 2.5px);
+            box-shadow: none;
+        }
+        .color-dot.recombine::before,
+        .color-dot.recombine::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 4px;
+            height: 4px;
+            border: 1.5px solid rgba(203, 213, 225, 0.95);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: recombination-wave 1.8s ease-out infinite;
+            pointer-events: none;
+        }
+        .color-dot.recombine::after {
+            animation-delay: 0.6s;
+        }
+        @keyframes recombination-wave {
+            0%   { width: 4px;  height: 4px;  opacity: 0.95; }
+            100% { width: 20px; height: 20px; opacity: 0; }
+        }
+
+        /* Guide Box / Footer */
+        .app-footer {
+            margin-top: auto;
+            padding: 1.5rem 0;
+        }
+
+        .guide-box {
+            background: rgba(30, 41, 59, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .guide-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 1rem 1.2rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: #cbd5e1;
+        }
+
+        .guide-toggle:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .guide-toggle h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            border-left: 3px solid #6366f1;
+            padding-left: 0.6rem;
+            margin: 0;
+        }
+
+        .guide-toggle .guide-chevron {
+            font-size: 0.85rem;
+            color: #64748b;
+            transition: transform 0.25s ease;
+            flex-shrink: 0;
+        }
+
+        .guide-box.open .guide-chevron {
+            transform: rotate(180deg);
+        }
+
+        .guide-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            padding: 0 1.2rem;
+        }
+
+        .guide-box.open .guide-content {
+            max-height: 2000px; /* 내용보다 충분히 큰 값 */
+            padding: 0 1.2rem 1.2rem;
+        }
+
+        .guide-box ul {
+            list-style-type: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .guide-box li {
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+
+        .guide-box strong {
+            color: #e2e8f0;
+        }
+
+        /* ── 추가 스타일 ── */
+        .regime-badge {
+            display: inline-block;
+            padding: 0.2rem 0.55rem;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+        .warn-banner {
+            margin-top: 0.6rem;
+            padding: 0.5rem 0.7rem;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            line-height: 1.45;
+            background: rgba(245, 158, 11, 0.10);
+            border: 1px solid rgba(245, 158, 11, 0.30);
+            color: #fcd34d;
+        }
+        .warn-banner.hidden { display: none; }
+
+        /* 조건 경고는 나타나고 사라져도 오른쪽 패널과 계측표를 밀지 않도록
+           실험 조건 카드 안의 고정 높이 슬롯에서만 표시한다. */
+        .condition-warning-slot {
+            flex: 0 0 auto;
+            height: 2.65rem;
+            margin-top: 0.2rem;
+        }
+
+        .condition-warning-slot .warn-banner {
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0.34rem 0.48rem;
+            font-size: 0.66rem;
+            line-height: 1.25;
+        }
+
+        .condition-warning-slot .warn-banner.hidden {
+            display: block;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .status-value.small { font-size: 0.82rem; }
+        .status-sub {
+            display: block;
+            font-size: 0.68rem;
+            font-weight: 400;
+            color: #64748b;
+            margin-top: 0.1rem;
+        }
+        .scale-note {
+            font-size: 0.72rem;
+            color: #64748b;
+            padding: 0.35rem 0.1rem 0;
+            line-height: 1.5;
+        }
+        .guide-content ul ul { margin: 0.35rem 0 0.35rem 1.1rem; }
+        .guide-content li { margin-bottom: 0.55rem; }
+        .fix-tag {
+            display: inline-block;
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: #34d399;
+            border: 1px solid rgba(52, 211, 153, 0.35);
+            background: rgba(52, 211, 153, 0.08);
+            border-radius: 4px;
+            padding: 0 0.3rem;
+            margin-right: 0.3rem;
+            vertical-align: 1px;
+        }
+
+        /* ── 반응형 실험대 배치 ─────────────────────────────────────
+           넓은 화면: 시각화와 조작부를 동시에 보고, 계측값은 한 줄 아래에서 비교한다.
+           좁은 화면: 읽는 순서대로 한 열로 흐르며 한글 어절을 중간에서 자르지 않는다. */
+        body {
+            letter-spacing: -0.012em;
+            word-break: keep-all;
+            overflow-wrap: break-word;
+        }
+
+        .app-container {
+            max-width: 1580px;
+            padding: 0.65rem 0.8rem;
+            gap: 0.55rem;
+        }
+
+        .app-header {
+            padding: 0.1rem 0;
+        }
+
+        .app-header h1 {
+            font-size: 1.65rem;
+            line-height: 1.25;
+            letter-spacing: -0.035em;
+            margin-bottom: 0.15rem;
+        }
+
+        .app-header .subtitle {
+            font-size: 0.82rem;
+            line-height: 1.4;
+        }
+
+        .mode-selector {
+            padding: 0.35rem;
+        }
+
+        .mode-btn {
+            padding: 0.52rem 0.7rem;
+            font-size: 0.82rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 340px;
+            grid-template-areas:
+                "simulation controls"
+                "results results";
+            gap: 0.55rem;
+            align-items: start;
+        }
+
+        .simulation-section {
+            grid-area: simulation;
+            min-width: 0;
+            gap: 0.5rem;
+            align-self: stretch;
+        }
+
+        .simulation-section > .canvas-card {
+            flex: 1 1 auto;
+        }
+
+        .simulation-section > .canvas-card .canvas-wrapper {
+            flex: 1 1 auto;
+            min-height: 0;
+        }
+
+        .control-panel {
+            grid-area: controls;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            min-width: 0;
+            align-self: stretch;
+        }
+
+        /* 남는 세로 공간은 '실험 조건'(슬라이더)이 쓴다. 범례는 내용 높이만 차지한다.
+           예전에는 범례가 flex:1 이라 아래쪽에 빈 공간이 크게 남았다. */
+        .control-panel .parameter-card {
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .control-panel .parameter-card h3 {
+            flex: 0 0 auto;
+        }
+
+        .control-panel .parameter-card .slider-group {
+            flex: 0 0 auto;
+            display: block;
+        }
+
+        .control-panel .legend-card {
+            flex: 0 0 auto;
+        }
+
+        .results-panel {
+            grid-area: results;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 0.55rem;
+            min-width: 0;
+        }
+
+        .canvas-tabs {
+            padding: 0.25rem;
+        }
+
+        .canvas-tab-btn {
+            padding: 0.44rem 0.45rem;
+            font-size: 0.76rem;
+        }
+
+        .canvas-card,
+        .control-card {
+            border-radius: 12px;
+            padding: 0.7rem;
+        }
+
+        .canvas-card {
+            gap: 0.45rem;
+        }
+
+        .card-header {
+            min-height: 26px;
+        }
+
+        .card-header h3,
+        .control-card h3 {
+            font-size: 0.94rem;
+            letter-spacing: -0.025em;
+        }
+
+        .card-header h3 {
+            flex: 0 0 auto;
+            overflow: visible;
+            text-overflow: clip;
+        }
+
+        .flow-summary {
+            flex: 1 1 auto;
+            min-width: 0;
+            padding: 0 0.35rem;
+            color: #a5b4fc;
+            font-size: 0.64rem;
+            font-weight: 600;
+            line-height: 1.3;
+            text-align: center;
+            white-space: normal;
+            overflow: visible;
+        }
+
+        .control-card h3 {
+            margin-bottom: 0.45rem;
+            padding-bottom: 0.35rem;
+        }
+
+        .badge {
+            min-width: 124px;
+            padding: 0.24rem 0.65rem;
+            font-size: 0.72rem;
+        }
+
+        .control-panel > .control-card:first-child {
+            padding: 0.5rem;
+        }
+
+        .btn-group {
+            gap: 0.45rem;
+        }
+
+        .control-btn {
+            min-height: 40px;
+            padding: 0.55rem 0.6rem;
+            font-size: 0.78rem;
+        }
+
+        .slider-group {
+            margin-bottom: 0.55rem;
+        }
+
+        .slider-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .slider-label {
+            font-size: 0.76rem;
+            margin-bottom: 0.15rem;
+        }
+
+        input[type="range"] {
+            height: 5px;
+            margin: 5px 0;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            width: 17px;
+            height: 17px;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 17px;
+            height: 17px;
+        }
+
+        .slider-ticks {
+            font-size: 0.62rem;
+            line-height: 1.25;
+        }
+
+        /* 계측값은 4칸씩 배치해 수치와 단위를 함께 읽을 수 있게 한다. */
+        .status-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.28rem 0.36rem;
+        }
+
+        .status-card {
+            padding: 0.52rem 0.62rem;
+        }
+
+        .status-card h3 {
+            margin-bottom: 0.32rem;
+            padding-bottom: 0.24rem;
+        }
+
+        .status-item {
+            min-width: 0;
+            padding: 0.34rem 0.44rem;
+        }
+
+        .status-title {
+            font-size: 0.66rem;
+            line-height: 1.16;
+            margin-bottom: 0.04rem;
+        }
+
+        .status-value,
+        .status-value.small {
+            display: block;
+            font-size: 0.78rem;
+            line-height: 1.2;
+            white-space: normal;
+            overflow-wrap: anywhere;
+        }
+
+        .results-panel .status-sub {
+            display: block;
+            font-size: 0.62rem;
+            line-height: 1.2;
+            margin-top: 0.04rem;
+        }
+
+        .legend-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.32rem 0.45rem;
+            font-size: 0.66rem;
+            line-height: 1.3;
+        }
+
+        .legend-item {
+            min-width: 0;
+            align-items: flex-start;
+            gap: 0.35rem;
+        }
+
+        .color-dot {
+            flex: 0 0 auto;
+            margin-top: 0.12rem;
+        }
+
+        .warn-banner,
+        .scale-note,
+        .guide-box li,
+        .legend-item,
+        .status-title,
+        .status-sub {
+            word-break: keep-all;
+            overflow-wrap: break-word;
+        }
+
+        .warn-banner {
+            margin-top: 0.4rem;
+            padding: 0.4rem 0.55rem;
+            font-size: 0.7rem;
+            line-height: 1.4;
+        }
+
+        .scale-note {
+            font-size: 0.65rem;
+            line-height: 1.4;
+            padding-top: 0.2rem;
+        }
+
+        .app-footer {
+            padding: 0;
+        }
+
+        .guide-toggle {
+            padding: 0.55rem 0.8rem;
+        }
+
+        .guide-toggle h4 {
+            font-size: 0.82rem;
+        }
+
+        .guide-box.open .guide-content {
+            padding: 0 0.9rem 0.9rem;
+        }
+
+        .guide-box li {
+            font-size: 0.78rem;
+            line-height: 1.65;
+        }
+
+        @media (max-width: 1180px) {
+            .main-content {
+                grid-template-columns: minmax(0, 1fr) 310px;
+            }
+
+            .results-panel {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .status-grid {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+
+            .legend-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .canvas-notes {
+                height: 5.5rem;
+            }
+        }
+
+        @media (min-width: 900px) and (max-height: 800px) {
+            .app-container {
+                padding-top: 0.4rem;
+                padding-bottom: 0.4rem;
+                gap: 0.4rem;
+            }
+
+            .app-header h1 {
+                font-size: 1.45rem;
+            }
+
+            .app-header .subtitle {
+                display: none;
+            }
+
+            .mode-btn,
+            .canvas-tab-btn {
+                padding-top: 0.3rem;
+                padding-bottom: 0.3rem;
+            }
+
+            .canvas-card,
+            .control-card {
+                padding: 0.58rem;
+            }
+
+            .scale-note {
+                font-size: 0.6rem;
+            }
+
+            .status-item {
+                padding-top: 0.34rem;
+                padding-bottom: 0.34rem;
+            }
+
+            .guide-toggle {
+                padding-top: 0.38rem;
+                padding-bottom: 0.38rem;
+            }
+        }
+
+        @media (max-width: 899px) {
+            .app-container {
+                padding: 0.65rem;
+            }
+
+            .main-content {
+                grid-template-columns: minmax(0, 1fr);
+                grid-template-areas:
+                    "simulation"
+                    "controls"
+                    "results";
+            }
+
+            .canvas-notes {
+                height: auto;
+                overflow: visible;
+            }
+
+            .control-panel {
+                display: grid;
+                grid-template-columns: minmax(210px, 0.7fr) minmax(0, 1.3fr);
+                grid-template-areas:
+                    "actions parameters"
+                    "legend parameters";
+                align-items: start;
+                align-self: start;
+            }
+
+            .control-panel > .control-card:first-child { grid-area: actions; }
+            .control-panel .parameter-card { grid-area: parameters; }
+            .control-panel .legend-card { grid-area: legend; }
+
+            .results-panel {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .status-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .results-panel .status-sub {
+                display: block;
+                font-size: 0.61rem;
+                line-height: 1.3;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .app-container {
+                padding: 0.45rem;
+                gap: 0.45rem;
+            }
+
+            .main-content {
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .simulation-section { order: 1; }
+            .control-panel { display: contents; }
+            .control-panel > .control-card:first-child { order: 2; }
+            .control-panel .parameter-card { order: 3; }
+            .results-panel { order: 4; }
+            .control-panel .legend-card { order: 5; }
+
+            .app-header h1 {
+                font-size: clamp(1.2rem, 6vw, 1.5rem);
+            }
+
+            .app-header .subtitle {
+                max-width: 34rem;
+                margin: 0 auto;
+                font-size: 0.73rem;
+                line-height: 1.45;
+            }
+
+            .mode-selector {
+                gap: 0.22rem;
+                padding: 0.25rem;
+            }
+
+            .mode-btn {
+                min-height: 42px;
+                padding: 0.48rem 0.2rem;
+                font-size: 0.72rem;
+            }
+
+            .canvas-tabs {
+                gap: 0.2rem;
+            }
+
+            .canvas-tab-btn {
+                min-height: 40px;
+                padding: 0.42rem 0.18rem;
+                font-size: 0.67rem;
+            }
+
+            .canvas-card,
+            .control-card {
+                padding: 0.6rem;
+            }
+
+            .card-header {
+                align-items: flex-start;
+            }
+
+            .card-header h3 {
+                flex: 1 1 170px;
+                font-size: 0.88rem;
+            }
+
+            .flow-summary {
+                order: 3;
+                flex: 1 1 100%;
+                padding: 0.18rem 0 0;
+                font-size: 0.66rem;
+                white-space: normal;
+                overflow: visible;
+            }
+
+            .badge {
+                flex: 0 1 auto;
+                min-width: 0;
+                max-width: 100%;
+                white-space: normal;
+                line-height: 1.3;
+            }
+
+            .results-panel {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .btn-group {
+                flex-wrap: wrap;
+            }
+
+            .control-btn {
+                min-width: 135px;
+                min-height: 44px;
+                font-size: 0.8rem;
+            }
+
+            .slider-label {
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            input[type="range"] {
+                height: 7px;
+                margin: 9px 0;
+            }
+
+            input[type="range"]::-webkit-slider-thumb {
+                width: 22px;
+                height: 22px;
+            }
+
+            input[type="range"]::-moz-range-thumb {
+                width: 22px;
+                height: 22px;
+            }
+
+            .slider-ticks {
+                font-size: 0.6rem;
+            }
+
+            .status-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 0.42rem;
+            }
+
+            .status-item {
+                padding: 0.55rem;
+            }
+
+            .status-title {
+                font-size: 0.7rem;
+            }
+
+            .status-value,
+            .status-value.small {
+                font-size: 0.79rem;
+            }
+
+            .status-sub {
+                font-size: 0.64rem;
+            }
+
+            /* 보조 줄에는 비저항 ρ·소수 나르개처럼 값의 의미를 정하는 내용이 들어간다.
+               좁은 화면에서도 숨기지 않는다(2칸 배치라 세로 여유가 있다). */
+            .results-panel .status-sub {
+                display: block;
+            }
+
+            .legend-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                font-size: 0.65rem;
+            }
+
+            .scale-note {
+                font-size: 0.66rem;
+                line-height: 1.55;
+            }
+
+            .guide-toggle {
+                min-height: 44px;
+            }
+        }
+
+        @media (max-width: 390px) {
+            .app-header .subtitle {
+                font-size: 0.69rem;
+            }
+
+            .mode-btn,
+            .canvas-tab-btn {
+                letter-spacing: -0.035em;
+            }
+
+            .slider-ticks {
+                letter-spacing: -0.035em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 상단 헤더 -->
+        <header class="app-header">
+            <h1>PN 접합 반도체 시뮬레이션</h1>
+            <p class="subtitle">도핑부터 PN 접합까지, 반도체의 핵심 원리를 눈으로 확인하는 시뮬레이터</p>
+        </header>
+
+        <!-- 모드 선택 버튼 -->
+        <nav class="mode-selector">
+            <button id="btn-p-type" class="mode-btn active" onclick="setMode('P')">P형 반도체</button>
+            <button id="btn-n-type" class="mode-btn" onclick="setMode('N')">N형 반도체</button>
+            <button id="btn-pn-junction" class="mode-btn" onclick="setMode('PN')">PN 접합</button>
+        </nav>
+
+        <!-- 메인 콘텐츠 영역 -->
+        <main class="main-content">
+            <section class="simulation-section">
+                <nav class="canvas-tabs">
+                    <button id="canvas-tab-lattice" class="canvas-tab-btn active" onclick="switchCanvasTab('lattice')">원자·캐리어</button>
+                    <button id="canvas-tab-energy" class="canvas-tab-btn" onclick="switchCanvasTab('energy')">에너지 밴드</button>
+                    <button id="canvas-tab-potential" class="canvas-tab-btn" onclick="switchCanvasTab('potential')">전위 그래프</button>
+                </nav>
+
+                <!-- 1. 원자 격자 -->
+                <div class="canvas-card" id="panel-lattice">
+                    <div class="card-header">
+                        <h3>전자와 양공의 움직임</h3>
+                        <span class="flow-summary" id="flow-summary" aria-live="polite">—</span>
+                        <span class="badge" id="lattice-badge">P형: 양공 다수 · 전자 소수</span>
+                    </div>
+                    <div class="canvas-wrapper">
+                        <canvas id="lattice-canvas"></canvas>
+                        <div id="junction-overlay" class="overlay hidden">
+                            <button id="btn-join-action" onclick="triggerJoinAnimation()">PN 접합 실행</button>
+                        </div>
+                    </div>
+                    <div class="canvas-notes">
+                        <p class="scale-note">※ <strong>개념 모형:</strong> 도핑 원자와 실리콘 원자는 고정되고 전자와 양공만 움직입니다. 0 V에서도 열운동은 계속되며, 전류가 흐르면 평균 이동 방향이 더해집니다. 점 수·화면 속력·공핍층 그림 폭은 상대 표현이며 실제 폭은 계측값으로 확인합니다.</p>
+                        <p class="scale-note hidden" id="note-drift">※ 반도체 캐리어와 도선 전자는 화면 속력 척도가 다릅니다. 도선 전자는 모든 모드에 같은 척도를 쓰므로 전류가 클수록 빠릅니다.</p>
+                    </div>
+                </div>
+
+                <!-- 2. 에너지 띠 -->
+                <div class="canvas-card" id="panel-energy" style="display:none">
+                    <div class="card-header">
+                        <h3>에너지 띠 구조 (전자 에너지)</h3>
+                        <span class="badge" id="energy-badge" style="background:#1e293b">—</span>
+                    </div>
+                    <div class="canvas-wrapper">
+                        <canvas id="energy-canvas"></canvas>
+                    </div>
+                    <div class="canvas-notes">
+                        <p class="scale-note">위로 갈수록 전자의 에너지가 높습니다. 단일 P형·N형은 도핑에 따른 E<sub>F</sub> 위치를 비교하는 <strong>평형 기준도</strong>이므로 수평으로 표시합니다. PN 접합도 P형·N형 중성영역은 수평으로 단순화하고, 내부 전기장이 존재하는 공핍층에서만 띠를 휘게 표시합니다. 순방향에서는 장벽이 낮아지고 역방향에서는 높아집니다. 선의 각도 자체보다 표시된 E<sub>g</sub>와 장벽의 eV 값을 기준으로 읽습니다.</p>
+                    </div>
+                </div>
+
+                <!-- 3. 전위 -->
+                <div class="canvas-card" id="panel-potential" style="display:none">
+                    <div class="card-header">
+                        <h3>정전위 분포 V(x)</h3>
+                        <span class="badge" id="potential-badge" style="background:#1e293b">—</span>
+                    </div>
+                    <div class="canvas-wrapper">
+                        <canvas id="potential-canvas"></canvas>
+                    </div>
+                    <div class="canvas-notes">
+                        <p class="scale-note">위로 갈수록 <strong>반도체 내부의 전위 V(x)</strong>가 높습니다. 단일 P형·N형에서는 인가 전압에 따른 균일한 전기장을 표시합니다. PN 접합은 N형 중성영역을 0 V 기준으로 두고 두 영역 사이의 상대 전위차를 나타냅니다. P형·N형 중성영역은 평평하게, 공핍층의 전위 장벽만 휘게 표시하며 전압을 바꿔도 세로축은 고정됩니다.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 컨트롤 패널 -->
+            <aside class="control-panel">
+                <div class="control-card">
+                    <div class="btn-group">
+                        <button id="btn-play" class="control-btn primary" onclick="togglePlay()">시뮬레이션 일시정지</button>
+                        <button id="btn-reset" class="control-btn secondary" onclick="resetSimulation()">초기화</button>
+                    </div>
+                </div>
+
+                <!-- 슬라이더 -->
+                <div class="control-card parameter-card">
+                        <h3>실험 조건</h3>
+
+                        <div class="slider-group" id="voltage-control">
+                            <div class="slider-label">
+                                <span>인가 전압</span>
+                                <span class="value-display" id="voltage-value">0.5 V</span>
+                            </div>
+                            <input type="range" id="slider-voltage" min="-1.0" max="0.8" step="0.02" value="0.5" oninput="updateVoltage(this.value)">
+                            <div class="slider-ticks">
+                                <span>역방향 (-1.0 V)</span>
+                                <span>평형 (0 V)</span>
+                                <span>순방향 (+0.8 V)</span>
+                            </div>
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-label">
+                                <span>도핑 농도</span>
+                                <span class="value-display" id="doping-value">보통 · 1.00×10¹⁶ cm⁻³</span>
+                            </div>
+                            <input type="range" id="slider-doping" min="1" max="5" step="1" value="3" oninput="updateDoping(this.value)">
+                            <div class="slider-ticks">
+                                <span>매우 낮음</span>
+                                <span>낮음</span>
+                                <span>보통</span>
+                                <span>높음</span>
+                                <span>매우 높음</span>
+                            </div>
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-label">
+                                <span>온도</span>
+                                <span class="value-display" id="temp-value">300 K</span>
+                            </div>
+                            <input type="range" id="slider-temp" min="250" max="400" step="10" value="300" oninput="updateTemperature(this.value)">
+                            <div class="slider-ticks">
+                                <span>낮음 (250 K)</span>
+                                <span>상온 (300 K)</span>
+                                <span>높음 (400 K)</span>
+                            </div>
+                        </div>
+                        <div class="condition-warning-slot" aria-live="polite">
+                            <div id="warn-banner" class="warn-banner hidden"></div>
+                        </div>
+                </div>
+
+                <!-- 범례 -->
+                <div class="control-card legend-card">
+                    <h3>시각 범례</h3>
+                    <div class="legend-grid">
+                        <div class="legend-item"><span class="color-dot electron"></span>자유 전자</div>
+                        <div class="legend-item"><span class="color-dot hole"></span>양공</div>
+                        <div class="legend-item"><span class="color-dot valence-electron"></span>공유결합 전자</div>
+                    </div>
+                    <div class="legend-conditional hidden" id="legend-conditional">
+                        <div class="legend-item hidden" id="legend-recombine"><span class="color-dot recombine"></span>자유전자–양공 재결합</div>
+                    </div>
+                </div>
+            </aside>
+
+            <section class="results-panel">
+                    <!-- 계측기 -->
+                    <div class="control-card status-card">
+                        <h3>핵심 계측값과 관찰 결과</h3>
+                        <div class="status-grid">
+                            <div class="status-item">
+                                <span class="status-title">전류</span>
+                                <span class="status-value small" id="status-current">0 A</span>
+                                <span class="status-sub" id="status-current-sub">전압이 0 V입니다.</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-title">공핍층 폭</span>
+                                <span class="status-value small" id="status-depletion">--</span>
+                                <span class="status-sub" id="status-depletion-sub">—</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-title">접합 장벽 전압</span>
+                                <span class="status-value small" id="status-barrier">--</span>
+                                <span class="status-sub" id="status-barrier-sub">PN 접합에서 형성</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-title">소자·접합 전압</span>
+                                <span class="status-value small" id="status-vj">--</span>
+                                <span class="status-sub" id="status-vj-sub">인가 전압과 내부 전압 강하</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-title">중성영역의 전자·양공 농도</span>
+                                <span class="status-value small" id="status-carriers">--</span>
+                                <span class="status-sub" id="status-carriers-sub">—</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-title">전도도 · 비저항</span>
+                                <span class="status-value small" id="status-conductivity">--</span>
+                                <span class="status-sub" id="status-conductivity-sub">—</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-title">순수 Si의 진성 캐리어 농도</span>
+                                <span class="status-value small" id="status-ni">--</span>
+                                <span class="status-sub" id="status-ni-sub">도핑하지 않았을 때 n = p = nᵢ</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-title">밴드갭</span>
+                                <span class="status-value small" id="status-eg">--</span>
+                                <span class="status-sub">실리콘의 에너지 차이</span>
+                            </div>
+                        </div>
+                    </div>
+
+            </section>
+        </main>
+        <!-- 학습 가이드 -->
+        <footer class="app-footer">
+            <div class="guide-box" id="guide-box">
+                <button class="guide-toggle" onclick="toggleGuide()">
+                    <h4>학습 가이드</h4>
+                    <span class="guide-chevron">▼</span>
+                </button>
+                <div class="guide-content">
+                    <ul>
+                        <li><strong>P형과 N형</strong><br>
+                        P형에서는 양공이, N형에서는 자유 전자가 다수 캐리어로서 주로 전류를 운반합니다. 도핑 농도를 높이면 다수 캐리어 농도도 대체로 증가합니다. 단일 P형·N형 화면은 금속 접점에서 전류가 원활히 드나든다고 가정하므로 PN 접합 다이오드처럼 0.6~0.7 V 부근에서 전류가 급격히 증가하는 접합 특성은 나타나지 않습니다.</li>
+
+                        <li><strong>PN 접합</strong><br>
+                        P형과 N형을 붙이면 접합면 부근의 전자와 양공 일부가 농도 차이 때문에 반대편으로 확산하여 재결합합니다. 그 자리에 움직이지 않는 이온화 도핑 원자가 남으면서, 움직이는 캐리어가 적고 내부 전기장이 존재하는 <strong>공핍층</strong>이 형성됩니다. 평형에서는 확산하려는 경향과 내부 전기장에 의한 이동이 균형을 이루므로 외부 회로에는 순전류가 흐르지 않습니다.</li>
+
+                        <li><strong>전압의 효과</strong><br>
+                        순방향 전압은 전위 장벽을 낮추고 공핍층을 좁혀 전류를 빠르게 증가시킵니다. 역방향 전압은 장벽을 높이고 공핍층을 넓혀 다수 캐리어가 접합을 통과하기 어렵게 만듭니다. 상온 부근의 실리콘 다이오드에서는 흔히 0.6~0.7 V 부근을 <strong>문턱전압(도통전압)</strong>이라고 부르지만, 정확히 한 전압에서 갑자기 켜지는 것은 아닙니다. 역방향에서도 열로 생긴 소수 캐리어 때문에 매우 작은 전류가 흐를 수 있습니다.</li>
+
+                        <li><strong>온도의 효과</strong><br>
+                        온도가 높아지면 전자와 양공의 무작위 열운동이 활발해지고, 열로 생성되는 전자–양공 쌍도 늘어납니다. 그러나 무작위 열운동 자체는 특정 방향의 순전류가 아니며, 실제 전류 변화는 전압과 도핑 조건도 함께 보아야 합니다.</li>
+
+                        <li><strong>애니메이션 읽기</strong><br>
+                        전압이 0 V이면 도선의 파란 전자는 평균적으로 한쪽 방향으로 이동하지 않습니다. 반도체 속 전자와 양공은 계속 무작위로 움직이지만, 평균 이동 방향이 없으므로 순전류는 0입니다. 전류가 흐를 때는 이러한 열운동에 평균적인 이동 방향이 더해집니다. P형에서 회색 공유결합 전자가 이웃 양공을 메우면 양공은 그 전자와 반대 방향으로 이동한 것처럼 보입니다. 재결합 때 나타나는 동심원은 실제로 퍼지는 전하의 물결이 아니라 재결합 위치를 잠시 강조하는 화면 표시입니다.</li>
+
+                        <li><strong>수치 읽기</strong><br>
+                        n은 자유전자 농도, p는 양공 농도이며, nᵢ는 같은 온도의 도핑하지 않은 순수 실리콘에서 n=p가 되는 진성 캐리어 농도입니다. PN 접합의 n·p 계측값은 접합에서 떨어진 P형·N형 중성영역의 기준값이며, 접합 가까이의 소수 캐리어 농도는 전압에 따라 달라집니다. 전도도 σ가 클수록 전류가 잘 흐르며 비저항은 ρ=1/σ의 관계를 갖습니다. 밴드갭 E<sub>g</sub>는 원자가띠와 전도띠 사이의 에너지 차이입니다. 계측값은 실리콘 물성식과 화면에서 정한 소자 크기로 계산되므로 모든 다이오드의 고정값으로 외우기보다 조건에 따른 변화 방향과 상대적인 크기를 비교하세요.</li>
+                    </ul>
+                </div>
+            </div>
+        </footer>
+    </div>
+    <script>
+    "use strict";
+    /* =========================================================================
+       PN 접합 반도체 시뮬레이션 — 물리 엔진
+       실리콘 실측 물성값 기반. 모든 계산은 cm·V·A·K 단위계.
+       ========================================================================= */
+
+    /* ── 물리 상수 ── */
+    const kB      = 8.617333e-5;    // eV/K
+    const qe      = 1.602177e-19;   // C
+    const EPS0    = 8.854188e-14;   // F/cm
+    const EPS_SI  = 11.7 * EPS0;    // Si 유전율
+    const NC300   = 2.86e19;        // cm^-3, 전도띠 유효상태밀도 @300K
+    const NV300   = 3.10e19;        // cm^-3, 원자가띠 유효상태밀도 @300K
+    const E_ION   = 0.045;          // eV, B(억셉터)·P(도너) 이온화 에너지
+    const TAU     = 1.0e-6;         // s, SRH 캐리어 수명
+    const AREA    = 1.0e-4;         // cm^2, 소자 단면적 (100µm × 100µm)
+    const LEN     = 1.0e-2;         // cm, 각 영역 길이 (100 µm)
+    const NI_300  = 1.0700e10;      // cm^-3, 기준 진성 캐리어 농도
+
+    /* ── 온도 의존 기본량 ── */
+    const EgT = T => 1.1700 - 4.730e-4 * T * T / (T + 636);          // Varshni
+    const NcT = T => NC300 * Math.pow(T / 300, 1.5);
+    const NvT = T => NV300 * Math.pow(T / 300, 1.5);
+    const VtT = T => kB * T;                                          // 열전압 (V)
+    const niT = T => Math.sqrt(NcT(T) * NvT(T)) * Math.exp(-EgT(T) / (2 * kB * T));
+
+    /* ── 불완전 이온화 (freeze-out) ──
+       N+ = N / (1 + (g·n/Nb)·exp(ΔE/kT)) 를 n에 대해 정확히 풀어낸 해.
+       도너 축퇴인자 g=2, 억셉터 g=4.                                    */
+    function ionizedDensity(N, T, isDonor) {
+        /* 고등학교 관찰 범위(250~400 K)에서는 도펀트가 이온화되어 있다고 가정한다.
+           저온 불완전 이온화는 이 수업용 화면의 범위 밖이다. */
+        if (T >= 200) return N;
+        const g  = isDonor ? 2 : 4;
+        const Nb = isDonor ? NcT(T) : NvT(T);
+        const beta = (g / Nb) * Math.exp(E_ION / (kB * T));
+        return (Math.sqrt(1 + 4 * beta * N) - 1) / (2 * beta);
+    }
+
+    /* ── 전하 중성 + np = ni² 를 동시에 만족하는 캐리어 농도 ── */
+    function carrierDensities(N, T, isDonor) {
+        const ni   = niT(T);
+        const Nion = ionizedDensity(N, T, isDonor);
+        const half = Nion / 2;
+        const maj  = half + Math.sqrt(half * half + ni * ni);
+        const min  = (maj > 0) ? ni * ni / maj : 0;
+        return isDonor
+            ? { n: maj, p: min, Nion: Nion, ni: ni, maj: maj, min: min }
+            : { p: maj, n: min, Nion: Nion, ni: ni, maj: maj, min: min };
+    }
+
+    /* ── 이동도: Arora 모형 (격자 산란 + 이온화 불순물 산란, 온도 의존 포함) ──
+       ── 산란 농도로 무엇을 쓰나: 전체 도핑 N (이온화 농도 N⁺ 가 아님) ──
+       "전하를 띤 불순물만 산란시키니 N⁺ 를 써야 한다"고 바꿔 보았으나, 유일한
+       문헌 기준점(100 K·1.75×10¹⁶ 에서 μn ≈ 4,725 cm²/Vs)과 대조하니 오히려
+       나빠졌다: N 기준 5,593 (비율 1.18) → N⁺ 기준 8,082 (비율 1.71).
+       중성 불순물도 산란에 기여하고, Arora 식 자체가 측정값에 맞춰 피팅된
+       식이라 N 을 넣는 것이 데이터에 더 가깝다. 그래서 N 을 유지한다.
+       ※ 유효범위는 250~500 K. 그 아래(특히 75 K 이하)는 이온화 불순물 산란이
+         만드는 이동도 봉우리·감소가 재현되지 않아 μ 가 과대평가되므로
+         '정성 관찰' 안내를 띄운다. */
+    function mobility(N, T) {
+        const Tn = T / 300;
+        const a  = 0.88 * Math.pow(Tn, -0.146);
+        const nRef = 1.26e17 * Math.pow(Tn, 2.4);
+        const pRef = 2.35e17 * Math.pow(Tn, 2.4);
+        return {
+            mn: 88.0 * Math.pow(Tn, -0.57) + 1252 * Math.pow(Tn, -2.33) / (1 + Math.pow(N / nRef, a)),
+            mp: 54.3 * Math.pow(Tn, -0.57) + 407  * Math.pow(Tn, -2.23) / (1 + Math.pow(N / pRef, a))
+        };
+    }
+
+    /* ── 전도도 σ = q(n·µn + p·µp) ── */
+    function conductivity(N, T, isDonor) {
+        const c = carrierDensities(N, T, isDonor);
+        const m = mobility(N, T);
+        return qe * (c.n * m.mn + c.p * m.mp);
+    }
+
+    /* ── 내부 전위 Vbi = Vt·ln(pP·nN/ni²) ──
+       (= [Eg − (Ef−Ev)P − (Ec−Ef)N]/q 와 정확히 동일. 밴드 그림도 이 관계로 그린다) */
+    function builtInPotential(Na, Nd, T) {
+        const cp = carrierDensities(Na, T, false);
+        const cn = carrierDensities(Nd, T, true);
+        const v = VtT(T) * Math.log((cp.p * cn.n) / (cp.ni * cp.ni));
+        return Math.max(0, Math.min(v, EgT(T)));
+    }
+
+    /* ── 공핍층 폭 (cm): 공핍 근사 ── */
+    function depletionWidthCm(Na, Nd, T, Vj) {
+        const vb = builtInPotential(Na, Nd, T);
+        const drive = Math.max(vb - Vj, 0);
+        const NaI = Math.max(ionizedDensity(Na, T, false), 1);
+        const NdI = Math.max(ionizedDensity(Nd, T, true), 1);
+        return Math.sqrt(2 * EPS_SI * drive / qe * (1 / NaI + 1 / NdI));
+    }
+
+    /* ── 다이오드: 확산전류 + 공핍층 SRH 생성·재결합전류 + 직렬저항 ──
+       I = I0(exp(Vj/Vt) − 1) + Irg(exp(Vj/2Vt) − 1),  Vj = Vapp − I·Rs
+       Newton 법으로 Vj를 자기일관적으로 풀어낸다. 평형에서 I는 정확히 0.       */
+    function solveDiode(Na, Nd, T, Vapp) {
+        const Vt = VtT(T);
+        const cp = carrierDensities(Na, T, false);
+        const cn = carrierDensities(Nd, T, true);
+        const ni = cp.ni;
+        const mP = mobility(Na, T), mN = mobility(Nd, T);
+        /* 전자는 P형 중성영역, 양공은 N형 중성영역의 소수캐리어이므로
+           각 확산계수에는 그 캐리어가 실제로 확산하는 영역의 이동도를 쓴다. */
+        const Dn = mP.mn * Vt, Dp = mN.mp * Vt;
+        const Ln = Math.sqrt(Dn * TAU), Lp = Math.sqrt(Dp * TAU);
+        /* 순방향 확산전류를 전자·양공 성분으로 따로 보존한다.
+           전자와 양공의 이동도가 다르므로 대칭 도핑이어도 두 성분은 일반적으로 같지 않다. */
+        const I0Hole = qe * AREA * ni * ni * Dp / (Lp * Math.max(cn.n, 1));
+        const I0Electron = qe * AREA * ni * ni * Dn / (Ln * Math.max(cp.p, 1));
+        const I0 = I0Hole + I0Electron;
+        const sP = conductivity(Na, T, false), sN = conductivity(Nd, T, true);
+        const Rs = LEN / AREA * (1 / sP + 1 / sN);
+        const vb = builtInPotential(Na, Nd, T);
+
+        const clampExp = x => Math.exp(Math.max(-60, Math.min(x, 300)));
+        const genPrefactor = Vj => qe * AREA * ni * depletionWidthCm(Na, Nd, T, Vj) / (2 * TAU);
+
+        let Vj = Math.min(Vapp, vb * 0.98);
+        for (let i = 0; i < 120; i++) {
+            const ex  = clampExp(Vj / Vt);
+            const ex2 = clampExp(Vj / (2 * Vt));
+            const Ig0 = genPrefactor(Vj);
+            const f   = I0 * (ex - 1) + Ig0 * (ex2 - 1) - (Vapp - Vj) / Rs;
+            const df  = I0 * ex / Vt + Ig0 * ex2 / (2 * Vt) + 1 / Rs;
+            const step = f / df;
+            Vj -= Math.max(-0.05, Math.min(step, 0.05));
+            if (Math.abs(step) < 1e-13) break;
+        }
+        const Igen = genPrefactor(Vj);
+        const diffusionFactor = clampExp(Vj / Vt) - 1;
+        const recombinationCurrent = Igen * (clampExp(Vj / (2 * Vt)) - 1);
+        const Ielectron = I0Electron * diffusionFactor + 0.5 * recombinationCurrent;
+        const Ihole = I0Hole * diffusionFactor + 0.5 * recombinationCurrent;
+        const I = Ielectron + Ihole;
+        return { I: I, Ielectron: Ielectron, Ihole: Ihole,
+                 I0: I0, I0Electron: I0Electron, I0Hole: I0Hole,
+                 Irg0: Igen, Vj: Vj, Rs: Rs, Vbi: vb,
+                 W: depletionWidthCm(Na, Nd, T, Vj) };
+    }
+
+    /* =========================================================================
+       전역 상태
+       ========================================================================= */
+    let currentMode = 'P';          // 'P' | 'N' | 'PN'
+    let isPlaying   = true;
+    let Vapp        = 0.5;          // 인가 전압 (V)
+    let dopingLevel = 3;            // 1~5
+    let temperature = 300;          // K
+
+    const DOPING_TABLE = [1.0e15, 3.0e15, 1.0e16, 3.0e16, 1.0e17];
+    const DOPING_LABEL = ['매우 낮음', '낮음', '보통', '높음', '매우 높음'];
+    /* 화면에 그릴 도펀트 점의 개수.
+       실제 농도는 100배 범위라 그대로 셀 수 없으므로 log10(N)을 3~26개에 선형 대응한다.
+       사용자 설명에서는 단순히 '상대 점 수'라고만 안내하고 실제 원자 수로 해석하지 않는다. */
+    const DOPANT_DOTS = DOPING_TABLE.map(N => {
+        const lo = Math.log10(DOPING_TABLE[0]);
+        const hi = Math.log10(DOPING_TABLE[DOPING_TABLE.length - 1]);
+        return Math.round(3 + 23 * (Math.log10(N) - lo) / (hi - lo));
+    });
+
+    let junctionJoined = false, isJoining = false;
+    let mergeProgress = 0.0, depletionProgress = 0.0;
+
+    let latticeCanvas, energyCanvas, potentialCanvas;
+    let ctxLattice, ctxEnergy, ctxPotential;
+
+    let atoms = [], particles = [], recombEvents = [];
+    let formationEvents = [], formationAccumulator = 0, formationSerial = 0;
+    let wireElectrons = [];
+    const NUM_WIRE_ELECTRONS = 14;
+
+    const V_WIDTH = 1100, V_HEIGHT = 380, V_CHART_HEIGHT = 340;
+    const GRID_COLS = 22, GRID_ROWS = 8, GRID_MID = GRID_COLS / 2;
+    const LATTICE_LEFT = 105, LATTICE_RIGHT = V_WIDTH - 105;
+    const LATTICE_TOP = 84, LATTICE_BOTTOM = 322;
+    const SPACING_X = (LATTICE_RIGHT - LATTICE_LEFT) / (GRID_COLS - 1);
+    const SPACING_Y = (LATTICE_BOTTOM - LATTICE_TOP) / (GRID_ROWS - 1);
+    const gridToX = c => LATTICE_LEFT + SPACING_X * c;
+    const gridToY = r => LATTICE_TOP + SPACING_Y * r;
+
+    /* 물리 스냅샷 — 파라미터가 바뀔 때만 재계산 */
+    let PH = null;
+    /* 애니메이션용 완화 상태 (전압/온도 변경 시 부드럽게 추종) */
+    let RX = { W: null, barrier: null, Vbi: null, Vj: null, ohm: 0 };
+
+    function dopingN() { return DOPING_TABLE[dopingLevel - 1]; }
+    function isDonorMode() { return currentMode === 'N'; }
+
+    /* ── 물리 스냅샷 재계산 ── */
+    function recomputePhysics() {
+        const T = temperature, N = dopingN();
+        const Eg = EgT(T), ni = niT(T), Vt = VtT(T);
+
+        if (currentMode === 'PN') {
+            const d  = solveDiode(N, N, T, junctionJoined ? Vapp : 0);
+            const cp = carrierDensities(N, T, false);
+            const cn = carrierDensities(N, T, true);
+            const mu = mobility(N, T);
+            PH = {
+                T, N, Eg, ni, Vt,
+                Nion: Math.min(cp.Nion, cn.Nion),
+                NionA: cp.Nion, NionD: cn.Nion,
+                ionRatio: Math.min(cp.Nion, cn.Nion) / N,
+                ionRatioA: cp.Nion / N, ionRatioD: cn.Nion / N,
+                maj: cn.n, min: cn.p, majP: cp.p, minP: cp.n,
+                mun: mu.mn, mup: mu.mp,
+                sigma: conductivity(N, T, true), sigmaP: conductivity(N, T, false),
+                Vbi: d.Vbi, Vj: junctionJoined ? d.Vj : 0, I: junctionJoined ? d.I : 0,
+                I0: d.I0, I0Electron: d.I0Electron, I0Hole: d.I0Hole,
+                Ielectron: d.Ielectron, Ihole: d.Ihole, Irg0: d.Irg0, Rs: d.Rs,
+                Wcm: junctionJoined ? d.W : depletionWidthCm(N, N, T, 0),
+                /* 교육용 장벽 높이는 음수가 될 수 없는 크기다.
+                   큰 순방향 전압에서 단순 공핍 근사가 한계에 닿으면 0으로 둔다. */
+                barrier: Math.max(d.Vbi - (junctionJoined ? d.Vj : 0), 0),
+                /* P형 영역 Ef−Ev, N형 영역 Ec−Ef (eV) — 밴드 그림의 기준 */
+                dEfP: Vt * Math.log(NvT(T) / Math.max(cp.p, 1)),
+                dEfN: Vt * Math.log(NcT(T) / Math.max(cn.n, 1))
+            };
+        } else {
+            const isD = isDonorMode();
+            const c   = carrierDensities(N, T, isD);
+            const mu  = mobility(N, T);
+            const sig = conductivity(N, T, isD);
+            PH = {
+                T, N, Eg, ni, Vt,
+                Nion: c.Nion, ionRatio: c.Nion / N,
+                NionA: isD ? null : c.Nion, NionD: isD ? c.Nion : null,
+                ionRatioA: isD ? null : c.Nion / N,
+                ionRatioD: isD ? c.Nion / N : null,
+                maj: c.maj, min: c.min, n: c.n, p: c.p,
+                mun: mu.mn, mup: mu.mp, sigma: sig,
+                I: sig * (AREA / LEN) * Vapp,        // 옴 법칙 (저항체)
+                Rs: LEN / (AREA * sig),
+                Vbi: 0, Vj: Vapp, barrier: 0, Wcm: 0,
+                /* Ef 위치: N형은 Ec 아래, P형은 Ev 위 (eV) */
+                dEf: isD ? Vt * Math.log(NcT(T) / Math.max(c.n, 1))
+                         : Vt * Math.log(NvT(T) / Math.max(c.p, 1))
+            };
+        }
+        PH.regime = classifyRegime(PH);
+        PH.degenerate = (currentMode === 'PN')
+            ? (PH.dEfP < 0.02 || PH.dEfN < 0.02)
+            : (PH.dEf < 0.02);
+        /* 고주입 자체와 교육용 정량 표시 한계를 구분한다. */
+        PH.highInjection = (currentMode === 'PN' && junctionJoined && PH.Vbi > 0 &&
+                            PH.Vj >= PH.Vbi * 0.97);
+        PH.forwardLimit = PH.highInjection;
+        PH.qualitative = (PH.T < 250) || PH.forwardLimit;
+
+        /* 중성영역 옴 강하 I·R_s (전류·나르개 이동 계산용 실제 값).
+           고등학생용 전위 그래프에서는 이 작은 기울기를 생략한다. */
+        PH.ohm = (currentMode === 'PN' && junctionJoined && isFinite(PH.I) && isFinite(PH.Rs))
+            ? PH.I * PH.Rs : 0;
+
+        if (RX.W === null) {
+            RX.W = PH.Wcm; RX.barrier = PH.barrier; RX.Vbi = PH.Vbi; RX.Vj = PH.Vj; RX.ohm = PH.ohm;
+        }
+        syncDopantIonization();
+    }
+
+    /* ── 나르개 농도 영역 판정 ──
+       온도에 따른 나르개 농도 곡선의 표준 3구간:
+         동결 영역   (freeze-out)  : 저온에서 kT가 부족해 도펀트가 이온화되지 못함
+         불순물 영역 (extrinsic / saturation) : 도펀트가 거의 다 이온화 → 농도 포화
+         진성 영역   (intrinsic)   : 열로 생긴 나르개가 도핑을 넘어섬
+       "동작 영역(operating region)"과 혼동하지 않도록 여기서는 '농도 영역'이라고 부른다.
+
+       ★ 주의: 이온화율이 낮은 원인은 두 가지이고 이름이 다르다.
+         ① 저온  (kT ≪ ΔE)        → 동결(freeze-out). 온도축의 저온쪽 구간.
+         ② 고농도 (E_F가 도펀트 준위에 접근) → 불완전 이온화. 상온에서도 일어난다.
+       ②를 "동결"이라 부르면 "상온 실리콘이 얼어 있다"는 오개념이 된다. 그래서
+       원인을 갈라서 이름 붙인다. 판정은 낮은 쪽(억셉터, g=4) 이온화율을 쓴다. */
+    function classifyRegime(ph) {
+        if (ph.ionRatio < 0.90) {
+            /* ── 원인 판정: 고정 온도 임계값을 쓰지 않는다 ──
+               동결이 풀리는 온도는 도핑에 따라 크게 달라진다. 이 코드의 이온화식으로
+               '이온화율 90% 도달 온도'를 직접 계산하면 (억셉터 붕소, g=4):
+                   3×10¹⁴ → 85 K,  3×10¹⁵ → 120 K,  1×10¹⁶ → 149 K,
+                   5×10¹⁶ → 214 K, 3×10¹⁷ → 363 K
+               10배 넘게 흩어지므로 "몇 K 미만이면 동결" 같은 상수는 물리적 근거가 없다.
+               (앞선 버전의 218 K 상수는 임의값이었으므로 폐기)
+
+               대신 '지금 온도가 제한 요인인가'를 직접 물어본다. 동결 구간에서는
+               N⁻ ∝ exp(−ΔE/2kT) 로 온도에 강하게 활성화되므로 온도를 10% 올리면
+               이온화율이 뚜렷이 오른다. 반대로 도핑이 원인이면 이미 포화 쪽이라
+               온도를 올려도 거의 안 오른다. 이 민감도로 두 원인을 가른다.
+               결과(검증됨): 50~75 K 전 도핑 동결, 100 K는 3×10¹⁵ 이상만 동결,
+                             300 K·3×10¹⁷ 는 불완전 이온화 → 상온을 "얼었다"고 하지 않음. */
+            const rNow  = ionizedDensity(ph.N, ph.T, false) / ph.N;
+            const rWarm = ionizedDensity(ph.N, ph.T * 1.1, false) / ph.N;
+            const temperatureLimited = rNow > 0 && (rWarm / rNow) > 1.05;
+            return temperatureLimited
+                ? { key: 'freeze', label: '동결 영역',
+                    note: '온도를 올리면 이온화가 빠르게 늘어남 → 열에너지 부족이 원인 (freeze-out)',
+                    color: '#60a5fa' }
+                : { key: 'partial', label: '불완전 이온화',
+                    note: '온도를 올려도 거의 안 늘어남 → 높은 도핑으로 페르미 준위가 도펀트 준위에 접근한 것이 원인',
+                    color: '#38bdf8' };
+        }
+        if (ph.ni >= ph.Nion)   return { key: 'intrinsic', label: '진성 영역',
+            note: '열로 생긴 나르개가 도핑을 넘어서 P/N 차이가 작아짐', color: '#ef4444' };
+        if (ph.ni >= 0.05 * ph.Nion) return { key: 'transition', label: '진성 영역 전이 구간',
+            note: '불순물 영역에서 진성 영역으로 넘어가는 중', color: '#f59e0b' };
+        return { key: 'extrinsic', label: '불순물 영역',
+            note: '도펀트가 거의 다 이온화되어 다수 나르개 ≈ 도핑 농도 (포화)', color: '#10b981' };
+    }
+
+    /* =========================================================================
+       재현성 있는 난수 (도펀트 배치용) — 같은 조건이면 항상 같은 격자
+       ========================================================================= */
+    function mulberry32(seed) {
+        let a = seed >>> 0;
+        return function () {
+            a = (a + 0x6D2B79F5) >>> 0;
+            let t = a;
+            t = Math.imul(t ^ (t >>> 15), 1 | t);
+            t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+    }
+
+    /* =========================================================================
+       원자
+       ========================================================================= */
+    class Atom {
+        constructor(gx, gy, type, x, y, phase) {
+            this.gridX = gx; this.gridY = gy; this.type = type;
+            this.baseX = x;  this.baseY = y;  this.x = x; this.y = y;
+            this.phase = phase;          // 고정 위상 (물리적인 진동)
+            this.rank = -1;              // 도펀트 이온화 순번
+            this.ionized = true;
+        }
+        update(t) {
+            /* 열진동 진폭 ∝ √T (등분배 정리), 영점 진동을 하한으로 */
+            const amp = 1.6 * Math.sqrt(temperature / 500) + 0.12;
+            this.x = this.baseX + Math.sin(t * 2.2 + this.phase) * amp;
+            this.y = this.baseY + Math.cos(t * 2.9 + this.phase * 1.7) * amp * 0.8;
+        }
+        draw(ctx, offsetX) {
+            const dx = this.x + offsetX;
+            let core = '#475569', edge = '#64748b', label = 'Si', lc = '#94a3b8';
+
+            if (this.type === 'B') {
+                if (this.ionized) { core = '#f43f5e'; edge = '#e11d48'; label = 'B⁻'; lc = '#fff'; }
+                else { core = 'rgba(244,63,94,0.20)'; edge = 'rgba(244,63,94,0.40)'; label = 'B'; lc = 'rgba(255,255,255,0.45)'; }
+            } else if (this.type === 'P') {
+                if (this.ionized) { core = '#3b82f6'; edge = '#2563eb'; label = 'P⁺'; lc = '#fff'; }
+                else { core = 'rgba(59,130,246,0.20)'; edge = 'rgba(59,130,246,0.40)'; label = 'P'; lc = 'rgba(255,255,255,0.45)'; }
+            }
+
+            ctx.beginPath();
+            ctx.arc(dx, this.y, 14, 0, Math.PI * 2);
+            ctx.fillStyle = core; ctx.fill();
+            ctx.strokeStyle = edge; ctx.lineWidth = 2; ctx.stroke();
+
+            ctx.fillStyle = lc;
+            ctx.font = 'bold 10px Outfit, sans-serif';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(label, dx, this.y);
+
+            if (this.type !== 'Si' && !this.ionized) {
+                ctx.font = 'bold 11px Outfit, sans-serif';
+                ctx.fillStyle = 'rgba(251,191,36,0.9)';
+                ctx.fillText('○', dx + 11, this.y - 11);
+            }
+        }
+    }
+
+    /* =========================================================================
+       전위 분포 — 모든 동역학과 그래프가 이 함수 하나를 공유한다
+       반환: 위치 x(0~1, 왼쪽→오른쪽)에서의 정전위 V (볼트)
+       PN: 고등학교 교과서형으로 중성영역은 평평하고 공핍층 장벽만 표시
+       단독: 왼쪽 = Vapp, 오른쪽 = 0 (선형)
+       ========================================================================= */
+    function depletionDisplayGeometry() {
+        /* 화면 공핍층 배율. 총폭은 가독성을 위해 제한하되 좌우 비율은 전하중성을 따른다. */
+        const REF_W = 0.430e-4;            // cm, 기준 조건(1e16,300K,0V)의 실제 폭
+        const REF_PX = 120;                // 그 조건을 120px로 그린다
+        if (!PH) {
+            return { pFrac: 0, nFrac: 0, pPx: 0, nPx: 0, totalPx: 0 };
+        }
+        /* 실제 폭의 거듭제곱 축척을 사용한다. 넓은 폭은 압축하고 좁은 폭은 확대하되
+           실제 폭이 줄어들면 화면 폭도 반드시 줄어들게 하여 순·역방향 변화를 보존한다.
+           최소 46 px는 접합면 양쪽의 가장 가까운 격자점을 포함해 고정 이온이 보이게 한다. */
+        let px;
+        if (PH.Wcm <= 0 && currentMode === 'PN' && junctionJoined && PH.forwardLimit) {
+            /* 큰 순방향 끝에서는 단순 공핍근사의 정량값이 0에 닿을 수 있다.
+               실제 접합이 사라진 것처럼 보이지 않도록 이 구간은 '매우 좁음'으로만 표시한다. */
+            px = 46;
+        } else {
+            if (PH.Wcm <= 0 || RX.W <= 0)
+                return { pFrac: 0, nFrac: 0, pPx: 0, nPx: 0, totalPx: 0 };
+            px = REF_PX * Math.pow(RX.W / REF_W, 0.55);
+            px = Math.min(Math.max(px, 46), 420);
+        }
+
+        let pShare = 0.5, nShare = 0.5;
+        if (currentMode === 'PN' && PH.NionA > 0 && PH.NionD > 0) {
+            const sum = PH.NionA + PH.NionD;
+            /* N_A^- x_p = N_D^+ x_n */
+            pShare = PH.NionD / sum;
+            nShare = PH.NionA / sum;
+        }
+        const pPx = px * pShare, nPx = px * nShare;
+        return { pFrac: pPx / V_WIDTH, nFrac: nPx / V_WIDTH,
+                 pPx: pPx, nPx: nPx, totalPx: px };
+    }
+
+    function isInDisplayedDepletion(col) {
+        if (currentMode !== 'PN' || !junctionJoined || depletionProgress <= 0) return false;
+        const dg = depletionDisplayGeometry();
+        if (dg.totalPx <= 0) return false;
+        const pCols = dg.pPx / SPACING_X * depletionProgress;
+        const nCols = dg.nPx / SPACING_X * depletionProgress;
+        const centerCol = GRID_MID - 0.5;
+        const lo = centerCol - pCols, hi = centerCol + nCols;
+        return col > lo && col < hi;
+    }
+
+    /* 나르개 애니메이션용 과장 기울기 (중성영역 옴 강하의 표시 배율)
+       ── 왜 과장이 필요한가 ──
+       나르개의 실제 속도는 (열운동) + (드리프트)이다.
+         · 드리프트는 v_n=μ_nE, v_p=μ_pE이며 전자와 양공이 서로 다르다.
+         · 열운동은 온도만 따르고 전류와 무관하다.
+       그런데 300 K에서 v_열운동 ≈ 2.3×10⁵ m/s, v_드리프트 ≈ 10² m/s 이하 —
+       비율이 10⁻⁴ ~ 10⁻⁷ 이라 드리프트를 정직한 비율로 그리면 아예 보이지 않는다.
+       그래서 격자 애니메이션에서는 '한 번 뛰는 속력'(=열운동, √T)은 건드리지 않고,
+       ① '어느 쪽으로 뛸지의 확률'을 기울여 방향을 만들고,
+       ② 각 나르개의 μE로 구한 알짜 속력을 공통 척도로 압축해 더한다.
+          전압·농도·온도가 바뀌면 μ와 국소 E가 다시 계산되며, 고전계에서는 포화속도를 쓴다.
+       한 번 뛰는 기본 속력은 √T(열운동)로 두어 온도 효과와 섞이지 않게 한다.
+       도선은 금속의 n과 A로 구한 별도 드리프트 척도를 사용하므로 반도체 점과 속력을
+       같게 맞추지 않는다. 전류 연속성은 전류가 같다는 뜻이지 입자 속도가 같다는 뜻이 아니다. */
+    /* ── 전자·양공을 분리한 국소 드리프트 속도 ──
+       전류 연속성은 '속도 동일'을 뜻하지 않는다. 각 나르개의 드리프트는
+         v_n = μ_n E,  v_p = μ_p E
+       로 계산한다. PN 중성영역의 E는 J/σ, 공핍층의 E는 포아송 해에서 얻는다.
+       고전계에서는 단순 저전계식이 무한히 커지지 않도록 실리콘 포화속도에 점근시킨다. */
+    const VOLT_MAX = 0.8;
+    const I_FULL_WIRE = 0.16;                   // A, 모든 모드에 공통인 도선 표시 기준
+    const VD_REF   = 1218 * VOLT_MAX / LEN;     // cm/s, 공통 화면 정규화 기준
+    const VSAT_N   = 1.0e7;                     // cm/s, 실리콘 전자 대표 포화속도
+    const VSAT_P   = 0.8e7;                     // cm/s, 실리콘 양공 대표 포화속도
+    const FLOW_K   = 1.04;                      // 기준 조건의 화면 알짜 흐름 (칸/초)
+    const HOP_MAX  = 0.95;
+
+    function saturatedVelocity(vLowField, type) {
+        const vsat = type === 'electron' ? VSAT_N : VSAT_P;
+        return vLowField > 0 ? vLowField / (1 + vLowField / vsat) : 0;
+    }
+
+    function localCarrierDriftVelocity(type, xFrac) {
+        if (!PH) return 0;
+        const mu = type === 'electron' ? PH.mun : PH.mup;
+        let field = 0;                           // V/cm
+
+        if (currentMode !== 'PN') {
+            field = Math.abs(Vapp) / LEN;
+        } else if (junctionJoined) {
+            const dg = depletionDisplayGeometry();
+            const leftEdge = 0.5 - dg.pFrac;
+            const rightEdge = 0.5 + dg.nFrac;
+
+            if (PH.Wcm > 0 && xFrac > leftEdge && xFrac < rightEdge) {
+                const sum = Math.max(PH.NionA + PH.NionD, 1);
+                const wp = PH.Wcm * PH.NionD / sum;
+                const wn = PH.Wcm * PH.NionA / sum;
+                const eMaxA = qe * PH.NionA * wp / EPS_SI;
+                const eMaxD = qe * PH.NionD * wn / EPS_SI;
+                const eMax = 0.5 * (eMaxA + eMaxD);
+                if (xFrac <= 0.5) {
+                    const u = dg.pFrac > 0 ? (xFrac - leftEdge) / dg.pFrac : 1;
+                    field = eMax * Math.min(Math.max(u, 0), 1);
+                } else {
+                    const u = dg.nFrac > 0 ? (xFrac - 0.5) / dg.nFrac : 1;
+                    field = eMax * (1 - Math.min(Math.max(u, 0), 1));
+                }
+            } else {
+                const J = Math.abs(PH.I) / AREA;  // A/cm²
+                const sigma = xFrac < 0.5 ? PH.sigmaP : PH.sigma;
+                field = sigma > 0 ? J / sigma : 0;
+            }
+        }
+        return saturatedVelocity(Math.max(mu * field, 0), type);
+    }
+
+    /* 실제 속도 범위를 화면에 담기 위한 공통 √압축.
+       전자와 양공 모두 같은 VD_REF를 사용하므로 μ_n > μ_p 차이가 화면에도 남는다. */
+    function carrierDriftLevel(type, xFrac) {
+        const vd = localCarrierDriftVelocity(type, xFrac);
+        /* 실제 속도는 이미 포화속도 모형으로 유한하다. 여기서 다시 같은 상한으로
+           잘라 버리면 고전계에서 전자·양공이 똑같이 보이므로 공통 √압축만 적용한다. */
+        return Math.sqrt(vd / VD_REF);
+    }
+
+    function thermalHopRate(type) {
+        /* 열운동은 v_th ∝ √(T/m*) 경향을 따른다. 실리콘의 방향·띠별 유효질량은
+           하나가 아니므로 수업용 대표 수송 유효질량만 사용한다. */
+        const massRel = type === 'electron' ? 0.26 : 0.39;
+        return 2.6 * Math.sqrt(temperature / 300) * Math.sqrt(0.39 / massRel);
+    }
+
+    function flowTarget(type, xFrac) {
+        return FLOW_K * carrierDriftLevel(type, xFrac);
+    }
+
+    function hopPerStepTarget(type, xFrac) {
+        const rate = thermalHopRate(type);
+        return rate > 0 ? Math.min(flowTarget(type, xFrac) / rate, HOP_MAX) : 0;
+    }
+
+    function driftHopBoost(type, xFrac) {
+        const rate = thermalHopRate(type);
+        const cap = rate * HOP_MAX;
+        return cap > 0 ? Math.max(1, flowTarget(type, xFrac) / cap) : 1;
+    }
+
+    function displayHopTilt(type, xFrac) {
+        const t = hopPerStepTarget(type, xFrac);
+        if (!(t > 0) || !PH || PH.I === 0) return 0;
+        return Math.sign(PH.I) * 4 * VtT(temperature) * Math.atanh(t);
+    }
+
+    function displayDriftDrop(type) {
+        if (currentMode !== 'PN')
+            return displayHopTilt(type, 0.5) * GRID_COLS;
+        return (displayHopTilt(type, 0.25) + displayHopTilt(type, 0.75)) * GRID_COLS / 2;
+    }
+
+    /* 금속 도선의 파란 점은 평균 드리프트만 나타낸다.
+       n_wire와 A_wire를 명시해 실제 평균속도 v=I/(qnA)를 계산한다. 화면에서는 작은
+       전류도 보이도록 모든 모드에 같은 √압축을 적용한다.
+       반도체와 금속은 n이 크게 다르므로 두 점의 화면 속도를 서로 같게 맞추지 않는다. */
+    const WIRE_CARRIER_DENSITY = 8.5e22;        // cm^-3, 구리의 대표 자유전자 밀도
+    const WIRE_AREA = AREA;                     // cm², 이 개념 모형에서 정한 도선 단면
+    const WIRE_SPEED_FULL = 170;                // px/s at the common display reference current
+    function wireDriftVelocity() {
+        if (!PH || !isFinite(PH.I)) return 0;
+        return PH.I / (qe * WIRE_CARRIER_DENSITY * WIRE_AREA);
+    }
+    function wireDisplaySpeed() {
+        const vd = wireDriftVelocity();
+        if (vd === 0) return 0;
+        const vdRef = I_FULL_WIRE / (qe * WIRE_CARRIER_DENSITY * WIRE_AREA);
+        /* 모든 모드에서 같은 √압축을 적용한다. 작은 전류도 보이게 하면서
+           전류의 대소 관계와 방향을 보존하므로, 더 작은 전류가 더 빠르게 보이지 않는다. */
+        const level = Math.sqrt(Math.min(Math.abs(vd) / vdRef, 1));
+        return Math.sign(vd) * WIRE_SPEED_FULL * level;
+    }
+
+
+    /* PN에서 forDrift = true 면 나르개 이동 판정용 표시 기울기,
+       false 면 소자 내부 전위 계산용 실제 I·R_s 분포를 반환한다.
+       교과서형 전위·에너지 띠 그림은 아래 textbookJunctionPotentialAt을 사용한다. */
+    function potentialAt(xFrac, forDrift, carrierType) {
+        if (currentMode !== 'PN') {
+            /* 나르개 판정용 기울기는 전자·양공의 μE를 각각 화면 척도로 바꾼 값이다.
+               실제 전위 그래프는 아래의 Vapp 선형 강하를 그대로 쓴다. */
+            if (forDrift)
+                return displayHopTilt(carrierType || 'electron', xFrac) *
+                       (GRID_COLS + 1) * (1 - xFrac);
+            return Vapp * (1 - xFrac);                      // 선형 강하 (그래프용 실제값)
+        }
+        if (!junctionJoined) {
+            return 0;                                        // 접합 전: 각 블록 독립
+        }
+        /* 그려지는 장벽은 relaxed Vbi·Vj 한 쌍에서만 파생시킨다.
+           그래야 애니메이션 완화 중에도 (밴드 휨) = (Vbi−Vj), (Ef 분리) = Vj 가
+           항상 정확히 성립한다. */
+        const step = PH.Wcm <= 0 ? 0 : Math.max(RX.Vbi - RX.Vj, 0); // Vbi − Vj
+        const dg = depletionDisplayGeometry();
+        const L = 0.5 - dg.pFrac, R = 0.5 + dg.nFrac;
+
+        /* 중성영역의 옴 강하 = I·R_s. V_인가 = V_j + I·R_s 이므로 이 항이 있어야
+           그래프 양끝 전위차가 V_bi − V_인가 로 정확히 맞는다(전에는 I·R_s가 빠져 있었다).
+           그래프는 비저항 비로 나누고, 애니메이션은 각 나르개의 국소 μE에서 얻은
+           P형·N형 영역의 표시 기울기를 따로 사용한다. */
+        let ohmP, ohmN;
+        if (forDrift) {
+            const tp = carrierType || 'electron';
+            ohmP = displayHopTilt(tp, 0.25) * GRID_COLS / 2;
+            ohmN = displayHopTilt(tp, 0.75) * GRID_COLS / 2;
+        } else {
+            const rN = PH.sigma  > 0 ? 1 / PH.sigma  : 0;
+            const rP = PH.sigmaP > 0 ? 1 / PH.sigmaP : 0;
+            const rSum = (rN + rP) || 1;
+            ohmP = RX.ohm * rP / rSum;
+            ohmN = RX.ohm * rN / rSum;
+        }
+
+        /* N형 중성영역: x=R 에서 ohmN, 오른쪽 단자(x=1)에서 0 */
+        if (xFrac >= R) {
+            const u = R < 1 ? (xFrac - R) / (1 - R) : 1;
+            return ohmN * (1 - u);
+        }
+        /* P형 중성영역: x=L 에서 ohmN−step, 왼쪽 단자(x=0)에서 ohmN−step+ohmP */
+        if (xFrac <= L) {
+            const u = L > 0 ? xFrac / L : 0;
+            return ohmN - step + ohmP * (1 - u);
+        }
+        /* 공핍층: N_A^- x_p = N_D^+ x_n을 만족하는 포아송 방정식의 포물선 해 */
+        const total = Math.max(dg.pFrac + dg.nFrac, 1e-12);
+        const pShare = dg.pFrac / total, nShare = dg.nFrac / total;
+        if (xFrac <= 0.5) {
+            const u = dg.pFrac > 0 ? (xFrac - L) / dg.pFrac : 1;
+            return ohmN - step + step * pShare * u * u;
+        }
+        const u = dg.nFrac > 0 ? (xFrac - 0.5) / dg.nFrac : 1;
+        return ohmN - step * nShare * (1 - u) * (1 - u);
+    }
+
+    /* 고등학생용 PN 접합 전위:
+       중성영역의 작은 I·R_s 기울기는 생략하고 공핍층의 전위 장벽만 나타낸다.
+       전류 계산에는 위의 실제 소자 모형을 그대로 사용하며, 이 함수는 에너지 띠와
+       전위 그래프를 교과서형으로 단순하게 그릴 때만 사용한다. */
+    function textbookJunctionPotentialAt(xFrac) {
+        if (currentMode !== 'PN' || !junctionJoined) return 0;
+        const step = Math.max(RX.barrier, 0);
+        if (!(step > 0)) return 0;
+        const dg = depletionDisplayGeometry();
+        const left = 0.5 - dg.pFrac, right = 0.5 + dg.nFrac;
+        if (xFrac <= left) return -step;                 // P형 중성영역
+        if (xFrac >= right) return 0;                    // N형 중성영역
+
+        const total = Math.max(dg.pFrac + dg.nFrac, 1e-12);
+        const pShare = dg.pFrac / total, nShare = dg.nFrac / total;
+        if (xFrac <= 0.5) {
+            const u = dg.pFrac > 0 ? (xFrac - left) / dg.pFrac : 1;
+            return -step + step * pShare * u * u;
+        }
+        const u = dg.nFrac > 0 ? (xFrac - 0.5) / dg.nFrac : 1;
+        return -step * nShare * (1 - u) * (1 - u);
+    }
+
+    const colToFrac = c => (c + 1) / (GRID_COLS + 1);
+
+    /* =========================================================================
+       캐리어
+       kind: 'majority' (이온화 도펀트가 내놓은 것)
+             'minority' (열평형 소수캐리어)
+             'injected' (순방향·접합 형성 때 반대쪽에 주입된 소수캐리어)
+             'thermal'  (공핍층 등에서 열적으로 쌍생성된 것 → 접점에서 수집되어 소멸)
+       ========================================================================= */
+    class Carrier {
+        constructor(gx, gy, type, kind) {
+            this.gridX = gx; this.gridY = gy;
+            this.targetGridX = gx; this.targetGridY = gy;
+            this.type = type;                 // 'electron' | 'hole'
+            this.kind = kind || 'majority';
+            this.hopProgress = 1.0;
+            this.isHopping = false;
+            this.dead = false;
+        }
+
+        update(dt) {
+            if (this.isHopping) {
+                /* 기본 hop 빈도는 √T 열운동, 알짜 흐름은 이 나르개의 국소 μE에서 얻는다.
+                   전자와 양공은 서로 다른 이동도를 쓰며 고전계에서는 포화속도를 적용한다. */
+                const xf = colToFrac((this.gridX + this.targetGridX) / 2);
+                const speed = thermalHopRate(this.type) * driftHopBoost(this.type, xf);
+                this.hopProgress += speed * dt;
+                if (this.hopProgress >= 1.0) {
+                    this.gridX = this.targetGridX;
+                    this.gridY = this.targetGridY;
+                    this.isHopping = false;
+                    this.hopProgress = 1.0;
+                }
+                return;
+            }
+
+            const c = this.gridX, r = this.gridY;
+            let neighbors = [];
+            if (c + 1 < GRID_COLS) neighbors.push({ c: c + 1, r: r });
+            if (c - 1 >= 0)        neighbors.push({ c: c - 1, r: r });
+            if (r + 1 < GRID_ROWS) neighbors.push({ c: c, r: r + 1 });
+            if (r - 1 >= 0)        neighbors.push({ c: c, r: r - 1 });
+
+            if (currentMode === 'PN' && !junctionJoined) {
+                neighbors = neighbors.filter(n =>
+                    (this.type === 'hole') ? n.c <= GRID_MID - 1 : n.c >= GRID_MID);
+            }
+            if (neighbors.length === 0) return;
+
+            const Vt = VtT(temperature);
+            /* 뛰는 '속력'은 위에서 √T 로만 정했다(=열운동). 여기서 정하는 것은 '방향 확률'
+               뿐이며, 이것이 드리프트에 해당한다. 전류가 커지면 이 쏠림이 커진다. */
+            const V0 = potentialAt(colToFrac(c), true, this.type);
+            /* 전자의 퍼텐셜 에너지 U = −qV, 양공은 U = +qV (eV 단위) */
+            const sgn = (this.type === 'electron') ? -1 : +1;
+
+            let total = 0;
+            const w = neighbors.map(n => {
+                let weight = 1.0;
+                if (n.c !== c) {
+                    const dU = sgn * (potentialAt(colToFrac(n.c), true, this.type) - V0);
+                    /* 세부균형: 정·역 확률비 = exp(−ΔU/kT) */
+                    const e = Math.max(-6, Math.min(-dU / (2 * Vt), 6));
+                    weight = Math.exp(e);
+                }
+                total += weight;
+                return weight;
+            });
+
+            let pick = Math.random() * total, acc = 0, sel = neighbors[0];
+            for (let i = 0; i < w.length; i++) {
+                acc += w[i];
+                if (pick <= acc) { sel = neighbors[i]; break; }
+            }
+            this.targetGridX = sel.c;
+            this.targetGridY = sel.r;
+            this.isHopping = true;
+            this.hopProgress = 0.0;
+        }
+
+        screenPos(offsetX) {
+            const x1 = gridToX(this.gridX),       y1 = gridToY(this.gridY);
+            const x2 = gridToX(this.targetGridX), y2 = gridToY(this.targetGridY);
+            return { x: x1 + (x2 - x1) * this.hopProgress + offsetX,
+                     y: y1 + (y2 - y1) * this.hopProgress,
+                     ex: x2 - (x2 - x1) * this.hopProgress + offsetX,
+                     ey: y2 - (y2 - y1) * this.hopProgress };
+        }
+
+        draw(ctx, offsetX) {
+            const pos = this.screenPos(offsetX);
+            ctx.beginPath();
+            if (this.type === 'electron') {
+                ctx.arc(pos.x, pos.y, 5, 0, Math.PI * 2);
+                ctx.fillStyle = '#38bdf8';
+                ctx.shadowColor = '#0284c7'; ctx.shadowBlur = 6;
+                ctx.fill(); ctx.shadowBlur = 0;
+            } else {
+                ctx.arc(pos.x, pos.y, 5, 0, Math.PI * 2);
+                ctx.strokeStyle = '#f43f5e'; ctx.lineWidth = 2.5;
+                ctx.shadowColor = '#e11d48'; ctx.shadowBlur = 6;
+                ctx.stroke(); ctx.shadowBlur = 0;
+                /* 이웃 공유결합의 전자가 양공을 메우면 양공은 반대 방향으로 이동해 보인다. */
+                if (this.isHopping) {
+                    ctx.beginPath();
+                    ctx.arc(pos.ex, pos.ey, 3.5, 0, Math.PI * 2);
+                    ctx.fillStyle = '#94a3b8'; ctx.strokeStyle = '#475569';
+                    ctx.lineWidth = 1; ctx.stroke(); ctx.fill();
+                }
+            }
+        }
+    }
+
+    /* =========================================================================
+       격자 생성 및 이온화 동기화
+       ========================================================================= */
+    function initLattice() {
+        atoms = []; particles = []; recombEvents = [];
+        formationEvents = []; formationAccumulator = 0; formationSerial = 0;
+
+        const nDots = DOPANT_DOTS[dopingLevel - 1];
+        /* 시드 고정 → 같은 조건이면 항상 같은 배치 (재현성) */
+        const rnd = mulberry32(dopingLevel * 7919 + (currentMode === 'PN' ? 13 : 1));
+
+        const dopantSet = new Map();   // index → rank
+        const shuffle = pool => {
+            for (let i = pool.length - 1; i > 0; i--) {
+                const j = Math.floor(rnd() * (i + 1));
+                const tmp = pool[i]; pool[i] = pool[j]; pool[j] = tmp;
+            }
+        };
+
+        const total = GRID_COLS * GRID_ROWS;
+        /* 실제 농도에서는 도펀트가 매우 희박하다. 과장된 화면 점들이 서로 결합해 보이지
+           않도록 한쪽 체커보드 격자만 사용해 각 도펀트가 Si 이웃만 갖게 한다. */
+        const parity = dopingLevel % 2;
+        const eligible = [];
+        for (let i = 0; i < total; i++) {
+            const c = i % GRID_COLS, r = Math.floor(i / GRID_COLS);
+            if ((c + r) % 2 === parity) eligible.push(i);
+        }
+
+        if (currentMode === 'PN') {
+            const left = eligible.filter(i => (i % GRID_COLS) < GRID_MID);
+            const right = eligible.filter(i => (i % GRID_COLS) >= GRID_MID);
+            shuffle(left); shuffle(right);
+
+            /* 공핍층 안의 B⁻·P⁺가 모든 도핑 단계에서 실제 격자점으로 보이도록
+               접합면에 가장 가까운 후보를 각 측의 첫 도펀트로 둔다. 모든 후보가 같은
+               체커보드 부분격자에 있으므로 도펀트끼리 상하좌우로 맞닿지는 않는다. */
+            const preferJunctionSite = (pool, col) => {
+                const at = pool.findIndex(i => (i % GRID_COLS) === col);
+                if (at > 0) {
+                    const chosen = pool[at];
+                    pool.splice(at, 1);
+                    pool.unshift(chosen);
+                }
+            };
+            preferJunctionSite(left, GRID_MID - 1);
+            preferJunctionSite(right, GRID_MID);
+            for (let k = 0; k < nDots; k++) { dopantSet.set(left[k], k); dopantSet.set(right[k], k); }
+        } else {
+            shuffle(eligible);
+            for (let k = 0; k < nDots; k++) dopantSet.set(eligible[k], k);
+        }
+
+        let idx = 0;
+        for (let r = 0; r < GRID_ROWS; r++) {
+            for (let c = 0; c < GRID_COLS; c++) {
+                const x = gridToX(c), y = gridToY(r);
+                let type = 'Si';
+                if (dopantSet.has(idx)) {
+                    if (currentMode === 'P') type = 'B';
+                    else if (currentMode === 'N') type = 'P';
+                    else type = (c < GRID_MID) ? 'B' : 'P';
+                }
+                const a = new Atom(c, r, type, x, y, (c * 1.7 + r * 3.1) % (Math.PI * 2));
+                if (type !== 'Si') a.rank = dopantSet.get(idx);
+                atoms.push(a);
+                idx++;
+            }
+        }
+
+        /* 결합 목록 미리 계산 (매 프레임 O(N²) 탐색 제거) */
+        buildBondList();
+        recomputePhysics();
+        initWire();
+    }
+
+    let bondList = [];
+    function buildBondList() {
+        bondList = [];
+        const grid = {};
+        atoms.forEach(a => { grid[a.gridX + ',' + a.gridY] = a; });
+        atoms.forEach(a => {
+            const right = grid[(a.gridX + 1) + ',' + a.gridY];
+            const down  = grid[a.gridX + ',' + (a.gridY + 1)];
+            if (right) bondList.push([a, right]);
+            if (down)  bondList.push([a, down]);
+        });
+    }
+
+    /* ── 이온화 상태 + 캐리어 수를 물리값에 맞춰 조정 (전체 리셋 없이) ── */
+    function syncDopantIonization() {
+        if (!PH) return;
+
+        const dopants = atoms.filter(a => a.type !== 'Si');
+        const countA = dopants.filter(a => a.type === 'B').length;
+        const countD = dopants.filter(a => a.type === 'P').length;
+        const ionCountA = Math.round((PH.ionRatioA ?? 0) * countA);
+        const ionCountD = Math.round((PH.ionRatioD ?? 0) * countD);
+
+        dopants.forEach(a => {
+            const count = (a.type === 'B') ? ionCountA : ionCountD;
+            a.ionized = (a.rank < count);
+        });
+
+        /* 공핍층에서는 이동 가능한 다수캐리어가 빠져나가고 이온화 도펀트만 남는다. */
+        particles.forEach(p => {
+            if (p.kind === 'majority' && isInDisplayedDepletion(p.gridX)) p.dead = true;
+        });
+        particles = particles.filter(p => !p.dead);
+
+        /* 다수캐리어 목표 수.
+           PN 접합에서는 공핍층에 들어간 이온화 도펀트만큼 이동 캐리어 총수를 줄인다.
+           이전처럼 공핍층에서 지운 점을 중성영역에 다시 채우면 캐리어가 바깥에
+           압축된 것처럼 보이므로, 실제로 이동 가능한 중성영역 도펀트 수를 센다. */
+        const targets = {};
+        if (currentMode === 'P')      targets.hole = ionCountA;
+        else if (currentMode === 'N') targets.electron = ionCountD;
+        else {
+            targets.hole = atoms.filter(a =>
+                a.type === 'B' && a.ionized && !isInDisplayedDepletion(a.gridX)).length;
+            targets.electron = atoms.filter(a =>
+                a.type === 'P' && a.ionized && !isInDisplayedDepletion(a.gridX)).length;
+        }
+
+        /* 화면 입자 수는 실제 다수/소수 농도비를 정수 개수로 근사한다. */
+        const minorTargets = {};
+        if (currentMode === 'P') {
+            minorTargets.electron = Math.min(30, Math.round(ionCountA * PH.min / Math.max(PH.maj, 1)));
+        } else if (currentMode === 'N') {
+            minorTargets.hole = Math.min(30, Math.round(ionCountD * PH.min / Math.max(PH.maj, 1)));
+        } else {
+            minorTargets.electron = Math.min(30, Math.round(
+                (targets.hole || 0) * PH.minP / Math.max(PH.majP, 1)));
+            minorTargets.hole = Math.min(30, Math.round(
+                (targets.electron || 0) * PH.min / Math.max(PH.maj, 1)));
+        }
+
+        ['hole', 'electron'].forEach(tp => {
+            const majTarget = targets[tp] || 0;
+            const list = particles.filter(p => p.type === tp && p.kind === 'majority');
+            if (list.length > majTarget) {
+                const cut = list.slice(majTarget);
+                cut.forEach(p => { p.dead = true; });
+            } else if (list.length < majTarget) {
+                const sites = atoms.filter(a => a.ionized && a.type !== 'Si' &&
+                    !isInDisplayedDepletion(a.gridX) &&
+                    (currentMode !== 'PN' || (tp === 'hole' ? a.type === 'B' : a.type === 'P')));
+                for (let i = list.length; i < majTarget; i++) {
+                    const s = sites[i % Math.max(sites.length, 1)];
+                    if (!s) break;
+                    particles.push(new Carrier(s.gridX, s.gridY, tp, 'majority'));
+                }
+            }
+        });
+
+        /* 소수캐리어: P형에서는 전자, N형에서는 양공. PN에서는 양쪽에 각각 */
+        const minorTypes = (currentMode === 'P') ? ['electron']
+                         : (currentMode === 'N') ? ['hole']
+                         : ['electron', 'hole'];
+        minorTypes.forEach(tp => {
+            const minorTarget = minorTargets[tp] || 0;
+            const list = particles.filter(p => p.type === tp && p.kind === 'minority');
+            if (list.length > minorTarget) list.slice(minorTarget).forEach(p => { p.dead = true; });
+            else for (let i = list.length; i < minorTarget; i++) {
+                /* 소수캐리어는 자신이 소수인 영역에서 생성 */
+                let cLo = 0, cHi = GRID_COLS;
+                if (currentMode === 'PN') {
+                    if (tp === 'electron') { cLo = 0; cHi = GRID_MID; }       // P형 영역의 소수 = 전자
+                    else { cLo = GRID_MID; cHi = GRID_COLS; }                 // N형 영역의 소수 = 양공
+                }
+                particles.push(new Carrier(
+                    cLo + Math.floor(Math.random() * (cHi - cLo)),
+                    Math.floor(Math.random() * GRID_ROWS), tp, 'minority'));
+            }
+        });
+
+        particles = particles.filter(p => !p.dead);
+    }
+
+    /* ── 열적 쌍생성 (SRH): 생성률 ∝ ni(T)·W ── */
+    let genAccumulator = 0;
+    const GEN_VISUAL_CAP = 26;     // 초당 최대 표시 이벤트 (애니메이션 한계)
+    const THERMAL_CAP = 12;        // 동시 표시 열생성 캐리어 상한 (화면 가독성)
+    function trueGenRateRatio() {
+        return PH ? PH.ni / NI_300 : 1;                       // 300K 대비 실제 생성률 배율
+    }
+    function visualGenRate() {
+        /* 화면 이벤트 속도는 SRH '순' 반응률의 부호와 크기를 따른다.
+             순 SRH 반응률 ∝ (exp(Vj/2Vt) − 1)
+             ▸ 역방향(Vj<0): −1 로 포화 → 순 생성. 크기는 ni·W 에 비례.
+             ▸ 평형(Vj=0)  : 순 반응 없음. 화면에서 임의의 쌍을 억지로 소멸시키지 않는다.
+             ▸ 순방향(Vj>0): 순 재결합 영역이므로 쌍 생성 사건은 만들지 않는다.
+           실제 절대 속도는 관찰 온도에 따라 매우 크게 변해 애니메이션으로 그대로 표현할 수 없으므로
+           표시 속도만 로그 압축하고, 정확한 변화는 계측값으로 확인한다.              */
+        if (!PH) return 0;
+        const bias = (currentMode === 'PN' && junctionJoined) ? PH.Vj : Vapp;
+        let wFactor = 1;
+        if (currentMode === 'PN' && junctionJoined) wFactor = RX.W / 0.430e-4;
+        const ratio = trueGenRateRatio() * wFactor;
+        if (!(ratio > 0)) return 0;
+        const norm = Math.min(Math.max(Math.log10(ratio) / Math.log10(30000), 0), 1);
+        const full = 0.3 + (GEN_VISUAL_CAP - 0.3) * norm;
+
+        if (currentMode !== 'PN') {
+            /* 단일 반도체: 상온·외인성 조건에서 소수캐리어는 다수의 10⁻¹²배로
+               사실상 존재하지 않는다. 그때 열생성 쌍을 화면에 띄우면 '도핑된 반도체에도
+               두 캐리어가 비슷하게 있다'는 오개념을 심는다. 그래서 소수캐리어 비율이
+               유의미해지는 진성 전이 구간부터만 표시한다.                        */
+            const ratioMin = (PH.maj > 0) ? PH.min / PH.maj : 0;
+            if (ratioMin < 1e-4) return 0;
+            return full * Math.min(1, ratioMin * 20);
+        }
+        if (bias > 0.01) return 0;                                     // 순 재결합 영역
+        if (bias < -0.01) {
+            /* 순 생성(누설): 재결합 표시와 같은 방식으로 실제 전류 크기에서 환산해
+               역방향 전압·온도 어느 쪽을 올려도 표시 속도가 단조 증가하게 한다.
+               누설전류는 pA~µA(9자릿수)를 훑으므로 그 범위로 로그 압축한다. */
+            const I = Math.abs(PH.I);
+            if (!(I > 1e-13)) return 0.15;
+            const n2 = Math.min(Math.max(Math.log10(I / 1e-12) / 9, 0), 1);
+            return 0.3 + (GEN_VISUAL_CAP - 0.3) * n2;
+        }
+        return 0;                                                       // 평형: 순 생성 표시 없음
+    }
+
+    function spawnThermalPairs(dt) {
+        if (!PH) return;
+        let thermalCount = particles.reduce((a, p) => a + (p.kind === 'thermal' ? 1 : 0), 0);
+        const rate = visualGenRate();
+        if (!(rate > 0)) { genAccumulator = 0; return; }
+        genAccumulator += rate * dt;
+        if (genAccumulator > 3) genAccumulator = 3;
+        while (genAccumulator >= 1) {
+            genAccumulator -= 1;
+            /* 움직이는 입자 쌍은 화면 가독성 상한 안에서만 추가한다. */
+            const showParticles = thermalCount < THERMAL_CAP;
+            if (showParticles) thermalCount += 2;
+            let c, r = Math.floor(Math.random() * GRID_ROWS);
+            if (currentMode === 'PN' && junctionJoined) {
+                /* 공핍층 내부에서 생성 — 전기장이 강해 즉시 분리된다 */
+                const dg = depletionDisplayGeometry();
+                const pCols = dg.pPx / SPACING_X;
+                const nCols = dg.nPx / SPACING_X;
+                const centerCol = GRID_MID - 0.5;
+                const lo = Math.max(0, Math.ceil(centerCol - pCols));
+                const hi = Math.min(GRID_COLS - 1, Math.floor(centerCol + nCols));
+                c = lo + Math.floor(Math.random() * Math.max(1, hi - lo + 1));
+            } else {
+                c = Math.floor(Math.random() * GRID_COLS);
+            }
+            /* 생성 직후 전기장이 즉시 둘을 반대로 떼어놓는다.
+               전자는 전위가 높은 쪽(N형), 양공은 전위가 낮은 쪽(P형)으로 밀린다.
+               전기장이 없으면(평형·단독) 임의 방향으로 갈라진 뒤 다시 만나 재결합할 수 있다. */
+            const dV = potentialAt(colToFrac(Math.min(c + 1, GRID_COLS - 1)), false) -
+                       potentialAt(colToFrac(Math.max(c - 1, 0)), false);
+            let eCol, hCol;
+            if (Math.abs(dV) > 1e-4) {
+                eCol = (dV > 0) ? Math.min(c + 1, GRID_COLS - 1) : Math.max(c - 1, 0);
+                hCol = (dV > 0) ? Math.max(c - 1, 0) : Math.min(c + 1, GRID_COLS - 1);
+            } else {
+                const dir = Math.random() < 0.5 ? 1 : -1;
+                eCol = Math.min(Math.max(c + dir, 0), GRID_COLS - 1);
+                hCol = Math.min(Math.max(c - dir, 0), GRID_COLS - 1);
+            }
+            const e = new Carrier(eCol, r, 'electron', 'thermal');
+            const h = new Carrier(hCol, r, 'hole', 'thermal');
+            e.age = 0; h.age = 0;
+            if (showParticles) { particles.push(e); particles.push(h); }
+        }
+    }
+
+    /* ── 접합 형성 과도상태 ───────────────────────────────────────────
+       확산은 한 입자가 접합면을 향해 직진하는 운동이 아니다. 개별 캐리어는 무작위
+       열운동을 하지만, N형에는 전자가 많고 P형에는 양공이 많기 때문에 앙상블의
+       순플럭스가 전자 N→P, 양공 P→N이 된다. 내부 전기장이 자라면 반대 방향 표류가
+       확산을 상쇄한다. Si 원자는 이 과정에서 이동하지 않는다. */
+    function updateJunctionFormation(dt) {
+        const forming = currentMode === 'PN' && junctionJoined && depletionProgress < 1;
+        const forward = currentMode === 'PN' && junctionJoined && depletionProgress >= 1 &&
+                        PH && PH.Vj > 0.01;
+        if (forming || forward) {
+            /* 형성 중에는 장벽이 자랄수록 순확산이 줄고, 순방향에서는 전류가 클수록
+               다수캐리어 주입 사건이 자주 보인다(표시 속도는 √압축). */
+            let rate = 10 * Math.max(1 - depletionProgress, 0.05);
+            if (forward) {
+                /* 문턱 아래의 매우 작은 전류가 활발한 도통처럼 보이지 않도록,
+                   계산 전류를 정상 범위의 1 mA 기준에 √압축해 사건 빈도로 바꾼다. */
+                const level = Math.min(Math.sqrt(Math.max(Math.abs(PH.I), 0) / 1.0e-3), 1);
+                rate = 0.02 + 7.98 * level;
+            }
+            formationAccumulator += rate * dt;
+            while (formationAccumulator >= 1) {
+                formationAccumulator -= 1;
+                let type;
+                if (forming) {
+                    /* 공핍층 형성 때 드러나는 고정전하는 양쪽에서 같은 전하량이어야 한다. */
+                    type = (formationSerial++ % 2 === 0) ? 'electron' : 'hole';
+                } else {
+                    /* 순방향에서는 실제 전자·양공 전류 성분에 맞춰 주입 종류를 고른다. */
+                    const totalComponent = Math.max((PH.Ielectron || 0) + (PH.Ihole || 0), 0);
+                    const electronShare = totalComponent > 0
+                        ? Math.min(Math.max(PH.Ielectron / totalComponent, 0), 1)
+                        : 0.5;
+                    type = Math.random() < electronShare ? 'electron' : 'hole';
+                }
+                const row = 1 + Math.floor(Math.random() * Math.max(GRID_ROWS - 2, 1));
+                const y = gridToY(row);
+                const spread = 18 + Math.random() * 68;
+                formationEvents.push(type === 'electron'
+                    ? { type, x: V_WIDTH / 2 + spread, y, age: 0, ttl: 1.8 + Math.random() * 0.8,
+                        vx: 0, vy: 0, turn: 0 }
+                    : { type, x: V_WIDTH / 2 - spread, y, age: 0, ttl: 1.8 + Math.random() * 0.8,
+                        vx: 0, vy: 0, turn: 0 });
+            }
+        }
+
+        formationEvents.forEach(e => {
+            e.age += dt;
+            /* 무작위 열운동을 매 프레임 떨림이 아닌 부드러운 지그재그로 표시한다.
+               속도는 일반 캐리어와 똑같이 √(T/m*)를 따르고 평균 이동 방향은 없다. */
+            e.turn = (e.turn || 0) - dt;
+            if (e.turn <= 0) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = (115 + Math.random() * 55) * thermalHopRate(e.type) / 2.6;
+                e.vx = Math.cos(angle) * speed;
+                e.vy = Math.sin(angle) * speed * 0.55;
+                e.turn = 0.14 + Math.random() * 0.14;
+            }
+            e.x += e.vx * dt;
+            e.y += e.vy * dt;
+
+            /* 내부 전기장은 확산과 반대인 표류를 만든다.
+               전자는 N형(오른쪽), 양공은 P형(왼쪽)으로 되민다. */
+            const driftDir = e.type === 'electron' ? 1 : -1;
+            const fieldStrength = forming
+                ? depletionProgress
+                : (PH && PH.Vbi > 0 ? Math.min(Math.max(PH.barrier / PH.Vbi, 0), 2.5) : 0);
+            const fieldSpeedRatio = e.type === 'electron' ? VSAT_N / VSAT_P : 1;
+            e.x += driftDir * 42 * fieldSpeedRatio * fieldStrength * dt;
+
+            const yMin = LATTICE_TOP, yMax = LATTICE_BOTTOM;
+            e.y = Math.min(Math.max(e.y, yMin), yMax);
+            const far = 145;
+            if (e.type === 'electron') e.x = Math.min(e.x, V_WIDTH / 2 + far);
+            else                       e.x = Math.max(e.x, V_WIDTH / 2 - far);
+
+            const crossed = e.type === 'electron'
+                ? e.x < V_WIDTH / 2 - 4
+                : e.x > V_WIDTH / 2 + 4;
+            if (crossed) {
+                /* 접합을 넘었다고 곧바로 재결합시키지 않는다.
+                   반대쪽 중성영역의 소수캐리어로 전환한 뒤 실제 다수캐리어 점과 만나야
+                   handleRecombination()에서 두 점이 함께 사라지고 재결합 위치 표시가 생긴다. */
+                const row = Math.min(GRID_ROWS - 1,
+                    Math.max(0, Math.round((e.y - LATTICE_TOP) / SPACING_Y)));
+                const dg = depletionDisplayGeometry();
+                const centerCol = GRID_MID - 0.5;
+                const pCols = dg.pPx / SPACING_X * depletionProgress;
+                const nCols = dg.nPx / SPACING_X * depletionProgress;
+                const col = e.type === 'electron'
+                    ? Math.max(0, Math.floor(centerCol - pCols - 0.5))
+                    : Math.min(GRID_COLS - 1, Math.ceil(centerCol + nCols + 0.5));
+                const injected = new Carrier(col, row, e.type, 'injected');
+                injected.age = 0;
+                particles.push(injected);
+                e.done = true;
+            } else if (e.age >= e.ttl) e.done = true;
+        });
+        formationEvents = formationEvents.filter(e => !e.done);
+    }
+
+    function drawJunctionFormation(ctx) {
+        formationEvents.forEach(e => {
+            ctx.beginPath();
+            ctx.arc(e.x, e.y, 6, 0, Math.PI * 2);
+            if (e.type === 'electron') {
+                ctx.fillStyle = '#38bdf8';
+                ctx.fill();
+            } else {
+                ctx.strokeStyle = '#f43f5e';
+                ctx.lineWidth = 2.5;
+                ctx.stroke();
+            }
+        });
+    }
+
+    /* ── 외부 도선 ── */
+    const DEVICE_LEFT = 75, DEVICE_RIGHT = V_WIDTH - 75;
+    const WIRE_LEFT = 30, WIRE_RIGHT = V_WIDTH - 30;
+    const DEVICE_TOP = 58, DEVICE_BOTTOM = 348;
+    const WIRE_TOP = 15, WIRE_CONTACT_Y = 203;
+    function wirePathLength() {
+        const sideLead = DEVICE_LEFT - WIRE_LEFT;
+        const verticalLead = WIRE_CONTACT_Y - WIRE_TOP;
+        return sideLead + verticalLead + (WIRE_RIGHT - WIRE_LEFT) +
+               verticalLead + sideLead;
+    }
+    function getWireCoordinates(s) {
+        const sideLead = DEVICE_LEFT - WIRE_LEFT;
+        const verticalLead = WIRE_CONTACT_Y - WIRE_TOP;
+        const topLead = WIRE_RIGHT - WIRE_LEFT;
+        if (s < sideLead)
+            return { x: DEVICE_LEFT - s, y: WIRE_CONTACT_Y };
+        s -= sideLead;
+        if (s < verticalLead)
+            return { x: WIRE_LEFT, y: WIRE_CONTACT_Y - s };
+        s -= verticalLead;
+        if (s < topLead)
+            return { x: WIRE_LEFT + s, y: WIRE_TOP };
+        s -= topLead;
+        if (s < verticalLead)
+            return { x: WIRE_RIGHT, y: WIRE_TOP + s };
+        s -= verticalLead;
+        return { x: WIRE_RIGHT - s, y: WIRE_CONTACT_Y };
+    }
+    function initWire() {
+        wireElectrons = [];
+        const totalLen = wirePathLength();
+        for (let i = 0; i < NUM_WIRE_ELECTRONS; i++)
+            wireElectrons.push((totalLen / NUM_WIRE_ELECTRONS) * i);
+    }
+
+    /* =========================================================================
+       공용 그리기 유틸
+       ========================================================================= */
+    function roundRectPath(ctx, x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+    }
+    function resolveLabelOverlap(labels, minGap) {
+        minGap = minGap || 13;
+        const sorted = labels.slice().sort((a, b) => a.y - b.y);
+        for (let i = 1; i < sorted.length; i++)
+            if (sorted[i].y - sorted[i - 1].y < minGap) sorted[i].y = sorted[i - 1].y + minGap;
+        const out = {};
+        sorted.forEach(s => { out[s.key] = s.y; });
+        return out;
+    }
+
+    /* =========================================================================
+       격자 캔버스
+       ========================================================================= */
+    function drawDeviceFrame(ctx) {
+        ctx.save();
+        ctx.strokeStyle = 'rgba(148,163,184,0.92)';
+        ctx.lineWidth = 2.4;
+
+        if (currentMode === 'PN' && !junctionJoined) {
+            /* 접합 전에는 P형과 N형이 떨어진 두 반도체 조각임을 테두리로 보여준다. */
+            roundRectPath(ctx, DEVICE_LEFT, DEVICE_TOP,
+                          V_WIDTH / 2 - 20 - DEVICE_LEFT, DEVICE_BOTTOM - DEVICE_TOP, 9);
+            ctx.stroke();
+            roundRectPath(ctx, V_WIDTH / 2 + 20, DEVICE_TOP,
+                          DEVICE_RIGHT - (V_WIDTH / 2 + 20), DEVICE_BOTTOM - DEVICE_TOP, 9);
+            ctx.stroke();
+        } else {
+            roundRectPath(ctx, DEVICE_LEFT, DEVICE_TOP,
+                          DEVICE_RIGHT - DEVICE_LEFT, DEVICE_BOTTOM - DEVICE_TOP, 9);
+            ctx.stroke();
+        }
+
+        /* 양쪽 금속 접점. 외부 도선은 이 접점의 가운데에 정확히 연결된다. */
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 7;
+        ctx.beginPath();
+        ctx.moveTo(DEVICE_LEFT, WIRE_CONTACT_Y - 34);
+        ctx.lineTo(DEVICE_LEFT, WIRE_CONTACT_Y + 34);
+        ctx.moveTo(DEVICE_RIGHT, WIRE_CONTACT_Y - 34);
+        ctx.lineTo(DEVICE_RIGHT, WIRE_CONTACT_Y + 34);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    function drawWire(ctx) {
+        const wireRight = WIRE_RIGHT, midX = V_WIDTH / 2, gap = 10;
+
+        ctx.strokeStyle = '#475569'; ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(DEVICE_LEFT, WIRE_CONTACT_Y);
+        ctx.lineTo(WIRE_LEFT, WIRE_CONTACT_Y);
+        ctx.lineTo(WIRE_LEFT, WIRE_TOP);
+        ctx.lineTo(midX - gap, WIRE_TOP);
+        ctx.moveTo(midX + gap, WIRE_TOP);
+        ctx.lineTo(wireRight, WIRE_TOP);
+        ctx.lineTo(wireRight, WIRE_CONTACT_Y);
+        ctx.lineTo(DEVICE_RIGHT, WIRE_CONTACT_Y);
+        ctx.stroke();
+
+        const zeroBias = Math.abs(Vapp) < 0.004;
+        const rev = Vapp < 0, off = 4;
+        const longPlateX  = rev ? midX + off : midX - off;   // 긴 판 = (+)
+        const shortPlateX = rev ? midX - off : midX + off;
+        if (zeroBias) {
+            /* 0 V에서 (+)/(−) 전지처럼 보이지 않도록 같은 길이의 중성 단자로 그린다. */
+            ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2.4;
+            ctx.beginPath();
+            ctx.moveTo(midX - off, 8); ctx.lineTo(midX - off, 22);
+            ctx.moveTo(midX + off, 8); ctx.lineTo(midX + off, 22);
+            ctx.stroke();
+        } else {
+            ctx.strokeStyle = '#f1f5f9'; ctx.lineWidth = 1.8;
+            ctx.beginPath(); ctx.moveTo(longPlateX, 5); ctx.lineTo(longPlateX, 25); ctx.stroke();
+            ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 4.0;
+            ctx.beginPath(); ctx.moveTo(shortPlateX, 9); ctx.lineTo(shortPlateX, 21); ctx.stroke();
+        }
+
+        ctx.font = 'bold 11px Outfit'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+        if (!zeroBias) {
+            ctx.fillStyle = rev ? '#3b82f6' : '#ef4444';
+            ctx.fillText(rev ? '-' : '+', midX - gap - 3, 12);
+            ctx.fillStyle = rev ? '#ef4444' : '#3b82f6';
+            ctx.fillText(rev ? '+' : '-', midX + gap + 3, 12);
+        }
+        ctx.lineWidth = 1;
+
+        /* 파란 점은 금속 자유전자의 평균 드리프트를 나타낸다.
+           실제 평균속도는 v=I/(qnA)로 구하고 화면에서는 모든 모드에 같은 √압축을 쓴다.
+           전류가 0이어도 자유전자는 사라지지 않고 같은 자리에 남는다
+           (금속 내부의 무작위 미시 운동은 생략). */
+        const speed = wireDisplaySpeed();
+        const totalLen = wirePathLength();
+        const dt = lastDt;
+        wireElectrons.forEach((s, i) => {
+            let ns = s + speed * dt;
+            if (ns > totalLen) ns -= totalLen;
+            if (ns < 0) ns += totalLen;
+            wireElectrons[i] = ns;
+            const co = getWireCoordinates(ns);
+            ctx.beginPath();
+            ctx.arc(co.x, co.y, 4, 0, Math.PI * 2);
+            ctx.fillStyle = '#38bdf8';
+            ctx.shadowColor = '#0284c7'; ctx.shadowBlur = 4;
+            ctx.fill(); ctx.shadowBlur = 0;
+        });
+    }
+
+    function drawLattice() {
+        const ctx = ctxLattice;
+        ctx.clearRect(0, 0, V_WIDTH, V_HEIGHT);
+        ctx.textBaseline = 'alphabetic';
+        const midX = V_WIDTH / 2;
+
+        /* 배경 영역 */
+        const bodyTop = DEVICE_TOP + 7;
+        const bodyHeight = DEVICE_BOTTOM - DEVICE_TOP - 14;
+        if (currentMode === 'PN') {
+            if (!junctionJoined) {
+                ctx.fillStyle = 'rgba(239,68,68,0.04)';
+                ctx.fillRect(DEVICE_LEFT, bodyTop, midX - 20 - DEVICE_LEFT, bodyHeight);
+                ctx.fillStyle = 'rgba(59,130,246,0.04)';
+                ctx.fillRect(midX + 20, bodyTop, DEVICE_RIGHT - (midX + 20), bodyHeight);
+            } else {
+                ctx.fillStyle = 'rgba(239,68,68,0.03)';
+                ctx.fillRect(DEVICE_LEFT, bodyTop, midX - DEVICE_LEFT, bodyHeight);
+                ctx.fillStyle = 'rgba(59,130,246,0.03)';
+                ctx.fillRect(midX, bodyTop, DEVICE_RIGHT - midX, bodyHeight);
+
+                const dg = depletionDisplayGeometry();
+                const pPx = dg.pPx * depletionProgress;
+                const nPx = dg.nPx * depletionProgress;
+                ctx.fillStyle = 'rgba(245,158,11,0.10)';
+                ctx.fillRect(midX - pPx, bodyTop, pPx + nPx, bodyHeight);
+                ctx.strokeStyle = 'rgba(245,158,11,0.32)';
+                ctx.lineWidth = 1.5; ctx.setLineDash([6, 4]);
+                ctx.beginPath();
+                ctx.moveTo(midX - pPx, bodyTop); ctx.lineTo(midX - pPx, DEVICE_BOTTOM - 8);
+                ctx.moveTo(midX + nPx, bodyTop); ctx.lineTo(midX + nPx, DEVICE_BOTTOM - 8);
+                ctx.stroke(); ctx.setLineDash([]);
+            }
+        } else {
+            ctx.fillStyle = (currentMode === 'P') ? 'rgba(239,68,68,0.03)' : 'rgba(59,130,246,0.03)';
+            ctx.fillRect(DEVICE_LEFT, bodyTop, DEVICE_RIGHT - DEVICE_LEFT, bodyHeight);
+        }
+
+        /* 반도체 본체와 금속 접점을 먼저 그리고, 외부 도선을 그 위에 연결한다. */
+        drawDeviceFrame(ctx);
+        drawWire(ctx);
+
+        /* 결합선 (미리 계산된 목록) */
+        ctx.strokeStyle = 'rgba(51,65,85,0.30)'; ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        for (let i = 0; i < bondList.length; i++) {
+            const a = bondList[i][0], b = bondList[i][1];
+            if (currentMode === 'PN' && !junctionJoined &&
+                ((a.gridX < GRID_MID) !== (b.gridX < GRID_MID))) continue;
+            const oa = atomOffset(a.gridX), ob = atomOffset(b.gridX);
+            ctx.moveTo(a.x + oa, a.y); ctx.lineTo(b.x + ob, b.y);
+        }
+        ctx.stroke();
+
+        atoms.forEach(a => a.draw(ctx, atomOffset(a.gridX)));
+        particles.forEach(p => p.draw(ctx, atomOffset(p.gridX)));
+        drawJunctionFormation(ctx);
+
+        /* 전자와 양공이 같은 자리에서 재결합한 위치를
+           중심점 + 바깥으로 퍼지는 두 개의 동심원으로 잠깐 강조한다.
+           이 원은 실제로 퍼져 나가는 물리적 파동을 뜻하지 않는다. */
+        if (recombinationVisualActive()) {
+            recombEvents.forEach(e => {
+                const progress = 1 - e.life;
+                [0, 0.26].forEach(delay => {
+                    const wave = (progress - delay) / (1 - delay);
+                    if (wave < 0 || wave > 1) return;
+                    ctx.beginPath();
+                    ctx.arc(e.x, e.y, 4 + wave * 22, 0, Math.PI * 2);
+                    ctx.strokeStyle = 'rgba(203,213,225,' + ((1 - wave) * 0.9) + ')';
+                    ctx.lineWidth = 1.6; ctx.stroke();
+                });
+                ctx.beginPath();
+                ctx.arc(e.x, e.y, 2.5, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(226,232,240,' + e.life + ')';
+                ctx.fill();
+            });
+        }
+
+        /* 전극 라벨 */
+        ctx.font = 'bold 12px Outfit'; ctx.textAlign = 'center';
+        if (Math.abs(Vapp) > 0.001) {
+            const leftPos = Vapp > 0;
+            ctx.fillStyle = leftPos ? '#ef4444' : '#3b82f6';
+            ctx.fillText(leftPos ? '(+)' : '(−)', DEVICE_LEFT + 15, V_HEIGHT / 2 + 10);
+            ctx.fillStyle = leftPos ? '#3b82f6' : '#ef4444';
+            ctx.fillText(leftPos ? '(−)' : '(+)', DEVICE_RIGHT - 15, V_HEIGHT / 2 + 10);
+        }
+
+        /* 원자와 겹치지 않는 하단 여백에 공핍층 범위를 괄호로 표시한다. */
+        if (currentMode === 'PN' && junctionJoined && depletionProgress > 0.12) {
+            const dg = depletionDisplayGeometry();
+            const xL = midX - dg.pPx * depletionProgress;
+            const xR = midX + dg.nPx * depletionProgress;
+            const y = DEVICE_BOTTOM - 8;
+            ctx.strokeStyle = 'rgba(245,158,11,0.85)';
+            ctx.lineWidth = 1.4;
+            ctx.beginPath();
+            ctx.moveTo(xL, y - 4); ctx.lineTo(xL, y + 2);
+            ctx.lineTo(xR, y + 2); ctx.lineTo(xR, y - 4);
+            ctx.stroke();
+            ctx.fillStyle = 'rgba(245,158,11,0.95)';
+            ctx.font = 'bold 10px Noto Sans KR';
+            ctx.textAlign = 'center';
+            ctx.fillText('공핍층', midX, DEVICE_BOTTOM + 15);
+        }
+    }
+
+    function atomOffset(gridX) {
+        if (currentMode === 'PN' && !junctionJoined)
+            return (gridX < GRID_MID) ? -20 * (1 - mergeProgress) : 20 * (1 - mergeProgress);
+        return 0;
+    }
+
+    /* =========================================================================
+       에너지 띠 캔버스
+       위로 갈수록 전자 에너지 높음. 국소 midgap = −qV(x) 를 기준으로 그린다.
+       평형에서 Ef가 자동으로 완전히 평탄해지는 것이 이 구성의 핵심.
+       ========================================================================= */
+    function drawEnergyBand() {
+        const ctx = ctxEnergy;
+        ctx.clearRect(0, 0, V_WIDTH, V_CHART_HEIGHT);
+        if (!PH) return;
+        ctx.textBaseline = 'alphabetic';
+
+        /* 왼쪽에 여백을 두어 준위 라벨이 띠 선을 가리지 않게 한다. */
+        const L = 96, R = V_WIDTH - 34;
+        const topPad = 40, botPad = 34;
+        const usable = V_CHART_HEIGHT - topPad - botPad;
+        const Eg = PH.Eg;
+
+        /* 자동 확대를 쓰면 장벽이 줄어도 띠 굽힘이 비슷하게 보일 수 있다.
+           단일 반도체와 PN 접합 각각에서 모든 슬라이더 조건에 같은 배율을 사용한다.
+           PN의 3.40 eV 범위는 Eg와 최대 역방향 장벽을 모두 여백 안에 포함한다. */
+        const span = currentMode === 'PN' ? 3.40 : 1.50;
+        const pxPerEV = usable / span;
+        const yc = topPad + usable / 2;
+        const toY = E => yc - E * pxPerEV;
+
+        /* 고등학생용 띠 그림:
+           - 단일 P/N형은 평형 기준도이므로 수평
+           - PN 접합은 중성영역의 작은 I·R_s 기울기를 생략하고 공핍층 장벽만 표시
+           - 인가 전압·접합 전압·I·R_s는 계측 카드에서 수치로 구분 */
+        const off = (-textbookJunctionPotentialAt(0) + -textbookJunctionPotentialAt(1)) / 2;
+        const emAt = xf => currentMode === 'PN' ? -textbookJunctionPotentialAt(xf) - off : 0;
+
+        /* Ef 위치 오프셋: Vbi = Eg − (Ef−Ev)_P − (Ec−Ef)_N 이 항등적으로 성립해야 하므로,
+           완화 중 relaxed Vbi 와의 차이를 두 오프셋에 균등 배분해 정합을 유지한다.
+           → 평형에서는 Ef가 정확히 하나의 수평선이 되고, 바이어스 시에는 정확히 qVj만 벌어진다. */
+        let dEfP = PH.dEfP, dEfN = PH.dEfN;
+        if (currentMode === 'PN') {
+            const corr = (PH.Vbi - (junctionJoined ? RX.Vbi : PH.Vbi)) / 2;
+            dEfP += corr; dEfN += corr;
+        }
+
+        const xToFrac = x => (x - L) / (R - L);
+        const dg = depletionDisplayGeometry();
+        const pDep = dg.pFrac * (R - L) * depletionProgress;
+        const nDep = dg.nFrac * (R - L) * depletionProgress;
+        const midX = (L + R) / 2;
+        const depL = midX - pDep, depR = midX + nDep;
+
+        /* 접합 전에는 두 블록 사이를 비운다 */
+        const gapPx = (currentMode === 'PN' && !junctionJoined) ? 40 * (1 - mergeProgress) + 12 : 0;
+
+        const skip = x => (gapPx > 0 && Math.abs(x - midX) < gapPx);
+
+        /* 곡선 수집 */
+        const curves = { ec: [], ev: [], ef: [], lvl: [] };
+        for (let x = L; x <= R; x += 4) {
+            if (skip(x)) { curves.ec.push(null); curves.ev.push(null);
+                           curves.ef.push(null); curves.lvl.push(null); continue; }
+            const xf = xToFrac(x);
+            const em = emAt(xf);
+            const ec = em + Eg / 2, ev = em - Eg / 2;
+            curves.ec.push({ x: x, y: toY(ec) });
+            curves.ev.push({ x: x, y: toY(ev) });
+
+            let ef = null, lvl = null;
+            if (currentMode === 'PN') {
+                const efP = em - Eg / 2 + dEfP;
+                const efN = em + Eg / 2 - dEfN;
+                if (!junctionJoined)      ef = (x < midX) ? efP : efN;
+                else if (Math.abs(PH.Vj) < 0.004) {
+                    if (x <= depL)       ef = efP;
+                    else if (x >= depR)  ef = efN;
+                    else {
+                        const t = (depR > depL) ? (x - depL) / (depR - depL) : 1;
+                        const eP = emAt(xToFrac(depL)) - Eg / 2 + dEfP;
+                        const eN = emAt(xToFrac(depR)) + Eg / 2 - dEfN;
+                        ef = eP + (eN - eP) * t;
+                    }
+                }
+            } else if (isDonorMode()) {
+                ef = ec - PH.dEf;
+                lvl = ec - E_ION;
+            } else {
+                ef = ev + PH.dEf;
+                lvl = ev + E_ION;
+            }
+            curves.ef.push(ef === null ? null : { x: x, y: toY(ef) });
+            curves.lvl.push(lvl === null ? null : { x: x, y: toY(lvl) });
+        }
+
+        const stroke = (pts, color, width, dash) => {
+            ctx.strokeStyle = color; ctx.lineWidth = width;
+            ctx.setLineDash(dash || []);
+            ctx.beginPath();
+            let pen = false;
+            pts.forEach(p => {
+                if (!p) { pen = false; return; }
+                if (!pen) { ctx.moveTo(p.x, p.y); pen = true; } else ctx.lineTo(p.x, p.y);
+            });
+            ctx.stroke(); ctx.setLineDash([]);
+        };
+
+        /* 공핍층 음영 */
+        if (currentMode === 'PN' && junctionJoined && (pDep + nDep) > 1) {
+            ctx.fillStyle = 'rgba(245,158,11,0.13)';
+            ctx.fillRect(depL, topPad - 6, pDep + nDep, usable + 12);
+        }
+
+        /* 단일 P/N형에서만 도너·억셉터 준위를 표시한다. */
+        if (currentMode !== 'PN') {
+            stroke(curves.lvl, currentMode === 'N' ? 'rgba(59,130,246,0.45)' : 'rgba(239,68,68,0.45)', 1.4, [4, 5]);
+        }
+        stroke(curves.ev, '#ef4444', 3);
+        stroke(curves.ec, '#3b82f6', 3);
+        stroke(curves.ef, '#eab308', 2, [8, 4]);
+
+        /* 라벨 */
+        ctx.font = 'bold 11px Outfit'; ctx.textAlign = 'left';
+        const pick = arr => { for (let i = arr.length - 1; i >= 0; i--) if (arr[i]) return arr[i]; return null; };
+        const pickFirst = arr => { for (let i = 0; i < arr.length; i++) if (arr[i]) return arr[i]; return null; };
+
+        const rEc = pick(curves.ec), rEv = pick(curves.ev), rEf = pick(curves.ef);
+        const lEc = pickFirst(curves.ec), lEv = pickFirst(curves.ev), lEf = pickFirst(curves.ef);
+
+        if (currentMode === 'PN') {
+            const leftItems = [{ key: 'Ec', y: lEc.y - 6 }, { key: 'Ev', y: lEv.y + 13 }];
+            if (lEf) leftItems.push({ key: 'Ef', y: lEf.y + 3 });
+            const lab = resolveLabelOverlap(leftItems, 13);
+            ctx.fillStyle = '#3b82f6'; ctx.fillText('E_c', L + 4, lab['Ec']);
+            ctx.fillStyle = '#ef4444'; ctx.fillText('E_v', L + 4, lab['Ev']);
+            if (lEf) {
+                ctx.fillStyle = '#eab308'; ctx.font = '10px Outfit';
+                ctx.fillText(junctionJoined ? 'E_F (평형)' : 'E_F (P형)', L + 30, lab['Ef']);
+            }
+
+            const rightItems = [{ key: 'Ec', y: rEc.y - 6 }, { key: 'Ev', y: rEv.y + 13 }];
+            if (rEf && !junctionJoined) rightItems.push({ key: 'Ef', y: rEf.y - 4 });
+            const labR = resolveLabelOverlap(rightItems, 13);
+            ctx.textAlign = 'right'; ctx.font = 'bold 11px Outfit';
+            ctx.fillStyle = '#3b82f6'; ctx.fillText('E_c', R - 4, labR['Ec']);
+            ctx.fillStyle = '#ef4444'; ctx.fillText('E_v', R - 4, labR['Ev']);
+            if (rEf && !junctionJoined) {
+                ctx.fillStyle = '#eab308'; ctx.font = '10px Outfit';
+                ctx.fillText('E_F (N형)', R - 30, labR['Ef']);
+            }
+
+            /* 고등학교 과정에 필요한 상태만 짧게 주석한다. */
+            ctx.textAlign = 'center'; ctx.font = 'bold 10.5px Noto Sans KR';
+            if (!junctionJoined) {
+                ctx.fillStyle = 'rgba(234,179,8,0.95)';
+                ctx.fillText('접합 전: 서로 떨어진 P형과 N형 — 각자의 에너지 띠는 평평함',
+                             midX, V_CHART_HEIGHT - 12);
+            } else if (Math.abs(PH.Vj) >= 0.004) {
+                ctx.fillStyle = 'rgba(234,179,8,0.95)';
+                const txt = PH.Vj > 0
+                    ? '순방향: 전위 장벽이 낮아져 캐리어가 더 쉽게 넘어감'
+                    : '역방향: 전위 장벽이 높아져 다수캐리어의 이동이 억제됨';
+                ctx.fillText(txt + ' · 장벽 ' + Math.max(RX.barrier, 0).toFixed(3) + ' eV',
+                             midX, V_CHART_HEIGHT - 12);
+            }
+        } else {
+            const rightItems = [{ key: 'Ec', y: rEc.y - 6 }, { key: 'Ev', y: rEv.y + 13 }];
+            if (rEf) rightItems.push({ key: 'Ef', y: rEf.y - 4 });
+            const lab = resolveLabelOverlap(rightItems, 13);
+            ctx.textAlign = 'right';
+            ctx.fillStyle = '#3b82f6'; ctx.fillText('E_c', R - 4, lab['Ec']);
+            ctx.fillStyle = '#ef4444'; ctx.fillText('E_v', R - 4, lab['Ev']);
+            if (rEf) {
+                ctx.fillStyle = '#eab308'; ctx.font = '10px Outfit';
+                ctx.fillText('E_F', R - 34, lab['Ef']);
+            }
+            ctx.textAlign = 'left'; ctx.font = '9.5px Outfit';
+            ctx.fillStyle = isDonorMode() ? 'rgba(59,130,246,0.85)' : 'rgba(239,68,68,0.85)';
+            ctx.fillText(isDonorMode() ? 'E_d (도너, E_c−0.045 eV)' : 'E_a (억셉터, E_v+0.045 eV)',
+                         L + 12, topPad - 14);
+
+            ctx.textAlign = 'center'; ctx.font = 'bold 10.5px Noto Sans KR';
+            ctx.fillStyle = 'rgba(148,163,184,0.9)';
+            ctx.fillText('단일 ' + currentMode + '형 · 평형 에너지 띠 기준도 (인가 전압은 전위 그래프에서 확인)',
+                         midX, V_CHART_HEIGHT - 12);
+        }
+
+        ctx.textAlign = 'left'; ctx.font = '9.5px Outfit';
+        ctx.fillStyle = 'rgba(148,163,184,0.6)';
+        ctx.fillText('E_g(' + PH.T + 'K) = ' + Eg.toFixed(4) + ' eV', L + 4, V_CHART_HEIGHT - 24);
+    }
+
+    /* =========================================================================
+       전위 캔버스 — 위로 갈수록 전위 높음.
+       ========================================================================= */
+    function drawPotential() {
+        const ctx = ctxPotential;
+        ctx.clearRect(0, 0, V_WIDTH, V_CHART_HEIGHT);
+        if (!PH) return;
+        ctx.textBaseline = 'alphabetic';
+
+        const L = 40, R = V_WIDTH - 40;
+        const topPad = 40, botPad = 40;
+        const usable = V_CHART_HEIGHT - topPad - botPad;
+
+        const graphPotentialAt = xf => currentMode === 'PN'
+            ? textbookJunctionPotentialAt(xf)
+            : potentialAt(xf);
+        /* 모든 슬라이더 조건에서 1 V가 같은 픽셀 높이가 되도록 축을 고정한다.
+           PN의 −2.05~+0.15 V는 최대 역방향 장벽(약 1.90 V)을 여백까지 포함한다.
+           자동 확대를 쓰면 순방향 장벽의 수치는 줄어도 높이가 같아 보이는 오류가 생긴다. */
+        const vMin = currentMode === 'PN' ? -2.05 : -1.10;
+        const vMax = currentMode === 'PN' ?  0.15 :  1.10;
+        const spanV = vMax - vMin;
+        const pxPerV = usable / spanV;
+        const vMid = (vMax + vMin) / 2;
+        const yc = topPad + usable / 2;
+        const toY = v => yc - (v - vMid) * pxPerV;
+
+        /* 0 V 기준선 */
+        ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1;
+        ctx.setLineDash([3, 5]);
+        ctx.beginPath(); ctx.moveTo(L, toY(0)); ctx.lineTo(R, toY(0)); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = 'rgba(148,163,184,0.5)'; ctx.font = '9px Outfit'; ctx.textAlign = 'left';
+        ctx.fillText('0 V', L + 2, toY(0) - 4);
+
+        const midX = (L + R) / 2;
+        const gapPx = (currentMode === 'PN' && !junctionJoined) ? 40 * (1 - mergeProgress) + 12 : 0;
+
+        ctx.strokeStyle = '#10b981'; ctx.lineWidth = 3;
+        ctx.beginPath();
+        let pen = false;
+        for (let x = L; x <= R; x += 4) {
+            if (gapPx > 0 && Math.abs(x - midX) < gapPx) { pen = false; continue; }
+            const v = graphPotentialAt((x - L) / (R - L));
+            const y = toY(v);
+            if (!pen) { ctx.moveTo(x, y); pen = true; } else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        ctx.font = '10px Noto Sans KR';
+        if (currentMode === 'PN') {
+            if (!junctionJoined) {
+                ctx.textAlign = 'center'; ctx.fillStyle = 'rgba(148,163,184,0.9)';
+                ctx.fillText('접합 전: 두 조각 모두 전위 0 (각각 중성)', midX, toY(0) - 16);
+            } else {
+                const step = Math.max(RX.barrier, 0);
+                /* 교과서형 근사: 양쪽 중성영역은 평평하고 공핍층에서만 전위가 변한다. */
+                ctx.textAlign = 'left'; ctx.fillStyle = '#f87171';
+                ctx.fillText('P형 중성영역  V = ' + graphPotentialAt(0).toFixed(3) + ' V',
+                             L + 4, toY(graphPotentialAt(0)) + 18);
+                ctx.textAlign = 'right'; ctx.fillStyle = '#60a5fa';
+                ctx.fillText('N형 중성영역 (기준)  V = ' + graphPotentialAt(1).toFixed(3) + ' V',
+                             R - 4, toY(graphPotentialAt(1)) - 10);
+
+                if (depletionProgress > 0.7 && step > 0.005) {
+                    const dg = depletionDisplayGeometry();
+                    const pW = dg.pFrac * (R - L), nW = dg.nFrac * (R - L);
+                    ctx.strokeStyle = 'rgba(245,158,11,0.45)'; ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(midX - pW - 6, toY(-step)); ctx.lineTo(midX + nW + 6, toY(-step));
+                    ctx.moveTo(midX - pW - 6, toY(0));     ctx.lineTo(midX + nW + 6, toY(0));
+                    ctx.stroke();
+                    ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 1.5;
+                    ctx.beginPath(); ctx.moveTo(midX, toY(-step)); ctx.lineTo(midX, toY(0)); ctx.stroke();
+                    ctx.fillStyle = '#f59e0b'; ctx.font = 'bold 11px Noto Sans KR'; ctx.textAlign = 'center';
+                    ctx.fillText('전위 장벽 V_bi − V_j = ' + step.toFixed(3) + ' V',
+                                 midX, (toY(-step) + toY(0)) / 2 - 6);
+                }
+            }
+        } else {
+            ctx.textAlign = 'left'; ctx.fillStyle = '#94a3b8';
+            ctx.fillText('V = ' + Vapp.toFixed(2) + ' V', L + 4, toY(graphPotentialAt(0)) - 10);
+            ctx.textAlign = 'right';
+            ctx.fillText('V = 0 V', R - 4, toY(graphPotentialAt(1)) + 18);
+            ctx.textAlign = 'center'; ctx.font = '9.5px Noto Sans KR';
+            ctx.fillStyle = 'rgba(148,163,184,0.75)';
+            ctx.fillText('균일한 전기장 E = −dV/dx = ' + (Vapp / LEN).toExponential(2) +
+                         ' V/cm (시료 길이 100 µm 기준)', midX, V_CHART_HEIGHT - 12);
+        }
+
+    }
+
+    /* =========================================================================
+       숫자 포맷터
+       ========================================================================= */
+    const SUP = { '-': '⁻', '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴',
+                  '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹' };
+    const sup = s => String(s).split('').map(ch => SUP[ch] || ch).join('');
+
+    function fmtCurrent(A) {
+        const a = Math.abs(A);
+        const sign = A < 0 ? '−' : '';
+        if (a < 1e-15) return '0 A';
+        if (a < 1e-12) return sign + (a * 1e15).toPrecision(3) + ' fA';
+        if (a < 1e-9)  return sign + (a * 1e12).toPrecision(3) + ' pA';
+        if (a < 1e-6)  return sign + (a * 1e9 ).toPrecision(3) + ' nA';
+        if (a < 1e-3)  return sign + (a * 1e6 ).toPrecision(3) + ' µA';
+        if (a < 1)     return sign + (a * 1e3 ).toPrecision(3) + ' mA';
+        return sign + a.toPrecision(3) + ' A';
+    }
+    function fmtConc(x) {
+        if (!(x > 0)) return '0';
+        const e = Math.floor(Math.log10(x));
+        const m = x / Math.pow(10, e);
+        return m.toFixed(2) + '×10' + sup(e);
+    }
+    function fmtSI(x) {
+        if (!isFinite(x)) return '∞';
+        if (x >= 1e4 || (x > 0 && x < 1e-2)) {
+            const e = Math.floor(Math.log10(x));
+            return (x / Math.pow(10, e)).toFixed(1) + '×10' + sup(e);
+        }
+        return x < 10 ? x.toFixed(2) : x.toFixed(0);
+    }
+    function fmtLength(cm) {
+        const nm = cm * 1e7;
+        if (nm < 1000) return nm.toFixed(1) + ' nm';
+        return (nm / 1000).toFixed(3) + ' µm';
+    }
+
+    /* =========================================================================
+       계측기
+       ========================================================================= */
+    function recombinationVisualActive() {
+        if (!PH) return false;
+        if (currentMode !== 'PN') {
+            /* 단일 반도체에서는 고온 진성 전이로 전자·양공이 함께 보일 때만 표시한다. */
+            return PH.maj > 0 && PH.min / PH.maj >= 1e-4;
+        }
+        if (!junctionJoined) return false;
+        /* 실제 재결합 사건이 있거나, 접합 형성·순방향 주입으로 곧 관찰될 때만 표시한다. */
+        return depletionProgress < 1 || PH.Vj > 0.01 || recombEvents.length > 0;
+    }
+
+    /* 나르개 쏠림(드리프트)이 실제로 화면에 보이는 상태인가.
+       평형·접합 전에는 순 이동이 정확히 0이므로 설명도 띄우지 않는다. */
+    function driftVisualActive() {
+        if (currentMode !== 'PN') return Math.abs(Vapp) > 0.004;
+        return junctionJoined && depletionProgress >= 1 &&
+            Math.max(Math.abs(displayDriftDrop('electron')),
+                     Math.abs(displayDriftDrop('hole'))) > 1e-4;
+    }
+
+    function updateVisualLegend() {
+        const recombine = document.getElementById('legend-recombine');
+        const neutral = document.getElementById('legend-neutral');
+        const conditional = document.getElementById('legend-conditional');
+        /* 조건부 설명은 그 현상이 실제로 보일 때만 띄운다.
+           항상 켜 두면 지금 화면에 없는 것을 찾게 되어 오히려 헷갈린다. */
+        const drift = document.getElementById('note-drift');
+        if (drift) drift.classList.toggle('hidden', !driftVisualActive());
+        if (!recombine || !conditional) return;
+
+        const showRecombine = recombinationVisualActive();
+        const showNeutral = !!neutral && atoms.some(a => a.type !== 'Si' && !a.ionized);
+        recombine.classList.toggle('hidden', !showRecombine);
+        if (neutral) neutral.classList.toggle('hidden', !showNeutral);
+        conditional.classList.toggle('hidden', !showRecombine && !showNeutral);
+    }
+
+    function updateFlowDisplay() {
+        const flow = document.getElementById('flow-summary');
+        const badge = document.getElementById('lattice-badge');
+        if (!flow || !badge || !PH) return;
+        updateVisualLegend();
+
+        if (currentMode === 'P' || currentMode === 'N') {
+            /* 문장 단위로 줄을 나눈다: 첫 줄은 "누가 어디로 움직이나", 둘째 줄은 "그래서 전류는". */
+            if (Math.abs(Vapp) < 0.004) {
+                flow.innerHTML = currentMode === 'P'
+                    ? 'P형에는 양공이 많고 자유전자는 소수입니다.<br>둘 다 무작위 열운동을 하지만 평균 이동 방향이 없어 순전류는 0입니다.'
+                    : 'N형에는 자유전자가 많고 양공은 소수입니다.<br>둘 다 무작위 열운동을 하지만 평균 이동 방향이 없어 순전류는 0입니다.';
+            } else {
+                flow.innerHTML = currentMode === 'P'
+                    ? '무작위 열운동은 계속되며, 양공은 평균적으로 (+)극에서 (−)극으로, 소수 자유전자는 반대로 이동합니다.<br>두 이동이 만드는 전류는 모두 (+)극에서 (−)극 방향입니다.'
+                    : '무작위 열운동은 계속되며, 자유전자는 평균적으로 (−)극에서 (+)극으로, 소수 양공은 반대로 이동합니다.<br>두 이동이 만드는 전류는 모두 (+)극에서 (−)극 방향입니다.';
+            }
+            return;
+        }
+
+        if (!junctionJoined) {
+            badge.innerText = '접합 전';
+            flow.textContent = '아직 접합하지 않아 P형과 N형 사이에는 전류가 흐르지 않습니다.';
+        } else if (depletionProgress < 1) {
+            badge.innerText = '공핍층 형성 중';
+            badge.style.background = 'linear-gradient(135deg,#d97706 0%,#7c3aed 100%)';
+            flow.textContent = '접촉 뒤 전자는 N형에서 P형으로, 양공은 P형에서 N형으로 무작위 확산합니다.';
+        } else if (Math.abs(PH.Vj) < 0.01) {
+            badge.innerText = 'PN 평형';
+            badge.style.background = 'linear-gradient(135deg,#059669 0%,#4f46e5 100%)';
+            flow.textContent = '전자와 양공은 계속 움직이지만, 확산과 내부 전기장에 의한 평균 이동이 균형을 이루어 순전류가 0입니다.';
+        } else if (PH.Vj > 0) {
+            badge.innerText = 'PN 순방향';
+            badge.style.background = 'linear-gradient(135deg,#059669 0%,#2563eb 100%)';
+            flow.innerHTML = '무작위 열운동 위에 평균 이동이 더해져 P형 영역의 양공은 N형 영역으로, N형 영역의 자유전자는 P형 영역으로 넘어갑니다.<br>전압이 커질수록 같은 시간에 더 많이 넘어가며, 전류는 P형에서 N형 방향으로 흐릅니다.';
+        } else {
+            badge.innerText = 'PN 역방향';
+            badge.style.background = 'linear-gradient(135deg,#d97706 0%,#7c3aed 100%)';
+            flow.innerHTML = '무작위 열운동 위에 평균 이동이 더해져 N형 영역의 소수 양공은 P형 영역으로, P형 영역의 소수 자유전자는 N형 영역으로 이동합니다.<br>현재 범위의 매우 작은 역방향 전류는 N형에서 P형 방향입니다.';
+        }
+    }
+
+    let lastInstrumentTime = -1;
+    function updateInstruments(force) {
+        if (!PH) return;
+        const now = performance.now();
+        if (!force && now - lastInstrumentTime < 120) return;
+        lastInstrumentTime = now;
+        updateFlowDisplay();
+
+        const set = (id, txt, color) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.innerHTML = txt;
+            if (color) el.style.color = color;
+        };
+
+        /* 전류값과 함께 흐름의 의미를 짧게 보여준다. */
+        const I = PH.I;
+        let currentText = fmtCurrent(I);
+        let currentSub = '전압이 0 V이므로 순전류는 0입니다.';
+        let iColor = '#64748b';
+        const formingJunction = currentMode === 'PN' && junctionJoined && depletionProgress < 1;
+        if (formingJunction) {
+            currentText = '0 A';
+            currentSub = '접합 안에서는 확산하지만 외부 순전류는 없습니다.';
+        } else {
+            if (currentMode === 'PN' && !junctionJoined) {
+                currentText = '0 A';
+                currentSub = '아직 P형과 N형을 접합하지 않았습니다.';
+            } else if (I === 0 || Math.abs(Vapp) < 0.004) {
+                currentText = '0 A';
+            } else if (currentMode === 'PN' && I < 0) {
+                currentText = fmtCurrent(I);
+                currentSub = '역방향에서는 열로 생긴 소수의 전하만 이동합니다.';
+                iColor = '#f59e0b';
+            } else {
+                currentText = fmtCurrent(I);
+                currentSub = currentMode === 'PN'
+                    ? (Math.abs(I) < 1e-6
+                        ? '순방향이지만 전류가 아직 매우 작습니다.'
+                        : '순방향 전류가 흐르며 전압을 높일수록 빠르게 증가합니다.')
+                    : '양공과 전자는 서로 반대 방향으로 이동합니다.';
+                iColor = '#10b981';
+            }
+        }
+        set('status-current', currentText, iColor);
+        set('status-current-sub', currentSub);
+
+        /* 접합 전압 */
+        if (currentMode === 'PN' && junctionJoined) {
+            set('status-vj', 'V<sub>j</sub> = ' + PH.Vj.toFixed(4) + ' V', '#a78bfa');
+            set('status-vj-sub', 'V<sub>인가</sub> ' + Vapp.toFixed(2) + ' V − I·R<sub>s</sub> ' +
+                (Vapp - PH.Vj).toFixed(3) + ' V');
+        } else if (currentMode === 'PN') {
+            set('status-vj', '접합 대기', '#64748b');
+            set('status-vj-sub', 'PN 접합 실행 버튼을 누르세요');
+        } else {
+            set('status-vj', 'ΔV = ' + Vapp.toFixed(2) + ' V', '#a78bfa');
+            set('status-vj-sub', 'R<sub>s</sub> = ' + PH.Rs.toPrecision(3) + ' Ω');
+        }
+
+        /* 공핍층: 계산 폭과 전압·농도에 따른 변화 방향을 함께 보여준다. */
+        if (currentMode === 'PN') {
+            if (formingJunction) {
+                set('status-depletion', '형성 중', '#f59e0b');
+                set('status-depletion-sub', '형성이 끝나면 ' + fmtLength(PH.Wcm));
+            } else if (junctionJoined) {
+                const depState = PH.Vj > 0.01 ? '좁아짐'
+                               : PH.Vj < -0.01 ? '넓어짐' : '기본 상태';
+                if (PH.Wcm <= 0 && PH.forwardLimit) {
+                    set('status-depletion', '매우 좁음', '#f59e0b');
+                    set('status-depletion-sub', '큰 순방향 전압에서는 변화 방향만 표시');
+                } else {
+                    set('status-depletion', fmtLength(PH.Wcm), '#f59e0b');
+                    set('status-depletion-sub',
+                        depState + ' · ' +
+                        (PH.Vj > 0.01 ? '순방향 전압의 효과' :
+                         PH.Vj < -0.01 ? '역방향 전압의 효과' : '전압을 걸지 않은 평형 상태') +
+                        ' · 도핑 농도가 높을수록 좁아지는 경향');
+                }
+            } else {
+                set('status-depletion', '—', '#64748b');
+                set('status-depletion-sub', '접합 전');
+            }
+        } else {
+            set('status-depletion', '해당 없음', '#64748b');
+            set('status-depletion-sub', '이 모형의 균일한 단일 반도체 내부에는 PN 접합 공핍층이 없음');
+        }
+
+        /* 장벽 */
+        if (formingJunction) {
+            set('status-barrier', '형성 중', '#eab308');
+            set('status-barrier-sub', '내부 전기장이 자라는 과도 상태');
+        } else if (currentMode === 'PN' && junctionJoined) {
+            const b = Math.max(PH.barrier, 0);
+            if (b <= 0 && PH.forwardLimit) {
+                set('status-barrier', '매우 낮음', '#ef4444');
+                set('status-barrier-sub', '큰 순방향 전압에서는 변화 방향만 표시');
+            } else {
+                set('status-barrier', b.toFixed(4) + ' V', b < 0.02 ? '#ef4444' : '#eab308');
+                set('status-barrier-sub',
+                    (PH.Vj > 0.01 ? '순방향에서 낮아짐' :
+                     PH.Vj < -0.01 ? '역방향에서 높아짐' : '전압을 걸지 않은 상태') +
+                    (b < 0.02 ? ' · 매우 낮음' : ''));
+            }
+        } else {
+            set('status-barrier', '—', '#64748b');
+            set('status-barrier-sub', 'PN 접합에서만 형성');
+        }
+
+        /* 이온화율 */
+        const ir = PH.ionRatio * 100;
+        const irColor = ir > 95 ? '#10b981' : ir > 50 ? '#eab308' : '#ef4444';
+        if (currentMode === 'PN') {
+            set('status-ionization', 'B ' + (PH.ionRatioA * 100).toFixed(1) +
+                '% · P ' + (PH.ionRatioD * 100).toFixed(1) + '%', irColor);
+            set('status-ionization-sub', '붕소(P형) · 인(N형) 이온화율');
+        } else {
+            set('status-ionization', ir.toFixed(2) + ' %', irColor);
+            set('status-ionization-sub', '이온화 도펀트 ' + fmtConc(PH.Nion) +
+                ' / ' + fmtConc(PH.N) + ' cm' + sup(-3));
+        }
+
+        /* 전자·양공 농도: 다수와 소수의 계산값을 함께 표시한다. */
+        if (currentMode === 'PN') {
+            set('status-carriers', 'P형 p=' + fmtConc(PH.majP) + ' cm' + sup(-3) +
+                ' · N형 n=' + fmtConc(PH.maj) + ' cm' + sup(-3), '#e2e8f0');
+            set('status-carriers-sub', '중성영역 소수: P형 n=' + fmtConc(PH.minP) + ' cm' + sup(-3) +
+                ' · N형 p=' + fmtConc(PH.min) + ' cm' + sup(-3));
+        } else {
+            set('status-carriers',
+                currentMode === 'P'
+                    ? 'p=' + fmtConc(PH.maj) + ' cm' + sup(-3) +
+                      ' · n=' + fmtConc(PH.min) + ' cm' + sup(-3)
+                    : 'n=' + fmtConc(PH.maj) + ' cm' + sup(-3) +
+                      ' · p=' + fmtConc(PH.min) + ' cm' + sup(-3),
+                '#e2e8f0');
+            set('status-carriers-sub',
+                currentMode === 'P' ? '양공 다수 · 전자 소수' : '전자 다수 · 양공 소수');
+        }
+
+        /* 전도도 σ와 비저항 ρ = 1/σ
+           σ, ρ는 온도와 나르개 농도가 정해진 균일한 영역의 상태값이다. PN 접합은 P 중성영역·공핍층·
+           N 중성영역이 성질이 다른 세 구간이므로 값을 하나로 묶을 수 없다. 그래서 두 중성
+           영역의 값을 나란히 보여주고, 공핍층은 따로라고 못박는다. */
+        const sig  = PH.sigma;
+        const approx = PH.T < 250 ? '≈ ' : '';
+        /* σ와 ρ는 서로 역수인 같은 급의 물리량이다. 한쪽만 굵게·색으로 강조하고
+           다른 쪽을 흐린 각주처럼 두면 위계가 잘못 전달되므로 두 줄 모두 값으로 쓴다. */
+        const rho = '<span style="color:#fbbf24">ρ</span>';
+        const sgm = '<span style="color:#34d399">σ</span>';
+        if (currentMode === 'PN') {
+            set('status-conductivity',
+                sgm + ' = N형 ' + approx + sig.toPrecision(3) + ' S/cm' +
+                ' · P형 ' + approx + PH.sigmaP.toPrecision(3) + ' S/cm<br>' +
+                rho + ' = N형 ' + (1 / sig).toPrecision(3) + ' Ω·cm' +
+                ' · P형 ' + (1 / PH.sigmaP).toPrecision(3) + ' Ω·cm', '#e2e8f0');
+            set('status-conductivity-sub', 'ρ = 1/σ · 공핍층은 움직이는 전하가 거의 없어 별도');
+        } else {
+            set('status-conductivity',
+                sgm + ' = ' + approx + sig.toPrecision(3) + ' S/cm<br>' +
+                rho + ' = ' + (1 / sig).toPrecision(3) + ' Ω·cm', '#e2e8f0');
+            set('status-conductivity-sub', 'ρ = 1/σ');
+        }
+
+        /* ni */
+        set('status-ni', fmtConc(PH.ni) + ' cm' + sup(-3), '#c4b5fd');
+        set('status-ni-sub', '도핑하지 않은 Si에서 n=p=nᵢ · 300 K 대비 ×' +
+            fmtSI(PH.ni / NI_300));
+
+        /* Eg */
+        set('status-eg', PH.Eg.toFixed(4) + ' eV', '#93c5fd');
+
+        /* 나르개 농도 영역 */
+        set('status-regime', PH.regime.label, PH.regime.color);
+        set('status-regime-sub', PH.regime.note);
+
+        /* 카드 헤더 배지 */
+        const eb = document.getElementById('energy-badge');
+        if (eb) {
+            if (currentMode === 'PN') {
+                eb.innerHTML = formingJunction
+                    ? '공핍층 형성 중'
+                    : junctionJoined
+                    ? (Math.abs(PH.Vj) < 0.004 ? '열평형 · E<sub>F</sub> 평탄'
+                       : (PH.Vj > 0 ? '순방향' : '역방향') +
+                         ' · 장벽 ' + Math.max(PH.barrier, 0).toFixed(3) + ' eV')
+                    : '접합 전 · 서로 떨어진 두 반도체';
+            } else {
+                eb.innerHTML = '평형 기준도 · ' +
+                    (isDonorMode() ? 'E<sub>c</sub>−E<sub>F</sub> = ' : 'E<sub>F</sub>−E<sub>v</sub> = ') +
+                    PH.dEf.toFixed(3) + ' eV';
+            }
+        }
+        const pb = document.getElementById('potential-badge');
+        if (pb) pb.innerHTML = formingJunction
+            ? '장벽 형성 중'
+            : (currentMode === 'PN' && junctionJoined)
+            ? '장벽 ' + Math.max(PH.barrier, 0).toFixed(3) + ' V'
+            : (currentMode === 'PN' ? '접합 전' : 'ΔV = ' + Vapp.toFixed(2) + ' V');
+
+        /* 수업 범위를 벗어난 세부 분류는 숨기고 필요한 주의만 짧게 보여준다. */
+        let warn = '';
+        if (PH.forwardLimit)
+            warn = '<strong>큰 순방향 전압:</strong> 실제 소자는 전류·발열이 커질 수 있어 변화 방향만 표시합니다.';
+        const wb = document.getElementById('warn-banner');
+        if (wb) {
+            if (warn) { wb.innerHTML = warn; wb.classList.remove('hidden'); }
+            else wb.classList.add('hidden');
+        }
+    }
+
+    /* =========================================================================
+       메인 루프 — 실제 경과 시간(dt) 기반이므로 어느 기기에서나 같은 속도
+       ========================================================================= */
+    let lastFrameTime = 0, lastDt = 0.016;
+    const DEPLETION_SEC = 2.5, RELAX_TAU = 0.28;
+
+    function simulationLoop(nowMs) {
+        const now = nowMs || performance.now();
+        let dt = (lastFrameTime ? (now - lastFrameTime) : 16) / 1000;
+        lastFrameTime = now;
+        dt = Math.min(Math.max(dt, 0.001), 0.05);      // 탭 복귀 시 점프 방지
+        lastDt = dt;
+
+        if (isPlaying) {
+            /* 접촉 후 캐리어 확산과 함께 공핍층이 자란다. */
+            if (currentMode === 'PN' && junctionJoined && depletionProgress < 1) {
+                depletionProgress = Math.min(1, depletionProgress + dt / DEPLETION_SEC);
+                if (depletionProgress >= 1) {
+                    const badge = document.getElementById('lattice-badge');
+                    badge.innerText = 'PN 접합 다이오드';
+                    badge.style.background = 'linear-gradient(135deg,#10b981 0%,#8b5cf6 100%)';
+                }
+            }
+
+            /* 물리 스냅샷 주기적 재계산 — 어떤 경로로도 값이 낡지 않도록 보장 */
+            physAccum += dt;
+            if (physAccum > 0.25) { physAccum = 0; recomputePhysics(); }
+
+            /* 표시값의 지수 완화 — 전압/온도를 바꾸면 부드럽게 따라간다 */
+            if (PH) {
+                const k = 1 - Math.exp(-dt / RELAX_TAU);
+                RX.W   += (PH.Wcm - RX.W)   * k;
+                RX.Vbi += (PH.Vbi - RX.Vbi) * k;
+                RX.Vj  += (PH.Vj  - RX.Vj)  * k;
+                RX.ohm += ((PH.ohm || 0) - RX.ohm) * k;
+                RX.barrier = PH.Wcm <= 0 ? 0 : Math.max(RX.Vbi - RX.Vj, 0);
+            }
+
+            /* 원자 진동 */
+            animTime += dt;
+            atoms.forEach(a => a.update(animTime));
+
+            /* 캐리어 이동 */
+            particles.forEach(p => p.update(dt));
+            updateJunctionFormation(dt);
+
+            /* 열적 쌍생성: 평형 배경 또는 역방향 누설의 소수 나르개 */
+            if (currentMode !== 'PN' || junctionJoined) {
+                spawnThermalPairs(dt);
+            }
+
+            /* 재결합 — 반대 부호 캐리어가 같은 자리에서 만나면 항상 일어난다.
+               (순방향에서 활발, 역방향에서는 전기장이 갈라놓아 거의 일어나지 않음 → 창발적) */
+            handleRecombination(dt);
+
+            /* 접점 처리 */
+            handleContacts(dt);
+
+            /* 이벤트 감쇠 */
+            const decay = dt / 0.75;
+            recombEvents.forEach(e => { e.life -= decay; });
+            recombEvents = recombEvents.filter(e => e.life > 0);
+        }
+
+        updateInstruments(false);
+        drawLattice();
+        drawEnergyBand();
+        drawPotential();
+
+        requestAnimationFrame(simulationLoop);
+    }
+    let animTime = 0, physAccum = 0;
+    const RECOMB_CAPTURE_SEC = 0.038;  // 같은 표시 칸에 머물 때의 화면 포획 시간
+
+    /* 홉 진행 중이라도 현재 가장 가까운 격자칸을 위치로 본다 */
+    function cellOf(p) {
+        return (p.hopProgress < 0.5)
+            ? (p.gridX + ',' + p.gridY)
+            : (p.targetGridX + ',' + p.targetGridY);
+    }
+    function handleRecombination(dt) {
+        const occupancy = {};
+        let didRecombine = false;
+        const bias = (currentMode === 'PN') ? (PH ? PH.Vj : 0) : Vapp;
+        const equilibrium = Math.abs(bias) <= 0.01;
+        const initialCount = particles.length;
+        for (let i = 0; i < initialCount; i++) {
+            const p = particles[i];
+            if (p.dead) continue;
+            const key = cellOf(p);
+            if (!occupancy[key]) { occupancy[key] = p; continue; }
+            const q = occupancy[key];
+            if (q.dead || q.type === p.type) continue;
+            /* 실제 재결합은 '만나면 즉시'가 아니다. 프레임 수에 따라 결과가 달라지지 않도록
+               P=1-exp(-dt/τ_capture)로 같은 칸 체류 중의 포획 확률을 계산한다.
+               RECOMB_CAPTURE_SEC는 실제 1 µs를 그대로 재생한 값이 아니라 화면 시간 척도다. */
+            const captureProb = 1 - Math.exp(-Math.max(dt || 0.016, 0) / RECOMB_CAPTURE_SEC);
+            if (Math.random() > captureProb) continue;
+
+            p.dead = true; q.dead = true;
+            didRecombine = true;
+            const cc = cellOf(p).split(',');
+            recombEvents.push({ x: gridToX(+cc[0]),
+                                y: gridToY(+cc[1]), life: 1.0 });
+            /* 바이어스 상태에서는 다수캐리어가 소멸하면 상류 접점이 보충한다.
+               평형에서는 접점 주입처럼 보이지 않도록 아래에서 평형 농도만 복원한다. */
+            [p, q].forEach(c => {
+                if (equilibrium || c.kind !== 'majority') return;
+                const col = (c.type === 'hole') ? 0 : GRID_COLS - 1;
+                particles.push(new Carrier(col, Math.floor(Math.random() * GRID_ROWS),
+                                           c.type, 'majority'));
+            });
+            occupancy[key] = null;
+        }
+        if (particles.some(p => p.dead)) particles = particles.filter(p => !p.dead);
+        /* 열평형에서는 생성과 재결합이 계속되어도 평균 다수·소수 농도가 일정하다. */
+        if (didRecombine && equilibrium) syncDopantIonization();
+    }
+
+    function handleContacts(dt) {
+        const last = GRID_COLS - 1;
+        let changed = false;
+
+        /* 비평형 PN 접합: 공핍층에서 생성된 캐리어가 자기 '다수' 영역의 중성부에 도달하면
+           다수 캐리어 바다에 합류하며, 그 순간 외부 회로로 전하 전달이 완료된다.
+           (실제 소자에서도 개별 캐리어가 접점까지 걸어갈 필요가 없다 — 전기적 중성이
+            거의 즉시 전달된다.) 따라서 접점까지 확산을 기다리지 않고 여기서 수집한다. */
+        if (currentMode === 'PN' && junctionJoined && PH && Math.abs(PH.Vj) > 0.01) {
+            const dg = depletionDisplayGeometry();
+            const pCols = dg.pPx / SPACING_X;
+            const nCols = dg.nPx / SPACING_X;
+            const centerCol = GRID_MID - 0.5;
+            const depLo = centerCol - pCols - 1.2, depHi = centerCol + nCols + 1.2;
+            particles.forEach(p => {
+                if (p.kind !== 'thermal' || p.dead) return;
+                p.age = (p.age || 0) + dt;
+                if (p.age < 0.45) return;                 // 분리 과정이 보일 만큼은 살려 둔다
+                const inMajorityRegion = (p.type === 'electron') ? (p.gridX > depHi)
+                                                                : (p.gridX < depLo);
+                if (inMajorityRegion) { p.dead = true; changed = true; }
+            });
+            if (changed) { particles = particles.filter(p => !p.dead); changed = false; }
+        }
+
+        particles.forEach(p => {
+            if (p.isHopping) return;
+            if (p.gridX !== 0 && p.gridX !== last) return;
+
+            if (p.kind === 'thermal') {
+                /* 순 생성으로 표시한 캐리어는 비평형에서 접점에 수집된다.
+                   전압을 0 V로 바꾼 직후 남아 있는 점은 새 전류로 계산하지 않고 반사한다. */
+                const bias = (currentMode === 'PN') ? (PH ? PH.Vj : 0) : Vapp;
+                if (Math.abs(bias) > 0.01 && (currentMode !== 'PN' || junctionJoined)) {
+                    p.dead = true; changed = true;
+                }
+                return;
+            }
+            if (p.kind === 'injected') {
+                /* 접합을 넘은 소수캐리어가 재결합하지 않고 접점까지 도달하면 수집한다.
+                   새 주입 사건은 전류에 따른 formation rate가 따로 만들므로 여기서
+                   반대편 접점으로 순간이동시켜 재사용하지 않는다. */
+                p.dead = true; changed = true;
+                return;
+            }
+            if (currentMode === 'PN' && !junctionJoined) return;
+
+            /* 각 캐리어를 공급하는 접점은 그 캐리어가 '다수'인 쪽이다.
+               PN: 양공 ← 왼쪽(P) 접점,  전자 ← 오른쪽(N) 접점 (바이어스 부호와 무관)
+               단독: 표류 방향이 인가전압 부호로 정해진다 (양공은 고전위→저전위) */
+            let entryCol;
+            if (currentMode === 'PN') {
+                entryCol = (p.type === 'hole') ? 0 : last;
+            } else {
+                const holeGoesRight = Vapp > 0;
+                const goesRight = (p.type === 'hole') ? holeGoesRight : !holeGoesRight;
+                entryCol = goesRight ? 0 : last;
+            }
+            const exitCol = (entryCol === 0) ? last : 0;
+
+            /* 하류 접점에 도달했을 때만 상류 접점으로 재주입 (전류 연속성).
+               상류 접점에 도달한 경우는 접점이 되돌려 보내므로 그대로 둔다(반사). */
+            if (p.gridX === exitCol && Math.abs(currentMode === 'PN' ? (PH ? PH.Vj : 0) : Vapp) > 0.004) {
+                p.gridX = p.targetGridX = entryCol;
+                p.gridY = p.targetGridY = Math.floor(Math.random() * GRID_ROWS);
+                p.hopProgress = 1; p.isHopping = false;
+            }
+        });
+        if (changed) particles = particles.filter(p => !p.dead);
+    }
+
+    /* =========================================================================
+       UI 핸들러
+       ========================================================================= */
+    function toggleGuide() { document.getElementById('guide-box').classList.toggle('open'); }
+
+    function setMode(mode) {
+        currentMode = mode;
+        ['btn-p-type', 'btn-n-type', 'btn-pn-junction']
+            .forEach(id => document.getElementById(id).classList.remove('active'));
+
+        const badge = document.getElementById('lattice-badge');
+        const overlay = document.getElementById('junction-overlay');
+        const vc = document.getElementById('voltage-control');
+
+        junctionJoined = false; isJoining = false;
+        mergeProgress = 0; depletionProgress = 0;
+        RX = { W: null, barrier: null, Vbi: null, Vj: null };
+        genAccumulator = 0;
+        recombEvents = [];
+
+        if (mode === 'P') {
+            document.getElementById('btn-p-type').classList.add('active');
+            badge.innerText = 'P형: 양공 다수 · 전자 소수';
+            badge.style.background = '#ef4444';
+            badge.style.boxShadow = '0 2px 8px rgba(239,68,68,0.2)';
+            overlay.classList.add('hidden');
+            vc.style.opacity = '1.0'; vc.style.pointerEvents = 'auto';
+        } else if (mode === 'N') {
+            document.getElementById('btn-n-type').classList.add('active');
+            badge.innerText = 'N형: 전자 다수 · 양공 소수';
+            badge.style.background = '#3b82f6';
+            badge.style.boxShadow = '0 2px 8px rgba(59,130,246,0.2)';
+            overlay.classList.add('hidden');
+            vc.style.opacity = '1.0'; vc.style.pointerEvents = 'auto';
+        } else {
+            document.getElementById('btn-pn-junction').classList.add('active');
+            badge.innerText = '접합 전: P형 · N형';
+            badge.style.background = 'linear-gradient(135deg,#10b981 0%,#8b5cf6 100%)';
+            badge.style.boxShadow = '0 2px 8px rgba(16,185,129,0.2)';
+            overlay.classList.remove('hidden');
+            document.getElementById('btn-join-action').style.display = 'block';
+            vc.style.opacity = '0.5'; vc.style.pointerEvents = 'none';
+            document.getElementById('slider-voltage').value = 0;
+            Vapp = 0;
+            document.getElementById('voltage-value').innerText = '0.00 V';
+        }
+        initLattice();
+        updateInstruments(true);
+    }
+
+    function triggerJoinAnimation() {
+        /* 두 결정의 접촉 자체는 즉시 처리한다. 이후 움직이는 것은 Si 원자가 아니라
+           N→P 전자와 P→N 양공이며, 그 과도 확산과 함께 공핍층이 형성된다. */
+        isJoining = false; junctionJoined = true;
+        mergeProgress = 1; depletionProgress = 0;
+        document.getElementById('btn-join-action').style.display = 'none';
+        document.getElementById('junction-overlay').classList.add('hidden');
+        const vc = document.getElementById('voltage-control');
+        vc.style.opacity = '1.0'; vc.style.pointerEvents = 'auto';
+        initLattice();
+        RX.W = 0;
+        RX.barrier = 0;
+        RX.Vbi = PH.Vbi;
+        RX.Vj = PH.Vj;
+        const badge = document.getElementById('lattice-badge');
+        badge.innerText = '무작위 열운동 · e⁻ N→P · h⁺ P→N';
+        badge.style.background = 'linear-gradient(135deg,#d97706 0%,#7c3aed 100%)';
+        updateInstruments(true);
+    }
+
+    function togglePlay() {
+        isPlaying = !isPlaying;
+        const b = document.getElementById('btn-play');
+        b.innerText = isPlaying ? '시뮬레이션 일시정지' : '시뮬레이션 재생';
+        b.style.background = isPlaying ? '#3b82f6' : '#10b981';
+        lastFrameTime = 0;
+    }
+
+    function resetSimulation() {
+        if (currentMode === 'PN') setMode('PN');
+        else { initLattice(); updateInstruments(true); }
+    }
+
+    function updateVoltage(val) {
+        Vapp = parseFloat(val);
+        document.getElementById('voltage-value').innerText = Vapp.toFixed(2) + ' V';
+        recomputePhysics();          // 격자는 유지 — 흐름이 끊기지 않는다
+        updateInstruments(true);
+    }
+
+    function updateDoping(val) {
+        dopingLevel = parseInt(val, 10);
+        document.getElementById('doping-value').innerText =
+            DOPING_LABEL[dopingLevel - 1] + ' · ' + fmtConc(dopingN()) + ' cm' + sup(-3);
+        initLattice();               // 도펀트 개수가 바뀌므로 격자 재구성 (시드 고정 → 재현성)
+        updateInstruments(true);
+    }
+
+    function updateTemperature(val) {
+        temperature = parseInt(val, 10);
+        document.getElementById('temp-value').innerText = temperature + ' K';
+        recomputePhysics();          // 이온화율·캐리어 수만 조정, 흐름 유지
+        updateInstruments(true);
+    }
+
+    /* =========================================================================
+       캔버스 설정
+       ========================================================================= */
+    function setupCanvas(canvas, vW, vH) {
+        const dpr = window.devicePixelRatio || 1;
+        /* 카드 안에서 남는 공간을 최대한 사용하되 종횡비는 보존한다.
+           CSS로 가로·세로를 동시에 강제하면 그림과 글씨가 찌그러지므로,
+           래퍼에 들어가는 가장 큰 등비 크기를 먼저 계산한다. */
+        const initial = canvas.getBoundingClientRect();
+        const slot = canvas.parentElement
+            ? canvas.parentElement.getBoundingClientRect()
+            : initial;
+        const slotW = Math.max(slot.width || initial.width, 1);
+        const slotH = Math.max(slot.height || initial.height, 1);
+        const fit = Math.min(slotW / vW, slotH / vH);
+        canvas.style.width = Math.max(vW * fit, 1) + 'px';
+        canvas.style.height = Math.max(vH * fit, 1) + 'px';
+        const rect = canvas.getBoundingClientRect();
+        const w = Math.max(rect.width, 1), h = Math.max(rect.height, 1);
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
+        const ctx = canvas.getContext('2d');
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.scale((w * dpr) / vW, (h * dpr) / vH);
+        return ctx;
+    }
+    function handleResize() {
+        ctxLattice   = setupCanvas(latticeCanvas,   V_WIDTH, V_HEIGHT);
+        ctxEnergy    = setupCanvas(energyCanvas,    V_WIDTH, V_CHART_HEIGHT);
+        ctxPotential = setupCanvas(potentialCanvas, V_WIDTH, V_CHART_HEIGHT);
+    }
+    function switchCanvasTab(tab) {
+        const panels = { lattice: 'panel-lattice', energy: 'panel-energy', potential: 'panel-potential' };
+        const tabs   = { lattice: 'canvas-tab-lattice', energy: 'canvas-tab-energy', potential: 'canvas-tab-potential' };
+        Object.keys(panels).forEach(k => {
+            document.getElementById(panels[k]).style.display = (k === tab) ? '' : 'none';
+            document.getElementById(tabs[k]).classList.toggle('active', k === tab);
+        });
+        requestAnimationFrame(handleResize);
+    }
+
+    window.onload = function () {
+        latticeCanvas   = document.getElementById('lattice-canvas');
+        energyCanvas    = document.getElementById('energy-canvas');
+        potentialCanvas = document.getElementById('potential-canvas');
+        handleResize();
+        window.addEventListener('resize', function () { requestAnimationFrame(handleResize); });
+        document.getElementById('slider-voltage').value = 0.5;
+        Vapp = 0.5;
+        document.getElementById('voltage-value').innerText = '0.50 V';
+        setMode('P');
+        requestAnimationFrame(simulationLoop);
+    };
+
+    /* 자체 검증용 훅 (헤드리스 테스트에서 사용) */
+    window.__PHYS__ = {
+        EgT, niT, NcT, NvT, VtT, ionizedDensity, carrierDensities, mobility,
+        conductivity, builtInPotential, depletionWidthCm, solveDiode,
+        getPH: () => PH, potentialAt, localCarrierDriftVelocity,
+        thermalHopRate, flowTarget, wireDriftVelocity, wireDisplaySpeed,
+        getWireCoordinates, wirePathLength,
+        getVisualCounts: () => ({
+            dopants: atoms.filter(a => a.type !== 'Si').length,
+            majority: particles.filter(p => p.kind === 'majority').length,
+            minority: particles.filter(p => p.kind === 'minority').length,
+            injected: particles.filter(p => p.kind === 'injected').length
+        }),
+        setState: (m, v, d, t) => {
+            currentMode = m; Vapp = v; dopingLevel = d; temperature = t;
+            junctionJoined = (m === 'PN'); depletionProgress = junctionJoined ? 1 : 0;
+            RX = { W: null, barrier: null, Vbi: null, Vj: null, ohm: 0 };
+            initLattice();
+            return PH;
+        }
+    };
+    </script>
+</body>
+</html>

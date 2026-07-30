@@ -51,7 +51,11 @@
       "description": "통합과학의 기초, SI 단위와 접두어를 시각적으로 탐험합니다.",
       "path": "experiments/si-prefixes.html",
       "date": "2026-07-28",
-      "tags": ["단위", "측정", "통합과학"]
+      "tags": [
+        "단위",
+        "측정",
+        "통합과학"
+      ]
     },
     {
       "id": "newton-laws",
@@ -60,7 +64,11 @@
       "description": "뉴턴의 운동 법칙을 직접 조작하며 확인하는 시뮬레이터.",
       "path": "experiments/newton-laws.html",
       "date": "2026-07-28",
-      "tags": ["뉴턴", "운동법칙", "힘"]
+      "tags": [
+        "뉴턴",
+        "운동법칙",
+        "힘"
+      ]
     },
     {
       "id": "newton-prism",
@@ -69,7 +77,11 @@
       "description": "프리즘을 통과한 빛이 분산되는 과정을 가상 실험실에서 재현합니다.",
       "path": "experiments/newton-prism.html",
       "date": "2026-07-28",
-      "tags": ["프리즘", "빛의 분산", "뉴턴"]
+      "tags": [
+        "프리즘",
+        "빛의 분산",
+        "뉴턴"
+      ]
     },
     {
       "id": "shm-circular-motion",
@@ -78,7 +90,11 @@
       "description": "원운동과 단진동의 관계를 시뮬레이션으로 비교합니다.",
       "path": "experiments/shm-circular-motion.html",
       "date": "2026-07-28",
-      "tags": ["단진동", "원운동", "주기운동"]
+      "tags": [
+        "단진동",
+        "원운동",
+        "주기운동"
+      ]
     },
     {
       "id": "rocket-motion",
@@ -87,7 +103,11 @@
       "description": "질량이 변하는 로켓 운동과 질량이 고정된 경우를 비교 시뮬레이션합니다.",
       "path": "experiments/rocket-motion.html",
       "date": "2026-07-28",
-      "tags": ["로켓", "운동량", "질량변화"]
+      "tags": [
+        "로켓",
+        "운동량",
+        "질량변화"
+      ]
     },
     {
       "id": "motion-analysis",
@@ -96,7 +116,11 @@
       "description": "물체의 운동을 그래프와 데이터로 분석하는 실험실.",
       "path": "experiments/motion-analysis.html",
       "date": "2026-07-28",
-      "tags": ["운동분석", "그래프", "속도"]
+      "tags": [
+        "운동분석",
+        "그래프",
+        "속도"
+      ]
     },
     {
       "id": "generator-principle",
@@ -105,7 +129,11 @@
       "description": "코일과 자석의 상대 운동으로 교류가 발생하는 원리를 시뮬레이션합니다.",
       "path": "experiments/generator-principle.html",
       "date": "2026-07-28",
-      "tags": ["발전기", "교류", "전자기유도"]
+      "tags": [
+        "발전기",
+        "교류",
+        "전자기유도"
+      ]
     },
     {
       "id": "convex-lens-focus",
@@ -114,7 +142,11 @@
       "description": "단계별로 볼록렌즈의 초점 거리를 찾아가는 가상 실험.",
       "path": "experiments/convex-lens-focus.html",
       "date": "2026-07-28",
-      "tags": ["볼록렌즈", "초점거리", "상"]
+      "tags": [
+        "볼록렌즈",
+        "초점거리",
+        "상"
+      ]
     },
     {
       "id": "rgb-cmy-light",
@@ -123,7 +155,12 @@
       "description": "빛의 3원색(RGB)과 색의 3원색(CMY)의 혼합 원리를 비교합니다.",
       "path": "experiments/rgb-cmy-light.html",
       "date": "2026-07-28",
-      "tags": ["빛의 3원색", "색의 3원색", "RGB", "CMY"]
+      "tags": [
+        "빛의 3원색",
+        "색의 3원색",
+        "RGB",
+        "CMY"
+      ]
     },
     {
       "id": "momentum-conservation",
@@ -132,7 +169,11 @@
       "description": "1차원 충돌 상황을 통해 운동량 보존 법칙을 확인합니다.",
       "path": "experiments/momentum-conservation.html",
       "date": "2026-07-28",
-      "tags": ["운동량 보존", "충돌", "역학"]
+      "tags": [
+        "운동량 보존",
+        "충돌",
+        "역학"
+      ]
     },
     {
       "id": "free-fall-projectile",
@@ -141,7 +182,11 @@
       "description": "자유낙하와 수평으로 던진 물체의 운동을 비교합니다.",
       "path": "experiments/free-fall-projectile.html",
       "date": "2026-07-28",
-      "tags": ["자유낙하", "수평투사", "포물선운동"]
+      "tags": [
+        "자유낙하",
+        "수평투사",
+        "포물선운동"
+      ]
     },
     {
       "id": "resistor-series-parallel",
@@ -150,7 +195,12 @@
       "description": "저항의 직렬연결과 병렬연결에서 전류와 전압을 측정하는 가상실험.",
       "path": "experiments/resistor-series-parallel.html",
       "date": "2026-07-28",
-      "tags": ["저항", "직렬", "병렬", "옴의법칙"]
+      "tags": [
+        "저항",
+        "직렬",
+        "병렬",
+        "옴의법칙"
+      ]
     },
     {
       "id": "electromagnetic-induction",
@@ -159,7 +209,25 @@
       "description": "코일과 자석의 상대 운동에 따른 전자기 유도 현상을 탐구합니다.",
       "path": "experiments/electromagnetic-induction.html",
       "date": "2026-07-28",
-      "tags": ["전자기유도", "코일", "자석"]
+      "tags": [
+        "전자기유도",
+        "코일",
+        "자석"
+      ]
+    },
+    {
+      "id": "pn-junction",
+      "title": "PN 접합 반도체 시뮬레이션",
+      "category": "modern-physics",
+      "description": "p형과 n형 반도체가 만나 만들어지는 공핍층을 관찰하고, 순방향·역방향 바이어스에서 전자와 양공의 움직임, 에너지 띠와 전위 분포가 어떻게 달라지는지 확인합니다.",
+      "path": "experiments/pn-junction.html",
+      "date": "2026-07-30",
+      "tags": [
+        "반도체",
+        "PN 접합",
+        "다이오드",
+        "공핍층"
+      ]
     }
   ]
 }
