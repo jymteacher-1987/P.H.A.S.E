@@ -228,6 +228,20 @@ window.EXPERIMENTS_DATA = {
         "다이오드",
         "공핍층"
       ]
+    },
+    {
+      "id": "proper-time-length",
+      "title": "특수 상대성 이론: 고유시간과 고유길이",
+      "category": "relativity",
+      "description": "행성 관찰자와 로켓 관찰자의 관점을 오가며 고유시간·고유길이·시간 팽창·길이 수축을 비교합니다.",
+      "path": "experiments/proper-time-length.html",
+      "date": "2026-07-31",
+      "tags": [
+        "특수상대성",
+        "고유시간",
+        "고유길이",
+        "길이수축"
+      ]
     }
   ]
 };

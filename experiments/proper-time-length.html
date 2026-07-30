@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>특수 상대성 이론: 고유시간과 고유길이</title>
+<style>
+  :root{
+    --bg:#0b1026; --panel:#141b3c; --panel2:#1b2450;
+    --ink:#eef1ff; --sub:#9aa5d8;
+    --cyan:#39d0ff; --orange:#ffb03a; --green:#4ade80; --red:#ff5d7a;
+    --line:#2a3568;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:'Segoe UI','Malgun Gothic','Apple SD Gothic Neo',sans-serif;
+    padding:16px; max-width:1060px; margin:0 auto;
+    word-break:keep-all; overflow-wrap:break-word;   /* 어절 단위 줄바꿈 */
+  }
+  h1{font-size:1.35rem; text-align:center; margin-bottom:3px;}
+  h1 .accent{color:var(--cyan);}
+  .subtitle{text-align:center; color:var(--sub); font-size:.85rem; margin-bottom:14px;}
+
+  /* 컨트롤 */
+  .controls{
+    background:var(--panel); border:1px solid var(--line); border-radius:12px;
+    padding:10px 14px; margin-bottom:10px;
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  }
+  .frame-toggle{display:flex; border-radius:10px; overflow:hidden; border:1px solid var(--line);}
+  .frame-toggle button{
+    background:var(--panel2); color:var(--sub); border:none; padding:9px 18px;
+    font-size:.92rem; font-weight:700; cursor:pointer; font-family:inherit;
+  }
+  .frame-toggle button.on-planet{background:var(--orange); color:#20160a;}
+  .frame-toggle button.on-rocket{background:var(--cyan); color:#062330;}
+  .slider-box{display:flex; align-items:center; gap:10px; flex:1; min-width:240px;}
+  .slider-box label{font-size:.86rem; white-space:nowrap; color:var(--sub);}
+  input[type=range]{flex:1; accent-color:var(--cyan); min-width:110px;}
+  .readout{
+    font-variant-numeric:tabular-nums; background:var(--panel2); border:1px solid var(--line);
+    padding:6px 10px; border-radius:8px; font-size:.86rem; white-space:nowrap;
+  }
+  .readout b{color:var(--cyan);}
+  .readout.g b{color:var(--red);}
+  .btns{display:flex; gap:8px;}
+  .btns button{
+    background:var(--panel2); color:var(--ink); border:1px solid var(--line);
+    border-radius:8px; padding:8px 14px; font-size:.9rem; cursor:pointer; font-family:inherit;
+  }
+  .btns button.play{background:var(--green); color:#052012; border:none; font-weight:700;}
+  .adv{display:flex; align-items:center; gap:6px; font-size:.78rem; color:var(--sub); cursor:pointer; user-select:none;}
+
+  /* 캔버스 */
+  .scene-wrap{
+    background:var(--panel); border:1px solid var(--line); border-radius:12px;
+    padding:6px; margin-bottom:10px; position:relative;
+  }
+  canvas{display:block; width:100%; height:auto; border-radius:8px;}
+  #eventBanner{
+    position:absolute; top:12px; left:50%; transform:translateX(-50%);
+    background:rgba(255,93,122,.93); color:#fff; font-weight:700; font-size:.92rem;
+    padding:6px 18px; border-radius:999px; opacity:0; transition:opacity .25s;
+    pointer-events:none; white-space:nowrap; z-index:2;
+  }
+
+  /* 핵심 한 줄 */
+  #keyLine{
+    border-radius:12px; padding:12px 16px; font-size:.98rem; line-height:1.65;
+    margin-bottom:10px; border:1px solid var(--line); text-align:center;
+  }
+  #keyLine.planet{background:rgba(255,176,58,.08); border-color:rgba(255,176,58,.45);}
+  #keyLine.rocket{background:rgba(57,208,255,.08); border-color:rgba(57,208,255,.45);}
+  .hl-c{color:var(--cyan); font-weight:700;}
+  .hl-o{color:var(--orange); font-weight:700;}
+  .hl-r{color:var(--red); font-weight:700;}
+  .tagY{background:rgba(74,222,128,.16); color:var(--green); border:1px solid rgba(74,222,128,.5);
+        border-radius:999px; padding:1px 9px; font-size:.78rem; font-weight:700;}
+  .tagN{background:rgba(255,93,122,.13); color:var(--red); border:1px solid rgba(255,93,122,.45);
+        border-radius:999px; padding:1px 9px; font-size:.78rem; font-weight:700;}
+
+  /* 하단 */
+  .bottom{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:13px;}
+  .table-card{flex:1.25; min-width:340px;}
+  .graph-card{flex:1; min-width:300px;}
+  .card h2{font-size:.95rem; margin-bottom:9px;}
+  .card h2 small{font-weight:400; color:var(--sub); font-size:.76rem;}
+  table{width:100%; border-collapse:collapse; font-size:.9rem;}
+  th,td{padding:9px 6px; text-align:center; border-bottom:1px solid var(--line);}
+  th{color:var(--sub); font-weight:600; font-size:.78rem;}
+  td:first-child{text-align:left; font-weight:700; white-space:nowrap;}
+  td .num{font-variant-numeric:tabular-nums; font-weight:700;}
+  .foot{font-size:.8rem; color:var(--sub); margin-top:9px; text-align:center;}
+  .foot b{color:var(--ink);}
+
+  /* 개념 정리 (접이식) */
+  details{
+    background:var(--panel); border:1px solid var(--line); border-radius:10px;
+    padding:10px 14px; margin-bottom:8px; font-size:.88rem; line-height:1.6;
+  }
+  summary{cursor:pointer; font-weight:700; font-size:.92rem;}
+  details p{margin-top:8px; color:#cdd4f0;}
+  footer{text-align:center; color:var(--sub); font-size:.72rem; margin-top:8px;}
+</style>
+</head>
+<body>
+
+<h1>특수 상대성 이론 <span class="accent">— 고유시간과 고유길이</span></h1>
+<p class="subtitle">사건 ① 로켓이 행성 X 통과 · 사건 ② 로켓이 행성 Y 통과 (X–Y 고유거리 L₀ = 6.0 광초)</p>
+
+<div class="controls">
+  <div class="frame-toggle">
+    <button id="btnPlanet" class="on-planet">🪐 행성 관찰자</button>
+    <button id="btnRocket">🚀 로켓 관찰자</button>
+  </div>
+  <div class="slider-box">
+    <label for="vSlider">속도 v</label>
+    <input type="range" id="vSlider" min="0.10" max="0.99" step="0.01" value="0.60">
+    <span class="readout">v = <b id="betaVal">0.60</b>c</span>
+    <span class="readout g">γ = <b id="gammaVal">1.250</b></span>
+  </div>
+  <div class="btns">
+    <button id="btnPlay" class="play">▶ 출발</button>
+    <button id="btnReset">⟲</button>
+  </div>
+  <label class="adv" id="advLabel" style="display:none"><input type="checkbox" id="chkAdv"> 심화: 행성 시계 보기</label>
+</div>
+
+<div class="scene-wrap">
+  <canvas id="scene" width="1020" height="410"></canvas>
+  <div id="eventBanner"></div>
+</div>
+
+<div id="keyLine" class="planet"></div>
+
+<div class="bottom">
+  <div class="card table-card">
+    <h2>실험 기록 <small>— 각 관점에서 ▶ 출발로 실험을 마치면 기록됩니다</small></h2>
+    <table>
+      <thead>
+        <tr><th>관찰자</th><th>①→② 시간</th><th>X–Y 거리</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>🪐 행성</td>
+          <td id="cellPT"><span style="color:var(--sub)">실험 전</span></td>
+          <td id="cellPL"><span style="color:var(--sub)">실험 전</span></td>
+        </tr>
+        <tr>
+          <td>🚀 로켓</td>
+          <td id="cellRT"><span style="color:var(--sub)">실험 전</span></td>
+          <td id="cellRL"><span style="color:var(--sub)">실험 전</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="foot" id="tblFoot">🪐 행성 관점과 🚀 로켓 관점에서 각각 실험을 실행해 보세요.</p>
+  </div>
+  <div class="card graph-card">
+    <h2>로런츠 인자 <small>γ = 1/√(1−v²/c²)</small></h2>
+    <canvas id="graph" width="440" height="280"></canvas>
+  </div>
+</div>
+
+<details>
+  <summary>⏱ 고유시간(t₀)이란?</summary>
+  <p>두 사건을 <b>같은 장소에서 시계 하나</b>로 잰 시간 간격이다.
+  로켓 관찰자에게는 사건 ①(X 통과)과 사건 ②(Y 통과)가 모두 자기 자리에서 일어난다.
+  그래서 몸에 지닌 시계 하나로 잴 수 있고, 이렇게 잰 시간이 고유시간이다.
+  반면 행성 관찰자는 X에 있는 시계와 Y에 있는 시계, <b>멀리 떨어진 두 시계</b>를 견주어야 하므로 고유시간이 아니며,
+  그 값은 t = γt₀로 고유시간보다 항상 길다. 이것이 시간 팽창이다.</p>
+</details>
+<details>
+  <summary>📏 고유길이(L₀)란?</summary>
+  <p>측정 대상에 대해 <b>상대속도가 0인(함께 정지한) 관찰자</b>가 잰 길이다.
+  X–Y 사이 거리는 행성 관찰자가 잰 6.0 광초가 고유길이이고,
+  이 구간이 스쳐 지나가는 로켓 관찰자에게는 L = L₀/γ로 짧게 측정된다.
+  수축은 <b>운동 방향으로만</b> 일어나므로, 로켓 관점에서 행성이 납작한 타원으로 보인다.</p>
+</details>
+<details>
+  <summary>🔍 심화: 로켓 관점에서 행성 시계들은 왜 서로 다른 시각인가? (동시성의 상대성)</summary>
+  <p>행성 기준계에서 동기화된 X·Y의 시계가 로켓 관점에서는 동기화되어 있지 않다.
+  로켓 관점에서 두 시계는 ① 둘 다 <b>1/γ배 느리게</b> 가고,
+  ② <b>진행 방향 앞쪽에 있는 Y의 시계가 vL₀/c²만큼 앞선 채</b>로 간다.
+  그 덕분에 로켓이 Y를 지나는 순간 Y의 시계는 정확히 L₀/v, 즉 행성 관찰자가 잰 시간을 가리키게 되어
+  두 관점의 측정이 모순 없이 맞아떨어진다.</p>
+  <p><b>🚂 기차 사고실험으로 이해하기</b> —
+  달리는 기차의 앞과 뒤에 번개가 치고, 지면 관찰자에게 두 번개가 동시라고 하자.
+  기차 가운데 있는 사람은 앞쪽 번개 빛을 먼저 만나므로 <b>"앞쪽 사건이 먼저 일어났다"</b>고 판단한다.
+  즉 움직이는 관찰자에게는 <b>진행 방향 앞쪽의 사건일수록 먼저</b> 일어난 것이 된다.
+  이제 시계에 적용해 보자. "Y의 시계가 0초를 가리킨 사건"은 로켓 진행 방향 앞쪽의 사건이므로,
+  로켓에게는 "X의 시계가 0초를 가리킨 사건"보다 <b>먼저</b> 일어났다.
+  먼저 0초를 지났으니 지금 이 순간 Y의 시계는 그만큼 더 가 있다. 그래서 <b>앞쪽 시계가 앞서 보이는 것</b>이다.
+  참고로 교과서에 나오는 "앞쪽 시계가 뒤처진다(leading clocks lag)"는 반대 상황,
+  즉 <b>정지한 관찰자가 움직이는 물체에 실린 시계들을 볼 때</b>의 이야기다. 누가 누구의 시계를 보느냐에 따라 방향이 뒤집힌다.</p>
+</details>
+
+<footer>※ 애니메이션 속도는 이해를 돕기 위한 것이며, 시계 값은 이론식으로 계산된 정확한 값입니다.</footer>
+
+<script>
+(function(){
+"use strict";
+// ===== 물리 (c = 1) =====
+const L0 = 6.0;
+let beta = 0.60, gamma = 1.25;
+const tP  = () => L0/beta;        // 행성이 잰 시간
+const tR  = () => tP()/gamma;     // 고유시간 t0
+const lR  = () => L0/gamma;       // 수축된 거리
+
+// ===== 상태 =====
+let s = 0, playing = false, lastTs = null;
+const TRIP = 6;                   // 재생 시간(초)
+let frame = "planet", showAdv = false, bannerT = null;
+
+// ===== DOM =====
+const cv = document.getElementById("scene"), ctx = cv.getContext("2d");
+const gcv = document.getElementById("graph"), gctx = gcv.getContext("2d");
+const banner = document.getElementById("eventBanner");
+
+// ===== 레이아웃 상수 (겹침 방지: 고정 슬롯) =====
+const W = 1020, H = 410;
+const CLK_Y = 88;                       // 시계 줄
+const SLOT_X = 170, SLOT_R = 510, SLOT_Y = 850;  // 시계 슬롯 x: X | 로켓 | Y
+const ROCK_Y = 218;                     // 로켓 진행선
+const PLAN_Y = 300;                     // 행성 줄
+const BRA_Y = 372;                      // 거리 표시 줄
+const PX_X = 170, PX_Y = 850;           // 행성 X·Y 위치(행성 관점) — 시계 슬롯과 수직 정렬
+const SPAN = PX_Y - PX_X;               // 680 px = 6 광초
+
+// ===== 별 =====
+const stars = [];
+(function(){ let sd=42; const r=()=> (sd=sd*16807%2147483647)/2147483647;
+  for(let i=0;i<80;i++) stars.push({x:r()*W,y:r()*H,rr:r()*1.3+.3,a:r()*.45+.2});})();
+function drawBG(){
+  ctx.fillStyle="#0a0f24"; ctx.fillRect(0,0,W,H);
+  for(const st of stars){ ctx.globalAlpha=st.a; ctx.fillStyle="#cfd8ff";
+    ctx.beginPath(); ctx.arc(st.x,st.y,st.rr,0,7); ctx.fill(); }
+  ctx.globalAlpha=1;
+  // 시계 줄과 장면 구분선 (행성 관점에서만)
+  if(frame==="planet"){
+    ctx.strokeStyle="rgba(42,53,104,.8)"; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(20,158); ctx.lineTo(W-20,158); ctx.stroke();
+  }
+}
+
+// ===== 부품 =====
+function planet(x,y,r,cols,squash,name){
+  ctx.save(); ctx.translate(x,y); ctx.scale(squash,1);
+  const g=ctx.createRadialGradient(-r*.3,-r*.3,r*.2,0,0,r);
+  g.addColorStop(0,cols[0]); g.addColorStop(1,cols[1]);
+  ctx.fillStyle=g; ctx.beginPath(); ctx.arc(0,0,r,0,7); ctx.fill();
+  ctx.restore();
+  ctx.fillStyle="#eef1ff"; ctx.font="bold 14px sans-serif"; ctx.textAlign="center";
+  ctx.fillText(name,x,y+r+18);
+}
+function rocket(nose,y,len,flame){
+  const h=24;
+  ctx.save(); ctx.translate(nose,y);
+  ctx.fillStyle="#e8ecf7";
+  ctx.beginPath();
+  ctx.moveTo(0,0); ctx.lineTo(-len*.28,-h/2); ctx.lineTo(-len,-h/2);
+  ctx.lineTo(-len,h/2); ctx.lineTo(-len*.28,h/2); ctx.closePath(); ctx.fill();
+  ctx.fillStyle="#39d0ff";
+  ctx.beginPath(); ctx.arc(-len*.44,0,Math.min(5.5,len*.08),0,7); ctx.fill();
+  ctx.fillStyle="#ff5d7a";
+  ctx.beginPath(); ctx.moveTo(-len,-h/2); ctx.lineTo(-len*1.13,-h); ctx.lineTo(-len*.82,-h/2); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(-len,h/2); ctx.lineTo(-len*1.13,h); ctx.lineTo(-len*.82,h/2); ctx.closePath(); ctx.fill();
+  if(flame){
+    const fl=len*.4*(0.8+0.4*Math.random());
+    const fg=ctx.createLinearGradient(-len,0,-len-fl,0);
+    fg.addColorStop(0,"rgba(255,176,58,.95)"); fg.addColorStop(1,"rgba(255,93,122,0)");
+    ctx.fillStyle=fg;
+    ctx.beginPath(); ctx.moveTo(-len,-h*.3); ctx.lineTo(-len-fl,0); ctx.lineTo(-len,h*.3); ctx.closePath(); ctx.fill();
+  }
+  ctx.restore();
+}
+function clock(x,y,t,label,tag,color,big){
+  const r=big?32:27;
+  ctx.fillStyle="#f4f6ff"; ctx.strokeStyle=color; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle="#7d89b8"; ctx.lineWidth=1.4;
+  for(let i=0;i<12;i++){ const a=i*Math.PI/6;
+    ctx.beginPath();
+    ctx.moveTo(x+Math.cos(a)*(r-4),y+Math.sin(a)*(r-4));
+    ctx.lineTo(x+Math.cos(a)*(r-8),y+Math.sin(a)*(r-8)); ctx.stroke(); }
+  const ang=(t/12)*Math.PI*2-Math.PI/2;              // 한 바퀴 = 12초
+  ctx.strokeStyle="#1b2450"; ctx.lineWidth=3; ctx.lineCap="round";
+  ctx.beginPath(); ctx.moveTo(x,y);
+  ctx.lineTo(x+Math.cos(ang)*(r-9),y+Math.sin(ang)*(r-9)); ctx.stroke();
+  ctx.fillStyle="#1b2450"; ctx.beginPath(); ctx.arc(x,y,3,0,7); ctx.fill();
+  ctx.textAlign="center";
+  ctx.fillStyle=color; ctx.font="bold 13px sans-serif";
+  ctx.fillText(label,x,y-r-24);
+  ctx.fillStyle= tag.ok ? "#4ade80" : "#ff5d7a"; ctx.font="11.5px sans-serif";
+  ctx.fillText(tag.text,x,y-r-9);
+  ctx.fillStyle="#eef1ff"; ctx.font="bold 15px monospace";
+  ctx.fillText(t.toFixed(2)+"초",x,y+r+18);
+}
+function bracket(x1,x2,y,text,color){
+  const c=Math.min(Math.max((x1+x2)/2,150),W-150);
+  ctx.strokeStyle=color; ctx.lineWidth=1.6;
+  ctx.beginPath();
+  ctx.moveTo(x1,y-6); ctx.lineTo(x1,y); ctx.lineTo(x2,y); ctx.lineTo(x2,y-6); ctx.stroke();
+  ctx.fillStyle=color; ctx.font="bold 14px sans-serif"; ctx.textAlign="center";
+  ctx.fillText(text,c,y+20);
+}
+function dotLine(x,y1,y2){
+  ctx.strokeStyle="rgba(154,165,216,.35)"; ctx.lineWidth=1; ctx.setLineDash([3,5]);
+  ctx.beginPath(); ctx.moveTo(x,y1); ctx.lineTo(x,y2); ctx.stroke();
+  ctx.setLineDash([]);
+}
+function vArrow(x,y,dir,label){       // dir: +1 오른쪽, -1 왼쪽
+  ctx.strokeStyle="#4ade80"; ctx.lineWidth=2.5;
+  ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+46*dir,y); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x+38*dir,y-5); ctx.lineTo(x+46*dir,y); ctx.lineTo(x+38*dir,y+5); ctx.stroke();
+  if(label){ ctx.fillStyle="#4ade80"; ctx.font="bold 12.5px sans-serif";
+    ctx.textAlign = dir>0 ? "left":"right";
+    ctx.fillText(label, x+52*dir, y+4); }
+}
+
+// ===== 장면: 행성 관점 =====
+function scenePlanet(){
+  const tNow=s*tP();
+  // 내 측정 도구: 떨어져 있는 두 시계 (동기화됨)
+  clock(SLOT_X, CLK_Y, tNow, "행성 X의 시계", {text:"내 기준계에서 동기화된 시계", ok:false}, "#ffb03a", false);
+  clock(SLOT_Y, CLK_Y, tNow, "행성 Y의 시계", {text:"내 기준계에서 동기화된 시계", ok:false}, "#ffb03a", false);
+  ctx.fillStyle="#ff5d7a"; ctx.font="bold 13.5px sans-serif"; ctx.textAlign="center";
+  ctx.fillText("떨어져 있는 두 시계로 측정", SLOT_R, CLK_Y-8);
+  ctx.fillText("→ 고유시간 ✗", SLOT_R, CLK_Y+12);
+  // 시계-행성 연결선
+  dotLine(PX_X, CLK_Y+62, PLAN_Y-40);
+  dotLine(PX_Y, CLK_Y+62, PLAN_Y-40);
+  // 행성 (정지)
+  planet(PX_X, PLAN_Y, 28, ["#ffd08a","#c96a2b"], 1, "행성 X");
+  planet(PX_Y, PLAN_Y, 28, ["#a8e0ff","#2b6ac9"], 1, "행성 Y");
+  // 로켓 (수축)
+  const len=88/gamma, nose=PX_X+s*SPAN;
+  rocket(nose, ROCK_Y, len, playing);
+  if(s<0.99) vArrow(nose+10, ROCK_Y, +1, "v="+beta.toFixed(2)+"c");
+  // 거리 (고유길이)
+  bracket(PX_X, PX_Y, BRA_Y, "L₀ = 6.0 광초 — 고유길이 ✓ (X·Y에 대해 정지한 내가 잰 거리)", "#ffb03a");
+}
+
+// ===== 장면: 로켓 관점 =====
+function sceneRocket(){
+  const tauNow=s*tR();
+  const D=SPAN/gamma;
+  const NOSE=290, len=88;
+  const xX=NOSE-s*D, xY=xX+D;
+  const RCX=NOSE-len/2;                 // 로켓(=내 시계) 위치
+  // 사건 지점 표시: 두 사건 모두 이 한 점에서 일어난다
+  ctx.strokeStyle="rgba(57,208,255,.55)"; ctx.lineWidth=1.5; ctx.setLineDash([5,5]);
+  ctx.beginPath(); ctx.moveTo(RCX,178); ctx.lineTo(RCX,344); ctx.stroke();
+  ctx.setLineDash([]);
+  // 로켓 (정지 → 고유길이) + 로켓에 부착된 시계
+  rocket(NOSE, ROCK_Y, len, playing);
+  ctx.strokeStyle="#39d0ff"; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(RCX,172); ctx.lineTo(RCX,206); ctx.stroke();   // 부착 마스트
+  clock(RCX, 118, tauNow, "나의 시계 (로켓에 부착)", {text:"사건①·② 모두 내 앞에서 → 고유시간 ✓", ok:true}, "#39d0ff", false);
+  ctx.fillStyle="#9aa5d8"; ctx.font="12px sans-serif"; ctx.textAlign="left";
+  ctx.fillText("나는 정지 — 행성들이 나를 지나간다", NOSE+64, ROCK_Y+4);
+  // 행성 (접근, 납작해짐)
+  planet(xX, PLAN_Y, 28, ["#ffd08a","#c96a2b"], 1/gamma, "행성 X");
+  planet(xY, PLAN_Y, 28, ["#a8e0ff","#2b6ac9"], 1/gamma, "행성 Y");
+  if(s<0.85) vArrow(Math.min(xY+80,W-80), PLAN_Y-68, -1, "v="+beta.toFixed(2)+"c");
+  // 심화: 행성에 붙어 움직이는 시계들 (동시성의 상대성)
+  if(showAdv){
+    const tx=tauNow/gamma, ty=beta*L0+tauNow/gamma;
+    ctx.fillStyle="#ffb03a"; ctx.font="bold 13px sans-serif"; ctx.textAlign="center";
+    ctx.fillText("X 시계 "+tx.toFixed(2)+"초", xX, 256);
+    ctx.fillText("Y 시계 "+ty.toFixed(2)+"초", xY, 256);
+    ctx.fillStyle="#ffb03a"; ctx.font="12.5px sans-serif";
+    ctx.fillText("심화: 행성 시계들은 1/γ배 느리게 가고, Y 시계가 vL₀/c²만큼 앞서 있다 (동시성의 상대성)", 510, 36);
+  }
+  // 거리 (수축)
+  bracket(xX, xY, BRA_Y, "L = L₀/γ = "+lR().toFixed(2)+" 광초 — 수축된 거리 ✗", "#ff5d7a");
+}
+
+function draw(){
+  drawBG();
+  frame==="planet" ? scenePlanet() : sceneRocket();
+}
+
+// ===== γ 그래프 =====
+function drawGraph(){
+  const GW=440,GH=280,mL=42,mR=12,mT=12,mB=34,YM=5;
+  const pw=GW-mL-mR, ph=GH-mT-mB;
+  const bx=b=>mL+b*pw, gy=g=>mT+ph-(g/YM)*ph;
+  gctx.fillStyle="#0a0f24"; gctx.fillRect(0,0,GW,GH);
+  gctx.strokeStyle="#212a55"; gctx.lineWidth=1;
+  gctx.fillStyle="#9aa5d8"; gctx.font="11px sans-serif";
+  for(let g=1;g<=YM;g++){ gctx.beginPath(); gctx.moveTo(mL,gy(g)); gctx.lineTo(GW-mR,gy(g)); gctx.stroke();
+    gctx.textAlign="right"; gctx.fillText(g,mL-6,gy(g)+4); }
+  for(let b=0;b<=1.001;b+=0.2){ gctx.beginPath(); gctx.moveTo(bx(b),mT); gctx.lineTo(bx(b),mT+ph); gctx.stroke();
+    gctx.textAlign="center"; gctx.fillText(b.toFixed(1),bx(b),GH-mB+16); }
+  gctx.fillText("v/c",GW/2,GH-5);
+  // γ
+  gctx.strokeStyle="#ff5d7a"; gctx.lineWidth=2.5; gctx.beginPath();
+  for(let b=0;b<=0.995;b+=0.005){ const g=1/Math.sqrt(1-b*b); if(g>YM)break;
+    b===0?gctx.moveTo(bx(b),gy(g)):gctx.lineTo(bx(b),gy(g)); }
+  gctx.stroke();
+  // 1/γ
+  gctx.strokeStyle="#39d0ff"; gctx.lineWidth=2.5; gctx.beginPath();
+  for(let b=0;b<=1.0001;b+=0.005){ const i=Math.sqrt(Math.max(0,1-b*b));
+    b===0?gctx.moveTo(bx(Math.min(b,1)),gy(i)):gctx.lineTo(bx(Math.min(b,1)),gy(i)); }
+  gctx.stroke();
+  // 현재 점
+  gctx.strokeStyle="rgba(238,241,255,.4)"; gctx.setLineDash([4,4]);
+  gctx.beginPath(); gctx.moveTo(bx(beta),mT); gctx.lineTo(bx(beta),mT+ph); gctx.stroke();
+  gctx.setLineDash([]);
+  if(gamma<=YM){ gctx.fillStyle="#ff5d7a"; gctx.beginPath(); gctx.arc(bx(beta),gy(gamma),5,0,7); gctx.fill(); }
+  gctx.fillStyle="#39d0ff"; gctx.beginPath(); gctx.arc(bx(beta),gy(1/gamma),5,0,7); gctx.fill();
+  gctx.font="bold 12px sans-serif"; gctx.textAlign="left";
+  gctx.fillStyle="#ff5d7a"; gctx.fillText("γ  (시간 팽창 배율) = "+gamma.toFixed(3), mL+10, mT+18);
+  gctx.fillStyle="#39d0ff"; gctx.fillText("1/γ (길이 수축 비율) = "+(1/gamma).toFixed(3), mL+10, mT+36);
+}
+
+// ===== 핵심 한 줄 / 수치 =====
+function updateKey(){
+  const el=document.getElementById("keyLine");
+  if(frame==="planet"){
+    el.className="planet";
+    el.innerHTML='🪐 <b>행성 관찰자:</b> 나는 X·Y에 대해 정지해 있으므로 내가 잰 거리 <span class="hl-o">6.0 광초</span>는 <span class="tagY">고유길이 ✓</span>'
+      +' &nbsp;·&nbsp; 시간은 <span class="hl-r">멀리 떨어진 두 시계</span>(X와 Y)를 견주어 잰 <span class="hl-r">t = '+tP().toFixed(2)+'초</span>이므로 <span class="tagN">고유시간 ✗</span>';
+  }else{
+    el.className="rocket";
+    el.innerHTML='🚀 <b>로켓 관찰자:</b> 두 사건이 모두 <span class="hl-c">내 위치, 한 점</span>에서 일어나므로 <span class="hl-c">시계 하나</span>로 잰 <span class="hl-c">t₀ = '+tR().toFixed(2)+'초</span>는 <span class="tagY">고유시간 ✓</span>'
+      +' &nbsp;·&nbsp; 대신 X–Y 거리는 <span class="hl-r">L₀/γ = '+lR().toFixed(2)+' 광초</span>로 수축되어 <span class="tagN">고유길이 ✗</span>'
+      +'<br><small style="color:var(--sub)">검산: 수축된 거리 '+lR().toFixed(2)+' 광초를 '+beta.toFixed(2)+'c로 지나면 '+tR().toFixed(2)+'초 = t₀, 계산이 맞아떨어진다</small>';
+  }
+}
+function update(){
+  gamma=1/Math.sqrt(1-beta*beta);
+  document.getElementById("betaVal").textContent=beta.toFixed(2);
+  document.getElementById("gammaVal").textContent=gamma.toFixed(3);
+  updateKey(); drawGraph(); renderTable();
+}
+
+// ===== 실험 기록 =====
+let rec={planet:null, rocket:null};
+function renderTable(){
+  const pre='<span style="color:var(--sub)">실험 전</span>';
+  const PT=document.getElementById("cellPT"), PL=document.getElementById("cellPL");
+  const RT=document.getElementById("cellRT"), RL=document.getElementById("cellRL");
+  if(rec.planet){
+    PT.innerHTML='<span class="num">'+rec.planet.t+'</span> 초 <span class="tagN">고유시간 ✗</span>';
+    PL.innerHTML='<span class="num">'+rec.planet.L+'</span> 광초 <span class="tagY">고유길이 ✓</span>';
+  } else { PT.innerHTML=pre; PL.innerHTML=pre; }
+  if(rec.rocket){
+    RT.innerHTML='<span class="num">'+rec.rocket.t+'</span> 초 <span class="tagY">고유시간 ✓</span>';
+    RL.innerHTML='<span class="num">'+rec.rocket.L+'</span> 광초 <span class="tagN">수축됨 ✗</span>';
+  } else { RT.innerHTML=pre; RL.innerHTML=pre; }
+  const f=document.getElementById("tblFoot");
+  if(rec.planet&&rec.rocket)
+    f.innerHTML='두 기록을 비교해 보자 — 한 관찰자가 <b>고유시간과 고유길이를 동시에 갖지 않는다!</b><br>(로켓 → 고유시간, 행성 → 고유길이)';
+  else if(rec.planet) f.innerHTML='이제 🚀 로켓 관점으로 바꿔 실험해 보세요.';
+  else if(rec.rocket) f.innerHTML='이제 🪐 행성 관점으로 바꿔 실험해 보세요.';
+  else f.innerHTML='🪐 행성 관점과 🚀 로켓 관점에서 각각 실험을 실행해 보세요.';
+}
+
+// ===== 배너 =====
+function flash(t){ banner.textContent=t; banner.style.opacity=1;
+  clearTimeout(bannerT); bannerT=setTimeout(()=>banner.style.opacity=0,1800); }
+
+// ===== 루프 =====
+function loop(ts){
+  if(playing){
+    if(lastTs!==null){
+      s+=(ts-lastTs)/1000/TRIP;
+      if(s>=1){ s=1; playing=false;
+        document.getElementById("btnPlay").textContent="▶ 출발";
+        if(frame==="planet") rec.planet={t:tP().toFixed(2), L:L0.toFixed(2)};
+        else rec.rocket={t:tR().toFixed(2), L:lR().toFixed(2)};
+        renderTable();
+        flash("사건 ② 로켓이 행성 Y를 통과! — 측정값이 아래 표에 기록됨"); }
+    }
+    lastTs=ts;
+  } else lastTs=null;
+  draw();
+  requestAnimationFrame(loop);
+}
+
+// ===== 이벤트 =====
+document.getElementById("btnPlay").addEventListener("click",function(){
+  if(s>=1)s=0;
+  playing=!playing;
+  this.textContent=playing?"⏸ 일시정지":"▶ 출발";
+  if(playing&&s===0)flash("사건 ① 로켓이 행성 X를 통과!");
+});
+document.getElementById("btnReset").addEventListener("click",function(){
+  playing=false;s=0;lastTs=null;
+  document.getElementById("btnPlay").textContent="▶ 출발";
+});
+document.getElementById("vSlider").addEventListener("input",function(){
+  beta=parseFloat(this.value);
+  rec={planet:null,rocket:null};        // 속도가 바뀌면 새 실험
+  update();
+});
+document.getElementById("btnPlanet").addEventListener("click",function(){
+  frame="planet"; this.className="on-planet";
+  document.getElementById("btnRocket").className="";
+  document.getElementById("advLabel").style.display="none";
+  updateKey();
+});
+document.getElementById("btnRocket").addEventListener("click",function(){
+  frame="rocket"; this.className="on-rocket";
+  document.getElementById("btnPlanet").className="";
+  document.getElementById("advLabel").style.display="flex";
+  updateKey();
+});
+document.getElementById("chkAdv").addEventListener("change",function(){
+  showAdv=this.checked;
+});
+
+update();
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
