@@ -163,7 +163,8 @@
     const catOrder = new Map(state.categories.map((c, i) => [c.id, i]));
     filtered.sort((a, b) => (catOrder.get(a.category) ?? 999) - (catOrder.get(b.category) ?? 999));
 
-    els.expCount.textContent = `${filtered.length}개`;
+    // 개수 표시는 lab.html에서 제거됨(사이드바와 중복). 요소가 없어도 안전하게.
+    if (els.expCount) els.expCount.textContent = `${filtered.length}개`;
     els.expSectionTitle.textContent = state.activeCategory === "all" ? "전체 실험" : catInfo(state.activeCategory).name;
 
     if (filtered.length === 0) {
