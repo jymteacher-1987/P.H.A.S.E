@@ -103,7 +103,11 @@ body.page-home .hero > .wrap{ width:100%; }
    그래서 세로로 자리를 차지하는 값(패딩·글자크기·여백)을 전부 vh 기준
    clamp로 묶어 화면이 낮아지면 같이 줄어들게 했다. px로 되돌리지 말 것. */
 @media (min-width: 861px){
-  body.page-home .site-nav .wrap{ height: clamp(52px, 7vh, 68px); }
+  /* 상단 네비게이션 바(.site-nav)는 여기서 건드리지 않는다. 한때 메인에서만
+     높이를 clamp로 줄였는데, 그러면 index.html과 lab.html의 "가상 물리 실험실"
+     줄 높이가 서로 달라져서 페이지를 오갈 때 바가 튄다. 모든 페이지에서
+     68px 고정(폰에서는 아래 반응형 규칙이 두 페이지 똑같이 줄인다).
+     세로 공간이 모자라면 아래 hero/footer 쪽 clamp를 조이고, nav는 놔둘 것. */
   body.page-home .hero{ padding: clamp(16px,3.5vh,64px) 0 clamp(12px,2.5vh,40px); }
   body.page-home .hero .eyebrow{ margin-bottom: clamp(10px,2.2vh,22px); }
   body.page-home .hero h1{
