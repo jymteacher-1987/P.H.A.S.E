@@ -14,7 +14,12 @@
   *{box-sizing:border-box; margin:0; padding:0;}
   html,body{height:100%;}
   body{
-    font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
+    /* 위 첨자(10⁻⁹의 ⁻⁹ 같은 글자)는 '맑은 고딕'에 글리프가 없다. 그래서 그 글자만
+       브라우저가 다른 글꼴로 대신 그려 버려, 바로 옆 숫자와 굵기·크기가 달라 보였다.
+       위 첨자를 전부 갖고 있는 Segoe UI를 한글 글꼴보다 앞에 두면 숫자와 위 첨자가
+       같은 글꼴로 나온다. 한글은 Segoe UI에 없으니 자연스럽게 뒤의 '맑은 고딕'으로
+       넘어간다 — 순서를 바꾸면 위 첨자가 다시 어긋나므로 그대로 둘 것. */
+    font-family:'Pretendard','Segoe UI','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;
     background:var(--soft); color:var(--ink); line-height:1.55; font-size:16px;
     display:flex; flex-direction:column;
     word-break:keep-all; overflow-wrap:break-word;   /* 한글 어절 중간에서 줄바꿈 금지 */
@@ -123,6 +128,9 @@
     font-family:inherit; font-size:1.1rem; padding:11px 13px; border:1.5px solid var(--line);
     border-radius:12px; background:#fff; color:var(--ink); outline:none;
   }
+  /* 펼쳐진 목록의 항목(option)은 글꼴을 따로 상속받지 않는 브라우저가 있어서
+     명시해 준다. 이게 없으면 닫힌 상태와 펼친 상태의 글꼴이 서로 다르게 보인다. */
+  select, select option{ font-family:inherit; }
   .calcRow input{width:190px;}
   .calcRow input:focus, .calcRow select:focus{border-color:var(--point);}
   .calcErr{color:#c62828; font-weight:600; margin-top:10px; display:none;}
