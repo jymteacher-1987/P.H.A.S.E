@@ -96,6 +96,20 @@
   const PREVIEW_W = 900;
   const PREVIEW_OVERSCALE = 1.18;
 
+  // 미리보기 iframe을 언제 "보여줄지" 정하는 값들.
+  //
+  // 예전에는 iframe을 붙이는 즉시 자리표시자(.ph)를 지웠는데, 그러면 실험
+  // 페이지의 body 배경이 먼저 칠해진다. 빛의 3원색(rgb-cmy-light)처럼 배경이
+  // 어둡고(#101418) 파일까지 무거운 실험은 새까만 사각형이 몇 초 떠 있다가
+  // 뒤늦게 내용이 나타나서 보기 나빴다.
+  //
+  // 그래서 load가 끝난 뒤 GRACE만큼 더 기다렸다가(스크립트가 첫 화면을
+  // 그릴 여유) 자리표시자를 걷어내고 iframe을 페이드인한다. load가 아예
+  // 안 오는 경우를 대비해 TIMEOUT을 안전장치로 둔다 — 이게 없으면 자리표시자가
+  // 영영 남는다. 아직도 검은 화면이 보이면 GRACE부터 키울 것.
+  const PREVIEW_REVEAL_GRACE = 600;
+  const PREVIEW_REVEAL_TIMEOUT = 10000;
+
   function loadPreview(box) {
     const src = box.dataset.src;
     if (!src) return;
@@ -104,8 +118,22 @@
     iframe.loading = "lazy";
     iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
     iframe.tabIndex = -1;
+    iframe.classList.add("loading");
+
     const ph = box.querySelector(".ph");
-    if (ph) ph.remove();
+    let revealed = false;
+    function reveal() {
+      if (revealed) return;
+      revealed = true;
+      iframe.classList.remove("loading");
+      if (ph) {
+        ph.classList.add("fade-out");
+        setTimeout(() => ph.remove(), 320);
+      }
+    }
+    iframe.addEventListener("load", () => setTimeout(reveal, PREVIEW_REVEAL_GRACE));
+    setTimeout(reveal, PREVIEW_REVEAL_TIMEOUT);
+
     box.appendChild(iframe);
 
     function fitPreview() {

@@ -84,6 +84,49 @@ input, button, textarea, select{ font-family: inherit; }
 .hero .wrap{
   display:grid; grid-template-columns: 1.1fr 0.9fr; align-items:center; gap: 48px;
 }
+
+/* 메인(index) 첫 화면이 큰 모니터에서도 화면을 꽉 채우도록:
+   body를 세로 flex로 만들어 hero가 남는 높이를 흡수하고 footer는 바닥에 붙는다.
+   노트북처럼 화면이 낮으면 hero는 원래 높이를 그대로 유지한다. */
+body.page-home{ display:flex; flex-direction:column; min-height:100vh; }
+body.page-home .hero{ flex:1 0 auto; display:flex; align-items:center; }
+body.page-home .hero > .wrap{ width:100%; }
+/* footer의 margin-top:60px은 그대로 둔다. hero가 flex-grow로 남는 높이를 전부
+   흡수하므로 footer는 자동으로 화면 맨 아래에 놓이고, 화면이 낮을 때도
+   hero와 footer 사이 60px 간격이 유지된다. (margin-top:auto를 쓰면 hero가
+   여백을 다 가져가 버려서 이 간격이 0이 된다 — 쓰지 말 것) */
+
+/* PC에서 메인 첫 화면은 스크롤 없이 모니터에 딱 맞아야 한다(조T 요청).
+   위의 flex 규칙만으로는 "빈 공간"만 없앨 뿐, 내용이 화면보다 높으면 여전히
+   스크롤이 생긴다 — 특히 노트북에서 배율을 125~150%로 쓰면 실제 뷰포트가
+   700px 근처까지 내려가서 아래가 잘렸다.
+   그래서 세로로 자리를 차지하는 값(패딩·글자크기·여백)을 전부 vh 기준
+   clamp로 묶어 화면이 낮아지면 같이 줄어들게 했다. px로 되돌리지 말 것. */
+@media (min-width: 861px){
+  body.page-home .site-nav .wrap{ height: clamp(52px, 7vh, 68px); }
+  body.page-home .hero{ padding: clamp(16px,3.5vh,64px) 0 clamp(12px,2.5vh,40px); }
+  body.page-home .hero .eyebrow{ margin-bottom: clamp(10px,2.2vh,22px); }
+  body.page-home .hero h1{
+    font-size: clamp(28px, min(4.4vw, 6.2vh), 48px);
+    margin-bottom: clamp(8px,1.6vh,16px);
+  }
+  body.page-home .hero p.sub{ font-size: clamp(14px,1.9vh,17px); margin-bottom: clamp(12px,3vh,30px); }
+  body.page-home .btn-cta{
+    padding: clamp(11px,1.8vh,17px) clamp(24px,3vw,34px);
+    margin: 0 0 clamp(12px,2.2vh,22px);
+  }
+  body.page-home .stat-card{ padding: clamp(9px,1.6vh,16px) clamp(16px,2vw,24px); }
+  body.page-home .site-footer{
+    margin-top: clamp(12px,2vh,60px);
+    padding: clamp(10px,1.8vh,34px) 0 clamp(12px,2.2vh,60px);
+  }
+}
+/* 위 clamp들이 내용을 화면 안에 넣어 준 뒤, 마지막으로 스크롤 자체를 없앤다.
+   창이 아주 낮을 때(560px 미만)까지 스크롤을 막으면 내용이 잘려서 못 보게
+   되므로, 그때는 이 규칙을 적용하지 않고 평소처럼 스크롤되게 둔다. */
+@media (min-width: 861px) and (min-height: 560px){
+  body.page-home{ height:100vh; overflow:hidden; }
+}
 .hero-copy{ text-align:left; }
 .hero .eyebrow{
   display:inline-flex; align-items:center; gap:8px;
@@ -256,6 +299,16 @@ input, button, textarea, select{ font-family: inherit; }
   color: var(--accent-2); background: rgba(8,145,178,.08);
   border:1px solid rgba(8,145,178,.22); padding:4px 10px; border-radius:999px; margin-bottom:12px;
 }
+/* 뷰어(view.html) 상단 바의 영역 태그 기본형. 색은 아래 [data-cat] 규칙이
+   덮어쓴다 — 그래서 이 기본 규칙은 반드시 [data-cat] 블록보다 "위"에 있어야
+   한다. (예전에는 이 규칙이 .viewer-bar .cat-tag로 아래쪽에 있었는데,
+   특정도가 같고 순서가 뒤라서 영역별 색이 전부 무시되고 늘 청록색으로만
+   나왔다. 다시 아래로 내리지 말 것.) */
+.cat-tag{
+  font-size:12px; font-weight:700; letter-spacing:.02em;
+  color: var(--accent-2); background: rgba(8,145,178,.08);
+  border:1px solid rgba(8,145,178,.22); padding:5px 12px; border-radius:999px;
+}
 /* One color per category (7 fixed categories, see data/experiments.json),
    so the tags on the card grid are visually distinguishable at a glance
    instead of all sharing the same teal. Applied via data-cat, set in
@@ -308,11 +361,19 @@ input, button, textarea, select{ font-family: inherit; }
   position:absolute; top:0; left:0; width:900px; height:675px;
   border:none; pointer-events:none; background:#fff;
   transform-origin: top left;
+  transition: opacity .35s ease;
 }
+/* 실험 페이지가 다 그려지기 전까지는 iframe을 숨겨 둔다.
+   빛의 3원색처럼 body 배경이 어둡거나(#101418) 파일이 무거운 실험은
+   iframe을 바로 보여주면 새까만 화면이 먼저 번쩍인 뒤에야 내용이 떴다.
+   lab.js가 load 이후에 .loading을 떼면서 부드럽게 나타나게 한다. */
+.exp-preview iframe.loading{ opacity:0; }
 .exp-preview .ph{
   position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
   font-size:30px; color: var(--text-faint); opacity:.5;
+  transition: opacity .3s ease;
 }
+.exp-preview .ph.fade-out{ opacity:0; }
 
 @media (max-width: 860px){
   .lab-shell{ grid-template-columns: 1fr; }
@@ -363,23 +424,28 @@ input, button, textarea, select{ font-family: inherit; }
 .admin-link:hover{ opacity:.8; }
 
 /* ---------- Viewer page ---------- */
+/* 상단 바 높이는 아래 .viewer-frame-wrap의 calc()과 반드시 같은 값을 써야
+   실험 화면이 정확히 남은 높이를 채운다. 그래서 숫자를 직접 쓰지 않고
+   변수 하나로 묶어 둔다 — 바 높이를 바꾸면 아래도 자동으로 따라간다.
+   (* { box-sizing:border-box } 때문에 아래 border 1px은 이 높이에 포함됨) */
+:root{ --viewer-bar-h: 56px; }
+
 .viewer-bar{
   position: sticky; top:0; z-index: 50;
   background: rgba(255,255,255,.92); backdrop-filter: blur(14px);
   border-bottom:1px solid var(--border);
-  display:flex; align-items:center; justify-content:space-between;
-  padding: 12px 20px;
+  display:flex; align-items:center; gap:12px;
+  height: var(--viewer-bar-h); padding: 0 20px;
 }
-.viewer-bar .back{
-  display:flex; align-items:center; gap:8px; font-weight:700; font-size:14px; color: var(--text-dim);
-}
-.viewer-bar .back:hover{ color: var(--text); }
-.viewer-bar .title{ font-weight:700; font-size:14px; color: var(--text); }
-.viewer-bar .cat-tag{
-  font-size:11px; color: var(--accent-2); background: rgba(8,145,178,.08);
-  border:1px solid rgba(8,145,178,.22); padding:3px 9px; border-radius:999px;
-}
-.viewer-frame-wrap{ height: calc(100vh - 57px); background: var(--bg); }
+/* 실험 제목은 일부러 넣지 않는다. 제목이 길면 바가 지저분해지고, 특히 폰에서
+   옆의 영역 태그("역학과 에너지" 등)를 밀어내 2줄로 깨졌다 — 조T 요청으로
+   제목을 없애고 영역 태그만 남겼다. 제목은 <title>(브라우저 탭)에는 그대로
+   들어가므로 정보가 사라지는 건 아니다. 다시 넣지 말 것.
+   그리고 버튼과 태그는 둘 다 "왼쪽"에 붙인다 — justify-content:space-between로
+   양 끝에 벌려 놓으면 넓은 모니터에서 가운데가 횅하게 비어 보인다. */
+.viewer-bar .back{ flex:none; }
+.viewer-bar .cat-tag{ flex:none; white-space:nowrap; }
+.viewer-frame-wrap{ height: calc(100vh - var(--viewer-bar-h)); background: var(--bg); }
 iframe.viewer-frame{ width:100%; height:100%; border:none; background:#fff; }
 
 /* ---------- Admin ---------- */
