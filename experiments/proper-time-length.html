@@ -114,6 +114,11 @@
     body{padding:10px;}
     h1{font-size:1.12rem;}
     .subtitle{font-size:.78rem;}
+    /* 폰에서는 정의 항목(사건 ① / 사건 ② 등)을 각각 한 줄씩 놓는다.
+       한 줄에 몰아넣으면 가운데서 아무렇게나 줄이 넘어가 지저분했다.
+       .dfn은 항목 한 덩어리, .sep은 항목 사이 구분점 — 폰에선 점을 숨긴다. */
+    .dfn{display:block; margin:3px 0;}
+    .sep{display:none;}
     /* 컨트롤: 세로 배치, 큰 터치 영역 */
     .controls{flex-direction:column; align-items:stretch; gap:10px; padding:10px;}
     .frame-toggle{width:100%;}
@@ -142,7 +147,11 @@
 <body>
 
 <h1>특수 상대성 이론 <span class="accent">— 고유시간과 고유길이</span></h1>
-<p class="subtitle">사건 ① 로켓이 행성 X 통과 · 사건 ② 로켓이 행성 Y 통과 (X–Y 고유거리 L₀ = 6.0 광초)</p>
+<p class="subtitle">
+  <span class="dfn">사건 ① 로켓이 행성 X 통과</span><span class="sep"> · </span>
+  <span class="dfn">사건 ② 로켓이 행성 Y 통과</span><span class="sep"> </span>
+  <span class="dfn">(X–Y 고유거리 L₀ = 6.0 광초)</span>
+</p>
 
 <div class="controls">
   <div class="frame-toggle">

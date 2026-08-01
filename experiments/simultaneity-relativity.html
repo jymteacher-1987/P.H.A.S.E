@@ -187,6 +187,11 @@
     table{font-size:.82rem; min-width:480px;}
     th,td{padding:8px 7px;}
     th{white-space:nowrap;}
+    /* 폰에서는 정의 항목(M / M′ / 번개 A / 번개 B 등)을 각각 한 줄씩 놓는다.
+       한 줄에 몰아넣으면 가운데서 아무렇게나 줄이 넘어가 지저분했다.
+       .dfn은 항목 한 덩어리, .sep은 항목 사이 가운뎃점 — 폰에선 점을 숨긴다. */
+    .dfn{display:block; margin:3px 0;}
+    .sep{display:none;}
     .tagY,.tagN{font-size:.68rem; padding:1px 6px;}
     details{font-size:.84rem;}
     .farrow{transform:rotate(90deg); align-self:center; width:100%; text-align:center;}
@@ -215,12 +220,12 @@
 <h1>동시성의 상대성 <span class="accent">— 번개는 정말 동시에 쳤을까?</span></h1>
 <p class="subtitle">달리는 기차(고유길이 L₀ = 6.0 광초)의 양 끝에 번개가 친다</p>
 <p class="subtitle" style="margin-top:-8px; margin-bottom:2px">
-  <span style="color:var(--orange); font-weight:700">M = 지면 관찰자</span> (두 번개 자국의 정중앙) &nbsp;·&nbsp;
-  <span style="color:var(--cyan); font-weight:700">M′ = 기차 관찰자</span> (기차 한가운데 탑승)
+  <span class="dfn"><span style="color:var(--orange); font-weight:700">M = 지면 관찰자</span> (두 번개 자국의 정중앙)</span><span class="sep"> &nbsp;·&nbsp; </span>
+  <span class="dfn"><span style="color:var(--cyan); font-weight:700">M′ = 기차 관찰자</span> (기차 한가운데 탑승)</span>
 </p>
 <p class="subtitle">
-  <span style="color:var(--orange); font-weight:700">번개 A</span> = 기차 뒤쪽 끝 (왼쪽) &nbsp;·&nbsp;
-  <span style="color:var(--cyan); font-weight:700">번개 B</span> = 기차 앞쪽 끝 (오른쪽, 진행 방향)
+  <span class="dfn"><span style="color:var(--orange); font-weight:700">번개 A</span> = 기차 뒤쪽 끝 (왼쪽)</span><span class="sep"> &nbsp;·&nbsp; </span>
+  <span class="dfn"><span style="color:var(--cyan); font-weight:700">번개 B</span> = 기차 앞쪽 끝 (오른쪽, 진행 방향)</span>
 </p>
 
 <div class="controls">
@@ -229,7 +234,7 @@
     <button id="btnTrain">🚄 기차 관찰자</button>
   </div>
   <div class="slider-box">
-    <span class="readout">기차 속도 v = <b>0.6</b>c (고정)</span>
+    <span class="readout">기차 속도 v = <b>0.6</b>c</span>
   </div>
   <div class="btns">
     <button id="btnPlay" class="play">⚡ 번개!</button>
