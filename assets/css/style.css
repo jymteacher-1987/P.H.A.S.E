@@ -434,15 +434,17 @@ body.page-home .hero > .wrap{ width:100%; }
   position: sticky; top:0; z-index: 50;
   background: rgba(255,255,255,.92); backdrop-filter: blur(14px);
   border-bottom:1px solid var(--border);
-  display:flex; align-items:center; gap:12px;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
   height: var(--viewer-bar-h); padding: 0 20px;
 }
 /* 실험 제목은 일부러 넣지 않는다. 제목이 길면 바가 지저분해지고, 특히 폰에서
    옆의 영역 태그("역학과 에너지" 등)를 밀어내 2줄로 깨졌다 — 조T 요청으로
    제목을 없애고 영역 태그만 남겼다. 제목은 <title>(브라우저 탭)에는 그대로
    들어가므로 정보가 사라지는 건 아니다. 다시 넣지 말 것.
-   그리고 버튼과 태그는 둘 다 "왼쪽"에 붙인다 — justify-content:space-between로
-   양 끝에 벌려 놓으면 넓은 모니터에서 가운데가 횅하게 비어 보인다. */
+   배치는 "실험실로 버튼 = 왼쪽 끝, 영역 태그 = 오른쪽 끝"(space-between).
+   넓은 화면에서 가운데가 비어 보일까 봐 둘 다 왼쪽에 모아 본 적이 있는데,
+   조T가 양 끝 배치를 원해서 되돌렸다 — 가운데 여백은 의도된 것이니
+   다시 왼쪽으로 모으지 말 것. */
 .viewer-bar .back{ flex:none; }
 .viewer-bar .cat-tag{ flex:none; white-space:nowrap; }
 .viewer-frame-wrap{ height: calc(100vh - var(--viewer-bar-h)); background: var(--bg); }
