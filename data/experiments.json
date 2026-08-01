@@ -242,6 +242,20 @@
         "고유길이",
         "길이수축"
       ]
+    },
+    {
+      "id": "ideal-gas-law",
+      "title": "이상 기체 상태방정식",
+      "category": "thermal",
+      "description": "보일·샤를·아보가드로 법칙을 단계별 가상실험으로 확인하고 PV=nRT로 종합하는 실험입니다.",
+      "path": "experiments/ideal-gas-law.html",
+      "date": "2026-08-01",
+      "tags": [
+        "이상기체",
+        "보일 법칙",
+        "샤를 법칙",
+        "기체 상수"
+      ]
     }
   ]
 }
