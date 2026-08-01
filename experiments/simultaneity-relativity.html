@@ -141,6 +141,24 @@
   details p{margin-top:8px; color:#cdd4f0;}
   footer{text-align:center; color:var(--sub); font-size:.72rem; margin-top:8px;}
 
+  /* 세로 화면 안내 오버레이.
+     이 실험은 기차 양 끝과 두 관찰자를 한 줄에 놓고 봐야 뜻이 통하는데,
+     세로 폰 폭(약 390px)에 1020px 그림을 넣으면 글씨를 읽을 수 없다.
+     그래서 세로일 때는 화면을 덮고 가로로 돌리도록 안내한다.
+     가로로 돌리면 미디어쿼리가 풀려 저절로 사라진다.
+     화면 회전 잠금을 켜 둔 사람도 있으므로 닫기 버튼은 반드시 남겨 둘 것. */
+  #rotateOverlay{display:none;}
+  #rotateOverlay .rot-inner{max-width:330px; text-align:center;}
+  #rotateOverlay .rot-icon{font-size:66px; display:block; margin-bottom:16px;
+    animation:rot-turn 2.6s ease-in-out infinite;}
+  @keyframes rot-turn{0%,32%{transform:rotate(0)} 52%,88%{transform:rotate(90deg)} 100%{transform:rotate(0)}}
+  #rotateOverlay h2{font-size:1.18rem; color:var(--ink); margin-bottom:10px;}
+  #rotateOverlay p{font-size:.87rem; color:var(--sub); line-height:1.65; margin-bottom:20px;}
+  #rotateOverlay button{background:transparent; border:1px solid var(--line);
+    color:var(--sub); border-radius:999px; padding:10px 20px; font-size:.82rem;
+    font-family:inherit; cursor:pointer;}
+  #rotateOverlay button:hover{color:var(--ink); border-color:var(--cyan);}
+
   #rotateHint{
     display:none; background:rgba(57,208,255,.1); border:1px solid rgba(57,208,255,.4);
     color:var(--cyan); border-radius:10px; padding:9px 12px; font-size:.82rem;
@@ -157,22 +175,42 @@
     .btns{width:100%;}
     .btns button{flex:1; padding:11px 8px;}
     .scene-wrap{overflow-x:auto; -webkit-overflow-scrolling:touch;}
-    #scene{min-width:760px;}
-    #clockCv{min-width:760px;}
-    #deriveCv{min-width:860px;}
+    /* JS에서 SC 70→48, SCL 88→60으로 그림 가로폭을 줄였으므로 여기도 같이 낮춘다.
+       한쪽만 바꾸면(JS만) 빈 여백이 늘고, (CSS만) 그림이 잘린다. */
+    #scene{min-width:560px;}
+    #clockCv{min-width:560px;}
+    #deriveCv{min-width:620px;}
     #keyLine{font-size:.88rem; padding:10px 12px; text-align:left; min-height:210px;}
-    table{font-size:.78rem;}
-    th,td{padding:7px 3px;}
+    /* 5열짜리 표를 폰 폭에 우겨넣으면 머리글이 여러 줄로 깨져 지저분했다.
+       글자를 더 줄이는 대신 최소 폭을 주고 .tablewrap으로 가로 스크롤시킨다. */
+    .tablewrap{margin-inline:-4px;}
+    table{font-size:.82rem; min-width:480px;}
+    th,td{padding:8px 7px;}
+    th{white-space:nowrap;}
     .tagY,.tagN{font-size:.68rem; padding:1px 6px;}
     details{font-size:.84rem;}
     .farrow{transform:rotate(90deg); align-self:center; width:100%; text-align:center;}
   }
   @media (max-width:700px) and (orientation:portrait){
     #rotateHint{display:block;}
+    #rotateOverlay{position:fixed; inset:0; z-index:9999; display:flex;
+      align-items:center; justify-content:center; padding:24px; background:var(--bg);}
+    /* 닫기를 누르면 이 클래스가 붙어 오버레이만 숨는다(안내 문구는 남는다) */
+    body.rot-ok #rotateOverlay{display:none;}
   }
 </style>
 </head>
 <body>
+
+<div id="rotateOverlay">
+  <div class="rot-inner">
+    <span class="rot-icon">📱</span>
+    <h2>가로로 돌려주세요</h2>
+    <p>이 실험은 달리는 기차의 양 끝과 두 관찰자를 <b>한 화면에 나란히</b> 놓고 봐야 뜻이 통합니다.
+       세로 화면에서는 글씨가 너무 작아져요.</p>
+    <button id="rotSkip">그래도 세로로 볼게요</button>
+  </div>
+</div>
 
 <h1>동시성의 상대성 <span class="accent">— 번개는 정말 동시에 쳤을까?</span></h1>
 <p class="subtitle">달리는 기차(고유길이 L₀ = 6.0 광초)의 양 끝에 번개가 친다</p>
@@ -240,6 +278,7 @@
 
 <div class="card">
   <h2>관찰 기록 <small>— 각 관점에서 ⚡ 번개! 를 눌러 끝까지 지켜보면 기록됩니다</small></h2>
+  <div class="scrollx tablewrap">
   <table>
     <thead>
       <tr><th>관찰자</th><th>번개 A(뒤)·B(앞)는 동시?</th><th>M′(기차 안)에는</th><th>M(지면)에는</th></tr>
@@ -259,6 +298,7 @@
       </tr>
     </tbody>
   </table>
+  </div>
   <p class="foot" id="tblFoot">🌍 지면 관점과 🚄 기차 관점에서 각각 관찰해 보세요.</p>
 </div>
 
@@ -359,7 +399,16 @@ const evLog=document.getElementById("evLog");
 
 // ===== 레이아웃 =====
 const W=1020, H=400;
-const CX=510, SC=70;
+// 폰처럼 좁은 화면에서는 그림의 '가로 폭'만 줄인다. 캔버스 논리 크기(1020)와
+// 글자 크기는 그대로라 글씨는 계속 읽히고, 옆으로 밀어야 하는 양만 줄어든다.
+// CSS의 #scene/#clockCv/#deriveCv min-width 값과 짝이다 — 한쪽만 바꾸지 말 것.
+const MQ_NARROW = window.matchMedia("(max-width:700px)");
+let NARROW = MQ_NARROW.matches;
+const CX=510;
+let SC = NARROW ? 48 : 70;
+// 가로로 돌리면 화면이 넓어지므로 축척을 원래대로 되돌린다. 그리기 루프가
+// 매 프레임 SC/NARROW를 다시 읽으므로 값만 바꿔 주면 바로 반영된다.
+MQ_NARROW.addEventListener("change", e => { NARROW = e.matches; SC = NARROW ? 48 : 70; });
 // 기차를 지면에 내려놓아, 번개(파면 중심)와 두 관찰자의 높이차를 최소화
 // → 파면을 '정원'으로 그려도 M′·M 모두 정확한 순간에 파면과 만난다
 const TRAIN_Y=266, TH=44;
@@ -789,7 +838,7 @@ function drawDerive(){
 
   if(dStep===1){
     // ===== 지면 관점 (정지) =====
-    const SCL=88, EX=510, half=L/2;
+    const SCL=NARROW?60:88, EX=510, half=L/2;
     const T=half;                          // 빛 도착 시각 (c=1)
     const PLAY=T/RATE_D, HOLD=1.8;         // 화면상 빛 속도 고정
     const cyc=dAnim%(PLAY+HOLD);
@@ -829,7 +878,7 @@ function drawDerive(){
   // ===== 기차 관점 (2~5단계 공통: 연속 애니메이션) =====
   const half=L/(2*gamma);                  // 수축된 반거리 (광초)
   const tQ=half/(1+beta), tP=half/(1-beta);
-  const SCL=88;
+  const SCL=NARROW?60:88;
   const EX=Math.max(510, 94+(half+beta*tP)*SCL);  // P가 화면 밖으로 안 나가게 배치
   const PLAY=tP/RATE_D, HOLD= dStep===2?1.5: dStep===3?2.0: 3.2;   // 화면상 빛 속도 고정
   const cyc=dAnim%(PLAY+HOLD);
@@ -974,6 +1023,11 @@ function renderTable(){
 function update(){
   updateKey(); drawClocks(); renderTable(); renderDerive();
 }
+
+// 세로 안내 오버레이 닫기 — 회전 잠금을 켜 둔 사람을 위한 탈출구.
+document.getElementById("rotSkip").addEventListener("click", () => {
+  document.body.classList.add("rot-ok");
+});
 
 // ===== 루프 =====
 function loop(ts){
