@@ -16,11 +16,20 @@
   --radius-sm: 10px;
   --shadow: 0 10px 34px rgba(30,45,90,.08);
   --max-w: 1180px;
+  /* 상단바 높이. index / lab / view 세 페이지가 이 값 하나를 같이 쓴다 —
+     페이지를 오갈 때 바 높이가 바뀌지 않게 하려는 것이니, 특정 페이지에서만
+     따로 높이를 주지 말 것. 화면 크기별 값은 파일 맨 아래 미디어쿼리에서
+     이 변수만 바꾼다. view.html의 실험 화면 높이도 이 값을 빼서 계산한다. */
+  --nav-h: 68px;
   font-size: 16px;
 }
 
 *{ box-sizing: border-box; }
 html,body{ margin:0; padding:0; overflow-x:hidden; width:100%; }
+/* 스크롤바 자리를 항상 비워 둔다. 메인(index)은 화면에 딱 맞아 스크롤바가 없고
+   실험실(lab)은 스크롤이 생기는데, 이게 없으면 페이지를 오갈 때 스크롤바 폭(약 8px)
+   만큼 가운데 정렬된 상단바 글자가 좌우로 튄다. */
+html{ scrollbar-gutter: stable; }
 body{
   background:
     radial-gradient(1100px 500px at 12% -10%, rgba(53,99,232,.08), transparent 60%),
@@ -49,7 +58,7 @@ input, button, textarea, select{ font-family: inherit; }
 }
 .site-nav .wrap{
   display:flex; align-items:center; justify-content:space-between;
-  height: 68px; gap:10px;
+  height: var(--nav-h); gap:10px;
 }
 .brand{ display:flex; align-items:center; gap:10px; font-weight:800; font-size:18px; letter-spacing:-.02em; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .brand .dot{
@@ -372,12 +381,25 @@ body.page-home .hero > .wrap{ width:100%; }
    iframe을 바로 보여주면 새까만 화면이 먼저 번쩍인 뒤에야 내용이 떴다.
    lab.js가 load 이후에 .loading을 떼면서 부드럽게 나타나게 한다. */
 .exp-preview iframe.loading{ opacity:0; }
+/* 미리보기가 뜨기 전 자리표시자. "로딩 중"이라는 뜻이 한눈에 보이도록
+   모래시계를 천천히 뒤집는다(예전엔 🧪였는데 기다리는 중인지 알기 어려웠다). */
 .exp-preview .ph{
   position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
   font-size:30px; color: var(--text-faint); opacity:.5;
   transition: opacity .3s ease;
+  animation: ph-hourglass 2.4s ease-in-out infinite;
 }
-.exp-preview .ph.fade-out{ opacity:0; }
+@keyframes ph-hourglass{
+  0%,  38%{ transform: rotate(0deg); }
+  50%, 88%{ transform: rotate(180deg); }
+  100%    { transform: rotate(360deg); }
+}
+/* 사라질 때는 애니메이션을 꺼 준다 — 돌아가는 채로 두면 어색하다. */
+.exp-preview .ph.fade-out{ opacity:0; animation:none; }
+/* 움직임을 줄여 달라고 설정한 사용자에게는 회전을 끈다(접근성). */
+@media (prefers-reduced-motion: reduce){
+  .exp-preview .ph{ animation:none; }
+}
 
 @media (max-width: 860px){
   .lab-shell{ grid-template-columns: 1fr; }
@@ -428,30 +450,20 @@ body.page-home .hero > .wrap{ width:100%; }
 .admin-link:hover{ opacity:.8; }
 
 /* ---------- Viewer page ---------- */
-/* 상단 바 높이는 아래 .viewer-frame-wrap의 calc()과 반드시 같은 값을 써야
-   실험 화면이 정확히 남은 높이를 채운다. 그래서 숫자를 직접 쓰지 않고
-   변수 하나로 묶어 둔다 — 바 높이를 바꾸면 아래도 자동으로 따라간다.
-   (* { box-sizing:border-box } 때문에 아래 border 1px은 이 높이에 포함됨) */
-:root{ --viewer-bar-h: 56px; }
+/* view.html(실험 보기)도 index/lab과 "완전히 똑같은" .site-nav 상단바를 쓴다.
+   예전에는 여기만 .viewer-bar라는 별도 바(높이 56px, 브랜드 글자 없음)를 썼는데,
+   실험에 들어가는 순간 바 높이가 68px→56px로 줄고 "가상 물리 실험실" 글자가
+   사라져서 화면이 튀었다 — 조T가 이걸 싫어했다. 별도 바를 다시 만들지 말 것.
+   구조는 lab.html과 동일: 브랜드(왼쪽) / nav-btn(가운데) / 오른쪽 항목.
+   lab은 오른쪽이 "실시간 운영중", view는 영역 태그가 들어간다.
 
-.viewer-bar{
-  position: sticky; top:0; z-index: 50;
-  background: rgba(255,255,255,.92); backdrop-filter: blur(14px);
-  border-bottom:1px solid var(--border);
-  display:flex; align-items:center; justify-content:space-between; gap:12px;
-  height: var(--viewer-bar-h); padding: 0 20px;
-}
-/* 실험 제목은 일부러 넣지 않는다. 제목이 길면 바가 지저분해지고, 특히 폰에서
-   옆의 영역 태그("역학과 에너지" 등)를 밀어내 2줄로 깨졌다 — 조T 요청으로
-   제목을 없애고 영역 태그만 남겼다. 제목은 <title>(브라우저 탭)에는 그대로
-   들어가므로 정보가 사라지는 건 아니다. 다시 넣지 말 것.
-   배치는 "실험실로 버튼 = 왼쪽 끝, 영역 태그 = 오른쪽 끝"(space-between).
-   넓은 화면에서 가운데가 비어 보일까 봐 둘 다 왼쪽에 모아 본 적이 있는데,
-   조T가 양 끝 배치를 원해서 되돌렸다 — 가운데 여백은 의도된 것이니
-   다시 왼쪽으로 모으지 말 것. */
-.viewer-bar .back{ flex:none; }
-.viewer-bar .cat-tag{ flex:none; white-space:nowrap; }
-.viewer-frame-wrap{ height: calc(100vh - var(--viewer-bar-h)); background: var(--bg); }
+   실험 제목은 상단바에 넣지 않는다. 제목이 길면 바가 지저분해지고 폰에서
+   영역 태그를 2줄로 밀어냈다 — 조T 요청. 제목은 브라우저 탭(document.title)에
+   그대로 들어가므로 정보가 사라지는 건 아니다. 다시 넣지 말 것. */
+body.page-view .site-nav .cat-tag{ flex:none; white-space:nowrap; }
+/* 실험 화면은 상단바를 뺀 나머지 높이를 정확히 채운다.
+   1px은 .site-nav의 border-bottom 몫. */
+.viewer-frame-wrap{ height: calc(100vh - var(--nav-h) - 1px); background: var(--bg); }
 iframe.viewer-frame{ width:100%; height:100%; border:none; background:#fff; }
 
 /* ---------- Admin ---------- */
@@ -507,6 +519,8 @@ iframe.viewer-frame{ width:100%; height:100%; border:none; background:#fff; }
 @media (max-width: 640px){
   .site-nav{ position: static; }
   .site-nav .nav-links{ display:none; }
+  /* 단, 실험 보기 화면의 "실험실로"는 유일한 되돌아가기 수단이라 폰에서도 남긴다. */
+  body.page-view .site-nav .nav-links{ display:flex; }
   .hero{ padding: 40px 0 24px; }
   .stat-card{ min-width: 120px; padding:14px 18px; }
   /* 푸터 배치(이메일 왼쪽 / 크레딧 오른쪽 / 관리자 아래 가운데)는
@@ -514,7 +528,7 @@ iframe.viewer-frame{ width:100%; height:100%; border:none; background:#fff; }
 }
 @media (max-width: 480px){
   .wrap{ padding: 0 16px; }
-  .site-nav .wrap{ height:60px; }
+  :root{ --nav-h: 60px; }   /* 세 페이지 상단바가 같이 줄어든다 */
   .brand{ font-size:15px; gap:7px; }
   .brand .dot{ width:8px; height:8px; }
   .nav-cta{ font-size:11px; padding:6px 11px; }
@@ -525,7 +539,7 @@ iframe.viewer-frame{ width:100%; height:100%; border:none; background:#fff; }
 /* 휴대폰 가로모드: 세로 공간이 좁으니 위아래 여백을 줄여서
    한 화면에 최대한 들어오도록 함 (너비가 아니라 높이 기준 미디어쿼리) */
 @media (max-height: 480px) and (orientation: landscape){
-  .site-nav .wrap{ height:52px; }
+  :root{ --nav-h: 52px; }
   .hero{ padding: 20px 0 16px; }
   .hero .wrap{ gap:24px; }
   .stats-row{ margin-bottom:0; }

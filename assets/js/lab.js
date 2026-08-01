@@ -177,7 +177,7 @@
         const url = `view.html?id=${encodeURIComponent(e.id)}&src=${e.source}`;
         return `
         <a class="exp-card ${isNew(e) ? "new" : ""}" href="${url}">
-          <div class="exp-preview" data-src="${e.path}"><span class="ph">🧪</span></div>
+          <div class="exp-preview" data-src="${e.path}"><span class="ph">⏳</span></div>
           <div class="body">
             <span class="tag" data-cat="${e.category}">${c.icon} ${c.name}</span>
             <h3>${e.title}</h3>

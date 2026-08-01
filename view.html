@@ -6,12 +6,20 @@
 <title>실험 보기 — 가상 물리 실험실</title>
 <link rel="stylesheet" href="assets/css/style.css" />
 </head>
-<body>
+<body class="page-view">
 
-<div class="viewer-bar">
-  <a class="nav-btn back" href="lab.html">🚪 실험실로</a>
-  <span class="cat-tag" id="expCat"></span>
-</div>
+<!-- index.html / lab.html과 완전히 같은 상단바 구조를 쓴다.
+     페이지를 오갈 때 바 높이와 "가상 물리 실험실" 글자 위치가 바뀌지 않게
+     하려는 것이므로, 여기만 다른 바로 바꾸지 말 것. -->
+<nav class="site-nav">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="dot"></span> 가상 물리 실험실</a>
+    <div class="nav-links">
+      <a class="nav-btn" href="lab.html">🚪 실험실로</a>
+    </div>
+    <span class="cat-tag" id="expCat"></span>
+  </div>
+</nav>
 <div class="viewer-frame-wrap">
   <iframe id="expFrame" class="viewer-frame" title="실험 화면" allowfullscreen></iframe>
 </div>
