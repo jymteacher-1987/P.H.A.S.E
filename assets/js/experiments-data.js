@@ -256,6 +256,20 @@ window.EXPERIMENTS_DATA = {
         "샤를 법칙",
         "기체 상수"
       ]
+    },
+    {
+      "id": "simultaneity-relativity",
+      "title": "동시성의 상대성 — 번개와 두 관찰자",
+      "category": "relativity",
+      "description": "달리는 기차 양 끝에 친 번개를 지면 관찰자와 기차 관찰자의 눈으로 비교하며 동시성이 상대적임을 확인합니다.",
+      "path": "experiments/simultaneity-relativity.html",
+      "date": "2026-08-01",
+      "tags": [
+        "특수상대성",
+        "동시성",
+        "관찰자",
+        "사고실험"
+      ]
     }
   ]
 };

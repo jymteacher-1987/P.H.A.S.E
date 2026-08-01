@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>동시성의 상대성: 번개와 두 관찰자</title>
+<style>
+  :root{
+    --bg:#0b1026; --panel:#141b3c; --panel2:#1b2450;
+    --ink:#eef1ff; --sub:#9aa5d8;
+    --cyan:#39d0ff; --orange:#ffb03a; --green:#4ade80; --red:#ff5d7a;
+    --line:#2a3568;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:'Segoe UI','Malgun Gothic','Apple SD Gothic Neo',sans-serif;
+    padding:12px 16px; max-width:1060px; margin:0 auto;
+    word-break:keep-all; overflow-wrap:break-word;
+  }
+  h1{font-size:1.22rem; text-align:center; margin-bottom:2px;}
+  h1 .accent{color:var(--cyan);}
+  .subtitle{text-align:center; color:var(--sub); font-size:.82rem; margin-bottom:8px;}
+
+  .controls{
+    background:var(--panel); border:1px solid var(--line); border-radius:12px;
+    padding:8px 14px; margin-bottom:8px;
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  }
+  .frame-toggle{display:flex; border-radius:10px; overflow:hidden; border:1px solid var(--line);}
+  .frame-toggle button{
+    background:var(--panel2); color:var(--sub); border:none; padding:9px 18px;
+    font-size:.92rem; font-weight:700; cursor:pointer; font-family:inherit;
+  }
+  .frame-toggle button.on-ground{background:var(--orange); color:#20160a;}
+  .frame-toggle button.on-train{background:var(--cyan); color:#062330;}
+  .slider-box{display:flex; align-items:center; gap:10px; flex:1; min-width:240px;}
+  .slider-box label{font-size:.86rem; white-space:nowrap; color:var(--sub);}
+  input[type=range]{flex:1; accent-color:var(--cyan); min-width:110px;}
+  .readout{
+    font-variant-numeric:tabular-nums; background:var(--panel2); border:1px solid var(--line);
+    padding:6px 10px; border-radius:8px; font-size:.86rem; white-space:nowrap;
+  }
+  .readout b{color:var(--cyan);}
+  .btns{display:flex; gap:8px;}
+  .btns button{
+    background:var(--panel2); color:var(--ink); border:1px solid var(--line);
+    border-radius:8px; padding:8px 14px; font-size:.9rem; cursor:pointer; font-family:inherit;
+  }
+  .btns button.play{background:var(--green); color:#052012; border:none; font-weight:700;}
+
+  .scene-wrap{
+    background:var(--panel); border:1px solid var(--line); border-radius:12px;
+    padding:5px; margin-bottom:8px; position:relative;
+  }
+  canvas{display:block; width:100%; height:auto; border-radius:8px;}
+  /* 관찰 일지 (사건이 사라지지 않고 쌓임) */
+  #evLog{list-style:none; margin:0; padding:0;}
+  #evLog li{
+    padding:6px 2px; border-bottom:1px dashed var(--line);
+    font-size:.9rem; line-height:1.5;
+  }
+  #evLog li:last-child{border-bottom:none;}
+  #evLog li.star{color:var(--green); font-weight:700;}
+  #evLog li.empty{color:var(--sub); border:none;}
+
+  #keyLine{
+    border-radius:12px; padding:9px 14px; font-size:.88rem; line-height:1.55;
+    margin-bottom:8px; border:1px solid var(--line); text-align:left;
+    min-height:132px;   /* 추론이 다 채워졌을 때 높이로 고정 → 채워져도 그림이 밀리지 않음 */
+  }
+  #keyLine .kl-title{font-size:.98rem; font-weight:700; display:block; margin-bottom:4px;}
+  #keyLine .kl-row{display:block; padding:1px 0;}
+  #keyLine .kl-num{display:inline-block; font-weight:700; color:var(--sub); margin-right:4px;}
+  #keyLine.ground{background:rgba(255,176,58,.08); border-color:rgba(255,176,58,.45);}
+  #keyLine.train{background:rgba(57,208,255,.08); border-color:rgba(57,208,255,.45);}
+  .hl-c{color:var(--cyan); font-weight:700;}
+  .hl-o{color:var(--orange); font-weight:700;}
+  .hl-g{color:var(--green); font-weight:700;}
+  .tagY{background:rgba(74,222,128,.16); color:var(--green); border:1px solid rgba(74,222,128,.5);
+        border-radius:999px; padding:1px 9px; font-size:.78rem; font-weight:700;}
+  .tagN{background:rgba(255,93,122,.13); color:var(--red); border:1px solid rgba(255,93,122,.45);
+        border-radius:999px; padding:1px 9px; font-size:.78rem; font-weight:700;}
+
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:13px; margin-bottom:10px;}
+  .card.aux{border:1.5px dashed rgba(154,165,216,.5); background:#10173a;}
+  .secdiv{
+    display:flex; align-items:center; gap:12px; margin:20px 0 10px;
+    color:var(--sub); font-size:.82rem; font-weight:700; white-space:nowrap;
+  }
+  .secdiv::before,.secdiv::after{content:""; flex:1; height:1px; background:var(--line);}
+  .card h2{font-size:.95rem; margin-bottom:9px;}
+  .card h2 small{font-weight:400; color:var(--sub); font-size:.76rem;}
+  table{width:100%; border-collapse:collapse; font-size:.88rem;}
+  th,td{padding:9px 5px; text-align:center; border-bottom:1px solid var(--line);}
+  th{color:var(--sub); font-weight:600; font-size:.76rem;}
+  td:first-child{text-align:left; font-weight:700; white-space:nowrap;}
+  .foot{font-size:.8rem; color:var(--sub); margin-top:9px; text-align:center;}
+  .foot b{color:var(--ink);}
+
+  /* 논리 흐름 */
+  .flow{display:flex; gap:10px; align-items:stretch; flex-wrap:wrap;}
+  .fcol{display:flex; flex-direction:column; gap:8px; flex:1.2; min-width:250px;}
+  .fbox{border:1.5px solid; border-radius:10px; padding:10px 12px; font-size:.85rem; line-height:1.6; flex:1;}
+  .fbox b.t{display:block; font-size:.9rem; margin-bottom:4px;}
+  .fbox.common{border-color:rgba(74,222,128,.6); background:rgba(74,222,128,.07); flex:1; min-width:250px;}
+  .fbox.gview{border-color:rgba(255,176,58,.35); background:rgba(255,176,58,.05); transition:border-color .25s, box-shadow .25s;}
+  .fbox.tview{border-color:rgba(57,208,255,.35); background:rgba(57,208,255,.05); transition:border-color .25s, box-shadow .25s;}
+  .fbox.gview.active{border-color:rgba(255,176,58,.9); box-shadow:0 0 0 1.5px rgba(255,176,58,.25);}
+  .fbox.tview.active{border-color:rgba(57,208,255,.9); box-shadow:0 0 0 1.5px rgba(57,208,255,.25);}
+  .farrow{align-self:center; color:var(--sub); font-size:1.5rem; padding:0 2px;}
+
+  /* 유도 단계 */
+  .dctrl{display:flex; align-items:center; gap:10px; margin-bottom:8px; flex-wrap:wrap;}
+  .dctrl button{
+    background:var(--panel2); color:var(--ink); border:1px solid var(--line);
+    border-radius:8px; padding:7px 16px; font-size:.9rem; cursor:pointer; font-family:inherit; font-weight:700;
+  }
+  .dctrl button:disabled{opacity:.35; cursor:default;}
+  .dctrl .dstep{color:var(--cyan); font-weight:700; font-size:.88rem; min-width:52px; text-align:center;}
+  #dText{font-size:.88rem; line-height:1.65; color:#cdd4f0; margin-top:8px; min-height:3.2em;}
+  #dText b{color:var(--ink);}
+  #dText .fm{color:var(--cyan); font-weight:700;}
+  .scrollx{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+
+  details{
+    background:var(--panel); border:1px solid var(--line); border-radius:10px;
+    padding:10px 14px; margin-bottom:8px; font-size:.88rem; line-height:1.6;
+  }
+  details.advWrap{
+    background:transparent; border:none; padding:0; margin-bottom:10px;
+  }
+  details.advWrap>summary{
+    background:var(--panel); border:1.5px dashed rgba(154,165,216,.55); border-radius:12px;
+    padding:14px 16px; font-size:.98rem; font-weight:700; color:var(--cyan);
+    list-style-position:inside;
+  }
+  details.advWrap>summary small{color:var(--sub); font-weight:400; font-size:.78rem;}
+  details.advWrap[open]>summary{margin-bottom:10px;}
+  summary{cursor:pointer; font-weight:700; font-size:.92rem;}
+  details p{margin-top:8px; color:#cdd4f0;}
+  footer{text-align:center; color:var(--sub); font-size:.72rem; margin-top:8px;}
+
+  #rotateHint{
+    display:none; background:rgba(57,208,255,.1); border:1px solid rgba(57,208,255,.4);
+    color:var(--cyan); border-radius:10px; padding:9px 12px; font-size:.82rem;
+    text-align:center; margin-bottom:10px; line-height:1.5;
+  }
+  @media (max-width:700px){
+    body{padding:10px;}
+    h1{font-size:1.12rem;}
+    .subtitle{font-size:.78rem;}
+    .controls{flex-direction:column; align-items:stretch; gap:10px; padding:10px;}
+    .frame-toggle{width:100%;}
+    .frame-toggle button{flex:1; padding:11px 8px;}
+    .slider-box{min-width:0; flex-wrap:wrap;}
+    .btns{width:100%;}
+    .btns button{flex:1; padding:11px 8px;}
+    .scene-wrap{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+    #scene{min-width:760px;}
+    #clockCv{min-width:760px;}
+    #deriveCv{min-width:860px;}
+    #keyLine{font-size:.88rem; padding:10px 12px; text-align:left; min-height:210px;}
+    table{font-size:.78rem;}
+    th,td{padding:7px 3px;}
+    .tagY,.tagN{font-size:.68rem; padding:1px 6px;}
+    details{font-size:.84rem;}
+    .farrow{transform:rotate(90deg); align-self:center; width:100%; text-align:center;}
+  }
+  @media (max-width:700px) and (orientation:portrait){
+    #rotateHint{display:block;}
+  }
+</style>
+</head>
+<body>
+
+<h1>동시성의 상대성 <span class="accent">— 번개는 정말 동시에 쳤을까?</span></h1>
+<p class="subtitle">달리는 기차(고유길이 L₀ = 6.0 광초)의 양 끝에 번개가 친다</p>
+<p class="subtitle" style="margin-top:-8px; margin-bottom:2px">
+  <span style="color:var(--orange); font-weight:700">M = 지면 관찰자</span> (두 번개 자국의 정중앙) &nbsp;·&nbsp;
+  <span style="color:var(--cyan); font-weight:700">M′ = 기차 관찰자</span> (기차 한가운데 탑승)
+</p>
+<p class="subtitle">
+  <span style="color:var(--orange); font-weight:700">번개 A</span> = 기차 뒤쪽 끝 (왼쪽) &nbsp;·&nbsp;
+  <span style="color:var(--cyan); font-weight:700">번개 B</span> = 기차 앞쪽 끝 (오른쪽, 진행 방향)
+</p>
+
+<div class="controls">
+  <div class="frame-toggle">
+    <button id="btnGround" class="on-ground">🌍 지면 관찰자</button>
+    <button id="btnTrain">🚄 기차 관찰자</button>
+  </div>
+  <div class="slider-box">
+    <span class="readout">기차 속도 v = <b>0.6</b>c (고정)</span>
+  </div>
+  <div class="btns">
+    <button id="btnPlay" class="play">⚡ 번개!</button>
+    <button id="btnReset">⟲</button>
+  </div>
+</div>
+
+<div id="rotateHint">📱 폰은 <b>가로로 돌리면</b> 한눈에 보여요 · 세로에서는 그림을 <b>좌우로 밀어서</b> 볼 수 있어요</div>
+
+<div id="keyLine" class="ground"></div>
+
+<div class="scene-wrap">
+  <canvas id="scene" width="1020" height="400"></canvas>
+</div>
+
+<div class="card">
+  <h2>📋 관찰 일지 <small>— 일어난 순서대로 기록되며 사라지지 않습니다</small></h2>
+  <ul id="evLog"><li class="empty">⚡ 번개! 버튼을 누르면 사건이 하나씩 기록됩니다.</li></ul>
+</div>
+
+<div class="card">
+  <h2>논리 흐름 <small>— 똑같은 사실에서 어떻게 서로 다른 결론이 나오는가</small></h2>
+  <div class="flow">
+    <div class="fbox common">
+      <b class="t">✅ 두 관점이 똑같이 인정하는 사실</b>
+      ① B의 빛이 M′와 <b>먼저</b> 만난다 (A의 빛은 나중에)<br>
+      ② 두 빛이 M의 눈앞에서 <b>한꺼번에</b> 만난다<br>
+      <span style="color:var(--sub); font-size:.78rem">"만남"은 같은 장소에서 겹쳐 일어나는 일이다. 그 자리에서 사진을 찍으면 한 장에 나란히 찍히므로, 어느 관점에서 봐도 부정할 수 없다.</span>
+    </div>
+    <div class="farrow">➜</div>
+    <div class="fcol">
+      <div class="fbox gview" id="fGround">
+        <b class="t">🌍 M(지면)의 해석</b>
+        "나는 두 자국의 정중앙에 있는데 양쪽 빛이 동시에 도착했다. 그러니 <b>번개는 동시에 친 것이다.</b>
+        M′가 B의 빛을 먼저 만난 건 그가 B 쪽으로 달려갔기 때문일 뿐이다."
+      </div>
+      <div class="fbox tview" id="fTrain">
+        <b class="t">🚄 M′(기차)의 해석</b>
+        "나는 기차 정중앙에 있고 양쪽 자국까지 거리도 같은데 B의 빛이 먼저 왔다. 그러니 <b>B가 먼저 친 것이다.</b>
+        M이 두 빛을 동시에 만난 건 그가 B의 빛에서 멀어지는 쪽으로 움직였기 때문일 뿐이다."
+      </div>
+    </div>
+  </div>
+  <p class="foot">두 해석 모두 위의 사실 ①·②를 빈틈없이 설명한다 — <b>갈리는 것은 "번개가 동시였는가"라는 판단 하나뿐이다.</b></p>
+</div>
+
+<div class="card">
+  <h2>관찰 기록 <small>— 각 관점에서 ⚡ 번개! 를 눌러 끝까지 지켜보면 기록됩니다</small></h2>
+  <table>
+    <thead>
+      <tr><th>관찰자</th><th>번개 A(뒤)·B(앞)는 동시?</th><th>M′(기차 안)에는</th><th>M(지면)에는</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>🌍 지면</td>
+        <td id="gS"><span style="color:var(--sub)">관찰 전</span></td>
+        <td id="gM2"><span style="color:var(--sub)">관찰 전</span></td>
+        <td id="gM"><span style="color:var(--sub)">관찰 전</span></td>
+      </tr>
+      <tr>
+        <td>🚄 기차</td>
+        <td id="tS"><span style="color:var(--sub)">관찰 전</span></td>
+        <td id="tM2"><span style="color:var(--sub)">관찰 전</span></td>
+        <td id="tM"><span style="color:var(--sub)">관찰 전</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="foot" id="tblFoot">🌍 지면 관점과 🚄 기차 관점에서 각각 관찰해 보세요.</p>
+</div>
+
+<details class="advWrap">
+<summary>📐 심화 학습 — 기차에서 보면 지면의 시계들은 얼마나 어긋나 있을까? <small>(위의 번개 실험과는 별개의 내용 · 눌러서 펼치기)</small></summary>
+
+<div class="card aux">
+  <h2>기차에서 본 지면의 시계들 <small>— 어긋남은 거리에 정비례: Δt = vL/c²</small></h2>
+  <div class="scrollx">
+    <canvas id="clockCv" width="1020" height="185"></canvas>
+  </div>
+  <p class="foot">지면에서 완벽하게 동기화해 둔 시계들이, 달리는 기차에서 보면 <b>진행 방향 앞쪽에 있을수록 vL/c²만큼 앞선 시각</b>을 가리킨다.
+  왜 그런지는 아래 <b>그림 유도</b>에서 단계별로 확인해 보세요.</p>
+</div>
+
+<div class="card aux">
+  <h2>그림으로 유도하기 <small>— 시계 어긋남 vL/c²는 어디서 나오나? (5단계)</small></h2>
+  <p style="font-size:.82rem; color:var(--sub); line-height:1.6; margin-bottom:10px;">
+    ※ 위의 번개 실험과는 <b style="color:var(--ink)">별개의 보조 사고실험</b>입니다.
+    지면에 시계 P와 Q를 놓고 <b style="color:var(--ink)">동기화하는 과정</b>을 기차에서 지켜보면,
+    앞쪽 시계가 얼마나 앞선 시각을 가리키는지 유도할 수 있습니다.
+  </p>
+  <div class="dctrl">
+    <button id="dPrev">◀ 이전</button>
+    <span class="dstep" id="dStep">1 / 5</span>
+    <button id="dNext">다음 ▶</button>
+    <span style="color:var(--sub); font-size:.78rem">각 단계의 애니메이션은 자동으로 반복 재생됩니다</span>
+  </div>
+  <div class="scrollx">
+    <canvas id="deriveCv" width="1020" height="450"></canvas>
+  </div>
+  <p id="dText"></p>
+</div>
+</details>
+
+<details>
+  <summary>💡 핵심 정리: 무엇이 상대적이고, 무엇이 절대적인가?</summary>
+  <p><b>① 운동 방향으로 떨어진 두 사건 — "동시"는 상대적이다.</b>
+  번개 A와 B는 기차의 뒤끝과 앞끝, 즉 운동 방향을 따라 떨어진 곳에서 쳤다.
+  이렇게 떨어져 있는 두 사건이 동시였는지는 눈으로 직접 확인할 수 없고, 빛이 도착한 시각으로부터 <b>추론</b>해야 한다.
+  M과 M′는 각자 흠잡을 데 없이 논리적으로 추론했지만 결론이 갈렸고, <b>둘 다 옳다.</b>
+  "동시"라는 판단 자체가 관찰자의 기준계에 딸린 개념이기 때문이다.</p>
+  <p><b>② 운동 방향에 수직으로만 떨어진 두 사건 — "동시"는 절대적이다.</b>
+  시각 변환식 t′ = γ(t − vx/c²)에서 시각을 어긋나게 하는 항은 <b>운동 방향 좌표 x에만</b> 걸려 있다.
+  그래서 두 사건의 운동 방향 거리가 Δx일 때 시각차는 γvΔx/c²이고, 운동 방향으로 떨어져 있지 않으면(Δx = 0) 시각차도 0이 된다.
+  예를 들어 기차의 지붕과 바닥에 동시에 친 번개는 어느 관찰자에게나 여전히 동시다.
+  <b>동시성이 깨지는 것은 오직 운동 방향으로 떨어져 있을 때뿐이다.</b></p>
+  <p><b>③ 같은 장소에서 겹쳐 일어난 일 — 언제나 절대적이다.</b>
+  "두 빛이 M의 눈앞에서 한꺼번에 만났다"는 것은 한 지점에서 겹쳐 일어난 일이다.
+  그 자리에서 사진을 찍으면 두 빛이 한 장에 나란히 찍히므로, 어느 관점에서 계산해도 결과가 같을 수밖에 없다.
+  실제로 기차 관점에서 따져 보면, B의 빛이 먼저 출발했지만 M이 그 빛에서 달아나는 쪽으로 움직인 탓에
+  나중에 출발한 A의 빛과 정확히 같은 순간 M에 닿는다. 설명하는 방식은 달라도 결론은 하나로 모인다.</p>
+</details>
+
+<footer>※ 애니메이션 속도는 이해를 돕기 위한 것이며, 모든 시간·시계 값은 이론식(로런츠 변환)으로 계산된 정확한 값입니다.</footer>
+
+<script>
+(function(){
+"use strict";
+// ===== 물리 (c=1) =====
+const L0 = 6.0;
+const beta = 0.60;                        // 기차 속도 고정
+const gamma = 1/Math.sqrt(1-beta*beta);   // = 1.25
+
+const gE = () => ({                       // 지면 관점 (번개 = 0초)
+  strike: 0,
+  BtoM2: L0/(2*gamma*(1+beta)),
+  Mboth: L0/(2*gamma),
+  AtoM2: L0/(2*gamma*(1-beta))
+});
+const tE = () => ({                       // 기차 관점 (B 번개 = 0초 기준)
+  Bstrike: 0,
+  Astrike: beta*L0,
+  BtoM2: L0/2,
+  Mboth: L0*(1+beta)/2,
+  AtoM2: L0/2+beta*L0
+});
+const tShift = () => beta*L0/2;
+
+// ===== 상태 =====
+let s=0, playing=false, lastTs=null, started=false;
+// 시뮬 시간 진행 속도: 실제 1초당 시뮬 1초 (고정)
+// → 속도 슬라이더를 바꿔도 화면에서 빛이 움직이는 속도는 항상 같다 (광속 불변)
+const RATE=1.0;
+let frame="ground";
+let rec={ground:false, train:false};
+const fired={};
+let dStep=1;                              // 유도 단계 1~5
+let dAnim=0, dPrevTs=null;                // 유도 애니메이션 시간축
+let kl={g1:false,g2:false,g3:false,t1:false,t2:false,t3:false};  // 추론 잠금해제
+function unlockKL(k){ if(!kl[k]){ kl[k]=true; updateKey(); } }
+
+// ===== DOM =====
+const cv=document.getElementById("scene"), ctx=cv.getContext("2d");
+const ccv=document.getElementById("clockCv"), cctx=ccv.getContext("2d");
+const dcv=document.getElementById("deriveCv"), dctx=dcv.getContext("2d");
+const evLog=document.getElementById("evLog");
+
+// ===== 레이아웃 =====
+const W=1020, H=400;
+const CX=510, SC=70;
+// 기차를 지면에 내려놓아, 번개(파면 중심)와 두 관찰자의 높이차를 최소화
+// → 파면을 '정원'으로 그려도 M′·M 모두 정확한 순간에 파면과 만난다
+const TRAIN_Y=266, TH=44;
+const ROOF=TRAIN_Y-TH/2;                  // 244 = 파면 중심 높이
+const GY=300;
+
+// ===== 별 =====
+const stars=[];
+(function(){ let sd=7; const r=()=> (sd=sd*16807%2147483647)/2147483647;
+  for(let i=0;i<70;i++) stars.push({x:r()*W,y:70+r()*(ROOF-140),rr:r()*1.3+.3,a:r()*.45+.2});})();
+
+// ===== 그리기 도우미 =====
+function rr(g,x,y,w,h,r){
+  g.beginPath();
+  g.moveTo(x+r,y);
+  g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r);
+  g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r);
+  g.closePath();
+}
+// --- 만화풍 인물 ---
+function drawPerson(g,x,footY,o){
+  // o: {shirt, pants, hair, label, lc}
+  // 신발
+  g.fillStyle="#20263d";
+  rr(g,x-10,footY-5,9,5,2); g.fill();
+  rr(g,x+1,footY-5,9,5,2); g.fill();
+  // 다리(바지)
+  g.fillStyle=o.pants;
+  rr(g,x-8,footY-22,7,18,2); g.fill();
+  rr(g,x+1,footY-22,7,18,2); g.fill();
+  // 팔 (몸통보다 먼저: 뒤로)
+  g.strokeStyle=o.shirt; g.lineWidth=5; g.lineCap="round";
+  g.beginPath(); g.moveTo(x-8,footY-38); g.lineTo(x-14,footY-25); g.stroke();
+  g.beginPath(); g.moveTo(x+8,footY-38); g.lineTo(x+14,footY-25); g.stroke();
+  // 손
+  g.fillStyle="#f6c9a2";
+  g.beginPath(); g.arc(x-14,footY-23,3,0,7); g.fill();
+  g.beginPath(); g.arc(x+14,footY-23,3,0,7); g.fill();
+  // 몸통(셔츠)
+  g.fillStyle=o.shirt;
+  rr(g,x-9,footY-43,18,23,6); g.fill();
+  // 머리
+  g.fillStyle="#f6c9a2";
+  g.beginPath(); g.arc(x,footY-51,8.5,0,7); g.fill();
+  // 머리카락
+  g.fillStyle=o.hair;
+  g.beginPath(); g.arc(x,footY-52.5,8.5,Math.PI*1.02,Math.PI*1.98); g.fill();
+  g.beginPath(); g.arc(x-6.5,footY-51,2.4,0,7); g.fill();
+  g.beginPath(); g.arc(x+6.5,footY-51,2.4,0,7); g.fill();
+  // 눈, 입
+  g.fillStyle="#1b2450";
+  g.beginPath(); g.arc(x-3,footY-51.5,1.3,0,7); g.fill();
+  g.beginPath(); g.arc(x+3,footY-51.5,1.3,0,7); g.fill();
+  g.strokeStyle="#1b2450"; g.lineWidth=1.3;
+  g.beginPath(); g.arc(x,footY-49.5,3,Math.PI*0.15,Math.PI*0.85); g.stroke();
+  // 라벨 (기본: 머리 위 / below:true → 발 아래)
+  g.fillStyle=o.lc; g.font="bold 14px sans-serif"; g.textAlign="center";
+  g.fillText(o.label, x, o.below? footY+17 : footY-66);
+}
+// --- 기차 ---
+function drawTrain(g,cx,lenPx){
+  const L=cx-lenPx/2, T=ROOF;
+  // 차체
+  const grad=g.createLinearGradient(0,T,0,T+TH);
+  grad.addColorStop(0,"#f2f5ff"); grad.addColorStop(1,"#c9d2ea");
+  g.fillStyle=grad;
+  rr(g,L,T,lenPx,TH,14); g.fill();
+  // 하단 스커트
+  g.fillStyle="#8f9cc4";
+  rr(g,L+4,T+TH-9,lenPx-8,9,4); g.fill();
+  // 라인 스트라이프
+  g.fillStyle="#39d0ff";
+  g.fillRect(L+6,T+TH-16,lenPx-12,4);
+  // 창문: 개수는 항상 6개 고정 — 기차가 수축하면 창문도 함께 홀쭉해진다
+  const n=6, ww=lenPx*0.048;
+  g.fillStyle="#173a63";
+  for(let i=0;i<n;i++){
+    const wx=L+lenPx*0.09+i*(lenPx*0.82)/(n-1);
+    rr(g,wx-ww,T+9,ww*2,14,Math.min(4,ww)); g.fill();
+  }
+  g.fillStyle="rgba(255,255,255,.35)";
+  for(let i=0;i<n;i++){
+    const wx=L+lenPx*0.09+i*(lenPx*0.82)/(n-1);
+    g.fillRect(wx-ww+2,T+10,Math.max(2,ww*0.35),12);
+  }
+  // 바퀴
+  for(const fx of [0.12,0.3,0.7,0.88]){
+    const wx2=L+lenPx*fx;
+    g.fillStyle="#1b2450";
+    g.beginPath(); g.arc(wx2,T+TH+6,7,0,7); g.fill();
+    g.fillStyle="#4a5687";
+    g.beginPath(); g.arc(wx2,T+TH+6,3,0,7); g.fill();
+  }
+}
+function drawGroundStrip(g,shiftPx){
+  g.strokeStyle="#3a4677"; g.lineWidth=2.5;
+  g.beginPath(); g.moveTo(0,GY); g.lineTo(W,GY); g.stroke();
+  g.strokeStyle="#2a3568"; g.lineWidth=1.5;
+  const sp=46;
+  let off=((shiftPx%sp)+sp)%sp;
+  for(let x=-off; x<W; x+=sp){
+    g.beginPath(); g.moveTo(x,GY); g.lineTo(x-12,GY+13); g.stroke();
+  }
+}
+function bolt(g,x,y,alpha){
+  g.save();
+  g.globalAlpha=alpha;
+  g.shadowColor="#ffe95e"; g.shadowBlur=16;
+  g.fillStyle="#ffe95e";
+  g.beginPath();
+  g.moveTo(x+4,y-52); g.lineTo(x-9,y-16); g.lineTo(x-1,y-16);
+  g.lineTo(x-7,y+8); g.lineTo(x+10,y-22); g.lineTo(x+2,y-22); g.closePath();
+  g.fill();
+  g.restore();
+}
+// 빛의 파면: 번개 지점에서 c로 퍼지는 원 (잔상 없이 파면 선만)
+function wavefront(g,cx,cy,r,color){
+  if(r<=0) return;
+  g.save();
+  g.beginPath(); g.rect(0,70,W,GY+30-70); g.clip();   // 장면 영역만
+  g.globalAlpha=.95; g.strokeStyle=color; g.lineWidth=3;
+  g.beginPath(); g.arc(cx,cy,r,0,7); g.stroke();
+  g.restore();
+  g.globalAlpha=1;
+}
+function ring(g,x,y,phase,color){
+  g.strokeStyle=color; g.lineWidth=3; g.globalAlpha=Math.max(0,1-phase);
+  g.beginPath(); g.arc(x,y,10+phase*24,0,7); g.stroke();
+  g.globalAlpha=1;
+}
+function badge(g,x,y,letter,color){       // 번개 이름표 (원 + 글자)
+  g.fillStyle=color;
+  g.beginPath(); g.arc(x,y,10,0,7); g.fill();
+  g.fillStyle="#0b1026"; g.font="bold 13px sans-serif"; g.textAlign="center";
+  g.fillText(letter,x,y+4.5);
+}
+function arrowH(g,x1,x2,y,color,label,labelAlign){
+  g.strokeStyle=color; g.lineWidth=2.5;
+  g.beginPath(); g.moveTo(x1,y); g.lineTo(x2,y); g.stroke();
+  const d=x2>x1?1:-1;
+  g.beginPath();
+  g.moveTo(x2-8*d,y-5); g.lineTo(x2,y); g.lineTo(x2-8*d,y+5); g.stroke();
+  if(label){
+    g.fillStyle=color; g.font="bold 12.5px sans-serif";
+    g.textAlign=labelAlign||"center";
+    g.fillText(label,(x1+x2)/2,y-8);
+  }
+}
+function miniClock(g,x,y,r,t,color,hi){
+  g.fillStyle="#f4f6ff"; g.strokeStyle=color; g.lineWidth= hi?3.5:2.5;
+  g.beginPath(); g.arc(x,y,r,0,7); g.fill(); g.stroke();
+  g.strokeStyle="#7d89b8"; g.lineWidth=1.2;
+  for(let k=0;k<12;k++){ const a=k*Math.PI/6;
+    g.beginPath();
+    g.moveTo(x+Math.cos(a)*(r-3),y+Math.sin(a)*(r-3));
+    g.lineTo(x+Math.cos(a)*(r-6.5),y+Math.sin(a)*(r-6.5)); g.stroke(); }
+  const ang=(t/12)*Math.PI*2-Math.PI/2;
+  g.strokeStyle="#1b2450"; g.lineWidth=2.6; g.lineCap="round";
+  g.beginPath(); g.moveTo(x,y);
+  g.lineTo(x+Math.cos(ang)*(r-8),y+Math.sin(ang)*(r-8)); g.stroke();
+  g.fillStyle="#1b2450"; g.beginPath(); g.arc(x,y,2.6,0,7); g.fill();
+}
+let evSeq=0;
+const CIRC=["①","②","③","④","⑤","⑥","⑦"];
+function logEvent(tval,msg,star){
+  const emp=evLog.querySelector(".empty");
+  if(emp) evLog.innerHTML="";
+  const li=document.createElement("li");
+  if(star) li.className="star";
+  li.textContent=(CIRC[evSeq++]||"·")+" "+msg;
+  evLog.appendChild(li);
+}
+function clearLog(){
+  evSeq=0;
+  evLog.innerHTML='<li class="empty">⚡ 번개! 버튼을 누르면 사건이 여기에 기록됩니다.</li>';
+}
+function fireOnce(key,tval,msg,star){
+  if(fired[key]) return;
+  fired[key]=true; logEvent(tval,msg,star);
+}
+
+// ===== 배경 =====
+function drawBG(){
+  ctx.fillStyle="#0a0f24"; ctx.fillRect(0,0,W,H);
+  for(const st of stars){ ctx.globalAlpha=st.a; ctx.fillStyle="#cfd8ff";
+    ctx.beginPath(); ctx.arc(st.x,st.y,st.rr,0,7); ctx.fill(); }
+  ctx.globalAlpha=1;
+}
+
+// ===== 장면: 지면 관점 =====
+function sceneGround(){
+  const E=gE();
+  const tEnd=E.AtoM2*1.08;
+  const t=s*tEnd;
+  const half=(L0/(2*gamma))*SC;
+  const ax=CX-half, bx=CX+half;             // 번개 자국 (지면 고정)
+  const trainCx=CX+beta*t*SC;
+
+  drawGroundStrip(ctx,0);
+  // 자국 위치 점선
+  ctx.strokeStyle="rgba(154,165,216,.45)"; ctx.lineWidth=1; ctx.setLineDash([3,4]);
+  ctx.beginPath(); ctx.moveTo(ax,ROOF-60); ctx.lineTo(ax,GY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(bx,ROOF-60); ctx.lineTo(bx,GY); ctx.stroke();
+  ctx.setLineDash([]);
+  // M은 두 자국의 정중앙 (M의 추론 근거)
+  ctx.strokeStyle="rgba(255,176,58,.55)"; ctx.lineWidth=1.4;
+  ctx.beginPath();
+  ctx.moveTo(ax,GY+50); ctx.lineTo(ax,GY+56); ctx.lineTo(CX-5,GY+56); ctx.lineTo(CX-5,GY+50);
+  ctx.moveTo(CX+5,GY+50); ctx.lineTo(CX+5,GY+56); ctx.lineTo(bx,GY+56); ctx.lineTo(bx,GY+50);
+  ctx.stroke();
+  ctx.fillStyle="#ffb03a"; ctx.font="bold 11.5px sans-serif";
+  ctx.fillText("같은 거리", (ax+CX)/2, GY+71);
+  ctx.fillText("같은 거리", (CX+bx)/2, GY+71);
+
+  // 기차 + M′ (지붕 위)
+  drawTrain(ctx,trainCx,2*half);
+  drawPerson(ctx,trainCx,ROOF,{shirt:"#39d0ff",pants:"#27406e",hair:"#3b2b20",label:"M′",lc:"#39d0ff"});
+  // M (지면, 기차 앞쪽에 서 있음 → 기차 위에 그림)
+  drawPerson(ctx,CX,GY,{shirt:"#ffb03a",pants:"#5a4322",hair:"#1e1712",label:"M",lc:"#ffb03a",below:true});
+  // 속도 화살표
+  arrowH(ctx,trainCx+half+10,trainCx+half+58,TRAIN_Y,"#4ade80","v=0.6c","left");
+
+  // 번개 & 파면 (⚡ 버튼을 눌러야 등장, t=0 동시, 파면 중심은 지면에 고정)
+  if(started){
+    if(t<0.55){ bolt(ctx,ax,ROOF-8,1-t/0.55); bolt(ctx,bx,ROOF-8,1-t/0.55); }
+    wavefront(ctx,ax,ROOF,t*SC,"#ffb03a");
+    wavefront(ctx,bx,ROOF,t*SC,"#39d0ff");
+  }
+
+  if(started&&t>=0) fireOnce("g_s",0,"번개 A와 B가 기차의 양 끝을 동시에 때렸다. 바로 이때 M′가 M의 머리 위를 지난다.");
+  if(started&&t>=E.BtoM2){ fireOnce("g_b",E.BtoM2,"B의 빛이 M′와 먼저 만났다. 같은 자리에서 겹친 일이라 기차 관점에서도 똑같이 인정한다."); unlockKL("g1");
+    if(t-E.BtoM2<0.6) ring(ctx,CX+beta*E.BtoM2*SC,ROOF-30,(t-E.BtoM2)/0.6,"#39d0ff"); }
+  if(started&&t>=E.Mboth){ fireOnce("g_m",E.Mboth,"두 빛이 M의 눈앞에서 한꺼번에 만났다. → M의 결론: 양쪽 거리가 같은데 동시에 왔으니 번개는 동시에 친 것이다.",true); unlockKL("g2");
+    if(t-E.Mboth<0.8) ring(ctx,CX,GY-30,(t-E.Mboth)/0.8,"#4ade80"); }
+  if(started&&t>=E.Mboth+0.5) unlockKL("g3");   // 결론은 ② 직후 바로
+  if(started&&t>=E.AtoM2){ fireOnce("g_a",E.AtoM2,"A의 빛이 뒤늦게 M′에게 도착했다. M′가 A의 빛에서는 멀어지는 쪽으로 달렸기 때문이다.");
+    if(t-E.AtoM2<0.6) ring(ctx,CX+beta*E.AtoM2*SC,ROOF-30,(t-E.AtoM2)/0.6,"#ffb03a"); }
+
+  // A/B 배지·자국 라벨은 맨 위에 (가림 방지)
+  badge(ctx,ax,ROOF-64,"A","#ffb03a");
+  badge(ctx,bx,ROOF-64,"B","#39d0ff");
+  ctx.fillStyle="#ffb03a"; ctx.font="bold 11.5px sans-serif"; ctx.textAlign="center";
+  ctx.fillText("A 자국 (뒤)", ax, GY+34);
+  ctx.fillStyle="#39d0ff";
+  ctx.fillText("B 자국 (앞)", bx, GY+34);
+
+  ctx.textAlign="left";
+  if(started){
+    ctx.fillStyle="#ffb03a"; ctx.font="bold 13px sans-serif";
+    ctx.fillText("지면 관점 — 번개 A와 B가 동시에 치고, 빛이 각 자국을 중심으로 대칭으로 퍼져 나간다", 16, 20);
+  }else{
+    ctx.fillStyle="#9aa5d8"; ctx.font="bold 13px sans-serif";
+    ctx.fillText("⚡ 번개! 버튼을 누르면 관찰이 시작됩니다", 16, 20);
+  }
+  if(t>=E.BtoM2){
+    ctx.fillStyle="#eef1ff"; ctx.font="12px sans-serif";
+    ctx.fillText("M′는 B의 빛을 향해 달려가고 있으므로 B의 빛을 먼저 만난다", 16, 38);
+  }
+  if(t>=E.Mboth){
+    ctx.fillStyle="#4ade80"; ctx.font="bold 12px sans-serif";
+    ctx.fillText("M의 추론 — 같은 거리, 같은 광속, 동시 도착. 따라서 번개 A와 B는 동시에 쳤다. ✓", 16, 56);
+  }
+}
+
+// ===== 장면: 기차 관점 =====
+function sceneTrain(){
+  const E=tE();
+  const t0=0, t1=E.AtoM2*1.05;             // 버튼 누르는 순간 = B 번개
+  const tp=t0+s*(t1-t0);
+  const half=(L0/2)*SC;                     // 210px
+  const ax=CX-half, bx=CX+half;
+  const relT=tp-tShift();
+
+  drawGroundStrip(ctx,beta*relT*SC);
+  // 기차(정지, 고유길이) + M′
+  drawTrain(ctx,CX,2*half);
+  drawPerson(ctx,CX,ROOF,{shirt:"#39d0ff",pants:"#27406e",hair:"#3b2b20",label:"M′",lc:"#39d0ff"});
+  // M (지면, 왼쪽으로 — 기차 앞쪽에 서 있음)
+  const mx=CX-beta*relT*SC;
+  drawPerson(ctx,mx,GY,{shirt:"#ffb03a",pants:"#5a4322",hair:"#1e1712",label:"M",lc:"#ffb03a",below:true});
+  // 지면 이동 화살표
+  arrowH(ctx,W-40,W-88,GY+40,"#4ade80","","center");
+  ctx.fillStyle="#4ade80"; ctx.font="bold 12.5px sans-serif"; ctx.textAlign="right";
+  ctx.fillText("지면이 v=0.6c로 뒤로", W-40, GY+28);
+
+  // 같은 거리 브래킷 (M′의 핵심 근거)
+  const brY=GY+50;
+  ctx.strokeStyle="#39d0ff"; ctx.lineWidth=1.6;
+  ctx.beginPath();
+  ctx.moveTo(ax,brY-6); ctx.lineTo(ax,brY); ctx.lineTo(CX-5,brY); ctx.lineTo(CX-5,brY-6);
+  ctx.moveTo(CX+5,brY-6); ctx.lineTo(CX+5,brY); ctx.lineTo(bx,brY); ctx.lineTo(bx,brY-6);
+  ctx.stroke();
+  ctx.fillStyle="#39d0ff"; ctx.font="bold 12.5px sans-serif"; ctx.textAlign="center";
+  ctx.fillText("같은 거리", (ax+CX)/2, brY+21);
+  ctx.fillText("같은 거리", (CX+bx)/2, brY+21);
+
+  // 번개 & 파면 (⚡ 버튼을 눌러야 등장, B 먼저!, 파면 중심은 기차 끝에 고정)
+  const tB=tp-E.Bstrike, tA=tp-E.Astrike;
+  if(started){
+    if(tB>=0&&tB<0.55) bolt(ctx,bx,ROOF-8,1-tB/0.55);
+    if(tA>=0&&tA<0.55) bolt(ctx,ax,ROOF-8,1-tA/0.55);
+    wavefront(ctx,bx,ROOF,tB*SC,"#39d0ff");
+    wavefront(ctx,ax,ROOF,tA*SC,"#ffb03a");
+  }
+
+  if(started) unlockKL("t1");
+  if(started&&tp>=E.Bstrike) fireOnce("t_b0",E.Bstrike,"앞쪽 끝에 번개 B가 먼저 쳤다. 이때 M은 아직 기차 중앙에 이르지 않았다.");
+  if(started&&tp>=tShift()) fireOnce("t_meet",tShift(),"M이 기차 정중앙, 즉 M′ 바로 아래를 지나갔다. 두 번개의 정확히 중간 시점이다.");
+  if(started&&tp>=E.Astrike) fireOnce("t_a0",E.Astrike,"뒤쪽 끝에 번개 A가 뒤이어 쳤다. 얼마나 늦었는지는 아래 심화에서 구할 수 있다.");
+  if(started&&tp>=E.BtoM2){ fireOnce("t_b",E.BtoM2,"B의 빛이 M′와 먼저 만났다. → M′의 결론: 거리가 같은데 B의 빛이 먼저 왔으니 B가 먼저 친 것이다."); unlockKL("t2");
+    if(tp-E.BtoM2<0.6) ring(ctx,CX,ROOF-30,(tp-E.BtoM2)/0.6,"#39d0ff"); }
+  if(started&&tp>=E.Mboth){ fireOnce("t_m",E.Mboth,"두 빛이 M의 눈앞에서 한꺼번에 만났다. 기차 관점에서 계산해도 결과는 똑같다.",true); unlockKL("t3");
+    if(tp-E.Mboth<0.8) ring(ctx,CX-beta*(E.Mboth-tShift())*SC,GY-30,(tp-E.Mboth)/0.8,"#4ade80"); }
+  if(started&&tp>=E.AtoM2){ fireOnce("t_a",E.AtoM2,"A의 빛이 뒤늦게 M′에게 도착했다. 애초에 A 번개가 늦게 쳤으니 당연한 결과다.");
+    if(tp-E.AtoM2<0.6) ring(ctx,CX,ROOF-30,(tp-E.AtoM2)/0.6,"#ffb03a"); }
+
+  // A/B 배지는 맨 위에 (가림 방지, 기차 끝에 부착)
+  badge(ctx,ax,ROOF-64,"A","#ffb03a");
+  badge(ctx,bx,ROOF-64,"B","#39d0ff");
+
+  ctx.textAlign="left";
+  if(started){
+    ctx.fillStyle="#39d0ff"; ctx.font="bold 13px sans-serif";
+    ctx.fillText("기차 관점 — 번개는 동시가 아니다. 앞쪽의 B가 먼저 친다", 16, 20);
+  }else{
+    ctx.fillStyle="#9aa5d8"; ctx.font="bold 13px sans-serif";
+    ctx.fillText("⚡ 번개! 버튼을 누르면 관찰이 시작됩니다", 16, 20);
+  }
+  if(tp>=E.BtoM2){
+    ctx.fillStyle="#eef1ff"; ctx.font="12px sans-serif";
+    ctx.fillText("M′의 추론 — 같은 거리, 같은 광속인데 B의 빛이 먼저 왔다. 따라서 B가 먼저 쳤다.", 16, 38);
+  }
+  if(tp>=E.Mboth){
+    ctx.fillStyle="#4ade80"; ctx.font="bold 12px sans-serif";
+    ctx.fillText("두 빛이 M의 눈앞에서 겹쳐 만나는 것은 여기서도 똑같다. 같은 자리에서 겹친 일은 관점을 타지 않는다.", 16, 56);
+  }
+}
+
+function draw(){
+  drawBG();
+  frame==="ground"? sceneGround() : sceneTrain();
+}
+
+// ===== 시계 스냅샷 카드 =====
+function drawClocks(){
+  const GW=1020, GH=185;
+  cctx.fillStyle="#0a0f24"; cctx.fillRect(0,0,GW,GH);
+  const xs=[0,1.5,3,4.5,6];
+  const x0=95, dx=(GW-190)/(xs.length-1);
+  cctx.strokeStyle="#4ade80"; cctx.lineWidth=2;
+  cctx.beginPath(); cctx.moveTo(GW/2-70,20); cctx.lineTo(GW/2+70,20); cctx.stroke();
+  cctx.beginPath(); cctx.moveTo(GW/2+62,15); cctx.lineTo(GW/2+70,20); cctx.lineTo(GW/2+62,25); cctx.stroke();
+  cctx.fillStyle="#4ade80"; cctx.font="bold 12px sans-serif"; cctx.textAlign="center";
+  cctx.fillText("기차 진행 방향 →", GW/2, 38);
+  xs.forEach((L,i)=>{
+    const x=x0+i*dx, y=95, r=30;
+    const off=beta*L;                   // 바늘 각도용 (표시는 기호로만)
+    miniClock(cctx,x,y,r,off,"#ffb03a",i>0);
+    cctx.textAlign="center";
+    cctx.fillStyle="#9aa5d8"; cctx.font="bold 13px sans-serif";
+    cctx.fillText(i===0? "기준 (거리 0)":"거리 "+(i===1?"L":i+"L"), x, y-r-12);
+    cctx.fillStyle= i===0? "#9aa5d8":"#ffb03a"; cctx.font="bold 13.5px sans-serif";
+    cctx.fillText(i===0? "0":"+"+(i===1?"":i)+"vL/c² 앞섬", x, y+r+22);
+  });
+}
+
+// ===== 그림 유도 카드 =====
+const dTexts = () => [
+  '<b>1단계 — 시계를 맞춘다는 것은 무슨 뜻인가 (지면 관점).</b> 지면 팀은 시계 P와 Q의 정중앙 O에서 빛을 한 번 번쩍이고, <b>그 빛이 닿는 순간 각자의 시계를 0에 맞추기로</b> 약속한다. 지면에서 보면 O에서 두 시계까지의 거리가 같으므로 빛은 P와 Q에 <span class="fm">동시에 도착</span>하고, 두 시계는 같은 순간 0이 된다. 이것이 시계를 동기화한다는 말의 뜻이다.',
+  '<b>2단계 — 똑같은 장면을 달리는 기차에서 바라본다.</b> 기차에서 보면 P와 O와 Q가 한 덩어리로 왼쪽으로 흘러간다. 여기서 두 가지 원리가 작동한다. 첫째, <b>빛은 기차에서 재어도 똑같이 c로 나아간다</b>(광속 불변). 둘째, <b>빛은 번쩍인 그 지점에서 사방으로 퍼져 나갈 뿐</b>, 광원이 움직인다고 해서 함께 끌려가지 않는다.',
+  '<b>3단계 — 한쪽은 마중 나오고, 다른 쪽은 달아난다.</b> 앞쪽 시계 Q는 빛을 향해 다가오므로 둘 사이의 간격이 <span class="fm">c+v</span>의 빠르기로 좁혀져 <b>Q가 먼저 0에 맞춰진다</b>. 반대로 뒤쪽 시계 P는 빛과 같은 방향으로 달아나므로 간격이 <span class="fm">c−v</span>의 빠르기로 더디게 좁혀져 <b>P는 한참 뒤에야 0에 맞춰진다</b>. 지면에서는 동시였던 두 사건이 기차에서는 동시가 아닌 것이다.',
+  '<b>4단계 — 두 사건 사이가 얼마나 벌어지는가 (기차 시계로 잰 값).</b> 걸리는 시간은 처음 거리를 간격이 좁혀지는 빠르기로 나누어 구한다. 기차에서 본 반쪽 거리는 수축되어 <span class="fm">L/2γ</span>이므로, Q가 0이 되기까지 <span class="fm">(L/2γ)/(c+v)</span>, P가 0이 되기까지 <span class="fm">(L/2γ)/(c−v)</span>가 걸린다. 두 값의 차를 정리하면 <span class="fm">Δt′ = (L/2γ)·2v/(c²−v²) = γvL/c²</span>이며, 이것은 <b>기차의 시계로 잰</b> 간격이다.',
+  '<b>5단계 — 움직이는 시계는 느리게 간다, 그리고 결론.</b> 기차에서 보면 지면의 시계는 <b>1/γ배로 느리게</b> 간다. 그래서 기차 시간이 Δt′만큼 흐르는 동안 Q의 바늘은 <span class="fm">Δt′ × (1/γ)</span>만큼만 돌아간다. 따라서 P가 막 0이 되는 순간 Q가 가리키는 값은 <span class="fm">γvL/c² × (1/γ) = vL/c²</span>이다. 결론적으로 <b>기차에서 보면 지면의 시계들은 진행 방향 앞쪽에 있을수록, 거리에 비례해 vL/c²만큼 앞선 시각을 가리킨다.</b>'
+];
+const RATE_D=1.0;                 // 유도 애니메이션도 시뮬 시간 기준 (빛 속도 일정)
+function drawDerive(){
+  const GW=1020, GH=450;
+  dctx.fillStyle="#0a0f24"; dctx.fillRect(0,0,GW,GH);
+  const CY=200, GB=352, NY=104, S1=290, S2=314;
+  const L=6;
+
+  const titles=["① 지면 관점 — 동기화의 정의","② 같은 장면을 기차에서 보면","③ 마중과 도망","④ 시간차 계산 (기차 시계 기준)","⑤ 느린 시계 보정 → 최종 결과"];
+  dctx.font="bold 17px sans-serif"; dctx.textAlign="center";
+  dctx.fillStyle = dStep===1? "#ffb03a":"#39d0ff";
+  dctx.fillText(titles[dStep-1], GW/2, 32);
+
+  // ---- 부품 ----
+  function dbar(shiftPx){
+    dctx.strokeStyle="#3a4677"; dctx.lineWidth=2;
+    dctx.beginPath(); dctx.moveTo(80,GB); dctx.lineTo(GW-80,GB); dctx.stroke();
+    dctx.strokeStyle="#2a3568"; dctx.lineWidth=1.2;
+    const off=((shiftPx%46)+46)%46;
+    for(let x=96-off; x<GW-84; x+=46){
+      if(x<86) continue;
+      dctx.beginPath(); dctx.moveTo(x,GB); dctx.lineTo(x-10,GB+11); dctx.stroke();
+    }
+  }
+  function pole(x){ dctx.strokeStyle="#556198"; dctx.lineWidth=3;
+    dctx.beginPath(); dctx.moveTo(x,CY+12); dctx.lineTo(x,GB); dctx.stroke(); }
+  function bulb(x,on){
+    if(on){ dctx.save(); dctx.shadowColor="#ffe95e"; dctx.shadowBlur=18;
+      dctx.fillStyle="#ffe95e"; dctx.beginPath(); dctx.arc(x,CY+2,7,0,7); dctx.fill(); dctx.restore(); }
+    else{ dctx.fillStyle="#3c466f"; dctx.strokeStyle="#556198"; dctx.lineWidth=1.5;
+      dctx.beginPath(); dctx.arc(x,CY+2,7,0,7); dctx.fill(); dctx.stroke(); }
+  }
+  function pulse(x,dir){
+    if(x<12||x>GW-12) return;            // 화면 밖으로 나가면 그리지 않음
+    dctx.save(); dctx.shadowColor="#ffe95e"; dctx.shadowBlur=12;
+    dctx.fillStyle="#ffe95e";
+    dctx.beginPath(); dctx.arc(x,CY+2,6,0,7); dctx.fill(); dctx.restore();
+    dctx.fillStyle="#ffe95e"; dctx.font="bold 13px sans-serif"; dctx.textAlign="center";
+    dctx.fillText("c", x, CY-18);
+  }
+  function clockUnset(x,color){        // 아직 0에 맞춰지기 전
+    dctx.globalAlpha=.4;
+    dctx.fillStyle="#f4f6ff"; dctx.strokeStyle=color; dctx.lineWidth=2.5;
+    dctx.beginPath(); dctx.arc(x,CY,46,0,7); dctx.fill(); dctx.stroke();
+    dctx.globalAlpha=1;
+    dctx.fillStyle="#8a93b8"; dctx.font="bold 14px sans-serif"; dctx.textAlign="center";
+    dctx.fillText("대기", x, CY+5);
+  }
+  function status(x,y,txt,color,fnt){
+    dctx.fillStyle=color; dctx.font=fnt||"bold 14px sans-serif"; dctx.textAlign="center";
+    dctx.fillText(txt,x,y);
+  }
+  const clampX=(x)=>Math.min(Math.max(x,128),GW-128);   // 라벨 화면 이탈 방지
+
+  if(dStep===1){
+    // ===== 지면 관점 (정지) =====
+    const SCL=88, EX=510, half=L/2;
+    const T=half;                          // 빛 도착 시각 (c=1)
+    const PLAY=T/RATE_D, HOLD=1.8;         // 화면상 빛 속도 고정
+    const cyc=dAnim%(PLAY+HOLD);
+    const simT=Math.min(cyc/PLAY,1)*T;
+    const px=EX-half*SCL, qx=EX+half*SCL;
+    const done=cyc>=PLAY;
+
+    dbar(0);
+    pole(EX); bulb(EX, simT<0.25);
+    const d=simT*SCL;
+    if(simT>0.03){ pulse(EX-d,-1); pulse(EX+d,+1); }
+    if(done){
+      miniClock(dctx,px,CY,46,0,"#ffb03a",true);
+      miniClock(dctx,qx,CY,46,0,"#39d0ff",true);
+      const hp=Math.min((cyc-PLAY)/0.7,1);
+      ring(dctx,px,CY,hp,"#4ade80"); ring(dctx,qx,CY,hp,"#4ade80");
+      status(px,S1,"동시에 0! ✓","#4ade80"); status(qx,S1,"동시에 0! ✓","#4ade80");
+    }else{
+      clockUnset(px,"#ffb03a"); clockUnset(qx,"#39d0ff");
+      status(px,S1,"빛이 오기를 기다리는 중","#9aa5d8","13px sans-serif");
+      status(qx,S1,"빛이 오기를 기다리는 중","#9aa5d8","13px sans-serif");
+    }
+    status(EX,S2,"발광 장치 O (정중앙)","#9aa5d8","13px sans-serif");
+    dctx.fillStyle="#ffb03a"; dctx.font="bold 15px sans-serif"; dctx.textAlign="center";
+    dctx.fillText("시계 P (뒤쪽)", px, NY);
+    dctx.fillStyle="#39d0ff";
+    dctx.fillText("시계 Q (앞쪽 = 진행 방향)", qx, NY);
+    dctx.strokeStyle="#9aa5d8"; dctx.lineWidth=1.4;
+    dctx.beginPath();
+    dctx.moveTo(px,GB+26); dctx.lineTo(px,GB+33); dctx.lineTo(qx,GB+33); dctx.lineTo(qx,GB+26);
+    dctx.stroke();
+    status((px+qx)/2,GB+56,"지면에서 잰 거리 L","#9aa5d8","14px sans-serif");
+    status(GW/2,432,"양쪽 거리가 같으니 빛이 동시에 도착하고, 두 시계가 같은 순간 0이 된다","#7d89b8","14px sans-serif");
+    return;
+  }
+
+  // ===== 기차 관점 (2~5단계 공통: 연속 애니메이션) =====
+  const half=L/(2*gamma);                  // 수축된 반거리 (광초)
+  const tQ=half/(1+beta), tP=half/(1-beta);
+  const SCL=88;
+  const EX=Math.max(510, 94+(half+beta*tP)*SCL);  // P가 화면 밖으로 안 나가게 배치
+  const PLAY=tP/RATE_D, HOLD= dStep===2?1.5: dStep===3?2.0: 3.2;   // 화면상 빛 속도 고정
+  const cyc=dAnim%(PLAY+HOLD);
+  const simT=Math.min(cyc/PLAY,1)*tP;
+  const drift=beta*simT*SCL;
+  const px=EX-half*SCL-drift, qx=EX+half*SCL-drift, ox=EX-drift;
+  const qSet=simT>=tQ, pSet=cyc>=PLAY;
+
+  dbar(drift);
+  arrowH(dctx,GW-96,GW-152,GB-14,"#4ade80","","center");
+  dctx.fillStyle="#4ade80"; dctx.font="bold 13.5px sans-serif"; dctx.textAlign="right";
+  dctx.fillText("지면 전체(P·O·Q)가 v로 왼쪽 이동 중", GW-84, GB-28);
+
+  pole(ox); bulb(ox, simT<0.12);   // 번쩍은 한순간
+
+  // 빛 펄스: 번쩍인 지점에서 좌우로 c씩 — 시계를 지나쳐도 같은 속도로 계속 나아간다
+  const dpx=simT*SCL;
+  if(simT>0.03){ pulse(EX-dpx,-1); pulse(EX+dpx,+1); }
+
+  // 시계
+  if(qSet){
+    miniClock(dctx,qx,CY,46,(simT-tQ)/gamma,"#39d0ff",true);
+    if(simT-tQ<0.45) ring(dctx,qx,CY,(simT-tQ)/0.45,"#4ade80");
+  } else clockUnset(qx,"#39d0ff");
+  if(pSet){
+    miniClock(dctx,px,CY,46,0,"#ffb03a",true);
+    if(cyc-PLAY<0.6) ring(dctx,px,CY,(cyc-PLAY)/0.6,"#4ade80");
+  } else clockUnset(px,"#ffb03a");
+
+  // 이름표 (화면 이탈 방지 클램프)
+  dctx.fillStyle="#ffb03a"; dctx.font="bold 15px sans-serif"; dctx.textAlign="center";
+  dctx.fillText("시계 P (뒤쪽)", clampX(px), NY);
+  dctx.fillStyle="#39d0ff";
+  dctx.fillText("시계 Q (앞쪽 = 진행 방향)", clampX(qx), NY);
+
+  // 상태 줄
+  if(qSet) status(clampX(qx),S1,"먼저 0에 맞춰진 뒤 1/γ배로 느리게 진행 중","#4ade80","bold 13.5px sans-serif");
+  else     status(clampX(qx),S1,"빛을 마중 나온다 (c+v로 좁혀짐)","#39d0ff");
+  if(pSet) status(clampX(px),S1,"이제야 0에 맞춰졌다","#ffb03a");
+  else     status(clampX(px),S1,"빛에서 달아난다 (c−v로 좁혀짐)","#ffb03a");
+
+  // 거리 브래킷 (2~3단계만)
+  if(dStep<=3){
+    dctx.strokeStyle="#9aa5d8"; dctx.lineWidth=1.4;
+    dctx.beginPath();
+    dctx.moveTo(px,GB+26); dctx.lineTo(px,GB+33); dctx.lineTo(qx,GB+33); dctx.lineTo(qx,GB+26);
+    dctx.stroke();
+    status(clampX((px+qx)/2),GB+56,"기차에서 본 거리 = L/γ (수축됨)","#9aa5d8","14px sans-serif");
+  }
+
+
+  // 하단 존 (단계별)
+  if(dStep===2)
+    status(GW/2,432,"빛은 번쩍인 지점에서 좌우로 c씩 퍼진다. 광원이 움직여도 빛은 끌려가지 않는다","#7d89b8","14px sans-serif");
+  if(dStep===3)
+    status(GW/2,432,"빛의 속도는 양쪽이 같지만 시계 쪽이 움직이므로, 빛과 만나는 순간이 달라진다","#7d89b8","14px sans-serif");
+  if(dStep===4){
+    dctx.fillStyle="#ff5d7a"; dctx.font="bold 15.5px sans-serif"; dctx.textAlign="center";
+    dctx.fillText("Δt′ = (L/2γ)/(c−v) − (L/2γ)/(c+v) = (L/2γ)·2v/(c²−v²) = γvL/c²", GW/2, 384);
+    const y=426, x1=250+(tQ/tP)*520, x2=770;   // 눈금 위치 = 실제 사건 시각에 비례
+    dctx.strokeStyle="#556198"; dctx.lineWidth=2;
+    dctx.beginPath(); dctx.moveTo(250,y); dctx.lineTo(770,y); dctx.stroke();
+    // 현재 진행 점
+    const nowX=250+(simT/tP)*(770-250);
+    dctx.fillStyle="#eef1ff"; dctx.beginPath(); dctx.arc(nowX,y,4,0,7); dctx.fill();
+    if(qSet){ dctx.strokeStyle="#39d0ff"; dctx.lineWidth=2.5;
+      dctx.beginPath(); dctx.moveTo(x1,y-7); dctx.lineTo(x1,y+7); dctx.stroke();
+      status(x1,y+20,"Q를 0에 맞춤","#39d0ff","bold 12.5px sans-serif"); }
+    if(pSet){ dctx.strokeStyle="#ffb03a"; dctx.lineWidth=2.5;
+      dctx.beginPath(); dctx.moveTo(x2,y-7); dctx.lineTo(x2,y+7); dctx.stroke();
+      status(x2,y+20,"P를 0에 맞춤","#ffb03a","bold 12.5px sans-serif");
+      dctx.strokeStyle="#ff5d7a"; dctx.lineWidth=2;
+      dctx.beginPath(); dctx.moveTo(x1,y-12); dctx.lineTo(x2,y-12); dctx.stroke();
+      status((x1+x2)/2,y-17,"Δt′","#ff5d7a","bold 12.5px sans-serif"); }
+  }
+  if(dStep===5){
+    if(pSet){
+      const bw=700, bx0=GW/2-bw/2, by0=396;
+      dctx.fillStyle="rgba(57,208,255,.1)";
+      dctx.strokeStyle="rgba(57,208,255,.6)"; dctx.lineWidth=1.5;
+      rr(dctx,bx0,by0,bw,42,10); dctx.fill(); dctx.stroke();
+      dctx.fillStyle="#39d0ff"; dctx.font="bold 17px sans-serif"; dctx.textAlign="center";
+      dctx.fillText("시계 어긋남 = Δt′ × (1/γ) = γvL/c² × (1/γ) = vL/c²", GW/2, by0+28);
+      status(clampX(qx),S2,"이미 vL/c²만큼 가 있다","#39d0ff","bold 13.5px sans-serif");
+    }else{
+      status(GW/2,432,"P가 0에 맞춰지는 순간 Q의 바늘이 어디까지 가 있는지 지켜보세요","#7d89b8","14px sans-serif");
+    }
+  }
+}
+function renderDerive(){
+  document.getElementById("dStep").textContent=dStep+" / 5";
+  document.getElementById("dPrev").disabled = dStep<=1;
+  document.getElementById("dNext").disabled = dStep>=5;
+  document.getElementById("dText").innerHTML=dTexts()[dStep-1];
+  dAnim=0;               // 단계를 바꾸면 애니메이션 처음부터
+  drawDerive();
+}
+
+// ===== 핵심 한 줄 =====
+function updateKey(){
+  const el=document.getElementById("keyLine");
+  const wait='<span class="kl-row" style="color:var(--sub)">… ⚡ 번개! 를 눌러 관찰하면 추론이 한 줄씩 채워집니다</span>';
+  if(frame==="ground"){
+    el.className="ground";
+    let h='<span class="kl-title">🌍 지면 관찰자 M의 추론</span>';
+    if(kl.g1) h+='<span class="kl-row"><span class="kl-num">①</span>M′는 B의 빛을 향해 달려갔고, 그래서 <span class="hl-c">B의 빛을 먼저 만났다</span>.</span>';
+    if(kl.g2) h+='<span class="kl-row"><span class="kl-num">②</span>나는 자국 A·B의 <span class="hl-o">정중앙</span>에 서 있고, 두 빛은 <span class="hl-g">나에게 동시에 도착</span>했다.</span>';
+    if(kl.g3) h+='<span class="kl-row"><span class="kl-num">③</span>양쪽 거리가 같고 빛의 속도도 같은데 동시에 왔으니 → <span class="hl-o">번개 A와 B는 동시에 쳤다.</span> <span class="tagY">동시 ✓</span></span>';
+    if(!(kl.g1&&kl.g2&&kl.g3)) h+=wait;
+    el.innerHTML=h;
+  }else{
+    el.className="train";
+    let h='<span class="kl-title">🚄 기차 관찰자 M′의 추론</span>';
+    if(kl.t1) h+='<span class="kl-row"><span class="kl-num">①</span>나는 기차 정중앙에 있으니 자국 A·B까지 <span class="hl-c">거리가 똑같고</span>, 빛의 속도도 양쪽이 같다.</span>';
+    if(kl.t2) h+='<span class="kl-row"><span class="kl-num">②</span>그런데 <span class="hl-c">B의 빛이 먼저 도착</span>했으니 → 번개는 <span class="tagN">동시 ✗</span>, <span class="hl-c">B가 먼저 쳤다고 볼 수밖에 없다.</span> <small style="color:var(--sub)">(얼마나 먼저인지는 아래 📐 심화에서 구할 수 있다)</small></span>';
+    if(kl.t3) h+='<span class="kl-row"><span class="kl-num">③</span>M은 B의 빛에서 멀어지는 쪽으로 움직였고, 그 덕분에 두 빛이 <span class="hl-g">M의 눈앞에서 정확히 겹쳐 만났다</span>. 같은 자리에서 겹친 일이니 나도 인정한다.</span>';
+    if(!(kl.t1&&kl.t2&&kl.t3)) h+=wait;
+    el.innerHTML=h;
+  }
+  // 논리 흐름 강조
+  document.getElementById("fGround").className = "fbox gview"+(frame==="ground"? " active":"");
+  document.getElementById("fTrain").className  = "fbox tview"+(frame==="train"? " active":"");
+}
+
+// ===== 기록 표 =====
+function renderTable(){
+  const pre='<span style="color:var(--sub)">관찰 전</span>';
+  document.getElementById("gS").innerHTML = rec.ground? '동시 <span class="tagY">✓</span>' : pre;
+  document.getElementById("gM2").innerHTML= rec.ground? 'B의 빛이 먼저 도착' : pre;
+  document.getElementById("gM").innerHTML = rec.ground? '두 빛이 동시 도착 <span class="tagY">✓</span>' : pre;
+  document.getElementById("tS").innerHTML = rec.train? '<span class="tagN">동시 ✗</span> — B가 먼저 쳤다' : pre;
+  document.getElementById("tM2").innerHTML= rec.train? 'B의 빛이 먼저 도착' : pre;
+  document.getElementById("tM").innerHTML = rec.train? '두 빛이 동시 도착 <span class="tagY">✓</span>' : pre;
+  const f=document.getElementById("tblFoot");
+  if(rec.ground&&rec.train)
+    f.innerHTML='2·3열(빛이 관찰자와 만나는 일)은 <b>같은 장소에서 겹쳐 일어나는 일이라 두 관점이 완전히 일치</b>한다.<br>갈리는 것은 1열, <b>운동 방향으로 떨어져 일어난 두 번개가 "동시였는가"라는 판단 하나뿐이다.</b>';
+  else if(rec.ground) f.innerHTML='이제 🚄 기차 관점으로 바꿔서 똑같은 상황을 지켜보세요.';
+  else if(rec.train) f.innerHTML='이제 🌍 지면 관점으로 바꿔서 똑같은 상황을 지켜보세요.';
+  else f.innerHTML='🌍 지면 관점과 🚄 기차 관점에서 각각 관찰해 보세요.';
+}
+
+function update(){
+  updateKey(); drawClocks(); renderTable(); renderDerive();
+}
+
+// ===== 루프 =====
+function loop(ts){
+  if(dPrevTs!==null) dAnim+=Math.min((ts-dPrevTs)/1000,0.05);
+  dPrevTs=ts;
+  if(playing){
+    if(lastTs!==null){
+      const D = frame==="ground" ? (L0/(2*gamma*(1-beta)))*1.08 : (L0/2+beta*L0)*1.05;
+      s+=(ts-lastTs)/1000*RATE/D;      // 시뮬 시간 기준 진행 → 빛 속도 화면상 일정
+      if(s>=1){ s=1; playing=false;
+        document.getElementById("btnPlay").textContent="⚡ 번개!";
+        rec[frame]=true; renderTable();
+      }
+    }
+    lastTs=ts;
+  } else lastTs=null;
+  draw();
+  drawDerive();          // 심화 유도 애니메이션 (자동 반복)
+  requestAnimationFrame(loop);
+}
+
+// ===== 이벤트 =====
+function clearFired(){ for(const k in fired) delete fired[k]; }
+function resetAnim(){
+  playing=false; s=0; lastTs=null; started=false; clearFired(); clearLog();
+  kl={g1:false,g2:false,g3:false,t1:false,t2:false,t3:false};
+  document.getElementById("btnPlay").textContent="⚡ 번개!";
+  updateKey();
+}
+document.getElementById("btnPlay").addEventListener("click",function(){
+  if(s>=1){ s=0; clearFired(); clearLog(); }   // 재관찰: 일지도 처음부터
+  playing=!playing;
+  if(playing) started=true;
+  this.textContent=playing? "⏸ 일시정지":"⚡ 번개!";
+});
+document.getElementById("btnReset").addEventListener("click",resetAnim);
+document.getElementById("btnGround").addEventListener("click",function(){
+  frame="ground"; this.className="on-ground";
+  document.getElementById("btnTrain").className="";
+  resetAnim(); updateKey();
+});
+document.getElementById("btnTrain").addEventListener("click",function(){
+  frame="train"; this.className="on-train";
+  document.getElementById("btnGround").className="";
+  resetAnim(); updateKey();
+});
+document.getElementById("dPrev").addEventListener("click",function(){ if(dStep>1){dStep--; renderDerive();} });
+document.getElementById("dNext").addEventListener("click",function(){ if(dStep<5){dStep++; renderDerive();} });
+
+update();
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
