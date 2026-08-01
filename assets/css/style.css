@@ -534,10 +534,6 @@ iframe.viewer-frame{ width:100%; height:100%; border:none; background:#fff; }
 @media (max-width: 640px){
   .site-nav{ position: static; }
   .site-nav .nav-links{ display:none; }
-  /* 실험실(lab)의 "← 메인으로"는 폰에서 숨긴다. 브랜드 글자를 누르면 메인으로
-     가므로 없어도 되고, 좁은 바에 버튼까지 넣으면 복잡해진다.
-     (오른쪽 묶음으로 옮기기 전 .nav-links 시절과 같은 동작을 유지한 것) */
-  body.page-lab .nav-right .nav-btn{ display:none; }
   /* 폰에서는 실험 보기 상단바를 예전처럼 "브랜드 / 버튼 / 영역 태그"가 바 전체에
      고르게 퍼진 모습으로 둔다(조T 선호 — 좁은 화면에선 이게 더 자연스럽다).
      display:contents로 묶음을 없애면 세 항목이 .wrap의 직접 자식처럼 취급돼서
