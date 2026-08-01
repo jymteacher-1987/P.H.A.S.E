@@ -14,10 +14,13 @@
 <nav class="site-nav">
   <div class="wrap">
     <a class="brand" href="index.html"><span class="dot"></span> 가상 물리 실험실</a>
-    <div class="nav-links">
+    <!-- 버튼과 영역 태그를 한 묶음으로 오른쪽에 붙인다. 버튼이 바 가운데
+         혼자 떠 있으면 덩그러니 보인다는 조T 의견. 영역명 길이가 제각각이어도
+         버튼이 좌우로 움직이지 않도록, 태그 너비를 고정해 둔다(style.css 참고). -->
+    <div class="nav-right">
       <a class="nav-btn" href="lab.html">🚪 실험실로</a>
+      <span class="cat-tag" id="expCat"></span>
     </div>
-    <span class="cat-tag" id="expCat"></span>
   </div>
 </nav>
 <div class="viewer-frame-wrap">

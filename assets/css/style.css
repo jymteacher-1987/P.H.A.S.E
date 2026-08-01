@@ -460,7 +460,19 @@ body.page-home .hero > .wrap{ width:100%; }
    실험 제목은 상단바에 넣지 않는다. 제목이 길면 바가 지저분해지고 폰에서
    영역 태그를 2줄로 밀어냈다 — 조T 요청. 제목은 브라우저 탭(document.title)에
    그대로 들어가므로 정보가 사라지는 건 아니다. 다시 넣지 말 것. */
-body.page-view .site-nav .cat-tag{ flex:none; white-space:nowrap; }
+/* 넓은 화면: "실험실로" 버튼과 영역 태그를 오른쪽에 한 묶음으로 붙인다.
+   버튼이 바 가운데 혼자 떠 있으면 덩그러니 보인다는 조T 의견.
+
+   ★ 영역 태그에 고정 너비(min-width)를 주는 게 핵심이다. 영역명이 "열"(1자)부터
+   "역학과 에너지"(6자)까지 제각각이라, 태그가 글자 수만큼만 차지하면 실험을
+   바꿀 때마다 옆의 버튼이 좌우로 움직인다. 태그 너비를 가장 긴 영역명 기준으로
+   고정하고 글자를 가운데 정렬하면 버튼은 항상 같은 자리에 있다.
+   10.5em = 12px 기준 126px (가장 긴 "🚀 역학과 에너지"가 약 119px).
+   영역명을 더 긴 것으로 바꾸거나 추가하면 이 값도 같이 키울 것. */
+body.page-view .nav-right{ display:flex; align-items:center; gap:10px; flex:none; }
+body.page-view .site-nav .cat-tag{
+  flex:none; white-space:nowrap; text-align:center; min-width:10.5em;
+}
 /* 실험 화면은 상단바를 뺀 나머지 높이를 정확히 채운다.
    1px은 .site-nav의 border-bottom 몫. */
 .viewer-frame-wrap{ height: calc(100vh - var(--nav-h) - 1px); background: var(--bg); }
@@ -519,8 +531,13 @@ iframe.viewer-frame{ width:100%; height:100%; border:none; background:#fff; }
 @media (max-width: 640px){
   .site-nav{ position: static; }
   .site-nav .nav-links{ display:none; }
-  /* 단, 실험 보기 화면의 "실험실로"는 유일한 되돌아가기 수단이라 폰에서도 남긴다. */
-  body.page-view .site-nav .nav-links{ display:flex; }
+  /* 폰에서는 실험 보기 상단바를 예전처럼 "브랜드 / 버튼 / 영역 태그"가 바 전체에
+     고르게 퍼진 모습으로 둔다(조T 선호 — 좁은 화면에선 이게 더 자연스럽다).
+     display:contents로 묶음을 없애면 세 항목이 .wrap의 직접 자식처럼 취급돼서
+     space-between이 다시 적용된다. 이때는 태그 고정 너비도 필요 없다
+     (오히려 좁은 폭을 잡아먹어 브랜드 글자가 잘린다). */
+  body.page-view .nav-right{ display:contents; }
+  body.page-view .site-nav .cat-tag{ min-width:0; }
   .hero{ padding: 40px 0 24px; }
   .stat-card{ min-width: 120px; padding:14px 18px; }
   /* 푸터 배치(이메일 왼쪽 / 크레딧 오른쪽 / 관리자 아래 가운데)는
