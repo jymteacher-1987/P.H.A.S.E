@@ -108,59 +108,12 @@
   // 안 오는 경우를 대비해 TIMEOUT을 안전장치로 둔다 — 이게 없으면 자리표시자가
   // 영영 남는다. 아직도 검은 화면이 보이면 GRACE부터 키울 것.
   //
-  // GRACE는 "정지 화면을 만들 시점"이기도 하다. 이 시점에 iframe 안의
-  // 애니메이션을 끊어서 미리보기를 사진처럼 세운다(freezePreview 참고).
+  // 미리보기는 실험이 실제로 돌아가는 모습을 그대로 보여준다. 한때 첫 화면이
+  // 그려진 뒤 iframe 안의 애니메이션을 끊어 사진처럼 세워 본 적이 있는데,
+  // 원운동과 단진동처럼 자취가 천천히 쌓이는 실험은 곡선이 반쯤 그려진 채
+  // 잘려 보여서 되돌렸다. 다시 시도하려거든 그 실험부터 확인할 것.
   const PREVIEW_REVEAL_GRACE = 600;
   const PREVIEW_REVEAL_TIMEOUT = 10000;
-  // 미리보기를 세우는 시점(보여준 뒤 기준). 미리보기가 빈 칸으로 굳으면
-  // FREEZE_DELAY를 키우고, 아직도 움직이면 FREEZE_DELAY_2ND를 키울 것.
-  const FREEZE_DELAY = 500;
-  const FREEZE_DELAY_2ND = 2500;
-
-  // 미리보기를 "정지 화면"으로 만든다.
-  //
-  // 카드 17장이 저마다 애니메이션을 돌리면 목록이 산만하고 노트북 팬이 돈다.
-  // 그래서 첫 화면이 그려진 직후 iframe 안의 움직임을 전부 끊는다.
-  // 실험 파일들이 같은 주소(github.io)에 있고 sandbox에 allow-same-origin이
-  // 있어서 부모 페이지가 안쪽에 접근할 수 있기에 가능한 방법이다.
-  //
-  // 세 가지를 다 끊어야 완전히 선다:
-  //   1. requestAnimationFrame — 캔버스 실험 대부분이 이걸로 돈다
-  //   2. setTimeout/setInterval — 타이머로 돌리는 실험도 있다
-  //   3. CSS animation/transition — 깜빡이는 배지, 도는 아이콘 등
-  //
-  // 실패해도 미리보기가 움직일 뿐 목록은 멀쩡해야 하므로 통째로 try로 감싼다.
-  function freezePreview(iframe) {
-    try {
-      const w = iframe.contentWindow;
-      if (!w) return;
-
-      // (1) 이미 예약돼 있는 타이머를 취소한다.
-      //     브라우저의 타이머 id는 1부터 순서대로 늘어나는 정수라서, 지금
-      //     하나 만들어 최대값을 알아낸 뒤 그 아래를 전부 취소하면 된다.
-      const maxId = w.setTimeout(() => {}, 0);
-      if (typeof maxId === "number") {
-        for (let i = 0; i <= maxId; i++) { w.clearTimeout(i); w.clearInterval(i); }
-      }
-
-      // (2) 앞으로 새로 예약하는 것도 막는다. (1)의 id 방식에만 기대면
-      //     동작이 다른 환경에서 미리보기가 계속 움직일 수 있어서, 함수 자체를
-      //     아무 일도 안 하도록 바꿔 확실히 세운다. 미리보기는 클릭도 막혀
-      //     있고(pointer-events:none) 카드를 누르면 새 페이지가 새로 뜨므로,
-      //     이 iframe의 타이머를 없애도 실험 자체에는 영향이 없다.
-      w.requestAnimationFrame = () => 0;
-      w.cancelAnimationFrame = () => {};
-      w.setTimeout = () => 0;
-      w.setInterval = () => 0;
-
-      // (3) JS와 무관하게 도는 CSS 애니메이션도 끈다.
-      const stop = w.document.createElement("style");
-      stop.textContent = "*,*::before,*::after{animation:none!important;transition:none!important}";
-      w.document.head.appendChild(stop);
-    } catch (e) {
-      // 다른 주소에서 열었을 때(file:// 등)는 접근이 막힌다. 그냥 넘어간다.
-    }
-  }
 
   function loadPreview(box) {
     const src = box.dataset.src;
@@ -178,13 +131,6 @@
       if (revealed) return;
       revealed = true;
       iframe.classList.remove("loading");
-      // 화면을 세우는 시점. 보여주자마자 끊지 않고 조금 기다리는 이유는,
-      // pn-junction(177KB)이나 빛의 3원색처럼 무거운 실험이 첫 그림을 다
-      // 그리기 전에 타이머를 끊어버리면 미리보기가 빈 칸으로 굳기 때문이다.
-      // 그래서 여유를 한 번 주고, 뒤늦게 시작하는 것까지 잡으려고 한 번 더 끊는다.
-      // 스쳐 지나가는 0.5초 정도는 움직이지만 그 뒤로는 사진처럼 정지한다.
-      setTimeout(() => freezePreview(iframe), FREEZE_DELAY);
-      setTimeout(() => freezePreview(iframe), FREEZE_DELAY_2ND);
       if (ph) {
         ph.classList.add("fade-out");
         setTimeout(() => ph.remove(), 320);
