@@ -146,7 +146,9 @@
     .adv{justify-content:center; font-size:.84rem; padding:4px 0;}
     /* 장면: 축소 대신 좌우 스크롤로 글씨 크기 유지 */
     .scene-wrap{overflow-x:auto; -webkit-overflow-scrolling:touch;}
-    #scene{min-width:740px;}
+    /* 캔버스가 780px로 좁아진 만큼 같이 낮춘다(위 JS의 NARROW 설명 참고).
+       560px면 가장 작은 폰을 가로로 돌려도(≈635px) 옆으로 밀 필요가 없다. */
+    #scene{min-width:560px;}
     #eventBanner{font-size:.8rem; white-space:normal; max-width:86%; text-align:center;}
     /* 핵심 한 줄 / 카드: 전체 폭 사용 */
     #keyLine{font-size:.88rem; padding:10px 12px; text-align:left;}
@@ -275,6 +277,14 @@
 <footer>※ 애니메이션 속도는 이해를 돕기 위한 것이며, 시계 값은 이론식으로 계산된 정확한 값입니다.</footer>
 
 <script>
+// ── 세로 안내 오버레이 닫기 ──────────────────────────────────
+// 회전 잠금을 켜 둔 사람을 위한 탈출구라서, 아래 시뮬레이션 코드에서
+// 무슨 오류가 나든 이 버튼만은 살아 있어야 한다. 그래서 스크립트 맨
+// 앞에 둔다 — 뒤에 두면 앞에서 죽었을 때 안내창에 갇혀 버린다.
+document.getElementById("rotSkip").addEventListener("click", () => {
+  document.body.classList.add("rot-ok");
+});
+
 (function(){
 "use strict";
 // ===== 물리 (c = 1) =====
@@ -295,19 +305,61 @@ const gcv = document.getElementById("graph"), gctx = gcv.getContext("2d");
 const banner = document.getElementById("eventBanner");
 
 // ===== 레이아웃 상수 (겹침 방지: 고정 슬롯) =====
-const W = 1020, H = 410;
+//
+// 좁은 화면(폰)에서는 그림의 "가로 폭"만 줄인다. 글자 크기는 캔버스에 px로
+// 박혀 있어서 손대지 않는다 — 대신 캔버스 자체를 좁게 만들고 CSS min-width도
+// 같은 비율로 낮춰서, 화면에 표시될 때의 축소율(≈0.72배)이 넓은 화면과 같아
+// 지도록 맞췄다. 그래서 폰에서도 글씨가 더 작아 보이지 않는다.
+//
+//            넓은 화면        좁은 화면
+//   캔버스     1020px          780px
+//   CSS 최소    740px          560px
+//   축소율      0.725          0.718   ← 거의 같음 = 글씨 크기 유지
+//
+// 이렇게 해야 구형 폰(가로 667px)에서도 옆으로 밀지 않고 한눈에 들어온다.
+// 폰을 돌리면 아래 리스너가 새로고침 없이 다시 계산해서 그린다. 그래서 값들이
+// const가 아니라 let이다 — 값 하나만 바꾸면 나머지가 따라오도록 묶어 두었다.
+const mqNarrow = window.matchMedia("(max-width:700px)");
+
+const H = 410;
 const CLK_Y = 88;                       // 시계 줄
-const SLOT_X = 170, SLOT_R = 510, SLOT_Y = 850;  // 시계 슬롯 x: X | 로켓 | Y
 const ROCK_Y = 218;                     // 로켓 진행선
 const PLAN_Y = 300;                     // 행성 줄
 const BRA_Y = 372;                      // 거리 표시 줄
-const PX_X = 170, PX_Y = 850;           // 행성 X·Y 위치(행성 관점) — 시계 슬롯과 수직 정렬
-const SPAN = PX_Y - PX_X;               // 680 px = 6 광초
+
+let W;                                  // 캔버스 논리 폭
+let SLOT_X, SLOT_Y, SLOT_R;             // 시계 슬롯 x: X | 로켓 | Y
+let PX_X, PX_Y, SPAN;                   // 행성 X·Y 위치와 그 사이 거리(= 6 광초)
+let NOSE_X;                             // 로켓 관점에서 로켓 코가 놓이는 자리
+
+function applyLayout(){
+  const narrow = mqNarrow.matches;
+  W      = narrow ? 780 : 1020;
+  SLOT_X = narrow ? 110 : 170;
+  SLOT_Y = narrow ? 670 : 850;
+  SLOT_R = (SLOT_X + SLOT_Y) / 2;       // 로켓 슬롯은 항상 두 행성의 정중앙
+  PX_X = SLOT_X; PX_Y = SLOT_Y;         // 행성은 시계 슬롯과 수직 정렬
+  SPAN = PX_Y - PX_X;                   // 680px(넓은) / 560px(좁은)
+  // 정지에 가까울 때(감마≈1) 뒤따라오는 행성 Y가 오른쪽으로 밀려나지 않도록
+  // NOSE_X + SPAN 이 W 안에 들어오는 값으로 잡는다.
+  NOSE_X = narrow ? 180 : 290;
+  cv.width = W; cv.height = H;          // HTML의 width/height 속성을 덮어쓴다
+  makeStars();                          // 별도 새 폭에 맞춰 다시 뿌린다
+}
 
 // ===== 별 =====
+// 매번 같은 자리에 찍히도록 고정 시드를 쓴다(폰을 돌려도 별이 튀지 않게).
 const stars = [];
-(function(){ let sd=42; const r=()=> (sd=sd*16807%2147483647)/2147483647;
-  for(let i=0;i<80;i++) stars.push({x:r()*W,y:r()*H,rr:r()*1.3+.3,a:r()*.45+.2});})();
+function makeStars(){
+  stars.length = 0;
+  let sd = 42; const r = () => (sd = sd*16807 % 2147483647) / 2147483647;
+  for(let i=0;i<80;i++) stars.push({x:r()*W, y:r()*H, rr:r()*1.3+.3, a:r()*.45+.2});
+}
+
+applyLayout();
+// 폰을 가로/세로로 돌렸을 때 즉시 다시 그린다. draw()는 아래에서 정의되지만
+// 이 콜백은 나중에 실행되므로 문제없다.
+mqNarrow.addEventListener("change", () => { applyLayout(); draw(); });
 function drawBG(){
   ctx.fillStyle="#0a0f24"; ctx.fillRect(0,0,W,H);
   for(const st of stars){ ctx.globalAlpha=st.a; ctx.fillStyle="#cfd8ff";
@@ -423,7 +475,7 @@ function scenePlanet(){
 function sceneRocket(){
   const tauNow=s*tR();
   const D=SPAN/gamma;
-  const NOSE=290, len=88;
+  const NOSE=NOSE_X, len=88;
   const xX=NOSE-s*D, xY=xX+D;
   const RCX=NOSE-len/2;                 // 로켓(=내 시계) 위치
   // 사건 지점 표시: 두 사건 모두 이 한 점에서 일어난다
@@ -594,10 +646,6 @@ update();
 requestAnimationFrame(loop);
 })();
 
-// 세로 안내 오버레이 닫기 — 회전 잠금을 켜 둔 사람을 위한 탈출구.
-document.getElementById("rotSkip").addEventListener("click", () => {
-  document.body.classList.add("rot-ok");
-});
 </script>
 </body>
 </html>
