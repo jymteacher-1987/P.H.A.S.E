@@ -383,23 +383,17 @@ body.page-home .hero > .wrap{ width:100%; }
 .exp-preview iframe.loading{ opacity:0; }
 /* 미리보기가 뜨기 전 자리표시자. "로딩 중"이라는 뜻이 한눈에 보이도록
    모래시계를 천천히 뒤집는다(예전엔 🧪였는데 기다리는 중인지 알기 어려웠다). */
+/* 미리보기가 뜨기 전 자리표시자.
+   예전에는 돌아가는 모래시계(⏳)를 띄웠는데, 카드 17장이 동시에 돌아가니
+   목록이 어수선하고 "아직 안 됐다"는 인상만 줬다. 지금은 카드 배경과 같은
+   톤의 빈 판이라 눈에 띄지 않고, 그림이 준비되면 조용히 바뀐다.
+   글자도 아이콘도 없으므로 실험 제목이 그만큼 먼저 눈에 들어온다. */
 .exp-preview .ph{
-  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-  font-size:30px; color: var(--text-faint); opacity:.5;
+  position:absolute; inset:0;
+  background: var(--surface-2);
   transition: opacity .3s ease;
-  animation: ph-hourglass 2.4s ease-in-out infinite;
 }
-@keyframes ph-hourglass{
-  0%,  38%{ transform: rotate(0deg); }
-  50%, 88%{ transform: rotate(180deg); }
-  100%    { transform: rotate(360deg); }
-}
-/* 사라질 때는 애니메이션을 꺼 준다 — 돌아가는 채로 두면 어색하다. */
-.exp-preview .ph.fade-out{ opacity:0; animation:none; }
-/* 움직임을 줄여 달라고 설정한 사용자에게는 회전을 끈다(접근성). */
-@media (prefers-reduced-motion: reduce){
-  .exp-preview .ph{ animation:none; }
-}
+.exp-preview .ph.fade-out{ opacity:0; }
 
 @media (max-width: 860px){
   .lab-shell{ grid-template-columns: 1fr; }
