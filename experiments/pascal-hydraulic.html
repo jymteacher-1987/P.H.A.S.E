@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>유압 장치 · 파스칼 법칙</title>
+<style>
+  :root{
+    --bg:#EDF0F3; --card:#FFFFFF; --line:#DCE2E7; --line2:#EDF1F3;
+    --ink:#1A242C; --mute:#6E7C85;
+    --oil:#C08328; --blue:#2A5FA5; --blue-soft:#EAF0F8;
+    --red:#B44F38; --red-soft:#F9EEEB; --dim:#5E6E77;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);
+    font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+    word-break:keep-all;overflow-wrap:break-word;line-break:strict}
+  h1,p,li,summary,label,td,th{text-wrap:pretty}
+  .wrap{max-width:1080px;margin:0 auto;padding:14px 14px 26px;display:grid;gap:12px}
+  .panel{display:grid;gap:12px}
+
+  /* 데스크톱: 위쪽은 하나의 큰 패널(두 단), 아래는 전체 폭 설명 상자 */
+  @media(min-width:880px){
+    body{padding:20px 16px 30px}
+    .wrap{max-width:1160px;padding:0;gap:14px}
+    .panel{padding:20px 24px 22px;gap:0 24px;
+      grid-template-columns:minmax(0,1.36fr) minmax(0,1fr);align-items:stretch;
+      background:var(--card);border:1px solid var(--line);border-radius:16px;
+      box-shadow:0 1px 2px #16303f0f}
+    h1{grid-column:1/-1;margin-bottom:15px;padding-bottom:12px;border-bottom:1px solid var(--line2)}
+    /* 패널 안쪽 테두리는 없애고, 구분은 단 사이 세로선과 옅은 가로선으로만 */
+    .panel>.col>.stage,.panel>.col>.card{background:transparent;border:0;border-radius:0;padding:0}
+    .panel>.col{gap:14px}
+    .panel>.col:last-of-type{padding-left:24px;border-left:1px solid var(--line2);
+      align-content:space-between}
+    /* 왼쪽 단: 그림이 남는 높이를 먹어 오른쪽 단과 하단이 맞는다 */
+    .panel>.col:first-of-type{grid-template-rows:1fr auto;align-content:stretch}
+    .panel>.col>.stage+.card,.panel>.col>.card+.card{
+      border-top:1px solid var(--line2);padding-top:14px}
+    .stage{max-height:none;min-height:0}
+    .badge{left:0;top:0}
+    .wide{padding:14px 16px}
+  }
+  h1{font-size:clamp(18px,3.2vw,24px);font-weight:800;letter-spacing:-.02em}
+  h1 span{color:var(--oil)}
+  h1{color:var(--ink)}
+
+  /* 캔버스 크기는 CSS가 정한다 — 그림이 실제로 차지하는 영역 비율(35.7:23.6) */
+  .stage{background:var(--card);border:1px solid var(--line);border-radius:14px;
+    overflow:hidden;position:relative;
+    aspect-ratio:357/236;min-height:230px;max-height:56vh}
+  canvas{position:absolute;inset:0;display:block;width:100%;height:100%;
+    touch-action:none;cursor:ns-resize}
+  .badge{position:absolute;left:10px;top:10px;font-size:12px;font-weight:600;padding:6px 10px;
+    border-radius:99px;pointer-events:none;background:#F1F4F6;color:var(--dim);
+    border:1px solid var(--line)}
+  .badge.warn{background:var(--red-soft);color:var(--red);border-color:#EBD2CB}
+
+  .col{display:grid;gap:12px;align-content:start}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 14px}
+  .ctl{display:grid;gap:1px;margin-bottom:9px}
+  .ctl:last-of-type{margin-bottom:0}
+  .ctl label{display:flex;justify-content:space-between;font-size:13px}
+  .ctl b{font-family:ui-monospace,Menlo,monospace;color:var(--oil)}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:22px;background:transparent}
+  input[type=range]::-webkit-slider-runnable-track{height:4px;background:var(--line);border-radius:99px}
+  input[type=range]::-moz-range-track{height:4px;background:var(--line);border-radius:99px}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;
+    margin-top:-7px;border-radius:50%;background:#fff;border:3px solid var(--blue);
+    box-shadow:0 1px 3px #0002;cursor:pointer}
+  input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#fff;
+    border:3px solid var(--blue);cursor:pointer}
+
+  /* 슬라이더로 못 바꾸는 값(큰 피스톤 지름·면적비)도 조절 값과 같은 크기로 읽히게 */
+  .fixed{display:grid;gap:6px;margin:4px 0 12px;padding:9px 11px;
+    background:#F7FAFA;border:1px solid var(--line2);border-radius:9px}
+  .fixed div{display:flex;justify-content:space-between;align-items:baseline;font-size:13px}
+  .fixed i{font-style:normal;font-size:11px;color:var(--mute);margin-left:5px}
+  .fixed b{font-family:ui-monospace,Menlo,monospace;color:var(--oil);font-size:15px}
+  .fixed .big b{font-size:19px}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}  .grid div{background:#F7FAFA;border:1px solid var(--line2);border-radius:9px;padding:8px 10px}
+  .grid span{display:block;font-size:11px;color:var(--mute);margin-bottom:2px}
+  .grid strong{font-family:ui-monospace,Menlo,monospace;font-size:17px}
+  /* 거리 칸의 m 환산값 — 일(J)을 구할 때 왜 m를 쓰는지 눈으로 잇기 위한 보조 표기 */
+  .grid em{display:block;font-style:normal;font-weight:400;font-size:11.5px;
+    color:var(--mute);letter-spacing:0;margin-top:1px}
+  .grid .f1{background:var(--red-soft);border-color:#EBD2CB}
+  .grid .f1 strong{color:var(--red)}
+  .grid .f2{background:var(--blue-soft);border-color:#CFDDEE}
+  .grid .f2 strong{color:var(--blue)}
+  .grid .s strong{color:var(--dim)}
+
+  .ratio{margin-top:11px;padding:10px 12px;background:#F5F7F9;border-left:3px solid var(--ink);
+    border-radius:0 9px 9px 0}
+  .ratio .peq{text-align:center;padding:2px 0 11px;margin-bottom:8px;
+    border-bottom:1px solid #DCE2E7;display:block}
+  .ratio .peq b{display:block;font-family:ui-monospace,Menlo,monospace;
+    font-size:30px;font-weight:800;color:var(--ink);letter-spacing:.06em}
+  .ratio .peq span{display:block;margin-top:4px;font-size:12px;font-weight:600;color:var(--mute)}
+  .ratio .peq + div{border-top:0}
+  .ratio div{display:flex;justify-content:space-between;align-items:baseline;
+    font-family:ui-monospace,Menlo,monospace;font-size:15px;padding:3px 0}
+  .ratio div + div{border-top:1px dashed #DCE2E7}
+  .ratio b{font-weight:600;color:var(--mute)}
+  .ratio strong{font-weight:700;color:var(--ink);font-size:16px;letter-spacing:.02em}
+  .ratio .unit{color:#93A1A9;font-size:11.5px}
+  .ratio p{margin-top:8px;padding-top:8px;border-top:1px solid #DCE2E7;
+    font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:var(--mute);line-height:1.7}
+  .ratio p b{color:var(--ink);font-weight:700}
+
+  .row{display:flex;gap:8px;margin-bottom:10px}
+  button{flex:1;font:inherit;font-size:13px;font-weight:600;color:var(--ink);background:#F2F6F6;
+    border:1px solid var(--line);border-radius:9px;padding:9px 6px;cursor:pointer}
+  button.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .foot{margin-top:9px;font-size:11.5px;color:var(--mute);line-height:1.55}
+  .more{margin-top:11px;border-top:1px solid var(--line2);padding-top:11px}
+  .wide .more{margin-top:0;border-top:0;padding-top:0}
+  .more summary{font-size:13px;font-weight:700;color:var(--blue);cursor:pointer;list-style:none;
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
+    padding:11px 14px;background:var(--blue-soft);border:1px solid #CFDDEE;border-radius:10px;
+    user-select:none;-webkit-tap-highlight-color:transparent}
+  .more summary::-webkit-details-marker{display:none}
+  .more summary::after{content:"▾";font-size:14px;font-weight:700;flex:none;
+    transition:transform .25s ease}
+  .more[open] summary{border-radius:10px 10px 0 0}
+  .more[open] summary::after{transform:rotate(180deg)}
+  .more ul{margin-top:0;padding:12px 14px;font-size:12.5px;line-height:1.65;color:#3C4A50;
+    background:#F7FAFC;border:1px solid #CFDDEE;border-top:0;border-radius:0 0 10px 10px}
+  .more li{list-style:none;padding-left:15px;position:relative;margin-bottom:8px}
+  .more li:last-child{margin-bottom:0}
+  .more li::before{content:"";position:absolute;left:2px;top:8px;width:5px;height:5px;
+    border-radius:50%;background:var(--blue)}
+  .more b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <div class="panel">
+
+  <h1>유압 장치 · <span>파스칼 법칙</span></h1>
+
+  <div class="col">
+
+    <div class="stage">
+      <canvas id="cv"></canvas>
+      <div class="badge" id="badge">↕ 작은 피스톤을 아래로 끌어 보세요</div>
+    </div>
+
+    <div class="card">
+      <div class="ctl"><label>작은 피스톤 지름 <b><span id="vd1">4</span> cm</b></label>
+        <input type="range" id="d1" min="1" max="4" step="1" value="3"></div>
+      <div class="fixed">
+        <div class="big"><span>큰 피스톤 지름 <i>고정</i></span><b>12 cm</b></div>
+      </div>
+      <div class="ctl"><label>물체의 무게 <b><span id="vm">1440</span> N</b></label>
+        <input type="range" id="m" min="720" max="5760" step="720" value="1440"></div>
+      <p class="foot">힘 N · 거리 cm · 일 J &nbsp;·&nbsp; 화살표는 힘의 크기 차이를 어림해 보여줌</p>
+    </div>
+
+  </div>
+
+  <div class="col">
+
+    <div class="card">
+      <div class="grid">
+        <div class="f1"><span>작은 피스톤을 누르는 힘 F₁</span><strong id="oF1">—</strong></div>
+        <div class="f2"><span>큰 피스톤이 떠받치는 힘 F₂</span><strong id="oF2">—</strong></div>
+        <div class="s"><span>내려간 거리 s₁</span><strong id="oS1">0.0 cm</strong></div>
+        <div class="s"><span>올라간 거리 s₂</span><strong id="oS2">0.0 cm</strong></div>
+        <div><span>한 일 W₁</span><strong id="oW1">0.00 J</strong></div>
+        <div><span>얻은 일 W₂</span><strong id="oW2">0.00 J</strong></div>
+      </div>
+      <div class="ratio" id="ratio"></div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <button id="reset">피스톤 되돌리기</button>
+      </div>
+    </div>
+
+  </div>
+ </div>
+
+  <div class="card wide">
+    <details class="more">
+      <summary>이 실험의 값은 어떤 조건에서 성립할까?</summary>
+      <ul>
+        <li><b>파스칼 법칙</b> — 밀폐된 액체에 가한 압력은 줄지 않고 액체 곳곳에 그대로 전달됩니다.
+          작은 피스톤이 만든 압력이 큰 피스톤 면에도 똑같이 나타나므로 <b>P₁ = P₂</b>이고,
+          이때 F₁/A₁ = F₂/A₂ 곧 <b>F₁ = F₂·A₁/A₂</b>가 성립합니다.</li>
+        <li><b>누를수록 오차가 생깁니다</b> — 두 피스톤 면의 높이가 같을 때 P₁ = P₂이지만,
+          누르면 작은 피스톤 면은 내려가고 큰 피스톤 면은 올라가 두 면 사이에 높이차 Δh가 생깁니다.
+          정지한 액체에서는 아래쪽 면이 <b>ρgΔh만큼</b> 압력이 크므로 <b>P₁ = P₂ + ρgΔh</b>가 되고,
+          실제로 필요한 힘은 화면의 F₁보다 조금 커집니다. 화면 값은 이 Δh를 0으로 둔 근삿값입니다.
+          이 오차는 물체가 무거울수록 작아집니다. P₂가 커질수록 ρgΔh가 차지하는 비중이 줄기 때문입니다.
+          여기서 내려갈 수 있는 최대 7.8 cm까지 눌러도 그 차이는 2%를 넘지 않습니다.</li>
+        <li><b>일의 원리</b> — 힘은 A₂/A₁ 배로 커지지만 거리는 꼭 그만큼 짧아져 <b>W₁ = W₂</b>가 됩니다.
+          힘에서 본 이득만큼 거리에서 손해를 보므로, 도구로 일을 줄일 수는 없습니다.</li>
+        <li><b>나머지 가정</b> — 천천히 움직여 가속도는 0에 가깝고(준정적), 액체는 비압축성이며 새지 않습니다(A₁s₁ = A₂s₂).
+          마찰과 점성 손실, 피스톤 자체의 무게는 무시하고, 대기압은 양쪽에 똑같이 작용해 상쇄됩니다.
+          F₁은 물체를 겨우 떠받치는 최소 힘이라, 실제로 들어 올리려면 이보다 조금 커야 합니다.</li>
+      </ul>
+    </details>
+  </div>
+
+</div>
+
+<script>
+(function(){
+'use strict';
+const RHO = 870, G = 10, TOL = 0.02;   // ρ, g 는 눌림 범위 계산에만 쓰임
+
+/* 월드(cm) */
+const W = 45, H = 30;
+/* 화면에 담을 영역 — 그림이 실제로 차지하는 범위만 잡아 여백을 줄인다(그림이 커짐) */
+const VX = 2.1, VY = 2.9, VW = 35.7, VH = 23.6;
+const TOP = 8, REST = 13, BASE = 23, TUBE = 3;
+const CX1 = 11, CX2 = 31;
+const PT = 2.0;
+
+const S = { d1:4, d2:12, m:1440, s1:0, view:0, drag:false, v:0 };
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+let px = 1, ox = 0, oy = 0;
+
+function fit(){
+  const box = cv.parentElement;                 // 크기는 .stage(CSS)가 정하고 여기선 읽기만
+  const cw = box.clientWidth, ch = box.clientHeight;
+  if (!cw || !ch) return;
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  /* 좁은 화면에선 글자 최소크기 때문에 라벨이 상대적으로 커진다 → 오른쪽 여유를 더 준다 */
+  const vw = VW + (cw < 520 ? 2.0 : 0.6);
+  px = Math.min(cw / vw, ch / VH);
+  ox = (cw - vw * px) / 2 - VX * px;
+  oy = (ch - VH * px) / 2 - VY * px;
+}
+const X = v => ox + v * px, Y = v => oy + v * px, L = v => v * px;
+const FS = s => Math.max(10, L(s));
+
+/* 물리 */
+const area = d => Math.PI * d * d / 4;
+function phys(){
+  const A1 = area(S.d1), A2 = area(S.d2), r = A2 / A1;
+  const f2 = S.m, f1 = f2 / r, s2 = S.s1 / r;
+  const P = f2 / (A2 / 1e4);            // Pa · 넓이 cm²→m². 같은 높이 가정에서 P₁ = P₂
+  // W[J] = F[N] × s[m] — s는 cm로 들고 있으므로 반드시 /100 (1 J = 1 N·m)
+  return {A1, A2, r, f1, f2, s2, P, W1:f1*(S.s1/100), W2:f2*(s2/100)};
+}
+/* 실제로 범위를 정하는 것은 geoCap(구조) 쪽 — 현재 설정에서는 tolCap이 항상 더 크다.
+   tolCap은 값이 바뀌었을 때 2% 가정이 깨지지 않도록 남겨 둔 안전장치. 설명 문구도 이에 맞춰 둠. */
+const geoCap = () => Math.min(BASE - REST - 2.2, (REST - TOP - .5) * area(S.d2) / area(S.d1));
+const tolCap = () => {
+  const A1 = area(S.d1), A2 = area(S.d2);
+  return 100 * TOL * (S.m / (A2 / 1e4)) / (RHO * G * (1 + A1 / A2));
+};
+const cap = () => Math.min(geoCap(), tolCap());
+
+/* 그리기 */
+function draw(){
+  const p = phys(), v = S.view;
+  const y1 = REST + v, y2 = REST - v / p.r;
+  const l1 = CX1 - S.d1/2, r1 = CX1 + S.d1/2;
+  const l2 = CX2 - S.d2/2, r2 = CX2 + S.d2/2;
+  const tb = BASE + TUBE;
+  ctx.clearRect(0, 0, cv.width, cv.height);
+
+  ctx.save();                                  // 처음 액면(두 쪽이 같은 높이)
+  ctx.setLineDash([L(.5), L(.45)]); ctx.lineWidth = 1.4; ctx.strokeStyle = '#B8C4C8';
+  ctx.beginPath(); ctx.moveTo(X(VX + .6), Y(REST)); ctx.lineTo(X(VX + VW - .6), Y(REST)); ctx.stroke();
+  ctx.restore();
+
+  const g = ctx.createLinearGradient(0, Y(TOP), 0, Y(tb));
+  g.addColorStop(0, '#EBBE73'); g.addColorStop(1, '#C08328');
+  ctx.fillStyle = g;
+  ctx.fillRect(X(l1), Y(y1), L(S.d1), L(tb - y1));
+  ctx.fillRect(X(l2), Y(y2), L(S.d2), L(tb - y2));
+  ctx.fillRect(X(l1), Y(BASE), L(r2 - l1), L(TUBE));
+
+  ctx.strokeStyle = '#55636B'; ctx.lineWidth = Math.max(2.4, L(.3));
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(X(l1), Y(TOP)); ctx.lineTo(X(l1), Y(tb)); ctx.lineTo(X(r2), Y(tb)); ctx.lineTo(X(r2), Y(TOP));
+  ctx.moveTo(X(r1), Y(TOP)); ctx.lineTo(X(r1), Y(BASE)); ctx.lineTo(X(l2), Y(BASE)); ctx.lineTo(X(l2), Y(TOP));
+  ctx.stroke();
+
+  ctx.save();                                  // 처음 액면(같은 높이)
+  ctx.setLineDash([L(.4), L(.4)]); ctx.lineWidth = 1.5; ctx.strokeStyle = '#AEB9C0';
+  ctx.beginPath();
+  ctx.moveTo(X(l1 + .2), Y(REST)); ctx.lineTo(X(r1 - .2), Y(REST));
+  ctx.moveTo(X(l2 + .2), Y(REST)); ctx.lineTo(X(r2 - .2), Y(REST));
+  ctx.stroke(); ctx.restore();
+
+  piston(CX1, S.d1, y1); piston(CX2, S.d2, y2);
+  const bh = block(CX2, y2);
+  /* 화살표 길이는 힘의 '차이'만 어림해 보여준다. 정비례로 그리면 면적비 9배만 돼도
+     F₁ 화살표가 화살표로 안 보일 만큼 짧아져 지수 0.22로 눌러 압축했다. 숫자는 옆에 그대로 있다.
+     F₂ 길이는 무게에 따라 2.0~3.0 cm. 물체가 커질수록 위 여백이 줄어 3.0 cm가 잘리지 않는 한계다. */
+  const len2 = 2.0 + 1.0 * Math.sqrt((S.m - 720) / 5040);      // 무게에 따라 2.0~3.0 cm
+  const len1 = Math.max(.85, len2 * Math.pow(p.f1 / p.f2, .22));
+  arrow(CX1, y1 - PT - .35, -1, p.f1, `F₁`, '#B44F38', r1 + .9, len1);
+  arrow(CX2, y2 - PT - bh - .35, +1, p.f2, `F₂`, '#2A5FA5', null, len2);
+  dist(l1 - 3.0, l1, REST, y1, S.s1, 's₁');
+  dist(l2 - 3.0, l2, REST, y2, p.s2, 's₂');
+  ppoint(CX1, y1, 'P₁'); ppoint(CX2, y2, 'P₂');
+}
+
+/* 압력이 작용하는 점 — 피스톤 아랫면(액체와 닿는 면)에 점과 문자로 표시.
+   두 점은 같은 색으로 두어 P₁ = P₂임을 눈으로 잇는다. */
+function ppoint(cx, y, label){
+  const py = y + .55, col = '#6E4A9E';
+  const r = Math.max(2.4, L(.22));
+  ctx.beginPath(); ctx.arc(X(cx), Y(py), r + 1.5, 0, 7); ctx.fillStyle = '#fff'; ctx.fill();
+  ctx.beginPath(); ctx.arc(X(cx), Y(py), r, 0, 7); ctx.fillStyle = col; ctx.fill();
+  ctx.font = `800 ${FS(1.05)}px ui-monospace,monospace`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.lineJoin = 'round';
+  ctx.lineWidth = Math.max(2.5, L(.28)); ctx.strokeStyle = '#fff';
+  ctx.strokeText(label, X(cx), Y(py) + r + 3);
+  ctx.fillStyle = col; ctx.fillText(label, X(cx), Y(py) + r + 3);
+}
+
+function piston(cx, d, y){
+  const l = cx - d/2, top = y - PT;
+  const gr = ctx.createLinearGradient(X(l), 0, X(l + d), 0);
+  gr.addColorStop(0, '#78858D'); gr.addColorStop(.3, '#E7ECEF'); gr.addColorStop(1, '#6A777F');
+  ctx.fillStyle = gr; ctx.strokeStyle = '#3E4A50'; ctx.lineWidth = Math.max(1.6, L(.16));
+  ctx.fillRect(X(l), Y(top), L(d), L(PT));
+  ctx.strokeRect(X(l), Y(top), L(d), L(PT));
+  ctx.strokeStyle = '#8F9BA1'; ctx.lineWidth = Math.max(1, L(.1));
+  ctx.beginPath();
+  ctx.moveTo(X(l + .15), Y(top + PT * .62)); ctx.lineTo(X(l + d - .15), Y(top + PT * .62));
+  ctx.stroke();
+}
+
+/* 얹힌 물체 — 질량이 클수록 크게, 색은 장치와 구분되는 남보라 */
+function block(cx, y){
+  const bh = 1.0 + S.m / 3600;
+  const bw = Math.min(S.d2 * .85, 2.8 + S.m / 1400);
+  const top = y - PT - bh;
+  const gr = ctx.createLinearGradient(X(cx - bw/2), 0, X(cx + bw/2), 0);
+  gr.addColorStop(0, '#2E3941'); gr.addColorStop(.35, '#4C5A64'); gr.addColorStop(1, '#2A343B');
+  ctx.fillStyle = gr; ctx.strokeStyle = '#1E262C'; ctx.lineWidth = Math.max(1.6, L(.16));
+  ctx.fillRect(X(cx - bw/2), Y(top), L(bw), L(bh));
+  ctx.strokeRect(X(cx - bw/2), Y(top), L(bw), L(bh));
+  return bh;
+}
+
+function arrow(cx, base, dir, f, label, color, lx, len){
+  /* 몸통과 촉을 하나의 다각형으로 그린다 — 굵기·촉 크기를 고정해 짧아도 화살표로 보인다 */
+  const tip  = dir < 0 ? base : base - len;    // 촉 끝
+  const tail = dir < 0 ? base - len : base;    // 꼬리
+  const u = tip > tail ? 1 : -1;
+  const H = Math.min(.95, len * .62), back = tip - u * H;   // 촉 길이(cm) — 몸통이 남게 제한
+  const x = X(cx), t = Math.max(1.6, L(.16)), hw = Math.max(5, L(.52));
+  ctx.fillStyle = color; ctx.strokeStyle = color;
+  ctx.lineJoin = 'round'; ctx.lineWidth = Math.max(1, L(.06));
+  ctx.beginPath();
+  ctx.moveTo(x - t, Y(tail));  ctx.lineTo(x + t, Y(tail));
+  ctx.lineTo(x + t, Y(back));  ctx.lineTo(x + hw, Y(back));
+  ctx.lineTo(x, Y(tip));
+  ctx.lineTo(x - hw, Y(back)); ctx.lineTo(x - t, Y(back));
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.font = `700 ${FS(1.0)}px ui-monospace,monospace`;
+  ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  /* 두 방향 모두 화살표는 base 위쪽 len 구간을 쓴다 */
+  ctx.fillText(`${label} ${f.toFixed(0)} N`, X(lx != null ? lx : cx + .9), Y(base - Math.max(len / 2, .95)));
+}
+
+function dist(x, wall, y0, y1, val, label){
+  if (val < .05) return;
+  const a = Math.min(y0, y1), b = Math.max(y0, y1);
+  ctx.save();                                   // 실린더 벽에서 눈금까지 연결선
+  ctx.setLineDash([L(.35), L(.3)]); ctx.lineWidth = 1.3; ctx.strokeStyle = '#5E6E7755';
+  [a, b].forEach(y => { ctx.beginPath(); ctx.moveTo(X(wall), Y(y)); ctx.lineTo(X(x), Y(y)); ctx.stroke(); });
+  ctx.restore();
+  ctx.strokeStyle = '#5E6E77'; ctx.fillStyle = '#5E6E77'; ctx.lineWidth = Math.max(2.4, L(.26));
+  ctx.beginPath(); ctx.moveTo(X(x), Y(a)); ctx.lineTo(X(x), Y(b)); ctx.stroke();
+  [a, b].forEach(y => {
+    ctx.beginPath(); ctx.moveTo(X(x - .55), Y(y)); ctx.lineTo(X(x + .55), Y(y)); ctx.stroke();
+  });
+  ctx.font = `700 ${FS(1.15)}px ui-monospace,monospace`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+  ctx.fillText(`${label} ${sig(val)}`, X(x), Y(a - .55));
+}
+
+/* 수치 */
+const $ = i => document.getElementById(i);
+const fmtR = r => Math.abs(r - Math.round(r)) < .05 ? String(Math.round(r)) : r.toFixed(1);
+/* 유효숫자 3자리 — 화면의 F × s(m)를 직접 곱해도 표시된 W와 어긋나지 않게 */
+const sig = v => v.toPrecision(3);
+const cmM = c => `${sig(c)} cm<em>= ${sig(c/100)} m</em>`;
+function readout(){
+  const p = phys();
+  $('oF1').textContent = p.f1.toFixed(0) + ' N';
+  $('oF2').textContent = p.f2.toFixed(0) + ' N';
+  $('oS1').innerHTML = cmM(S.s1);
+  $('oS2').innerHTML = cmM(p.s2);
+  $('oW1').textContent = p.W1.toFixed(2) + ' J';
+  $('oW2').textContent = p.W2.toFixed(2) + ' J';
+  const R = fmtR(p.r);
+  $('ratio').innerHTML =
+    `<div class="peq"><b>P = P₁ = P₂</b><span>두 피스톤에 걸리는 압력은 같다</span></div>` +
+    `<div><b>A₁ : A₂</b><strong>1 : ${R}</strong></div>` +
+    `<div><b>F₁ : F₂</b><strong>1 : ${R}</strong></div>` +
+    `<div><b>s₁ : s₂</b><strong>${R} : 1</strong></div>` +
+    `<div><b>W₁ : W₂</b><strong>1 : 1</strong></div>` +
+    `<p>P = F₁/A₁ = F₂/A₂ &nbsp;<span class="unit">1 N/m² = 1 Pa</span><br>` +
+    `W₁ = F₁ × s₁ &nbsp; W₂ = F₂ × s₂ &nbsp;<span class="unit">1 J = 1 N·m, 거리는 m로</span><br>` +
+    `힘이 ${R}배면 거리는 1/${R}배 → <b>일은 그대로</b></p>`;
+}
+
+/* 입력 */
+const D1 = [2, 3, 4, 6];                    // 12 cm 의 약수 → 면적비 36·16·9·4
+/* 조건이 바뀌면 이전 조건에서 눌러 둔 s₁은 의미가 없다 → 늘 처음 위치에서 다시 시작 */
+function restore(msg){
+  const moved = S.s1 > .05;
+  S.s1 = 0; S.v = 0;
+  if (moved && msg) flash(msg, 1600);
+  readout();
+}
+$('d1').oninput = e => {
+  S.d1 = D1[+e.target.value - 1];
+  $('vd1').textContent = S.d1;
+  restore('지름이 바뀌었습니다 · 피스톤을 처음 위치로');
+};
+$('m').oninput = e => {
+  S.m = +e.target.value; $('vm').textContent = S.m;
+  restore('무게가 바뀌었습니다 · 피스톤을 처음 위치로');
+};
+
+let gy = 0, gs = 0, lt = 0, ls = 0;
+cv.addEventListener('pointerdown', e => {
+  S.drag = true; cv.setPointerCapture(e.pointerId);
+  gy = e.clientY; gs = S.s1; lt = performance.now(); ls = S.s1;
+});
+cv.addEventListener('pointermove', e => {
+  if (!S.drag) return;
+  S.s1 = Math.max(0, Math.min(cap(), gs + (e.clientY - gy) / px));
+  const t = performance.now(), dt = (t - lt) / 1000;
+  if (dt > .012){ S.v = Math.max(S.v, Math.abs(S.s1 - ls) / dt); lt = t; ls = S.s1; }
+  readout();
+});
+['pointerup','pointercancel'].forEach(t => cv.addEventListener(t, () => S.drag = false));
+$('reset').onclick = () => { S.s1 = 0; readout(); };
+
+/* 루프 */
+const badge = $('badge'); let used = false;
+let fMsg = '', fWarn = false, fUntil = 0;      // 잠깐 떴다 사라지는 안내(기록 실패·피스톤 복귀 등)
+function flash(msg, ms, warn){ fMsg = msg; fWarn = !!warn; fUntil = performance.now() + ms; }
+(function tick(){
+  S.view += (S.s1 - S.view) * .25; S.v *= .93;
+  if (S.drag) used = true;
+  if (performance.now() < fUntil) badge.className = fWarn ? 'badge warn' : 'badge', badge.textContent = fMsg;
+  else if (!used) badge.className = 'badge', badge.textContent = '↕ 작은 피스톤을 아래로 끌어 보세요';
+  else if (S.s1 >= cap() - .05) badge.className = 'badge warn', badge.textContent = '실린더 구조상 여기까지만 내려갑니다';
+  else if (S.v > 22) badge.className = 'badge warn', badge.textContent = '천천히 누르세요';
+  else badge.className = 'badge', badge.textContent = `s₁ ${S.s1.toFixed(2)} cm`;
+  draw(); requestAnimationFrame(tick);
+})();
+addEventListener('resize', fit);
+if (window.ResizeObserver) new ResizeObserver(fit).observe(cv.parentElement);
+fit(); readout();
+})();
+</script>
+</body>
+</html>

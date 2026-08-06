@@ -270,6 +270,20 @@
         "관찰자",
         "사고실험"
       ]
+    },
+    {
+      "id": "pascal-hydraulic",
+      "title": "유압 장치와 파스칼 법칙",
+      "category": "mechanics",
+      "description": "작은 피스톤을 눌러 무거운 물체를 들어 올리며, 압력이 그대로 전달되어 힘은 커지지만 일은 그대로임을 확인합니다.",
+      "path": "experiments/pascal-hydraulic.html",
+      "date": "2026-08-07",
+      "tags": [
+        "파스칼 법칙",
+        "압력",
+        "유압 장치",
+        "일의 원리"
+      ]
     }
   ]
 }
