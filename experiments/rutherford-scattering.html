@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>러더퍼드 산란 실험</title>
+<script src="https://cdn.jsdelivr.net/npm/p5@1.9.4/lib/p5.min.js"></script>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --line:#30363d;
+    --ink:#e6edf3; --dim:#98a2ad;
+    --pos:#ff7a5c; --neg:#58a6ff;
+    --warn:#f0883e; --ok:#3fb950;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Pretendard","Malgun Gothic",system-ui,-apple-system,sans-serif;
+    line-height:1.75; word-break:keep-all; overflow-wrap:break-word;
+  }
+  .wrap{max-width:980px; margin:0 auto; padding:22px 16px 60px}
+  h1{font-size:clamp(20px,5.2vw,27px); margin:0 0 4px; letter-spacing:-.5px}
+  .sub{color:var(--dim); font-size:clamp(12.5px,3.3vw,14.5px); margin:0 0 16px}
+
+  #sketch canvas{max-width:100%; height:auto; border-radius:10px; display:block; cursor:pointer}
+
+  .state{margin-top:11px; background:var(--panel); border:1px solid var(--line);
+         border-left:3px solid var(--warn); border-radius:9px; padding:12px 15px;
+         font-size:clamp(12.8px,3.4vw,14px); line-height:1.65}
+  .state b{color:var(--warn)}
+
+  .legend{margin:11px 0 0; font-size:12.2px; color:var(--dim)}
+  .legend .ln{display:flex; flex-wrap:wrap; gap:6px 15px; margin-bottom:5px; align-items:center}
+  .legend i{display:inline-block; width:11px; height:11px; border-radius:50%; margin-right:5px; vertical-align:-1px}
+  .chip{display:inline-block; width:15px; height:15px; border-radius:50%; color:#fff;
+        font-size:11px; line-height:15px; text-align:center; font-weight:700; margin-right:5px; vertical-align:-3px}
+
+  .btnrow{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px}
+  .btnrow button{flex:1 1 128px}
+  button{background:#252c36; color:var(--ink); border:1px solid var(--line);
+         padding:11px 14px; border-radius:8px; font-size:13.5px; cursor:pointer;
+         font-family:inherit; min-height:44px}
+  button:hover{background:#30373f; border-color:#8b949e}
+  button.on{background:var(--ok); border-color:var(--ok); color:#04260f; font-weight:700}
+  button.sel{background:#3a2a20; border-color:var(--warn); color:#ffca9a; font-weight:700}
+
+  .note{margin-top:12px; font-size:12.4px; color:var(--dim); line-height:1.65;
+        border-left:2px solid var(--line); padding-left:11px}
+
+  .docs{margin-top:28px}
+  details{background:var(--panel); border:1px solid var(--line); border-radius:9px;
+          margin:9px 0; overflow:hidden}
+  summary{padding:14px 16px; cursor:pointer; font-weight:700;
+          font-size:clamp(14px,3.8vw,15.5px); list-style:none; display:flex; gap:10px; align-items:flex-start}
+  summary::-webkit-details-marker{display:none}
+  summary::before{content:"＋"; color:var(--warn); flex:0 0 auto; line-height:1.45}
+  details[open] summary::before{content:"－"}
+  details[open] summary{border-bottom:1px solid var(--line)}
+  .body{padding:14px 17px 17px}
+  .body > p{margin:0 0 10px} .body > p:last-child{margin:0}
+  p,li{font-size:clamp(13.5px,3.5vw,14.6px); color:#c9d1d9}
+
+  ul.k{list-style:none; padding:0; margin:12px 0 0}
+  ul.k li{margin:0 0 13px; padding-left:1.85em; text-indent:-1.85em}
+  ul.k li:last-child{margin:0}
+  ul.k .n{display:inline-block; width:1.85em; text-indent:0; font-weight:700; color:var(--warn)}
+  ul.k .h{color:var(--ink); font-weight:700}
+
+  table.d{width:100%; border-collapse:collapse; font-size:13.2px; margin:11px 0 0}
+  table.d th,table.d td{border:1px solid var(--line); padding:7px 10px; text-align:left}
+  table.d th{background:#1c222b; color:var(--dim); font-weight:600}
+  table.d td:last-child{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap}
+
+  .pos{color:var(--pos); font-weight:700}
+  .neg{color:var(--neg); font-weight:700}
+
+  .src{margin-top:24px; padding-top:12px; border-top:1px solid var(--line);
+       font-size:12.1px; color:var(--dim); line-height:1.7}
+  .src a{color:#7aa7d8}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>러더퍼드 산란 실험</h1>
+  <p class="sub">같은 알파입자를 톰슨 모형과 러더퍼드 모형에 동시에 쏘아 비교합니다</p>
+
+  <div id="sketch"></div>
+
+  <div class="state" id="state"></div>
+
+  <div class="legend">
+    <div class="ln">
+      <span><span class="chip" style="background:#ff7a5c">＋</span>알파입자</span>
+      <span><span class="chip" style="background:#ff5a3c">＋</span>원자핵 · 양전하</span>
+      <span><span class="chip" style="background:#58a6ff">－</span>전자</span>
+    </div>
+    <div class="ln">
+      <span>궤적 색 = 꺾인 각도</span>
+      <span><i style="background:#5adc8c"></i>1° 미만 (거의 그대로 통과)</span>
+      <span><i style="background:#ffd250"></i>1~10°</span>
+      <span><i style="background:#ff8c3c"></i>10~90°</span>
+      <span><i style="background:#ff5050"></i>90° 넘게 되튕김</span>
+    </div>
+  </div>
+
+  <div class="btnrow">
+    <button data-v="0">원자 전체 보기</button>
+    <button data-v="1">핵 근처 확대</button>
+  </div>
+  <div class="btnrow">
+    <button id="bHead">핵 정조준 1발</button>
+    <button id="bAuto">연속 발사</button>
+    <button id="bTrail">궤적 : 켜짐</button>
+    <button id="bReset">초기화</button>
+  </div>
+
+  <p class="note">전자는 개수와 배치를 단순하게 그린 개념도입니다. 금의 실제 전자는 79개입니다. 원자핵도 실제 비율(0.04픽셀)로는 보이지 않아 크게 그렸고, 그래서 <b>핵 그림 안을 겨누면 핵에 맞은 것으로 계산</b>합니다.</p>
+
+  <div class="docs">
+
+    <details>
+      <summary>톰슨 모형으로는 설명할 수 없었다</summary>
+      <div class="body">
+        <p>톰슨의 <b>푸딩 모형</b>에서 원자는 <span class="pos">(+)전하</span>가 <b>전체에 고르게 퍼진 젤리</b>이고, 그 속에 <span class="neg">전자</span>가 건포도처럼 박혀 있습니다.</p>
+        <p>전하가 넓게 퍼져 있으면 알파입자가 받는 힘이 <b>세질 수 없습니다.</b> 안으로 들어갈수록 알파입자를 감싸는 전하가 줄어들어, 중심으로 갈수록 오히려 힘이 0에 가까워지기 때문입니다. 이 모형이 예측하는 최대 산란각은 <b>0.03°</b>에 불과합니다.</p>
+        <p>그런데 1909년, <b>알파입자가 90°가 넘게 꺾여 되돌아왔습니다.</b> 푸딩 모형으로는 있을 수 없는 일이었습니다.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>핵을 도입하니 설명됐다</summary>
+      <div class="body">
+        <p>퍼져 있던 <span class="pos">(+)전하</span>와 <b>질량 대부분</b>을 중심의 아주 작은 덩어리에 몰아넣었습니다. 이것이 <b>원자핵</b>이고, 크기는 원자의 약 1만분의 1입니다.</p>
+        <ul class="k">
+          <li><span class="n">1</span><span class="h">가까이 갈수록 미는 힘이 급격히 커진다</span><br>
+            전하가 한 점에 모여 있으면 알파입자가 아무리 가까이 가도 그 전하가 고스란히 앞을 막고 있어 힘이 계속 커집니다. 전기력은 거리가 절반이 되면 4배가 됩니다.</li>
+          <li><span class="n">2</span><span class="h">핵이 무거워서 밀리지 않는다</span><br>
+            원자 질량의 <b>99.98%</b>가 핵에 있고, 금 원자핵은 알파입자보다 약 <b>49배</b> 무겁습니다. 만약 핵이 알파입자보다 가벼웠다면 오히려 밀려나 버려서, 90°가 넘게 되튕기는 일 자체가 일어날 수 없습니다.</li>
+          <li><span class="n">3</span><span class="h">둘 다 (+)전하라서 서로 밀어낸다</span><br>
+            알파입자와 금 원자핵은 모두 <span class="pos">(+)전하</span>를 띠고 있습니다. 서로 닿지도 않은 채 <b>전기적인 척력</b>만으로 알파입자의 방향이 바뀝니다.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary>그런데 러더퍼드 모형에서도 대부분은 그냥 통과한다</summary>
+      <div class="body">
+        <p>핵을 도입해도 <b>거의 모든 알파입자는 그대로 지나갑니다.</b> 핵이 워낙 작아서 대부분은 근처에도 가지 못하기 때문입니다.</p>
+        <p><b>이 시뮬레이션</b>에서 원자 하나를 향해 1만 발을 쏘면 이렇게 나옵니다. (화면과 같은 평면에서, 지나가는 높이를 고르게 잡은 경우)</p>
+        <table class="d">
+          <tr><th>꺾인 각도</th><th>발수</th></tr>
+          <tr><td>1° 미만 — 거의 그대로 통과</td><td>약 9,739발</td></tr>
+          <tr><td>1 ~ 10°</td><td>약 235발</td></tr>
+          <tr><td>10 ~ 90°</td><td>약 24발</td></tr>
+          <tr><td>90° 넘게 되튕김</td><td>2발 안팎</td></tr>
+        </table>
+        <p style="margin-top:11px; font-size:13px; color:var(--dim)">위 값을 실제 실험 확률로 읽으면 안 됩니다. 실제 빔은 <b>넓이로 들어오므로</b> 확률이 지나가는 높이가 아니라 <b>넓이(2πb·db)에 비례</b>하고, 그래서 크게 꺾일 확률이 훨씬 낮습니다. 게다가 금박에는 원자층이 수천 겹 겹쳐 있습니다. 러더퍼드가 보고한 <b>2만 발에 1발</b>은 금박 전체를 지날 때의 값이라 위 표와 직접 비교할 수 없습니다.</p>
+        <p>원자 바깥쪽(b가 클 때)에서는 두 모형의 차이가 거의 없습니다. 예를 들어 원자 반지름의 93% 지점을 지날 때 톰슨 모형은 0.027°, 러더퍼드 모형은 0.028°로 <b>사실상 같습니다.</b></p>
+        <p><b>차이는 오직 핵에 바짝 붙었을 때만 납니다.</b> 톰슨 모형은 중심으로 갈수록 힘이 0이 되지만, 러더퍼드 모형은 그때 힘이 폭발적으로 커집니다. 그래서 <b>“대부분 통과, 아주 가끔 되튕김”</b>이라는 실제 관측이 설명됩니다.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>전자는 알파입자를 휘게 하지 못한다</summary>
+      <div class="body">
+        <p>알파입자는 <span class="pos">(+)전하</span>, 전자는 <span class="neg">(−)전하</span>이므로 둘은 서로 <b>끌어당깁니다.</b> 핵과는 반대로 잡아당기는 셈인데, 그런데도 계산에서 전자를 빼는 이유는 <b>질량 차이</b> 때문입니다.</p>
+        <p>알파입자는 전자보다 약 <b>7,300배</b> 무겁습니다. 볼링공이 탁구공 옆을 지나가는 것과 같아서, 정면으로 부딪히더라도 알파입자의 방향은 최대 <b>0.008°</b>밖에 바뀌지 않습니다.</p>
+        <p>금 원자에는 전자가 <b>79개</b>(K 2, L 8, M 18, N 32, O 18, P 1) 있지만 부딪히는 방향이 제각각이라 서로 상쇄되어, 여러 번 겪어도 누적되는 편향은 <b>0.1° 안팎</b>에 그칩니다.</p>
+        <p>전자가 아무 일도 하지 않는다는 뜻은 아닙니다. 전자는 알파입자의 <b>에너지를 조금씩 빼앗고 아주 작은 각도로 휘게 하는 데는 기여합니다.</b> 다만 <b>90°가 넘는 되튕김은 결코 만들어 낼 수 없습니다.</b></p>
+        <p>즉 <b>큰 각도 산란을 좌우하는 것은 오직 (+)전하가 어떻게 분포하느냐</b>이고, 두 모형의 차이도 거기서 갈립니다. 그래서 표준적인 산란 계산과 마찬가지로 이 시뮬레이션에서도 전자를 제외했습니다.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>실험의 의의</summary>
+      <div class="body">
+        <ul class="k">
+          <li><span class="n">①</span><span class="h">원자핵의 발견</span><br>
+            원자 중심에 작고 무거운 <span class="pos">(+)덩어리</span>가 있다는 것이 밝혀졌고, 여기서 핵물리학이 시작됩니다.</li>
+          <li><span class="n">②</span><span class="h">원자는 대부분 빈 공간</span><br>
+            원자를 지름 100 m 경기장으로 키우면 핵은 한가운데 놓인 지름 0.7 cm 구슬 하나에 지나지 않습니다.</li>
+          <li><span class="n">③</span><span class="h">새로운 탐구 방법의 탄생</span><br>
+            입자를 쏘아 튕겨 나오는 각도로 내부 구조를 알아내는 방식으로, 오늘날 입자가속기가 쓰는 방법이 그대로 이것입니다.</li>
+          <li><span class="n">④</span><span class="h">모형은 증거로 바뀐다</span><br>
+            예상과 어긋난 관측 하나가 단서가 되어, 널리 받아들여지던 모형이 무너지고 새 모형이 자리 잡았습니다. 과학이 어떻게 작동하는지 보여주는 사례입니다.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary>러더퍼드 모형의 한계</summary>
+      <div class="body">
+        <p>러더퍼드 모형은 <b>원자가 왜 안정한지를 설명하지 못합니다.</b> 어느 쪽을 택해도 막히기 때문입니다.</p>
+        <ul class="k">
+          <li><span class="n">·</span><span class="h">전자가 가만히 있으면</span> — (+)핵이 끌어당기므로 그대로 빨려 들어갑니다. 전기력만으로는 전자가 멈춰 있을 안정한 자리가 없습니다.</li>
+          <li><span class="n">·</span><span class="h">전자가 핵 주위를 돌면</span> — 원운동은 가속운동이므로 <b>전자기파를 내놓으며 에너지를 잃습니다.</b> 계산하면 약 <b>10<sup>-11</sup>초</b> 만에 핵으로 떨어져야 합니다.</li>
+        </ul>
+        <p style="margin-top:12px">그런데 실제 원자는 멀쩡히 안정합니다. 러더퍼드 자신도 1911년 논문에서 안정성 문제는 <b>다루지 않고 남겨두었습니다.</b> 이 한계가 <b>보어 모형(1913)</b>을 거쳐 <b>양자역학</b>으로 이어집니다.</p>
+        <p style="font-size:13px; color:var(--dim)">참고 · 1911년 논문은 중심 전하만 다루었을 뿐 전자가 어떻게 놓이고 움직이는지는 정하지 않았습니다. 위 그림처럼 <b>전자가 핵 주위를 도는 표현은 이후에 자리 잡은 것</b>이고, K·L·M 같은 전자껍질도 보어 모형에서 나온 개념입니다.</p>
+      </div>
+    </details>
+
+  </div>
+
+  <div class="src">
+    출처 ·
+    <a href="https://www.chemteam.info/Chem-History/Rutherford-1911/Rutherford-1911.html" target="_blank" rel="noopener">러더퍼드 1911년 논문 원문</a> ·
+    <a href="https://www.aps.org/apsnews/2006/05/rutherford-discovery-atomic-nucleus" target="_blank" rel="noopener">APS</a>
+  </div>
+</div>
+
+<script>
+/* ==========================================================
+   러더퍼드 산란 시뮬레이션 (p5.js)
+
+   단위 : 원자 반지름 R = 1 (실제 1.0e-10 m)
+          알파입자 질량 = 1,  입사 속도 = 1  ->  운동에너지 E = 0.5
+
+   D = 4.55e-4 R : 5 MeV 알파입자가 금 원자핵에 정면으로 부딪힐 때
+                   가장 가까이 갈 수 있는 거리 (4.55e-14 m)
+   힘 : F = K/r^2  (러더퍼드),   F = K r/R^3  (톰슨, 구 안)
+        K = D/2
+
+   ※ 힘을 부풀린 값은 하나도 없다. 두 모형 모두 실제 값으로 계산한다.
+     보기 배율만 바꿔서 핵 근처를 들여다본다.
+   ========================================================== */
+
+const R_ATOM = 1;
+const V0     = 1;
+const D      = 4.55e-4;
+const K      = D / 2;              // b = D/2 이면 정확히 90도
+
+// 보기 : 그림 영역 세로 절반이 담는 실제 거리
+const VIEWS = [
+  { name:'원자 전체', viewR:1.15   },
+  { name:'핵 근처',   viewR:1.6e-3 }     // 원자 단면의 약 39만분의 1
+];
+let viewIdx = 0;
+
+const HEAD = 44, FOOT = 32;
+const POS = [255,122,92], POS_CORE = [255,90,60], NEG = [90,170,255];
+
+let particles = [], LAY = null;
+let showTrail = true, autoFire = false, lastFire = 0;
+let hoverPx = null, hoverB = null, elecPhase = 0;
+const NUC_R = 8;                     // 원자 전체 보기에서 그리는 원자핵 반지름(px)
+
+/* 화면에서 겨눈 위치를 실제 충돌 계수 b 로 바꾼다.
+   원자핵은 실제 비율(0.04px)로는 보이지 않아 8px 로 크게 그려 두었다.
+   그래서 그 원 안을 겨누면 "핵에 맞은 것"으로 보고 실제 규모(±0.6D)로 환산한다.
+   이렇게 해야 크게 그린 핵을 클릭했을 때 실제로 튕겨 나간다. */
+function pxToB(dy, S) {
+  if (view().viewR > 0.3 && Math.abs(dy) <= NUC_R) {
+    let t = dy / NUC_R;
+    if (Math.abs(t) < 0.02) t = (t < 0 ? -0.02 : 0.02);    // 정면충돌 특이점 회피
+    return t * 0.6 * D;
+  }
+  return dy / S;
+}
+let stats = { thomson:{n:0,pass:0,big:0,max:0}, rutherford:{n:0,pass:0,big:0,max:0} };
+
+// 그림에 그리는 대표 전자 [개수, 반지름]
+// 실제 금은 전자가 79개(K2 L8 M18 N32 O18 P1)지만, 전부 그리면 원자 속이 빽빽해 보여
+// "원자는 대부분 빈 공간"이라는 이 실험의 결론이 가려진다. 그래서 바깥쪽 일부만 그린다.
+/* 참고 — 러더퍼드 1911년 논문은 중심 전하만 다루었고 전자의 운동은 가정하지 않았다.
+   원문 : "a charge ±Ne at its centre surrounded by a sphere of electrification
+   ... supposed uniformly distributed throughout a sphere of radius R."
+   여기서 전자를 궤도로 그리는 것은 교과서에서 널리 쓰는 표현을 따른 것이며,
+   그 사실은 본문 설명에 밝혀 두었다. */
+
+// 원판 위에 고르게 흩뿌린 점을 만든다 (해바라기 배열)
+function spread(n, rMax, phase) {
+  const a = [], g = Math.PI * (3 - Math.sqrt(5));      // 황금각
+  for (let i = 0; i < n; i++) {
+    const r = rMax * Math.sqrt((i + 0.5) / n), t = i * g + phase;
+    a.push([Math.cos(t) * r, Math.sin(t) * r]);
+  }
+  return a;
+}
+const JELLY_POS = spread(16, 0.86, 0.9);      // 톰슨 : 구 전체에 퍼진 (+)전하
+const JELLY_NEG = spread(7,  0.78, 0.4);      // 톰슨 : 그 속에 박힌 전자
+
+function view() { return VIEWS[viewIdx]; }
+
+function computeLayout() {
+  const cw = Math.max(260, Math.min(document.getElementById('sketch').clientWidth, 980));
+  if (cw >= 700) {
+    const h = 500;
+    return { w:cw, h:h, stacked:false,
+             panels:[{ox:0,oy:0,pw:cw/2,ph:h}, {ox:cw/2,oy:0,pw:cw/2,ph:h}] };
+  }
+  const ph = Math.round(Math.max(300, Math.min(cw * 1.0, 370)));
+  return { w:cw, h:ph*2, stacked:true,
+           panels:[{ox:0,oy:0,pw:cw,ph:ph}, {ox:0,oy:ph,pw:cw,ph:ph}] };
+}
+function plotOf(pn) {
+  const h = pn.ph - HEAD - FOOT;
+  return { cy: pn.oy + HEAD + h/2, h: h, S: (h/2) / view().viewR };
+}
+
+function setup() {
+  LAY = computeLayout();
+  createCanvas(LAY.w, LAY.h).parent('sketch');
+  bindUI();
+  refreshState();
+}
+function windowResized() { LAY = computeLayout(); resizeCanvas(LAY.w, LAY.h); }
+
+// ---------------------------------------------------------- 물리
+function accel(x, y, model) {
+  const r = Math.max(Math.sqrt(x*x + y*y), 1e-14);
+  let a;
+  if (model === 'rutherford')  a = K / (r*r);                 // 한 점에 모인 전하
+  else if (r >= R_ATOM)        a = K / (r*r);                 // 퍼진 전하 : 구 바깥
+  else                         a = K * r / (R_ATOM**3);       // 퍼진 전하 : 구 안
+  return [a*x/r, a*y/r];
+}
+function advance(p, dt) {
+  let left = dt, guard = 0;
+  while (left > 1e-18 && guard++ < 20000) {
+    const [ax, ay] = accel(p.x, p.y, p.model);
+    const r  = Math.max(Math.sqrt(p.x*p.x + p.y*p.y), 1e-14);
+    const v  = Math.max(Math.sqrt(p.vx*p.vx + p.vy*p.vy), 1e-14);
+    const am = Math.max(Math.sqrt(ax*ax + ay*ay), 1e-18);
+    const h  = Math.min(0.02*r/v, 0.15*Math.sqrt(r/am), dt, left);
+    p.x += p.vx*h + 0.5*ax*h*h;                               // 속도 베를레 적분
+    p.y += p.vy*h + 0.5*ay*h*h;
+    const [bx, by] = accel(p.x, p.y, p.model);
+    p.vx += 0.5*(ax+bx)*h;  p.vy += 0.5*(ay+by)*h;
+    left -= h;
+  }
+}
+function fire(b) {
+  const start = Math.max(15*Math.abs(b), 15*D, 1.6*view().viewR);
+  ['thomson','rutherford'].forEach(function(model){
+    particles.push({ model:model, x:-start, y:b, vx:V0, vy:0,
+                     start:start, trail:[], done:false, theta:0, age:0 });
+    stats[model].n++;
+  });
+}
+
+// ---------------------------------------------------------- 그리기 도우미
+function plusMark(x, y, s, w) { strokeWeight(w); strokeCap(ROUND); line(x-s,y,x+s,y); line(x,y-s,x,y+s); }
+function minusMark(x, y, s, w){ strokeWeight(w); strokeCap(ROUND); line(x-s,y,x+s,y); }
+
+function draw() {
+  background(13, 17, 23);
+  elecPhase += 0.007;
+
+  const vR = view().viewR;
+  if (autoFire && millis() - lastFire > 120) {
+    fire(random(-1, 1) * vR * 0.95);      // 보이는 범위 전체에 고르게
+    lastFire = millis();
+  }
+
+  for (const p of particles) {
+    if (p.done) continue;
+    const r = Math.sqrt(p.x*p.x + p.y*p.y);
+    advance(p, Math.max(vR/55, r/40) / V0);
+    const t = p.trail;
+    if (!t.length || Math.abs(p.x-t[t.length-1][0]) + Math.abs(p.y-t[t.length-1][1]) > vR/300)
+      t.push([p.x, p.y]);
+    if (++p.age > 1200 || Math.sqrt(p.x*p.x + p.y*p.y) > p.start) {
+      p.done = true;
+      p.theta = Math.abs(degrees(Math.atan2(p.vy, p.vx)));
+      const s = stats[p.model];
+      if (p.theta > 90) s.big++;
+      if (p.theta < 1)  s.pass++;
+      s.max = Math.max(s.max, p.theta);
+    }
+  }
+  if (!showTrail) particles = particles.filter(function(p){ return !p.done; });
+  if (particles.length > 200) particles.splice(0, particles.length - 200);
+
+  updateHover();
+  drawPanel(LAY.panels[0], 'thomson',    '톰슨 모형',     '(+)전하가 원자 전체에 퍼져 있다');
+  drawPanel(LAY.panels[1], 'rutherford', '러더퍼드 모형', '(+)전하와 질량이 중심의 핵에 뭉쳐 있다');
+
+  stroke(48,54,61); strokeWeight(2);
+  if (LAY.stacked) line(0, LAY.panels[1].oy, LAY.w, LAY.panels[1].oy);
+  else             line(LAY.panels[1].ox, 0, LAY.panels[1].ox, LAY.h);
+}
+
+function panelAt(mx, my) {
+  for (const pn of LAY.panels)
+    if (mx >= pn.ox && mx < pn.ox+pn.pw && my >= pn.oy && my < pn.oy+pn.ph) return pn;
+  return null;
+}
+function updateHover() {
+  hoverPx = null; hoverB = null;
+  const pn = panelAt(mouseX, mouseY);
+  if (!pn) return;
+  const pl = plotOf(pn);
+  const dy = mouseY - pl.cy;
+  if (Math.abs(dy) > pl.h/2) return;
+  hoverPx = dy;                       // 조준선은 마우스가 있는 자리에 그린다
+  hoverB  = pxToB(dy, pl.S);          // 예상 각도는 환산한 값으로 구한다
+}
+
+function drawPanel(pn, model, title, desc) {
+  const pl = plotOf(pn), S = pl.S, vR = view().viewR;
+  const isR = (model === 'rutherford');
+  const wide = (vR > 0.3);            // 원자 전체가 보이는 배율인가
+
+  push();
+  drawingContext.save();
+  drawingContext.beginPath();
+  drawingContext.rect(pn.ox, pn.oy + HEAD, pn.pw, pl.h);
+  drawingContext.clip();
+  translate(pn.ox + pn.pw/2, pl.cy);
+
+  if (isR) {
+    if (wide) {
+      // 핵 주위를 도는 전자 2개. 궤도 반지름은 톰슨 쪽 원자와 같은 1.0R 로 두어
+      // 두 모형의 원자 크기를 맞춘다.
+      noFill(); stroke(NEG[0],NEG[1],NEG[2],95); strokeWeight(1.3);
+      drawingContext.setLineDash([6,6]);
+      circle(0, 0, 2*R_ATOM*S);
+      drawingContext.setLineDash([]);
+      const er = Math.max(7, Math.min(11, S/17));
+      for (let j = 0; j < 2; j++) {
+        const a = elecPhase*1.4 + j*PI;
+        const ex = Math.cos(a)*R_ATOM*S, ey = Math.sin(a)*R_ATOM*S;
+        noStroke(); fill(NEG[0],NEG[1],NEG[2]); circle(ex, ey, er);
+        stroke(255); minusMark(ex, ey, er*0.28, 1.3);
+      }
+    } else {
+      // 확대한 상태 : 가장 가까이 갈 수 있는 거리를 점선으로 표시
+      noFill(); stroke(240,136,62,110); strokeWeight(1);
+      drawingContext.setLineDash([4,5]);
+      circle(0, 0, 2*D*S);
+      drawingContext.setLineDash([]);
+      noStroke(); fill(240,136,62,190); textAlign(LEFT, BOTTOM);
+      const tight = pn.pw < 400;                     // 좁은 화면에서는 문구를 줄인다
+      textSize(tight ? 10 : 11);
+      text(tight ? '다가갈 수 있는 한계' : '정면으로 쏠 때 다가갈 수 있는 한계', 6, -D*S - 5);
+      textAlign(LEFT, TOP);
+    }
+    // 원자핵 : 확대한 상태에서는 실제 크기(반지름 7e-5 R)로 그린다
+    // 핵반지름 R = r0·A^(1/3) 이므로 금(A=197)은 알파입자(A=4)보다 3.7배 크다.
+    // 화면에서는 알파입자(반지름 4.5px)보다 확실히 크되, 원자에 비해서는 작게 유지한다.
+    const rn = wide ? NUC_R : Math.max(NUC_R, 7e-5 * S);
+    noStroke();
+    for (let i = 6; i > 0; i--) { fill(POS_CORE[0],POS_CORE[1],POS_CORE[2],13); circle(0,0,2*rn*(i/6)*1.9); }
+    fill(POS_CORE[0],POS_CORE[1],POS_CORE[2]); circle(0, 0, 2*rn);
+    if (rn > 7) { stroke(255); plusMark(0, 0, rn*0.5, 2.2); }
+  } else {
+    noStroke();
+    if (wide) {                                       // 원자 전체가 보일 때
+      for (let i = 24; i > 0; i--) { fill(POS[0],POS[1],POS[2],5); circle(0,0,(2*R_ATOM*S)*(i/24)); }
+      noFill(); stroke(POS[0],POS[1],POS[2],90); strokeWeight(1); circle(0,0,2*R_ATOM*S);
+      const er = Math.max(7, Math.min(11, S/17));
+      stroke(POS[0],POS[1],POS[2],90);            // 세는 대상이 아니라 배경 무늬처럼 옅게
+      for (const q of JELLY_POS) plusMark(q[0]*S, q[1]*S, 4, 1.3);
+      for (const e of JELLY_NEG) {                     // 박혀 있는 전자 79개
+        noStroke(); fill(NEG[0],NEG[1],NEG[2]); circle(e[0]*S, e[1]*S, er);
+        if (er >= 9) { stroke(255); minusMark(e[0]*S, e[1]*S, er*0.28, 1.3); }
+      }
+    } else {                                          // 젤리 내부를 확대한 상태
+      fill(POS[0],POS[1],POS[2],20); rect(-pn.pw/2, -pl.h/2, pn.pw, pl.h);
+      stroke(POS[0],POS[1],POS[2],55);
+      for (let gx = -3; gx <= 3; gx++)
+        for (let gy = -2; gy <= 2; gy++) plusMark(gx*72, gy*68, 5, 1.5);
+      noStroke(); fill(POS[0],POS[1],POS[2],150); textSize(11); textAlign(LEFT, TOP);
+      text('(+)전하 젤리 내부 — 이 깊이에서는 미는 힘이 거의 0', -pn.pw/2 + 12, -pl.h/2 + 8);
+    }
+  }
+
+  if (hoverPx !== null) {
+    const hy = hoverPx;
+    stroke(240,136,62,105); strokeWeight(1);
+    drawingContext.setLineDash([6,6]);
+    line(-pn.pw/2, hy, pn.pw/2, hy);
+    drawingContext.setLineDash([]);
+    noStroke(); fill(240,136,62);
+    triangle(-pn.pw/2+2, hy-8, -pn.pw/2+2, hy+8, -pn.pw/2+15, hy);
+
+    // 지금 겨누는 위치에서 예상되는 산란각 (러더퍼드는 공식으로 바로 구해진다)
+    const pred = isR
+      ? '예상 ' + degrees(2*Math.atan(D / (2*Math.max(Math.abs(hoverB), 1e-12)))).toFixed(1) + '°'
+      : '어디를 겨눠도 0.03° 미만';
+    const ty = Math.max(hy - 6, -pl.h/2 + 15);
+    textSize(11.5); textAlign(RIGHT, BOTTOM); fill(240,136,62);
+    text(pred, pn.pw/2 - 10, ty);
+    textAlign(LEFT, TOP);
+  }
+
+  for (const p of particles) {
+    if (p.model !== model) continue;
+    const th = p.done ? p.theta : Math.abs(degrees(Math.atan2(p.vy, p.vx)));
+    const c = angleColor(th);
+    if (showTrail && p.trail.length > 1) {
+      noFill(); stroke(c[0],c[1],c[2], p.done ? 105 : 220); strokeWeight(1.8);
+      beginShape();
+      for (const t of p.trail) vertex(t[0]*S, t[1]*S);
+      endShape();
+    }
+    if (!p.done) {
+      const px = p.x*S, py = p.y*S;
+      noStroke();
+      fill(c[0],c[1],c[2],55); circle(px, py, 20);
+      fill(POS[0],POS[1],POS[2]); circle(px, py, 9);   // 금 원자핵보다 작게
+      stroke(255); plusMark(px, py, 2.3, 1.4);
+    }
+  }
+  drawingContext.restore();
+  pop();
+
+  noStroke(); textAlign(LEFT, TOP); fill(230,237,243);
+  textSize(15.5); textStyle(BOLD); text(title, pn.ox+14, pn.oy+9);
+  fill(150,158,168); textSize(11.5); textStyle(NORMAL);
+  text(desc, pn.ox+14, pn.oy+28);
+
+  const s = stats[model], ty = pn.oy + pn.ph - FOOT + 9;
+  const narrow = pn.pw < 430;                      // 좁은 화면에서는 문구를 줄인다
+  textSize(narrow ? 10.5 : 11.5); fill(140,148,158);
+  text(narrow
+        ? s.n + '발 · 통과 ' + s.pass + ' · 최대 ' + s.max.toFixed(2) + '°'
+        : '쏜 알파입자 ' + s.n + '발  ·  거의 그대로 통과 ' + s.pass + '발  ·  최대 ' + s.max.toFixed(2) + '°',
+       pn.ox + (narrow ? 12 : 14), ty);
+  textAlign(RIGHT, TOP);
+  fill(s.big ? color(255,80,80) : color(120,128,138));
+  text('되튕김 ' + s.big + (narrow ? '' : '발'), pn.ox + pn.pw - (narrow ? 12 : 14), ty);
+  textAlign(LEFT, TOP);
+}
+
+function angleColor(th) {
+  if (th > 90) return [255, 80, 80];
+  if (th > 10) return [255,140, 60];
+  if (th >  1) return [255,210, 80];
+  return              [ 90,220,140];
+}
+
+// ---------------------------------------------------------- 안내문
+function refreshState() {
+  const el = document.getElementById('state');
+  if (viewIdx === 0) {
+    el.innerHTML = '<b>원자 전체</b>를 보고 있습니다. 원자핵은 원자의 1만분의 1 크기라 여기서는 점으로도 보이지 않습니다. ' +
+      '연속 발사를 켜 보면 <b>거의 모든 알파입자가 그대로 통과</b>합니다. 실제 실험에서도 90°가 넘게 되튕기는 것은 약 2만 발에 1발입니다. ' +
+      '왜 그런 일이 일어나는지 보려면 <b>핵 근처 확대</b>를 누르세요.';
+  } else {
+    el.innerHTML = '<b>핵 근처</b>를 크게 확대했습니다. 화면 세로 폭은 약 3×10⁻¹³ m로, <b>원자 단면의 39만분의 1</b>에 해당하는 아주 좁은 영역입니다. ' +
+      '여기까지 들어온 알파입자만 크게 꺾입니다. <b>화면을 클릭</b>해 핵에 가깝게 겨눠 보세요.';
+  }
+}
+
+// ---------------------------------------------------------- 조작
+function mousePressed() {
+  const pn = panelAt(mouseX, mouseY);
+  if (!pn) return;
+  const pl = plotOf(pn);
+  fire(pxToB(mouseY - pl.cy, pl.S));             // 클릭한 높이로 발사
+  return false;
+}
+function touchStarted() { return mousePressed(); }
+
+function bindUI() {
+  const $ = function(id){ return document.getElementById(id); };
+
+  document.querySelectorAll('button[data-v]').forEach(function(btn){
+    btn.onclick = function(){
+      viewIdx = +btn.dataset.v;
+      particles = [];
+      document.querySelectorAll('button[data-v]').forEach(function(b2){
+        b2.classList.toggle('sel', b2 === btn);
+      });
+      refreshState();
+    };
+  });
+  document.querySelector('button[data-v="0"]').classList.add('sel');
+
+  // 핵에 아주 가까이 지나가도록 쏜다. 매번 조금씩 달라서 되튕기는 각도가 다양하게 나온다
+  $('bHead').onclick  = function(){
+    const k = 0.05 + Math.random() * 0.55;          // 0.05D ~ 0.6D  ->  약 87° ~ 176°
+    fire((random() < 0.5 ? -1 : 1) * k * D);
+  };
+  $('bAuto').onclick  = function(e){
+    autoFire = !autoFire;
+    e.target.classList.toggle('on', autoFire);
+    e.target.textContent = autoFire ? '연속 발사 중' : '연속 발사';
+  };
+  $('bTrail').onclick = function(e){
+    showTrail = !showTrail;
+    e.target.textContent = '궤적 : ' + (showTrail ? '켜짐' : '꺼짐');
+  };
+  $('bReset').onclick = function(){
+    particles = [];
+    stats = { thomson:{n:0,pass:0,big:0,max:0}, rutherford:{n:0,pass:0,big:0,max:0} };
+  };
+}
+</script>
+</body>
+</html>
