@@ -284,6 +284,20 @@
         "유압 장치",
         "일의 원리"
       ]
+    },
+    {
+      "id": "rutherford-scattering",
+      "title": "러더퍼드 산란 실험 — 톰슨 모형과의 비교",
+      "category": "modern-physics",
+      "description": "같은 알파입자를 톰슨 모형과 러더퍼드 모형에 동시에 쏘아 궤적을 비교합니다. 핵을 겨눠 되튕김을 만들어 보고, 대부분의 알파입자는 그대로 통과한다는 사실도 함께 확인합니다.",
+      "path": "experiments/rutherford-scattering.html",
+      "date": "2026-08-20",
+      "tags": [
+        "러더퍼드",
+        "원자 모형",
+        "알파입자",
+        "원자핵"
+      ]
     }
   ]
 }
