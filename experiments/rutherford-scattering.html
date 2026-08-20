@@ -4,7 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>러더퍼드 산란 실험</title>
-<script src="https://cdn.jsdelivr.net/npm/p5@1.9.4/lib/p5.min.js"></script>
 <style>
   :root{
     --bg:#0d1117; --panel:#161b22; --line:#30363d;
@@ -213,77 +212,106 @@
 
 <script>
 /* ==========================================================
-   러더퍼드 산란 시뮬레이션 (p5.js)
+   러더퍼드 산란 시뮬레이션 — 순수 Canvas 판 (라이브러리 없음)
 
-   단위 : 원자 반지름 R = 1 (실제 1.0e-10 m)
-          알파입자 질량 = 1,  입사 속도 = 1  ->  운동에너지 E = 0.5
+   p5.js 판과 물리 계산은 완전히 같다. 그리는 방법만 다르다.
+     p5:      circle(x, y, 지름)            한 줄
+     Canvas:  ctx.beginPath(); ctx.arc(x, y, 반지름, 0, TAU); ctx.fill();
 
-   D = 4.55e-4 R : 5 MeV 알파입자가 금 원자핵에 정면으로 부딪힐 때
-                   가장 가까이 갈 수 있는 거리 (4.55e-14 m)
-   힘 : F = K/r^2  (러더퍼드),   F = K r/R^3  (톰슨, 구 안)
-        K = D/2
-
-   ※ 힘을 부풀린 값은 하나도 없다. 두 모형 모두 실제 값으로 계산한다.
-     보기 배율만 바꿔서 핵 근처를 들여다본다.
+   p5 가 대신 해주던 것을 여기서는 직접 해야 한다.
+     · 캔버스 만들기, 화면 배율(고해상도) 처리
+     · 초당 60번 다시 그리는 반복 루프
+     · 마우스 좌표를 캔버스 좌표로 바꾸기
+     · 글꼴·정렬 지정
    ========================================================== */
 
 const R_ATOM = 1;
 const V0     = 1;
 const D      = 4.55e-4;
 const K      = D / 2;              // b = D/2 이면 정확히 90도
+const TAU    = Math.PI * 2;
+const FONT   = '"Pretendard","Malgun Gothic",system-ui,sans-serif';
 
-// 보기 : 그림 영역 세로 절반이 담는 실제 거리
 const VIEWS = [
   { name:'원자 전체', viewR:1.15   },
-  { name:'핵 근처',   viewR:1.6e-3 }     // 원자 단면의 약 39만분의 1
+  { name:'핵 근처',   viewR:1.6e-3 }
 ];
 let viewIdx = 0;
 
 const HEAD = 44, FOOT = 32;
 const POS = [255,122,92], POS_CORE = [255,90,60], NEG = [90,170,255];
+const NUC_R = 8;
 
 let particles = [], LAY = null;
 let showTrail = true, autoFire = false, lastFire = 0;
 let hoverPx = null, hoverB = null, elecPhase = 0;
-const NUC_R = 8;                     // 원자 전체 보기에서 그리는 원자핵 반지름(px)
+let stats = { thomson:{n:0,pass:0,big:0,max:0}, rutherford:{n:0,pass:0,big:0,max:0} };
 
-/* 화면에서 겨눈 위치를 실제 충돌 계수 b 로 바꾼다.
-   원자핵은 실제 비율(0.04px)로는 보이지 않아 8px 로 크게 그려 두었다.
-   그래서 그 원 안을 겨누면 "핵에 맞은 것"으로 보고 실제 규모(±0.6D)로 환산한다.
-   이렇게 해야 크게 그린 핵을 클릭했을 때 실제로 튕겨 나간다. */
+let cv, ctx, mouseX = -1, mouseY = -1;      // p5 가 만들어 주던 것들을 직접 들고 있는다
+
 function pxToB(dy, S) {
   if (view().viewR > 0.3 && Math.abs(dy) <= NUC_R) {
     let t = dy / NUC_R;
-    if (Math.abs(t) < 0.02) t = (t < 0 ? -0.02 : 0.02);    // 정면충돌 특이점 회피
+    if (Math.abs(t) < 0.02) t = (t < 0 ? -0.02 : 0.02);
     return t * 0.6 * D;
   }
   return dy / S;
 }
-let stats = { thomson:{n:0,pass:0,big:0,max:0}, rutherford:{n:0,pass:0,big:0,max:0} };
 
-// 그림에 그리는 대표 전자 [개수, 반지름]
-// 실제 금은 전자가 79개(K2 L8 M18 N32 O18 P1)지만, 전부 그리면 원자 속이 빽빽해 보여
-// "원자는 대부분 빈 공간"이라는 이 실험의 결론이 가려진다. 그래서 바깥쪽 일부만 그린다.
-/* 참고 — 러더퍼드 1911년 논문은 중심 전하만 다루었고 전자의 운동은 가정하지 않았다.
-   원문 : "a charge ±Ne at its centre surrounded by a sphere of electrification
-   ... supposed uniformly distributed throughout a sphere of radius R."
-   여기서 전자를 궤도로 그리는 것은 교과서에서 널리 쓰는 표현을 따른 것이며,
-   그 사실은 본문 설명에 밝혀 두었다. */
-
-// 원판 위에 고르게 흩뿌린 점을 만든다 (해바라기 배열)
 function spread(n, rMax, phase) {
-  const a = [], g = Math.PI * (3 - Math.sqrt(5));      // 황금각
+  const a = [], g = Math.PI * (3 - Math.sqrt(5));
   for (let i = 0; i < n; i++) {
     const r = rMax * Math.sqrt((i + 0.5) / n), t = i * g + phase;
     a.push([Math.cos(t) * r, Math.sin(t) * r]);
   }
   return a;
 }
-const JELLY_POS = spread(16, 0.86, 0.9);      // 톰슨 : 구 전체에 퍼진 (+)전하
-const JELLY_NEG = spread(7,  0.78, 0.4);      // 톰슨 : 그 속에 박힌 전자
+const JELLY_POS = spread(16, 0.86, 0.9);
+const JELLY_NEG = spread(7,  0.78, 0.4);
 
 function view() { return VIEWS[viewIdx]; }
 
+/* ---------------------------------------------------------- 그리기 도우미
+   p5 의 fill(r,g,b,a) 는 투명도가 0~255 지만 Canvas 는 0~1 이라 나눠 준다. */
+function rgba(c, a) {
+  return a === undefined ? 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')'
+                         : 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + (a/255) + ')';
+}
+function setFont(size, bold) {
+  ctx.font = (bold ? 'bold ' : '') + size + 'px ' + FONT;
+}
+function fillCircle(x, y, d, style) {           // p5 의 circle(x,y,지름) 과 같게 맞춘다
+  ctx.fillStyle = style;
+  ctx.beginPath(); ctx.arc(x, y, d/2, 0, TAU); ctx.fill();
+}
+function strokeCircle(x, y, d, style, w) {
+  ctx.strokeStyle = style; ctx.lineWidth = w;
+  ctx.beginPath(); ctx.arc(x, y, d/2, 0, TAU); ctx.stroke();
+}
+function seg(x1, y1, x2, y2, style, w) {
+  ctx.strokeStyle = style; ctx.lineWidth = w;
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+}
+function plusMark(x, y, s, w, style) {
+  ctx.strokeStyle = style; ctx.lineWidth = w; ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(x-s, y); ctx.lineTo(x+s, y);
+  ctx.moveTo(x, y-s); ctx.lineTo(x, y+s);
+  ctx.stroke();
+}
+function minusMark(x, y, s, w, style) {
+  ctx.strokeStyle = style; ctx.lineWidth = w; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(x-s, y); ctx.lineTo(x+s, y); ctx.stroke();
+}
+function label(str, x, y, style, size, alignX, alignY) {
+  ctx.fillStyle = style; setFont(size);
+  ctx.textAlign = alignX || 'left';
+  ctx.textBaseline = alignY || 'top';
+  ctx.fillText(str, x, y);
+}
+const deg = r => r * 180 / Math.PI;
+
+// ---------------------------------------------------------- 배치와 캔버스
 function computeLayout() {
   const cw = Math.max(260, Math.min(document.getElementById('sketch').clientWidth, 980));
   if (cw >= 700) {
@@ -300,21 +328,25 @@ function plotOf(pn) {
   return { cy: pn.oy + HEAD + h/2, h: h, S: (h/2) / view().viewR };
 }
 
-function setup() {
+/* 고해상도 화면(레티나)에서 선명하게 나오도록 실제 픽셀을 배로 잡고 축소해 표시한다.
+   p5 는 pixelDensity() 로 알아서 해주던 부분이다. */
+function resizeCanvas() {
   LAY = computeLayout();
-  createCanvas(LAY.w, LAY.h).parent('sketch');
-  bindUI();
-  refreshState();
+  const dpr = window.devicePixelRatio || 1;
+  cv.width  = Math.round(LAY.w * dpr);
+  cv.height = Math.round(LAY.h * dpr);
+  cv.style.width  = LAY.w + 'px';
+  cv.style.height = LAY.h + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
-function windowResized() { LAY = computeLayout(); resizeCanvas(LAY.w, LAY.h); }
 
-// ---------------------------------------------------------- 물리
+// ---------------------------------------------------------- 물리 (p5 판과 완전히 동일)
 function accel(x, y, model) {
   const r = Math.max(Math.sqrt(x*x + y*y), 1e-14);
   let a;
-  if (model === 'rutherford')  a = K / (r*r);                 // 한 점에 모인 전하
-  else if (r >= R_ATOM)        a = K / (r*r);                 // 퍼진 전하 : 구 바깥
-  else                         a = K * r / (R_ATOM**3);       // 퍼진 전하 : 구 안
+  if (model === 'rutherford')  a = K / (r*r);
+  else if (r >= R_ATOM)        a = K / (r*r);
+  else                         a = K * r / (R_ATOM**3);
   return [a*x/r, a*y/r];
 }
 function advance(p, dt) {
@@ -341,18 +373,23 @@ function fire(b) {
   });
 }
 
-// ---------------------------------------------------------- 그리기 도우미
-function plusMark(x, y, s, w) { strokeWeight(w); strokeCap(ROUND); line(x-s,y,x+s,y); line(x,y-s,x,y+s); }
-function minusMark(x, y, s, w){ strokeWeight(w); strokeCap(ROUND); line(x-s,y,x+s,y); }
+// ---------------------------------------------------------- 반복 루프
+// p5 의 draw() 에 해당한다. p5 가 자동으로 돌려주던 것을 직접 예약한다.
+function loop() {
+  step();
+  requestAnimationFrame(loop);
+}
 
-function draw() {
-  background(13, 17, 23);
+function step() {
+  ctx.fillStyle = '#0d1117';
+  ctx.fillRect(0, 0, LAY.w, LAY.h);
   elecPhase += 0.007;
 
   const vR = view().viewR;
-  if (autoFire && millis() - lastFire > 120) {
-    fire(random(-1, 1) * vR * 0.95);      // 보이는 범위 전체에 고르게
-    lastFire = millis();
+  const now = performance.now();                 // p5 의 millis()
+  if (autoFire && now - lastFire > 120) {
+    fire((Math.random()*2 - 1) * vR * 0.95);
+    lastFire = now;
   }
 
   for (const p of particles) {
@@ -364,7 +401,7 @@ function draw() {
       t.push([p.x, p.y]);
     if (++p.age > 1200 || Math.sqrt(p.x*p.x + p.y*p.y) > p.start) {
       p.done = true;
-      p.theta = Math.abs(degrees(Math.atan2(p.vy, p.vx)));
+      p.theta = Math.abs(deg(Math.atan2(p.vy, p.vx)));
       const s = stats[p.model];
       if (p.theta > 90) s.big++;
       if (p.theta < 1)  s.pass++;
@@ -378,9 +415,8 @@ function draw() {
   drawPanel(LAY.panels[0], 'thomson',    '톰슨 모형',     '(+)전하가 원자 전체에 퍼져 있다');
   drawPanel(LAY.panels[1], 'rutherford', '러더퍼드 모형', '(+)전하와 질량이 중심의 핵에 뭉쳐 있다');
 
-  stroke(48,54,61); strokeWeight(2);
-  if (LAY.stacked) line(0, LAY.panels[1].oy, LAY.w, LAY.panels[1].oy);
-  else             line(LAY.panels[1].ox, 0, LAY.panels[1].ox, LAY.h);
+  if (LAY.stacked) seg(0, LAY.panels[1].oy, LAY.w, LAY.panels[1].oy, '#30363d', 2);
+  else             seg(LAY.panels[1].ox, 0, LAY.panels[1].ox, LAY.h, '#30363d', 2);
 }
 
 function panelAt(mx, my) {
@@ -395,135 +431,123 @@ function updateHover() {
   const pl = plotOf(pn);
   const dy = mouseY - pl.cy;
   if (Math.abs(dy) > pl.h/2) return;
-  hoverPx = dy;                       // 조준선은 마우스가 있는 자리에 그린다
-  hoverB  = pxToB(dy, pl.S);          // 예상 각도는 환산한 값으로 구한다
+  hoverPx = dy;
+  hoverB  = pxToB(dy, pl.S);
 }
 
+// ---------------------------------------------------------- 한 패널 그리기
 function drawPanel(pn, model, title, desc) {
   const pl = plotOf(pn), S = pl.S, vR = view().viewR;
   const isR = (model === 'rutherford');
-  const wide = (vR > 0.3);            // 원자 전체가 보이는 배율인가
+  const wide = (vR > 0.3);
 
-  push();
-  drawingContext.save();
-  drawingContext.beginPath();
-  drawingContext.rect(pn.ox, pn.oy + HEAD, pn.pw, pl.h);
-  drawingContext.clip();
-  translate(pn.ox + pn.pw/2, pl.cy);
+  ctx.save();                                     // p5 의 push()
+  ctx.beginPath();
+  ctx.rect(pn.ox, pn.oy + HEAD, pn.pw, pl.h);
+  ctx.clip();
+  ctx.translate(pn.ox + pn.pw/2, pl.cy);
 
   if (isR) {
     if (wide) {
-      // 핵 주위를 도는 전자 2개. 궤도 반지름은 톰슨 쪽 원자와 같은 1.0R 로 두어
-      // 두 모형의 원자 크기를 맞춘다.
-      noFill(); stroke(NEG[0],NEG[1],NEG[2],95); strokeWeight(1.3);
-      drawingContext.setLineDash([6,6]);
-      circle(0, 0, 2*R_ATOM*S);
-      drawingContext.setLineDash([]);
+      ctx.setLineDash([6,6]);
+      strokeCircle(0, 0, 2*R_ATOM*S, rgba(NEG,95), 1.3);      // 전자 궤도
+      ctx.setLineDash([]);
       const er = Math.max(7, Math.min(11, S/17));
       for (let j = 0; j < 2; j++) {
-        const a = elecPhase*1.4 + j*PI;
+        const a = elecPhase*1.4 + j*Math.PI;
         const ex = Math.cos(a)*R_ATOM*S, ey = Math.sin(a)*R_ATOM*S;
-        noStroke(); fill(NEG[0],NEG[1],NEG[2]); circle(ex, ey, er);
-        stroke(255); minusMark(ex, ey, er*0.28, 1.3);
+        fillCircle(ex, ey, er, rgba(NEG));
+        minusMark(ex, ey, er*0.28, 1.3, '#fff');
       }
     } else {
-      // 확대한 상태 : 가장 가까이 갈 수 있는 거리를 점선으로 표시
-      noFill(); stroke(240,136,62,110); strokeWeight(1);
-      drawingContext.setLineDash([4,5]);
-      circle(0, 0, 2*D*S);
-      drawingContext.setLineDash([]);
-      noStroke(); fill(240,136,62,190); textAlign(LEFT, BOTTOM);
-      const tight = pn.pw < 400;                     // 좁은 화면에서는 문구를 줄인다
-      textSize(tight ? 10 : 11);
-      text(tight ? '다가갈 수 있는 한계' : '정면으로 쏠 때 다가갈 수 있는 한계', 6, -D*S - 5);
-      textAlign(LEFT, TOP);
+      ctx.setLineDash([4,5]);
+      strokeCircle(0, 0, 2*D*S, 'rgba(240,136,62,0.43)', 1);  // 최근접거리
+      ctx.setLineDash([]);
+      const tight = pn.pw < 400;
+      label(tight ? '다가갈 수 있는 한계' : '정면으로 쏠 때 다가갈 수 있는 한계',
+            6, -D*S - 5, 'rgba(240,136,62,0.75)', tight ? 10 : 11, 'left', 'bottom');
     }
-    // 원자핵 : 확대한 상태에서는 실제 크기(반지름 7e-5 R)로 그린다
-    // 핵반지름 R = r0·A^(1/3) 이므로 금(A=197)은 알파입자(A=4)보다 3.7배 크다.
-    // 화면에서는 알파입자(반지름 4.5px)보다 확실히 크되, 원자에 비해서는 작게 유지한다.
+    // 원자핵
     const rn = wide ? NUC_R : Math.max(NUC_R, 7e-5 * S);
-    noStroke();
-    for (let i = 6; i > 0; i--) { fill(POS_CORE[0],POS_CORE[1],POS_CORE[2],13); circle(0,0,2*rn*(i/6)*1.9); }
-    fill(POS_CORE[0],POS_CORE[1],POS_CORE[2]); circle(0, 0, 2*rn);
-    if (rn > 7) { stroke(255); plusMark(0, 0, rn*0.5, 2.2); }
+    for (let i = 6; i > 0; i--) fillCircle(0, 0, 2*rn*(i/6)*1.9, rgba(POS_CORE, 13));
+    fillCircle(0, 0, 2*rn, rgba(POS_CORE));
+    if (rn > 7) plusMark(0, 0, rn*0.5, 2.2, '#fff');
   } else {
-    noStroke();
-    if (wide) {                                       // 원자 전체가 보일 때
-      for (let i = 24; i > 0; i--) { fill(POS[0],POS[1],POS[2],5); circle(0,0,(2*R_ATOM*S)*(i/24)); }
-      noFill(); stroke(POS[0],POS[1],POS[2],90); strokeWeight(1); circle(0,0,2*R_ATOM*S);
+    if (wide) {
+      for (let i = 24; i > 0; i--) fillCircle(0, 0, (2*R_ATOM*S)*(i/24), rgba(POS, 5));
+      strokeCircle(0, 0, 2*R_ATOM*S, rgba(POS, 90), 1);
       const er = Math.max(7, Math.min(11, S/17));
-      stroke(POS[0],POS[1],POS[2],90);            // 세는 대상이 아니라 배경 무늬처럼 옅게
-      for (const q of JELLY_POS) plusMark(q[0]*S, q[1]*S, 4, 1.3);
-      for (const e of JELLY_NEG) {                     // 박혀 있는 전자 79개
-        noStroke(); fill(NEG[0],NEG[1],NEG[2]); circle(e[0]*S, e[1]*S, er);
-        if (er >= 9) { stroke(255); minusMark(e[0]*S, e[1]*S, er*0.28, 1.3); }
+      for (const q of JELLY_POS) plusMark(q[0]*S, q[1]*S, 4, 1.3, rgba(POS, 90));
+      for (const e of JELLY_NEG) {
+        fillCircle(e[0]*S, e[1]*S, er, rgba(NEG));
+        if (er >= 9) minusMark(e[0]*S, e[1]*S, er*0.28, 1.3, '#fff');
       }
-    } else {                                          // 젤리 내부를 확대한 상태
-      fill(POS[0],POS[1],POS[2],20); rect(-pn.pw/2, -pl.h/2, pn.pw, pl.h);
-      stroke(POS[0],POS[1],POS[2],55);
+    } else {
+      ctx.fillStyle = rgba(POS, 20);
+      ctx.fillRect(-pn.pw/2, -pl.h/2, pn.pw, pl.h);
       for (let gx = -3; gx <= 3; gx++)
-        for (let gy = -2; gy <= 2; gy++) plusMark(gx*72, gy*68, 5, 1.5);
-      noStroke(); fill(POS[0],POS[1],POS[2],150); textSize(11); textAlign(LEFT, TOP);
-      text('(+)전하 젤리 내부 — 이 깊이에서는 미는 힘이 거의 0', -pn.pw/2 + 12, -pl.h/2 + 8);
+        for (let gy = -2; gy <= 2; gy++) plusMark(gx*72, gy*68, 5, 1.5, rgba(POS, 55));
+      label('(+)전하 젤리 내부 — 이 깊이에서는 미는 힘이 거의 0',
+            -pn.pw/2 + 12, -pl.h/2 + 8, rgba(POS, 150), 11);
     }
   }
 
-  if (hoverPx !== null) {
+  if (hoverPx !== null) {                          // 조준선
     const hy = hoverPx;
-    stroke(240,136,62,105); strokeWeight(1);
-    drawingContext.setLineDash([6,6]);
-    line(-pn.pw/2, hy, pn.pw/2, hy);
-    drawingContext.setLineDash([]);
-    noStroke(); fill(240,136,62);
-    triangle(-pn.pw/2+2, hy-8, -pn.pw/2+2, hy+8, -pn.pw/2+15, hy);
+    ctx.setLineDash([6,6]);
+    seg(-pn.pw/2, hy, pn.pw/2, hy, 'rgba(240,136,62,0.41)', 1);
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgb(240,136,62)';
+    ctx.beginPath();
+    ctx.moveTo(-pn.pw/2+2, hy-8);
+    ctx.lineTo(-pn.pw/2+2, hy+8);
+    ctx.lineTo(-pn.pw/2+15, hy);
+    ctx.closePath(); ctx.fill();
 
-    // 지금 겨누는 위치에서 예상되는 산란각 (러더퍼드는 공식으로 바로 구해진다)
     const pred = isR
-      ? '예상 ' + degrees(2*Math.atan(D / (2*Math.max(Math.abs(hoverB), 1e-12)))).toFixed(1) + '°'
+      ? '예상 ' + deg(2*Math.atan(D / (2*Math.max(Math.abs(hoverB), 1e-12)))).toFixed(1) + '°'
       : '어디를 겨눠도 0.03° 미만';
     const ty = Math.max(hy - 6, -pl.h/2 + 15);
-    textSize(11.5); textAlign(RIGHT, BOTTOM); fill(240,136,62);
-    text(pred, pn.pw/2 - 10, ty);
-    textAlign(LEFT, TOP);
+    label(pred, pn.pw/2 - 10, ty, 'rgb(240,136,62)', 11.5, 'right', 'bottom');
   }
 
-  for (const p of particles) {
+  for (const p of particles) {                     // 궤적과 알파입자
     if (p.model !== model) continue;
-    const th = p.done ? p.theta : Math.abs(degrees(Math.atan2(p.vy, p.vx)));
+    const th = p.done ? p.theta : Math.abs(deg(Math.atan2(p.vy, p.vx)));
     const c = angleColor(th);
     if (showTrail && p.trail.length > 1) {
-      noFill(); stroke(c[0],c[1],c[2], p.done ? 105 : 220); strokeWeight(1.8);
-      beginShape();
-      for (const t of p.trail) vertex(t[0]*S, t[1]*S);
-      endShape();
+      ctx.strokeStyle = rgba(c, p.done ? 105 : 220);
+      ctx.lineWidth = 1.8; ctx.lineCap = 'butt';
+      ctx.beginPath();
+      ctx.moveTo(p.trail[0][0]*S, p.trail[0][1]*S);
+      for (let i = 1; i < p.trail.length; i++) ctx.lineTo(p.trail[i][0]*S, p.trail[i][1]*S);
+      ctx.stroke();
     }
     if (!p.done) {
       const px = p.x*S, py = p.y*S;
-      noStroke();
-      fill(c[0],c[1],c[2],55); circle(px, py, 20);
-      fill(POS[0],POS[1],POS[2]); circle(px, py, 9);   // 금 원자핵보다 작게
-      stroke(255); plusMark(px, py, 2.3, 1.4);
+      fillCircle(px, py, 20, rgba(c, 55));
+      fillCircle(px, py, 9,  rgba(POS));
+      plusMark(px, py, 2.3, 1.4, '#fff');
     }
   }
-  drawingContext.restore();
-  pop();
+  ctx.restore();                                   // p5 의 pop()
 
-  noStroke(); textAlign(LEFT, TOP); fill(230,237,243);
-  textSize(15.5); textStyle(BOLD); text(title, pn.ox+14, pn.oy+9);
-  fill(150,158,168); textSize(11.5); textStyle(NORMAL);
-  text(desc, pn.ox+14, pn.oy+28);
+  // ---- 머리글 ----
+  ctx.fillStyle = 'rgb(230,237,243)'; setFont(15.5, true);
+  ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+  ctx.fillText(title, pn.ox+14, pn.oy+9);
+  label(desc, pn.ox+14, pn.oy+28, 'rgb(150,158,168)', 11.5);
 
+  // ---- 꼬리글 ----
   const s = stats[model], ty = pn.oy + pn.ph - FOOT + 9;
-  const narrow = pn.pw < 430;                      // 좁은 화면에서는 문구를 줄인다
-  textSize(narrow ? 10.5 : 11.5); fill(140,148,158);
-  text(narrow
-        ? s.n + '발 · 통과 ' + s.pass + ' · 최대 ' + s.max.toFixed(2) + '°'
-        : '쏜 알파입자 ' + s.n + '발  ·  거의 그대로 통과 ' + s.pass + '발  ·  최대 ' + s.max.toFixed(2) + '°',
-       pn.ox + (narrow ? 12 : 14), ty);
-  textAlign(RIGHT, TOP);
-  fill(s.big ? color(255,80,80) : color(120,128,138));
-  text('되튕김 ' + s.big + (narrow ? '' : '발'), pn.ox + pn.pw - (narrow ? 12 : 14), ty);
-  textAlign(LEFT, TOP);
+  const narrow = pn.pw < 430;
+  label(narrow
+          ? s.n + '발 · 통과 ' + s.pass + ' · 최대 ' + s.max.toFixed(2) + '°'
+          : '쏜 알파입자 ' + s.n + '발  ·  거의 그대로 통과 ' + s.pass + '발  ·  최대 ' + s.max.toFixed(2) + '°',
+        pn.ox + (narrow ? 12 : 14), ty, 'rgb(140,148,158)', narrow ? 10.5 : 11.5);
+  label('되튕김 ' + s.big + (narrow ? '' : '발'),
+        pn.ox + pn.pw - (narrow ? 12 : 14), ty,
+        s.big ? 'rgb(255,80,80)' : 'rgb(120,128,138)', narrow ? 10.5 : 11.5, 'right');
 }
 
 function angleColor(th) {
@@ -547,14 +571,44 @@ function refreshState() {
 }
 
 // ---------------------------------------------------------- 조작
-function mousePressed() {
-  const pn = panelAt(mouseX, mouseY);
+/* p5 는 mouseX, mouseY 를 알아서 채워 주지만 여기서는 직접 계산한다.
+   캔버스가 CSS 로 줄어들어 표시될 수 있으므로 그 비율까지 보정해야 한다. */
+function toCanvasXY(clientX, clientY) {
+  const r = cv.getBoundingClientRect();
+  return [ (clientX - r.left) * (LAY.w / r.width),
+           (clientY - r.top ) * (LAY.h / r.height) ];
+}
+function shootAt(mx, my) {
+  const pn = panelAt(mx, my);
   if (!pn) return;
   const pl = plotOf(pn);
-  fire(pxToB(mouseY - pl.cy, pl.S));             // 클릭한 높이로 발사
-  return false;
+  fire(pxToB(my - pl.cy, pl.S));
 }
-function touchStarted() { return mousePressed(); }
+
+function init() {
+  cv = document.createElement('canvas');
+  ctx = cv.getContext('2d');
+  document.getElementById('sketch').appendChild(cv);
+  resizeCanvas();
+
+  window.addEventListener('resize', resizeCanvas);
+  cv.addEventListener('mousemove', function(e){
+    const [x,y] = toCanvasXY(e.clientX, e.clientY); mouseX = x; mouseY = y;
+  });
+  cv.addEventListener('mouseleave', function(){ mouseX = -1; mouseY = -1; });
+  cv.addEventListener('mousedown', function(e){
+    const [x,y] = toCanvasXY(e.clientX, e.clientY); shootAt(x, y);
+  });
+  cv.addEventListener('touchstart', function(e){
+    const t = e.touches[0];
+    const [x,y] = toCanvasXY(t.clientX, t.clientY); shootAt(x, y);
+    e.preventDefault();
+  }, { passive:false });
+
+  bindUI();
+  refreshState();
+  requestAnimationFrame(loop);
+}
 
 function bindUI() {
   const $ = function(id){ return document.getElementById(id); };
@@ -571,10 +625,9 @@ function bindUI() {
   });
   document.querySelector('button[data-v="0"]').classList.add('sel');
 
-  // 핵에 아주 가까이 지나가도록 쏜다. 매번 조금씩 달라서 되튕기는 각도가 다양하게 나온다
   $('bHead').onclick  = function(){
-    const k = 0.05 + Math.random() * 0.55;          // 0.05D ~ 0.6D  ->  약 87° ~ 176°
-    fire((random() < 0.5 ? -1 : 1) * k * D);
+    const k = 0.05 + Math.random() * 0.55;
+    fire((Math.random() < 0.5 ? -1 : 1) * k * D);
   };
   $('bAuto').onclick  = function(e){
     autoFire = !autoFire;
@@ -590,6 +643,8 @@ function bindUI() {
     stats = { thomson:{n:0,pass:0,big:0,max:0}, rutherford:{n:0,pass:0,big:0,max:0} };
   };
 }
+
+init();
 </script>
 </body>
 </html>
