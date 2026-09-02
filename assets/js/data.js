@@ -57,7 +57,11 @@ const SITE = (function () {
     }
   }
 
-  // 전체 실험 목록(정적 + Firebase) + 카테고리 목록 반환
+  // 전체 실험 목록(정적 + Firebase) + 카테고리 목록 + 과학 놀이 목록 반환
+  //
+  // plays(과학 놀이)는 실험과 성격이 다른 활동물이라 experiments에 섞지 않고
+  // 별도 배열로 돌려준다. 사이드바에서도 별도 박스로 나뉜다(lab.js 참고).
+  // 관리자 업로드(Firebase) 대상은 실험뿐이므로 plays는 정적 목록만 쓴다.
   async function getAllData() {
     const [staticData, dynamicExps] = await Promise.all([
       loadStaticExperiments(),
@@ -65,7 +69,8 @@ const SITE = (function () {
     ]);
     const staticExps = (staticData.experiments || []).map((e) => ({ ...e, source: "static" }));
     const all = [...dynamicExps, ...staticExps]; // 최신 업로드가 먼저 오도록
-    return { categories: staticData.categories || [], experiments: all };
+    const plays = (staticData.plays || []).map((p) => ({ ...p, source: "static", section: "play" }));
+    return { categories: staticData.categories || [], experiments: all, plays };
   }
 
   // ---------------- 방문자 카운터 ----------------

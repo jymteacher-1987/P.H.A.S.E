@@ -24,7 +24,9 @@
   </div>
 </nav>
 <div class="viewer-frame-wrap">
-  <iframe id="expFrame" class="viewer-frame" title="실험 화면" allowfullscreen></iframe>
+  <!-- allow="camera": 과학 놀이(히어로 만들기)는 iframe 안에서 카메라를 연다.
+       같은 출처라 기본값으로도 열리지만, 정책이 바뀌어도 막히지 않게 명시해 둔다. -->
+  <iframe id="expFrame" class="viewer-frame" title="실험 화면" allow="camera; fullscreen" allowfullscreen></iframe>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>

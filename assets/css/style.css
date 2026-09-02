@@ -237,6 +237,17 @@ body.page-home .hero > .wrap{ width:100%; }
 }
 .section-title h2{ font-size:21px; font-weight:800; letter-spacing:-.02em; margin:0; color: var(--text); }
 .section-title .count{ color: var(--text-faint); font-size:13px; }
+/* 실험실 제목의 앞부분(묶음 이름) — "물리 가상실험: 전체" 한 줄로 쓴다.
+   묶음 이름은 강조색으로 두어 왼쪽에서 파랗게 켜 둔 박스와 눈으로 이어지게
+   하고, 고른 줄 이름은 h2 기본값(진한 글자, 800)을 그대로 받아 더 무겁게
+   남는다. 색만 다르고 크기는 같아야 한 줄로 자연스럽게 읽힌다.
+   두 줄로 쌓아 본 적이 있는데 제목치고 자리를 너무 먹었다. */
+.section-title h2 .group-name{ color: var(--accent); font-weight:700; }
+/* 콜론은 CSS로 붙인다 — lab.js는 글자만 넘긴다. 앞은 붙이고 뒤만 띄우는
+   것이 한국어 문장부호 관행이다. 글자보다 흐리게 둬서 구분자로만 읽힌다. */
+.section-title h2 .group-name::after{
+  content:":"; color: var(--text-faint); font-weight:600; margin-right:.36em;
+}
 
 .cat-grid{
   display:grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr));
@@ -272,10 +283,24 @@ body.page-home .hero > .wrap{ width:100%; }
   display:grid; grid-template-columns: 232px 1fr; gap:28px; align-items:start;
 }
 .lab-shell .section-title{ margin-top:0; }
+/* 사이드바는 이제 "카드 한 장"이 아니라 카드 여러 장을 담는 통이다.
+   (물리 가상실험 / 과학 놀이 — lab.js의 sideBox() 참고)
+   그래서 배경·테두리·그림자는 .lab-sidebar가 아니라 .side-box가 가진다.
+   여기에 배경을 다시 주면 카드 밑에 회색 판이 한 겹 더 깔려 보인다. */
 .lab-sidebar{
   position:sticky; top:86px;
+  display:flex; flex-direction:column; gap:14px;
+}
+.side-box{
   background: var(--surface); border:1px solid var(--border);
   border-radius: var(--radius); padding:12px; box-shadow: var(--shadow);
+}
+/* 박스 제목. 예전에는 "전체 19"가 사실상 제목 노릇을 했는데, 박스가 둘이 되면
+   "무엇의 전체인지"가 사라진다. 그래서 각 박스에 작은 머리글을 둔다. */
+.side-box-title{
+  font-size:11px; font-weight:800; letter-spacing:.06em;
+  color: var(--text-faint); text-transform:uppercase;
+  padding:4px 12px 8px;
 }
 .side-item{
   display:flex; align-items:center; gap:10px;
@@ -348,6 +373,10 @@ body.page-home .hero > .wrap{ width:100%; }
 .exp-card .tag[data-cat="modern-physics"], .cat-tag[data-cat="modern-physics"]{
   color:#0f9d6e; background:rgba(15,157,110,.08); border-color:rgba(15,157,110,.22);
 }
+/* 과학 놀이는 영역이 아니라 별도 묶음이라 7색 어디에도 겹치지 않는 색을 쓴다. */
+.exp-card .tag[data-cat="play"], .cat-tag[data-cat="play"]{
+  color:#4d7c0f; background:rgba(77,124,15,.09); border-color:rgba(77,124,15,.24);
+}
 .exp-card h3{ font-size:17px; margin:0 0 8px; font-weight:700; letter-spacing:-.01em; color: var(--text); }
 .exp-card p{ font-size:13.5px; color: var(--text-dim); margin:0 0 16px; flex:1; }
 .exp-card .meta{ display:flex; justify-content:space-between; align-items:center; font-size:12px; color: var(--text-faint); }
@@ -395,11 +424,23 @@ body.page-home .hero > .wrap{ width:100%; }
 
 @media (max-width: 860px){
   .lab-shell{ grid-template-columns: 1fr; }
-  .lab-sidebar{
-    position:static; display:flex; overflow-x:auto; gap:6px; padding:10px;
+  /* 좁은 화면에서는 박스마다 가로로 넘기는 띠가 된다. 박스는 위아래로 쌓이고
+     (물리 가상실험 띠 / 과학 놀이 띠), 각 띠 안에서만 좌우로 스크롤된다. */
+  /* min-width:0 이 없으면 그리드 칸(1fr)이 안쪽 내용 너비만큼 늘어나서
+     .side-row의 overflow-x가 걸릴 자리가 없어진다 — 띠가 안 생기고 페이지가
+     통째로 좌우로 밀린다. 예전엔 .lab-sidebar 자신이 overflow 컨테이너라
+     자동으로 해결됐지만, 이제는 바깥 통이라 직접 지정해 줘야 한다. */
+  .lab-sidebar{ position:static; gap:10px; min-width:0; }
+  .side-box{ min-width:0; padding:10px 12px; }
+  /* 제목은 항목 위 제 줄에 세운다. 한때 왼쪽에 세로로 붙여 고정해 봤는데,
+     항목이 그 옆을 지나가면서 '역학과 에너지'가 '지'만 남는 식으로 잘려
+     보였다. 다시 옆으로 붙이지 말 것. */
+  .side-box-title{ padding:0 2px 8px; }
+  .side-row{
+    display:flex; gap:6px; overflow-x:auto;
     scrollbar-width:none; -ms-overflow-style:none;
   }
-  .lab-sidebar::-webkit-scrollbar{ display:none; }
+  .side-row::-webkit-scrollbar{ display:none; }
   .side-item{ flex:0 0 auto; white-space:nowrap; margin-bottom:0; }
 }
 
