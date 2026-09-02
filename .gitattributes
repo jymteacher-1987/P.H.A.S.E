@@ -1,0 +1,5 @@
+# Hero 저장소(jymteacher-1987/Hero)에서 통째로 가져온 파일이다.
+# 그쪽 blob 이 CRLF 라서, core.autocrlf=true 인 컴퓨터에서 커밋하면 git 이
+# LF 로 바꿔 버린다. 그러면 두 사이트가 서로 다른 바이트를 서비스하게 되고
+# '똑같이' 가 깨진다. 줄 끝을 건드리지 않도록 텍스트 취급에서 뺀다.
+plays/hero-maker.html -text
