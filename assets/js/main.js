@@ -20,8 +20,14 @@
   });
 
   // ---------- 데이터 로드 (영역 미리보기용) ----------
-  const { categories, experiments } = await SITE.getAllData();
-  if (els.expTotalCount) els.expTotalCount.textContent = experiments.length;
+  const { categories, experiments, plays } = await SITE.getAllData();
+  // 실험 개수와 과학 놀이 개수는 성격이 달라 합치지 않고 "19+1" 형태로 나란히 보여준다.
+  if (els.expTotalCount) {
+    const playCount = (plays || []).length;
+    els.expTotalCount.innerHTML = playCount
+      ? `${experiments.length}<span class="num-plus">+${playCount}</span>`
+      : String(experiments.length);
+  }
 
   // ---------- 검색: 실험실 페이지로 검색어를 들고 이동 ----------
   function goSearch() {
