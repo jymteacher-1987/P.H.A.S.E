@@ -314,6 +314,21 @@ window.EXPERIMENTS_DATA = {
         "설계",
         "포스터"
       ]
+    },
+    {
+      "id": "jjomuldak-factory",
+      "title": "쪼물딱 공장",
+      "icon": "🫧",
+      "description": "뽁뽁이, 말랑이, 팝잇처럼 손으로 조물조물 만지는 장난감을 모아 둔 놀이터입니다. 누르고 당기고 터뜨리며 색 도감을 채워보세요.",
+      "path": "plays/jjomuldak-factory.html",
+      "date": "2026-09-05",
+      "tags": [
+        "뽁뽁이",
+        "말랑이",
+        "팝잇",
+        "과학 놀이",
+        "촉각"
+      ]
     }
   ]
 };

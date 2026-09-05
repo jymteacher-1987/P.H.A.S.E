@@ -1,0 +1,2274 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>쪼물딱 공장</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500;700&display=swap">
+</head>
+<body>
+<style>
+:root{
+  --ink:#17202B; --ink-soft:#5A6B7C; --ink-faint:#8C9AA8;
+  --ground:#E4EAEF; --surface:#FFFFFF; --surface-2:#F1F5F8; --surface-3:#E4ECF2;
+  --line:#C9D5DF; --line-2:#B4C4D1;
+  --pok:#1494AC; --pok-t:#DEF3F7;
+  --man:#E8446E; --man-t:#FFE5EB;
+  --jjo:#C98700; --jjo-t:#FFF1D2;
+  --lime:#5FAF22;
+  --bub1:#9ED9E4; --bub2:#EAFBFD; --film:#E2F1F5;
+  --sh:rgba(23,32,43,.16); --veil:rgba(241,245,248,.93);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#E7EEF5; --ink-soft:#9BADBE; --ink-faint:#7286A0;
+    --ground:#0E141B; --surface:#18212C; --surface-2:#1E2833; --surface-3:#26333F;
+    --line:#32404F; --line-2:#3E4E60;
+    --pok:#4ED2E5; --pok-t:#123039;
+    --man:#FF7C99; --man-t:#3B1A23;
+    --jjo:#FFC53D; --jjo-t:#3B2C09;
+    --lime:#9AE255;
+    --bub1:#3E7F90; --bub2:#8ED4E4; --film:#1A2932;
+    --sh:rgba(0,0,0,.45); --veil:rgba(30,40,51,.93);
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#E7EEF5; --ink-soft:#9BADBE; --ink-faint:#7286A0;
+  --ground:#0E141B; --surface:#18212C; --surface-2:#1E2833; --surface-3:#26333F;
+  --line:#32404F; --line-2:#3E4E60;
+  --pok:#4ED2E5; --pok-t:#123039;
+  --man:#FF7C99; --man-t:#3B1A23;
+  --jjo:#FFC53D; --jjo-t:#3B2C09;
+  --lime:#9AE255;
+  --bub1:#3E7F90; --bub2:#8ED4E4; --film:#1A2932;
+  --sh:rgba(0,0,0,.45); --veil:rgba(30,40,51,.93);
+}
+*{box-sizing:border-box}
+html{height:100%;-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--ground);color:var(--ink);
+  font-family:'IBM Plex Sans KR','Malgun Gothic',system-ui,sans-serif;
+  font-size:15px;line-height:1.6;-webkit-tap-highlight-color:transparent;
+  height:100vh;height:100svh;display:flex;flex-direction:column;overflow:hidden;
+}
+h1,h2,h3,.jua{font-family:'Jua','Malgun Gothic',system-ui,sans-serif;font-weight:400;letter-spacing:.01em}
+.mono{font-family:'IBM Plex Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+button{font-family:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--pok);outline-offset:2px}
+
+.top{flex:none;z-index:40;background:var(--surface);border-bottom:1.5px solid var(--line)}
+.top-in{max-width:1180px;margin:0 auto;padding:9px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:baseline;gap:9px;margin-right:auto}
+.brand b{font-family:'Jua',sans-serif;font-weight:400;font-size:23px;letter-spacing:.02em}
+.brand b i{font-style:normal;color:var(--pok)}
+.brand small{font-size:11.5px;color:var(--ink-faint);letter-spacing:.05em}
+@media (max-width:520px){.brand small{display:none}}
+.tally{display:flex;align-items:baseline;gap:7px;padding:5px 13px;border-radius:999px;background:var(--surface-2);border:1.5px solid var(--line)}
+.tally .n{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;font-weight:700;font-size:17px;display:inline-block;transition:transform .12s ease-out}
+.tally .n.bump{transform:scale(1.3)}
+.tally .l{font-size:11px;color:var(--ink-faint);letter-spacing:.04em}
+.mute{border:1.5px solid var(--line);background:var(--surface-2);border-radius:11px;padding:6px 12px;font-size:13px;cursor:pointer;box-shadow:0 3px 0 var(--line-2)}
+.mute:active{transform:translateY(2px);box-shadow:0 1px 0 var(--line-2)}
+.mute[aria-pressed="false"]{color:var(--ink-faint)}
+
+.wrap{max-width:1180px;width:100%;margin:0 auto;padding:12px 18px 8px;flex:1;min-height:0;display:flex;flex-direction:column}
+.main{display:grid;grid-template-columns:238px 1fr;gap:20px;align-items:stretch;flex:1;min-height:0}
+@media (max-width:900px){.main{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr);gap:12px}}
+
+.shelf{display:flex;flex-direction:column;gap:clamp(6px,1.4vh,13px);min-height:0;overflow-y:auto;overflow-x:hidden;padding-right:4px}
+.cat-h{flex:none;display:flex;align-items:center;gap:8px;margin-bottom:clamp(2px,.55vh,6px);padding-left:2px;line-height:1.3}
+.cat-h .bar{width:16px;height:4px;border-radius:2px;background:var(--c)}
+.cat-h strong{font-family:'Jua',sans-serif;font-weight:400;font-size:clamp(13px,1.8vh,15px);color:var(--ink-soft)}
+.cat-h em{font-style:normal;font-size:10px;color:var(--ink-faint);letter-spacing:.09em;font-family:'IBM Plex Mono',monospace}
+.shelf > div{display:flex;flex-direction:column;min-height:0}
+.cat-list{display:flex;flex-direction:column;gap:clamp(4px,.85vh,7px);flex:1;justify-content:space-between}
+.toy-btn{flex:none;display:flex;align-items:center;gap:10px;width:100%;padding:clamp(3px,.62vh,9px) 12px;border:1.5px solid var(--line);border-radius:13px;background:var(--surface);font-family:'Jua',sans-serif;font-size:clamp(13.5px,1.9vh,15.5px);line-height:1.3;cursor:pointer;text-align:left;box-shadow:0 3px 0 var(--line-2);transition:box-shadow .1s,transform .1s,border-color .1s}
+.toy-btn .dot{width:13px;height:13px;border-radius:5px;background:var(--c);flex:none}
+.toy-btn:hover{border-color:var(--c)}
+.toy-btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--line-2)}
+.toy-btn[aria-current="true"]{border-color:var(--c);background:var(--tint);box-shadow:0 3px 0 var(--c);transform:translateY(1px)}
+@media (max-width:900px){
+  .shelf{gap:6px;overflow:visible;flex:none}
+  .shelf > div{flex:none !important}
+  .cat-h{margin-bottom:3px}
+  .cat-h strong{font-size:13px}
+  .cat-list{flex-direction:row;flex-wrap:wrap;overflow:visible;padding-bottom:0;justify-content:flex-start;gap:6px}
+  .toy-btn{width:auto;white-space:nowrap;flex:none;padding:7px 12px;font-size:14px;line-height:1.35;gap:8px;box-shadow:0 2px 0 var(--line-2)}
+  .toy-btn .dot{width:11px;height:11px}
+}
+
+.stage{background:var(--surface);border:1.5px solid var(--line);border-radius:22px;padding:13px 14px 14px;box-shadow:0 5px 0 var(--line-2);display:flex;flex-direction:column;min-height:0}
+.stage.shake{animation:shake .34s cubic-bezier(.36,.07,.19,.97)}
+@keyframes shake{10%,90%{transform:translate(-2px,1px)}30%,70%{transform:translate(5px,-2px)}50%{transform:translate(-6px,2px)}}
+.stage-head{flex:none;display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;margin:1px 5px 9px}
+.stage-head h2{margin:0;font-size:24px;line-height:1.12;text-wrap:balance}
+.stage-head p{margin:2px 0 0;font-size:12.5px;color:var(--ink-soft);max-width:50ch;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;height:2.7em}
+.stage-head .meta{margin-left:auto;text-align:right}
+.stage-head .meta .v{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;font-weight:700;font-size:20px;color:var(--c);display:block;line-height:1.2}
+.stage-head .meta .k{font-size:10px;letter-spacing:.09em;color:var(--ink-faint)}
+.field{position:relative;background:var(--surface-2);border-radius:16px;flex:1;min-height:150px;display:grid;grid-template:minmax(0,1fr)/minmax(0,1fr);place-items:center;padding:12px 12px 34px;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
+.tools{flex:none;display:flex;gap:8px;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;height:40px;margin:9px 5px 0;align-items:center;scrollbar-width:none}
+.tools::-webkit-scrollbar{height:0}
+.tools > *{flex:none}
+.tool{border:1.5px solid var(--line);background:var(--surface);border-radius:11px;padding:6px 13px;font-size:13px;font-family:'Jua',sans-serif;cursor:pointer;box-shadow:0 3px 0 var(--line-2)}
+.tool:hover{border-color:var(--c)}
+.tool:active{transform:translateY(2px);box-shadow:0 1px 0 var(--line-2)}
+.hint{font-size:12px;color:var(--ink-faint);margin-left:auto;text-align:right;white-space:nowrap}
+.foot{flex:none;margin:7px 6px 0;font-size:11px;color:var(--ink-faint);text-align:center}
+@media (max-width:640px){.hint{display:none}}
+
+#fx{position:fixed;inset:0;pointer-events:none;z-index:60;overflow:hidden}
+.fx{position:absolute;font-family:'Jua',sans-serif;font-size:26px;transform:translate(-50%,-50%);animation:fxup .72s cubic-bezier(.2,.8,.3,1) forwards;white-space:nowrap}
+@keyframes fxup{
+  0%{opacity:0;transform:translate(-50%,-50%) rotate(var(--r)) scale(.5)}
+  22%{opacity:1;transform:translate(-50%,-88%) rotate(var(--r)) scale(1.15)}
+  100%{opacity:0;transform:translate(-50%,-200%) rotate(var(--r)) scale(.9)}
+}
+@media (prefers-reduced-motion:reduce){
+  .fx{animation-duration:.4s}
+  .stage.shake{animation:none}
+}
+
+/* ── 뽁뽁이 ─────────────────────────── */
+.sheet{display:grid;gap:3px;padding:11px;border-radius:12px;background:var(--film);box-shadow:inset 0 0 0 1.5px var(--line),0 3px 12px var(--sh);max-width:100%}
+.bub{aspect-ratio:1;border-radius:50%;cursor:pointer;
+  background:radial-gradient(circle at 34% 27%,rgba(255,255,255,.95),rgba(255,255,255,.18) 40%,rgba(255,255,255,0) 62%),radial-gradient(circle at 52% 66%,var(--bub2),var(--bub1) 80%);
+  box-shadow:inset 0 -2px 5px rgba(0,0,0,.14),0 1px 3px var(--sh);
+  transition:transform .09s ease-out}
+.bub:hover{transform:scale(1.06)}
+.bub.popped{cursor:default;transform:scale(.78);opacity:.92;background:var(--film);box-shadow:inset 0 1px 4px rgba(0,0,0,.2),inset 0 0 0 1px var(--line)}
+.bub.popped:hover{transform:scale(.78)}
+.bub.refill{animation:refill .4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes refill{0%{transform:scale(.78)}60%{transform:scale(1.14)}100%{transform:scale(1)}}
+.combo{position:absolute;top:11px;right:15px;font-family:'Jua',sans-serif;font-size:20px;color:var(--c);opacity:0;transition:opacity .25s}
+.combo.on{opacity:1}
+.done{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:var(--veil);font-family:'Jua',sans-serif;font-size:25px;text-align:center;z-index:5}
+
+/* ── 말랑이 ─────────────────────────── */
+.doll{width:100%;height:100%;max-width:340px;display:block;cursor:grab;overflow:visible}
+.doll:active{cursor:grabbing}
+.gauge{position:absolute;left:0;right:0;bottom:0;height:7px;background:var(--surface-3)}
+.gauge i{display:block;height:100%;width:0;background:var(--c);transition:width .06s linear}
+.gauge i.hot{background:#E8446E}
+.puff{position:absolute;border-radius:50%;pointer-events:none}
+.label-mid{position:absolute;bottom:16px;left:0;right:0;text-align:center;font-family:'Jua',sans-serif;font-size:14px;color:var(--ink-faint)}
+
+/* ── 쪼물딱 ─────────────────────────── */
+.board{display:grid;gap:8px;padding:14px;border-radius:20px;background:var(--boardc,#f0a);box-shadow:inset 0 -4px 0 rgba(0,0,0,.14),0 4px 12px var(--sh)}
+.pit{aspect-ratio:1;border-radius:50%;cursor:pointer;transition:transform .07s,box-shadow .07s;
+  background:radial-gradient(circle at 36% 30%,rgba(255,255,255,.5),rgba(255,255,255,0) 55%),var(--boardc);
+  box-shadow:inset 0 -4px 6px rgba(0,0,0,.22),0 2px 3px rgba(0,0,0,.12)}
+.pit.in{box-shadow:inset 0 4px 8px rgba(0,0,0,.4);transform:scale(.94);background:var(--boardc)}
+.spin-wrap{position:relative;height:100%;max-height:330px;width:auto;aspect-ratio:1;max-width:100%;cursor:grab}
+.spin-wrap:active{cursor:grabbing}
+.rpm{position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;font-weight:700;font-size:15px;color:var(--ink-faint)}
+.pen{height:100%;max-height:280px;width:auto;max-width:100%;cursor:pointer}
+.sw-bank{display:flex;gap:24px 10px;padding:16px 14px;border-radius:16px;background:var(--surface-3);box-shadow:inset 0 0 0 1.5px var(--line);flex-wrap:wrap;justify-content:center}
+.sw{width:44px;height:78px;border-radius:9px;background:var(--surface);border:1.5px solid var(--line);position:relative;cursor:pointer;box-shadow:inset 0 -3px 0 rgba(0,0,0,.07)}
+.sw i{position:absolute;left:5px;right:5px;height:32px;top:5px;border-radius:6px;background:var(--line-2);transition:top .09s cubic-bezier(.4,1.6,.5,1),background .09s}
+.sw.on i{top:39px;background:var(--jjo)}
+.sw b{position:absolute;left:0;right:0;bottom:-19px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:500;color:var(--ink-faint)}
+.slime-c{border-radius:16px;touch-action:none;max-width:100%}
+
+/* ── 설정 바 ── */
+.bar-row{flex:none;display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin:0 0 11px}
+.chip{display:inline-flex;align-items:center;gap:7px;border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px;font-size:13.5px;font-family:'Jua',sans-serif;cursor:pointer;box-shadow:0 3px 0 var(--line-2)}
+.chip:hover{border-color:var(--pok)}
+.chip:active{transform:translateY(2px);box-shadow:0 1px 0 var(--line-2)}
+.chip .n{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;font-size:12px;font-weight:700;color:var(--ink-faint)}
+.chip .sw{width:14px;height:14px;border-radius:5px;box-shadow:inset 0 -2px 4px rgba(0,0,0,.25)}
+.lv{display:inline-flex;align-items:center;gap:8px;padding:5px 14px;border-radius:999px;background:var(--pok-t);border:1.5px solid var(--pok);font-family:'Jua',sans-serif;font-size:13.5px}
+.lv b{font-family:'IBM Plex Mono',monospace;font-weight:700;color:var(--pok)}
+.lv i{font-style:normal;font-size:11px;color:var(--ink-faint);font-family:'IBM Plex Sans KR',sans-serif}
+
+.seg{display:inline-flex;border:1.5px solid var(--line);border-radius:11px;overflow:hidden;box-shadow:0 3px 0 var(--line-2)}
+.seg button{border:0;background:var(--surface);padding:6px 12px;font-size:12.5px;font-family:'Jua',sans-serif;cursor:pointer;border-right:1.5px solid var(--line);color:var(--ink-soft)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--tint);color:var(--c)}
+.rng{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-faint);font-family:'Jua',sans-serif}
+.rng input{width:104px;accent-color:var(--c)}
+
+/* ── 모달 ── */
+.mask{position:fixed;inset:0;background:rgba(8,14,20,.58);z-index:70;display:grid;place-items:center;padding:20px;animation:fade .18s ease-out}
+@keyframes fade{from{opacity:0}}
+.modal{background:var(--surface);border:1.5px solid var(--line);border-radius:22px;box-shadow:0 8px 0 var(--line-2);max-width:470px;width:100%;max-height:84vh;overflow:auto;padding:22px}
+.modal h3{margin:0 0 3px;font-size:23px}
+.modal .sub{font-size:12.5px;color:var(--ink-soft);margin:0 0 16px;line-height:1.5}
+.modal .row{display:flex;gap:8px;margin-top:18px;justify-content:flex-end;flex-wrap:wrap}
+.dex{display:grid;grid-template-columns:repeat(auto-fill,minmax(66px,1fr));gap:8px}
+.dex button{border:1.5px solid var(--line);border-radius:13px;background:var(--surface-2);padding:8px 3px;cursor:pointer;font-size:10.5px;display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--ink-soft)}
+.dex button .sw{width:30px;height:30px;border-radius:10px;box-shadow:inset 0 -3px 6px rgba(0,0,0,.2)}
+.dex button.locked{opacity:.45;cursor:default}
+.dex button.on{border-color:var(--pok);box-shadow:0 3px 0 var(--pok);color:var(--ink)}
+.txt{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:13px;background:var(--surface-2);color:var(--ink);font-family:'Jua',sans-serif;font-size:22px;text-align:center;letter-spacing:.08em}
+.fort{background:var(--surface-2);border-radius:16px;padding:18px;text-align:center;font-family:'Jua',sans-serif;font-size:19px;line-height:1.5;margin-bottom:14px}
+.fort-l{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;font-size:12.5px;color:var(--ink-soft);font-family:'IBM Plex Sans KR',sans-serif}
+.fort-l span{background:var(--surface-2);border-radius:999px;padding:5px 12px}
+
+/* ── 도장판 ── */
+.achs{display:grid;grid-template-columns:repeat(auto-fill,minmax(134px,1fr));gap:9px}
+.achs div{border:1.5px solid var(--line);border-radius:13px;background:var(--surface-2);padding:9px 11px;font-size:11.5px;color:var(--ink-faint);line-height:1.35}
+.achs div.got{border-color:var(--jjo);background:var(--jjo-t);color:var(--ink);box-shadow:0 3px 0 var(--jjo)}
+.achs b{display:block;font-family:'Jua',sans-serif;font-weight:400;font-size:14px;margin-bottom:2px}
+
+/* ── 토스트 ── */
+#toasts{position:fixed;left:0;right:0;bottom:24px;z-index:80;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;padding:0 16px}
+.toast{background:var(--ink);color:var(--ground);padding:11px 20px;border-radius:999px;font-family:'Jua',sans-serif;font-size:14.5px;box-shadow:0 5px 18px rgba(0,0,0,.32);animation:tin .28s cubic-bezier(.2,.9,.3,1);text-align:center}
+@keyframes tin{from{opacity:0;transform:translateY(16px) scale(.9)}}
+
+/* ── 각인 · 미스터리 알 ── */
+.bub{position:relative}
+.bub span{position:absolute;inset:0;display:grid;place-items:center;font-family:'Jua',sans-serif;color:rgba(16,44,54,.5);pointer-events:none;overflow:hidden;line-height:1}
+.bub.popped span{opacity:.4}
+.bub.myst{animation:myst 1.3s ease-in-out infinite}
+@keyframes myst{0%,100%{filter:brightness(1) saturate(1)}50%{filter:brightness(1.4) saturate(1.9)}}
+.bub.myst.popped{animation:none}
+@media (prefers-reduced-motion:reduce){.bub.myst{animation:none;outline:2px dashed var(--jjo);outline-offset:-3px}}
+
+/* ══ 좁은 화면(폰) ═══════════════════════════════════════
+   가로로 끌 일은 어디에도 없게, 대신 세로로 내려서 본다 */
+@media (max-width:900px){
+  body{height:auto;min-height:100svh;overflow:visible}
+  .top{position:sticky;top:0}
+  .top-in{padding:7px 13px;gap:9px}
+  .wrap{flex:none;padding:10px 13px 16px}
+  .main{flex:none;min-height:0}
+  .bar-row{flex-wrap:wrap;overflow:visible;margin-bottom:9px}
+  .stage{padding:11px 11px 12px;border-radius:18px;min-height:0}
+  .stage-head{margin:1px 4px 7px}
+  .stage-head h2{font-size:21px}
+  .stage-head .meta{margin-left:auto}
+  .field{flex:none;height:min(48vh,340px);min-height:230px}
+  .tools{height:auto;min-height:40px;flex-wrap:wrap;overflow:visible}
+  .foot{margin-top:11px;font-size:11.5px}
+  /* 스위치 여덟 개가 판 안에 들어오도록 */
+  .sw{width:36px;height:62px}
+  .sw i{left:4px;right:4px;height:24px}
+  .sw.on i{top:33px}
+  .sw b{bottom:-16px;font-size:10px}
+  .sw-bank{gap:22px 8px;padding:12px 11px}
+}
+</style>
+
+<div class="top">
+  <div class="top-in">
+    <div class="brand">
+      <b>쪼물딱 <i>공장</i></b>
+      <small>손가락 심심할 때 오는 곳</small>
+    </div>
+    <div class="tally"><span class="n mono" id="tally">0</span><span class="l">번 쪼물딱</span></div>
+    <button class="mute" id="mute" aria-pressed="true">소리 켜짐</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="bar-row" id="bar"></div>
+  <div class="main">
+    <nav class="shelf" id="shelf" aria-label="장난감 선반"></nav>
+    <section class="stage" id="stage">
+      <div class="stage-head">
+        <div>
+          <h2 id="t-name">—</h2>
+          <p id="t-desc"></p>
+        </div>
+        <div class="meta"><span class="v" id="t-val">0</span><span class="k" id="t-key"></span></div>
+      </div>
+      <div class="field" id="field"></div>
+      <div class="tools" id="tools"></div>
+    </section>
+  </div>
+</div>
+<div id="fx"></div>
+<div id="toasts"></div>
+
+<script>
+/* ══ 소리 공장 ══════════════════════════════════════════ */
+const SND = (() => {
+  let ctx = null, master = null, nb = null, on = true;
+  function ready(){
+    if (!on) return null;
+    if (!ctx){
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) { on = false; return null; }
+      ctx = new AC(); master = ctx.createGain(); master.gain.value = .5; master.connect(ctx.destination);
+    }
+    if (ctx.state === 'suspended') ctx.resume();
+    return ctx;
+  }
+  function noise(c){
+    if (!nb){
+      nb = c.createBuffer(1, c.sampleRate, c.sampleRate);
+      const d = nb.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    const s = c.createBufferSource(); s.buffer = nb; s.loop = true; return s;
+  }
+  return {
+    get on(){ return on; },
+    toggle(){ on = !on; if (!on && ctx) ctx.suspend(); else ready(); return on; },
+    wake(){ ready(); },
+    /* 뽁! */
+    pop(p = 1, v = 1){
+      const c = ready(); if (!c) return; const t = c.currentTime;
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(820 * p, t);
+      o.frequency.exponentialRampToValueAtTime(Math.max(60, 140 * p), t + .07);
+      g.gain.setValueAtTime(.0001, t);
+      g.gain.exponentialRampToValueAtTime(.32 * v, t + .005);
+      g.gain.exponentialRampToValueAtTime(.0001, t + .1);
+      o.connect(g); g.connect(master); o.start(t); o.stop(t + .11);
+      const n = noise(c), bp = c.createBiquadFilter(), ng = c.createGain();
+      bp.type = 'bandpass'; bp.frequency.value = 1900 * p; bp.Q.value = 1.2;
+      ng.gain.setValueAtTime(.26 * v, t);
+      ng.gain.exponentialRampToValueAtTime(.0001, t + .05);
+      n.connect(bp); bp.connect(ng); ng.connect(master); n.start(t); n.stop(t + .06);
+    },
+    /* 딸깍 */
+    click(p = 1, v = 1){
+      const c = ready(); if (!c) return; const t = c.currentTime;
+      [[2400 * p, 0], [1300 * p, .012]].forEach(([f, d]) => {
+        const o = c.createOscillator(), g = c.createGain();
+        o.type = 'square'; o.frequency.value = f;
+        g.gain.setValueAtTime(.0001, t + d);
+        g.gain.exponentialRampToValueAtTime(.12 * v, t + d + .002);
+        g.gain.exponentialRampToValueAtTime(.0001, t + d + .03);
+        o.connect(g); g.connect(master); o.start(t + d); o.stop(t + d + .04);
+      });
+    },
+    /* 삐- 음 */
+    tone(f, dur = .2, type = 'triangle', v = .18){
+      const c = ready(); if (!c) return; const t = c.currentTime;
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = type; o.frequency.value = f;
+      g.gain.setValueAtTime(.0001, t);
+      g.gain.exponentialRampToValueAtTime(v, t + .012);
+      g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+      o.connect(g); g.connect(master); o.start(t); o.stop(t + dur + .02);
+    },
+    /* 뽀요요옹 */
+    boing(f = 210, v = .22){
+      const c = ready(); if (!c) return; const t = c.currentTime;
+      const o = c.createOscillator(), g = c.createGain(), l = c.createOscillator(), lg = c.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(f * 2.1, t);
+      o.frequency.exponentialRampToValueAtTime(f * .8, t + .3);
+      l.type = 'sine'; l.frequency.value = 15; lg.gain.setValueAtTime(70, t);
+      lg.gain.exponentialRampToValueAtTime(1, t + .35);
+      l.connect(lg); lg.connect(o.frequency);
+      g.gain.setValueAtTime(.0001, t);
+      g.gain.exponentialRampToValueAtTime(v, t + .01);
+      g.gain.exponentialRampToValueAtTime(.0001, t + .42);
+      o.connect(g); g.connect(master); o.start(t); l.start(t); o.stop(t + .45); l.stop(t + .45);
+    },
+    /* 뻥! */
+    burst(v = .5){
+      const c = ready(); if (!c) return; const t = c.currentTime;
+      const n = noise(c), lp = c.createBiquadFilter(), g = c.createGain();
+      lp.type = 'lowpass'; lp.frequency.setValueAtTime(4200, t);
+      lp.frequency.exponentialRampToValueAtTime(220, t + .4);
+      g.gain.setValueAtTime(v, t);
+      g.gain.exponentialRampToValueAtTime(.0001, t + .45);
+      n.connect(lp); lp.connect(g); g.connect(master); n.start(t); n.stop(t + .5);
+    },
+    /* 딸깍 — 볼펜·스위치용. 위쪽 '딸' 틱과 아래쪽 '깍' 몸통이 겹쳐 난다 */
+    clack(p = 1, v = 1){
+      const c = ready(); if (!c) return; const t = c.currentTime;
+      const n = noise(c), hp = c.createBiquadFilter(), bp = c.createBiquadFilter(), ng = c.createGain();
+      hp.type = 'highpass'; hp.frequency.value = 1800 * p;
+      bp.type = 'peaking'; bp.frequency.value = 3800 * p; bp.Q.value = 1.4; bp.gain.value = 9;
+      ng.gain.setValueAtTime(.0001, t);
+      ng.gain.exponentialRampToValueAtTime(.34 * v, t + .0012);
+      ng.gain.exponentialRampToValueAtTime(.0001, t + .026);
+      n.connect(hp); hp.connect(bp); bp.connect(ng); ng.connect(master);
+      n.start(t); n.stop(t + .035);
+      const o = c.createOscillator(), g = c.createGain();
+      o.type = 'triangle';
+      o.frequency.setValueAtTime(380 * p, t);
+      o.frequency.exponentialRampToValueAtTime(105 * p, t + .045);
+      g.gain.setValueAtTime(.0001, t);
+      g.gain.exponentialRampToValueAtTime(.19 * v, t + .003);
+      g.gain.exponentialRampToValueAtTime(.0001, t + .075);
+      o.connect(g); g.connect(master); o.start(t); o.stop(t + .085);
+    },
+    /* 통 — 실로폰처럼 짧게 튕기는 음 (스위치 음계용) */
+    pluck(f, v = .16){
+      const c = ready(); if (!c) return; const t = c.currentTime;
+      [[1, v, .34], [2.01, v * .34, .17], [3.03, v * .11, .1]].forEach(a => {
+        const o = c.createOscillator(), g = c.createGain();
+        o.type = 'sine'; o.frequency.value = f * a[0];
+        g.gain.setValueAtTime(.0001, t);
+        g.gain.exponentialRampToValueAtTime(a[1], t + .006);
+        g.gain.exponentialRampToValueAtTime(.0001, t + a[2]);
+        o.connect(g); g.connect(master); o.start(t); o.stop(t + a[2] + .03);
+      });
+    },
+    /* 삐이이익 — 고무 인형 쥐는 소리. lo가 낮을수록 큰 고무 */
+    squeak(lo = 240, hi = 900){
+      const c = ready(); if (!c) return { set(){}, stop(){} };
+      const o = c.createOscillator(), g = c.createGain(), lp = c.createBiquadFilter();
+      o.type = 'sawtooth'; o.frequency.value = lo;
+      lp.type = 'lowpass'; lp.frequency.value = 1400;
+      g.gain.value = .0001;
+      o.connect(lp); lp.connect(g); g.connect(master); o.start();
+      return {
+        set(x){
+          const t = c.currentTime;
+          o.frequency.setTargetAtTime(lo + hi * x, t, .04);
+          lp.frequency.setTargetAtTime(900 + 2200 * x, t, .06);
+          g.gain.setTargetAtTime(x <= .01 ? .0001 : .05 + .06 * x, t, .05);
+        },
+        stop(){ const t = c.currentTime; g.gain.setTargetAtTime(.0001, t, .04); setTimeout(() => { try { o.stop(); } catch (e) {} }, 250); }
+      };
+    },
+    /* 스으으— 바람 들어가는 소리 (볼록이) */
+    air(){
+      const c = ready(); if (!c) return { set(){}, stop(){} };
+      const n = noise(c), bp = c.createBiquadFilter(), g = c.createGain();
+      bp.type = 'bandpass'; bp.frequency.value = 460; bp.Q.value = 1;
+      g.gain.value = .0001;
+      n.connect(bp); bp.connect(g); g.connect(master); n.start();
+      return {
+        set(x){
+          const t = c.currentTime;
+          bp.frequency.setTargetAtTime(420 + 2400 * x, t, .09);
+          bp.Q.setTargetAtTime(1 + 6 * x, t, .12);
+          g.gain.setTargetAtTime(x <= .01 ? .0001 : .04 + .15 * x, t, .09);
+        },
+        stop(){ const t = c.currentTime; g.gain.setTargetAtTime(.0001, t, .06); setTimeout(() => { try { n.stop(); } catch (e) {} }, 320); }
+      };
+    },
+    /* 질척질척 — 슬라임 주무르는 소리 */
+    goo(){
+      const c = ready(); if (!c) return { set(){}, stop(){} };
+      const n = noise(c), bp = c.createBiquadFilter(), lp = c.createBiquadFilter(), g = c.createGain();
+      const lfo = c.createOscillator(), lg = c.createGain();
+      bp.type = 'bandpass'; bp.frequency.value = 380; bp.Q.value = 7;
+      lp.type = 'lowpass'; lp.frequency.value = 1300;
+      lfo.type = 'sine'; lfo.frequency.value = 7; lg.gain.value = 240;
+      lfo.connect(lg); lg.connect(bp.frequency);
+      g.gain.value = .0001;
+      n.connect(bp); bp.connect(lp); lp.connect(g); g.connect(master);
+      n.start(); lfo.start();
+      return {
+        set(x){
+          const t = c.currentTime;
+          bp.frequency.setTargetAtTime(300 + 620 * x, t, .07);
+          lfo.frequency.setTargetAtTime(5 + 15 * x, t, .1);
+          g.gain.setTargetAtTime(x <= .01 ? .0001 : .06 + .2 * x, t, .06);
+        },
+        stop(){ const t = c.currentTime; g.gain.setTargetAtTime(.0001, t, .05); setTimeout(() => { try { n.stop(); lfo.stop(); } catch (e) {} }, 320); }
+      };
+    },
+    /* 위이잉 — 스피너 */
+    whir(){
+      const c = ready(); if (!c) return { set(){}, stop(){} };
+      const n = noise(c), bp = c.createBiquadFilter(), g = c.createGain();
+      bp.type = 'bandpass'; bp.frequency.value = 700; bp.Q.value = 4;
+      g.gain.value = .0001;
+      n.connect(bp); bp.connect(g); g.connect(master); n.start();
+      return {
+        set(x){
+          const t = c.currentTime;
+          bp.frequency.setTargetAtTime(320 + 1500 * Math.min(1, x), t, .06);
+          g.gain.setTargetAtTime(Math.min(.16, x * .2), t, .08);
+        },
+        stop(){ const t = c.currentTime; g.gain.setTargetAtTime(.0001, t, .05); setTimeout(() => { try { n.stop(); } catch (e) {} }, 300); }
+      };
+    },
+    /* 뿌직 */
+    squelch(v = .3, up = true){
+      const c = ready(); if (!c) return; const t = c.currentTime;
+      const n = noise(c), bp = c.createBiquadFilter(), g = c.createGain();
+      bp.type = 'bandpass'; bp.Q.value = 3;
+      bp.frequency.setValueAtTime(up ? 380 : 1500, t);
+      bp.frequency.exponentialRampToValueAtTime(up ? 1500 : 380, t + .22);
+      g.gain.setValueAtTime(.0001, t);
+      g.gain.exponentialRampToValueAtTime(v, t + .04);
+      g.gain.exponentialRampToValueAtTime(.0001, t + .26);
+      n.connect(bp); bp.connect(g); g.connect(master); n.start(t); n.stop(t + .3);
+    }
+  };
+})();
+
+/* ══ 저장 ══════════════════════════════════════════════ */
+const DB = (() => {
+  const K = 'jjomullak.v1';
+  let d = { tally: 0, rec: {}, last: 'classic', stamp: '', dex: [], color: null, kit: 1, size: 1, fortuneDay: '', lv: 1,
+            ach: [], seen: [], slimeMem: 100, jjukSnap: 1 };
+  try { const r = localStorage.getItem(K); if (r) d = Object.assign(d, JSON.parse(r)); } catch (e) {}
+  let timer = null;
+  const save = () => { clearTimeout(timer); timer = setTimeout(() => { try { localStorage.setItem(K, JSON.stringify(d)); } catch (e) {} }, 400); };
+  return {
+    get data(){ return d; },
+    bump(n){ d.tally += n; save(); return d.tally; },
+    rec(id){ return d.rec[id] || 0; },
+    setRec(id, v){ if (v > (d.rec[id] || 0)) { d.rec[id] = v; save(); return true; } return false; },
+    clear(id){ delete d.rec[id]; save(); },
+    set(k, v){ d[k] = v; save(); return v; },
+    last(id){ if (id) { d.last = id; save(); } return d.last; }
+  };
+})();
+
+/* ══ 의성어 ════════════════════════════════════════════ */
+const fxLayer = document.getElementById('fx');
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let fxAt = 0;
+function fx(x, y, text, color, size, force){
+  const now = performance.now();
+  if (!force && now - fxAt < 60) return;
+  fxAt = now;
+  const s = document.createElement('span');
+  s.className = 'fx'; s.textContent = text;
+  s.style.left = x + 'px'; s.style.top = y + 'px';
+  s.style.color = color || 'var(--ink)';
+  s.style.fontSize = (size || 26) + 'px';
+  s.style.setProperty('--r', (Math.random() * 22 - 11).toFixed(1) + 'deg');
+  fxLayer.appendChild(s);
+  setTimeout(() => s.remove(), 760);
+}
+function vib(ms){ try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {} }
+const rnd = (a, b) => a + Math.random() * (b - a);
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+const pickOne = a => a[(Math.random() * a.length) | 0];
+function mix(a, b, t){
+  const P = h => [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)];
+  const A = P(a), B = P(b);
+  return 'rgb(' + A.map((v,i) => Math.round(v + (B[i]-v)*t)).join(',') + ')';
+}
+const lighten = (h, t) => mix(h, '#ffffff', t);
+
+/* ══ 토스트 · 모달 ══════════════════════════════════════ */
+const toastBox = document.getElementById('toasts');
+function toast(msg, ms){
+  const t = document.createElement('div');
+  t.className = 'toast'; t.textContent = msg;
+  toastBox.appendChild(t);
+  setTimeout(() => { t.style.transition = 'opacity .3s'; t.style.opacity = '0'; setTimeout(() => t.remove(), 320); }, ms || 2200);
+}
+function modal(build){
+  const mask = document.createElement('div');
+  mask.className = 'mask';
+  const box = document.createElement('div');
+  box.className = 'modal';
+  mask.appendChild(box);
+  const close = () => { mask.remove(); removeEventListener('keydown', esc); };
+  const esc = e => { if (e.key === 'Escape') close(); };
+  mask.addEventListener('pointerdown', e => { if (e.target === mask) close(); });
+  addEventListener('keydown', esc);
+  build(box, close);
+  document.body.appendChild(mask);
+  const f = box.querySelector('input,button');
+  if (f) f.focus();
+  return close;
+}
+
+/* ══ 소리 종류 ══════════════════════════════════════════ */
+const KITS = [
+  { name: '얇은 비닐', p: 1.42, v: .72 },
+  { name: '보통', p: 1, v: 1 },
+  { name: '에어캡', p: .62, v: 1.3 }
+];
+
+/* ══ 숨은 색 도감 ══════════════════════════════════════ */
+const DEX = [
+  ['병아리','#FFD93B'], ['하늘','#7EC8F5'], ['새싹','#8FD94A'], ['딸기우유','#FF9EC0'], ['자두','#8E5BD8'],
+  ['민트','#4FD8C0'], ['귤','#FF9E3D'], ['숯','#4A5C6E'], ['우유','#F2ECDD'], ['체리','#E8446E'],
+  ['바다','#2A86C4'], ['라벤더','#B9A0F0'], ['말차','#6BAE63'], ['모래','#E2C89A'], ['포도','#6B4BC9'],
+  ['수박','#FF6B6B'], ['레몬','#F2DF52'], ['청포도','#C3E05A'], ['복숭아','#FFB59E'], ['가지','#6B4499'],
+  ['소다','#5FD3F0'], ['코코아','#9A6A45'], ['장미','#D62B57'], ['이끼','#5E8A46'], ['안개','#C3D0DB'],
+  ['노을','#FF7A45'], ['먹물','#2A3B52'], ['금','#E5B53C'], ['형광','#B6FF3C'], ['오로라','#7CF5C4']
+];
+function dexHas(i){ return DB.data.dex.indexOf(i) >= 0; }
+function grantColor(){
+  const left = DEX.map((c, i) => i).filter(i => !dexHas(i));
+  if (!left.length){
+    toast('색은 이미 30가지 다 모았어요');
+    SND.tone(880, .18);
+    return null;
+  }
+  const i = pickOne(left);
+  DB.data.dex.push(i);
+  DB.set('dex', DB.data.dex);
+  if (DB.data.dex.length >= 10) ach('dex10');
+  SND.tone(660, .12); setTimeout(() => SND.tone(990, .22), 110);
+  toast('숨은 색 ‘' + DEX[i][0] + '’ 획득! (' + DB.data.dex.length + '/' + DEX.length + ')', 2600);
+  if (typeof refreshBar === 'function') refreshBar();
+  return i;
+}
+/* 지금 칠해진 색 (없으면 기본 뽁뽁이 색) */
+function activeColor(){
+  const i = DB.data.color;
+  return (i == null || !dexHas(i)) ? null : DEX[i][1];
+}
+
+/* ══ 도장판 ═══════════════════════════════════════════ */
+const ACHS = [
+  ['pop1',    '첫 뽁',      '뽁뽁이 한 알 터뜨리기'],
+  ['clear',   '한 판 완파',  '뽁뽁이 한 판 끝까지 터뜨리기'],
+  ['combo15', '손이 빠르네',  '15연속으로 터뜨리기'],
+  ['chain30', '도미노 명수',  '한 번에 30알 넘게 번지게 하기'],
+  ['squeeze3','오래 참기',   '말랑이를 3초 넘게 꾹 누르기'],
+  ['bollok95','간 큰 손',    '볼록이 95%에서 손 떼기'],
+  ['burst',   '뻥',         '볼록이 터뜨려 보기'],
+  ['jjuk3',   '쭈욱',       '쭈욱이 3배까지 늘리기'],
+  ['snap',    '뚝',         '쭈욱이 끊어뜨리기'],
+  ['slime100','반죽사',      '슬라임 100번 주무르기'],
+  ['shape',   '조각가',      '슬라임 모양 크게 바꿔놓기'],
+  ['spin3000','팽이 장인',   '스피너 3000 RPM 넘기기'],
+  ['sw8',     '전부 올림',   '스위치 여덟 개 다 올리기'],
+  ['pen200',  '볼펜 고문',   '볼펜 200번 딸깍하기'],
+  ['popit100','팝잇 중독',   '팝잇 100번 뒤집기'],
+  ['alltoys', '다 만져봄',   '장난감 전부 한 번씩 만져보기'],
+  ['dex10',   '수집가',      '숨은 색 10가지 모으기'],
+  ['lv4',     '단골',       'Lv.4 달성하기']
+];
+function achHas(id){ return (DB.data.ach || []).indexOf(id) >= 0; }
+function ach(id){
+  if (!DB.data.ach) DB.data.ach = [];
+  if (achHas(id)) return;
+  const a = ACHS.find(x => x[0] === id);
+  if (!a) return;
+  DB.data.ach.push(id); DB.set('ach', DB.data.ach);
+  toast('도장 획득 — ‘' + a[1] + '’ (' + DB.data.ach.length + '/' + ACHS.length + ')', 2900);
+  SND.tone(784, .1); setTimeout(() => SND.tone(1046, .24), 110);
+  fx(innerWidth / 2, innerHeight * .34, '도장 쾅!', 'var(--jjo)', 36, true);
+  if (typeof refreshBar === 'function') refreshBar();
+}
+
+/* ══ 레벨 · 칭호 ═══════════════════════════════════════ */
+const RANKS = [
+  [0, '손가락 근질러'], [50, '뽁린이'], [200, '뽁잘알'], [600, '쪼물딱러'],
+  [1500, '뽁뽁 장인'], [3500, '에어캡 마스터'], [8000, '쪼물딱 공장장'], [15000, '전설의 손가락']
+];
+function rankOf(n){
+  let i = 0;
+  for (let k = 0; k < RANKS.length; k++) if (n >= RANKS[k][0]) i = k;
+  return { lv: i + 1, name: RANKS[i][1], next: RANKS[i + 1] ? RANKS[i + 1][0] : null };
+}
+
+/* ══ 오늘의 운세 ═══════════════════════════════════════ */
+const FORTUNES = [
+  '오늘은 뽁뽁이가 유난히 잘 터지는 날.',
+  '참았던 한숨이 뽁 소리로 바뀌는 하루.',
+  '누군가 당신에게 택배를 보냅니다. 완충재 두둑한 걸로.',
+  '오늘 만지는 것마다 촉감이 좋습니다.',
+  '작은 일에 크게 웃게 되는 날. 손가락은 바쁩니다.',
+  '한 번에 다 터뜨리려 하지 마세요. 오늘은 한 알씩.',
+  '미뤄둔 일이 생각보다 금방 끝납니다.',
+  '오늘의 스트레스는 도미노처럼 알아서 무너집니다.',
+  '조용한 곳에서 딸깍거리면 큰일 납니다. 소리를 줄이세요.',
+  '반가운 연락이 옵니다. 답장은 천천히.',
+  '오늘은 지는 것도 나쁘지 않은 날.',
+  '주머니에서 잊고 있던 것이 나옵니다.',
+  '무리하지 마세요. 볼록이는 100%에서 터집니다.',
+  '오늘 고른 색이 마음에 오래 남습니다.',
+  '남의 속도에 맞추지 않아도 되는 하루.',
+  '뜻밖의 간식이 생깁니다.',
+  '손이 심심할수록 머리는 맑아집니다.',
+  '오늘 한 번은 크게 기지개를 켜세요.',
+  '늘어난 만큼 다시 돌아옵니다. 쭈욱이처럼.',
+  '오늘의 당신에게는 무한 뽁뽁이가 어울립니다.'
+];
+function todayKey(){
+  const d = new Date();
+  return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+}
+</script>
+
+<script>
+const TOYS = [];
+const SMALL = () => innerWidth < 640;
+/* 세로가 모자라면 판을 그만큼 줄여 한 화면에 담는다 */
+function fieldBox(f){
+  const cs = getComputedStyle(f);
+  return {
+    w: f.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight),
+    h: f.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom)
+  };
+}
+function fitToField(field, el, cols, rows, pad){
+  const h = fieldBox(field).h;
+  if (h > 50) el.style.maxWidth = Math.round((h - pad) * (cols / rows) + pad) + 'px';
+}
+const pick = (d, m) => SMALL() ? m : d;
+
+/* ══ 뽁뽁이 공용 부품 ═══════════════════════════════════ */
+function bubbleSheet(field, api, cfg){
+  const cols = cfg.cols, rows = cfg.rows, cell = cfg.cell, gap = cfg.gap == null ? 3 : cfg.gap;
+  const sheet = document.createElement('div');
+  sheet.className = 'sheet';
+  sheet.style.gridTemplateColumns = 'repeat(' + cols + ',minmax(0,1fr))';
+  sheet.style.gap = gap + 'px';
+  sheet.style.width = 'min(100%,' + (cols * (cell + gap) + 22) + 'px)';
+  const N = cols * rows, cells = [], frag = document.createDocumentFragment();
+  const stamp = DB.data.stamp;
+  for (let i = 0; i < N; i++){
+    const b = document.createElement('div');
+    b.className = 'bub'; b.dataset.i = i;
+    if (stamp && cell >= 20){
+      const s = document.createElement('span');
+      s.textContent = stamp.length > 2 ? stamp.slice(0, 2) : stamp;
+      s.style.fontSize = Math.max(8, cell * (stamp.length > 1 ? .3 : .42)) + 'px';
+      b.appendChild(s);
+    }
+    frag.appendChild(b); cells.push(b);
+  }
+  sheet.appendChild(frag);
+  field.appendChild(sheet);
+  /* 알 크기(확대배율)까지 감안해서 판이 필드를 넘지 않게 */
+  function refit(){
+    const sc = clamp(DB.data.size || 1, .7, 1.15);
+    sheet.style.transform = 'scale(' + sc + ')';
+    const box = fieldBox(field);
+    if (box.h > 50){
+      const byH = (box.h / sc - 22) * (cols / rows) + 22;
+      sheet.style.maxWidth = Math.round(Math.min(byH, box.w / sc)) + 'px';
+    }
+  }
+  /* 도감에서 고른 색이 있으면 그 색으로 */
+  function paint(){
+    const c = activeColor();
+    if (c){
+      sheet.style.setProperty('--bub1', c);
+      sheet.style.setProperty('--bub2', lighten(c, .55));
+    } else {
+      sheet.style.removeProperty('--bub1');
+      sheet.style.removeProperty('--bub2');
+    }
+  }
+  paint();
+  /* 반짝이는 미스터리 알 몇 개 숨겨두기 */
+  const mystN = Math.max(1, Math.round(N * .014));
+  const mysts = new Set();
+  while (mysts.size < mystN) mysts.add((Math.random() * N) | 0);
+  mysts.forEach(i => { cells[i].classList.add('myst'); cells[i].dataset.myst = '1'; });
+
+  const comboEl = document.createElement('div'); comboEl.className = 'combo';
+  field.appendChild(comboEl);
+
+  const timers = [];
+  const words = cfg.words || ['뽁', '뽁!', '뽁—'];
+  let live = N, total = 0, combo = 0, comboT = null, done = null;
+
+  function say(el, txt, size, force){
+    const r = el.getBoundingClientRect();
+    fx(r.left + r.width / 2, r.top + r.height / 2, txt, cfg.color, size, force);
+  }
+  function showDone(){
+    if (done || cfg.refillMs) return;
+    ach('clear');
+    done = document.createElement('div');
+    done.className = 'done';
+    done.innerHTML = '<div>' + (cfg.doneMsg || '다 터뜨렸다!') + '</div>';
+    const b = document.createElement('button');
+    b.className = 'tool'; b.textContent = '새 비닐 뜯기';
+    b.onclick = reset; done.appendChild(b);
+    field.appendChild(done);
+    SND.tone(660, .12); setTimeout(() => SND.tone(880, .2), 110);
+  }
+  function reset(){
+    if (done){ done.remove(); done = null; }
+    cells.forEach(b => b.classList.remove('popped'));
+    live = N; SND.squelch(.2, true);
+  }
+  function popOne(i, depth, noChain){
+    const b = cells[i];
+    if (!b || b.classList.contains('popped')) return;
+    b.classList.add('popped');
+    live--; total++;
+    if (total === 1) ach('pop1');
+    combo++;
+    clearTimeout(comboT);
+    comboT = setTimeout(() => { combo = 0; comboEl.classList.remove('on'); }, 620);
+    if (combo >= 4){ comboEl.textContent = combo + '연속'; comboEl.classList.add('on'); }
+    if (combo >= 15) ach('combo15');
+
+    const kit = KITS[DB.data.kit] || KITS[1];
+    const pitch = (cfg.pitch || 1) * kit.p * rnd(.93, 1.08) * (1 + (depth || 0) * .05);
+    SND.pop(pitch, (cfg.vol || 1) * kit.v);
+    if (b.dataset.myst){
+      delete b.dataset.myst;
+      b.classList.remove('myst');
+      say(b, '반짝!', 32, true);
+      grantColor();
+      paint();
+    }
+    vib(cfg.big ? 22 : 7);
+    api.bump(1);
+    api.val(total);
+    if (cfg.big){
+      say(b, ['뽀오옥!', '퍽!', '뽁!!'][(Math.random() * 3) | 0], 40, true);
+      api.shake();
+    } else if (!depth){
+      say(b, words[(Math.random() * words.length) | 0], cell > 26 ? 26 : 20);
+    } else if (depth % 3 === 0){
+      say(b, '뽁', 20);
+    }
+    if (cfg.chain && !noChain) chainFrom(i);
+    if (cfg.refillMs){
+      timers.push(setTimeout(() => {
+        b.classList.remove('popped'); b.classList.add('refill'); live++;
+        timers.push(setTimeout(() => b.classList.remove('refill'), 420));
+        if (Math.random() < .02){
+          const t = cells[(Math.random() * N) | 0];
+          if (t && !t.classList.contains('popped')){ t.classList.add('myst'); t.dataset.myst = '1'; }
+        }
+      }, cfg.refillMs + rnd(0, 500)));
+    }
+    if (live === 0) showDone();
+  }
+  function chainFrom(i){
+    let ring = [i], depth = 0, cnt = 1;
+    const seen = new Set([i]);
+    const step = () => {
+      const next = [];
+      ring.forEach(k => {
+        const x = k % cols, y = (k / cols) | 0;
+        [[1,0],[-1,0],[0,1],[0,-1]].forEach(d => {
+          const nx = x + d[0], ny = y + d[1];
+          if (nx < 0 || ny < 0 || nx >= cols || ny >= rows) return;
+          const ni = ny * cols + nx;
+          if (seen.has(ni) || cells[ni].classList.contains('popped')) return;
+          seen.add(ni); next.push(ni);
+        });
+      });
+      if (!next.length) return;
+      depth++;
+      cnt += next.length;
+      if (cnt >= 30) ach('chain30');
+      next.forEach(ni => popOne(ni, depth, true));
+      ring = next;
+      if (depth < 40) timers.push(setTimeout(step, 65));
+    };
+    timers.push(setTimeout(step, 75));
+  }
+
+  let down = false;
+  const hit = e => {
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    if (el && el.classList.contains('bub') && sheet.contains(el)) popOne(+el.dataset.i, 0);
+  };
+  const onDown = e => { down = true; try { sheet.setPointerCapture(e.pointerId); } catch (err) {} hit(e); };
+  const onMove = e => { if (down) hit(e); };
+  const onUp = () => { down = false; };
+  sheet.addEventListener('pointerdown', onDown);
+  sheet.addEventListener('pointermove', onMove);
+  addEventListener('pointerup', onUp);
+  addEventListener('pointercancel', onUp);
+
+  api.tool(cfg.refillMs ? '싹 터뜨리기' : '새 비닐 뜯기', () => {
+    if (cfg.refillMs){
+      cells.forEach((b, i) => timers.push(setTimeout(() => popOne(i, 0, true), i * 6)));
+    } else reset();
+  });
+  api.seg('소리', KITS.map(k => k.name), DB.data.kit, i => {
+    DB.set('kit', i);
+    SND.pop(1.1 * KITS[i].p, KITS[i].v);
+  });
+  api.range('알 크기', 70, 115, Math.round(clamp(DB.data.size || 1, .7, 1.15) * 100), v => {
+    DB.set('size', v / 100);
+    refit();
+  });
+  refit();
+  api.val(0); api.key('터뜨린 개수');
+
+  return () => {
+    timers.forEach(clearTimeout); clearTimeout(comboT);
+    removeEventListener('pointerup', onUp);
+    removeEventListener('pointercancel', onUp);
+  };
+}
+
+/* ── 1. 클래식 뽁뽁이 ── */
+TOYS.push({
+  id: 'classic', cat: 'pok', name: '클래식 뽁뽁이',
+  desc: '택배 상자에서 꺼낸 그 비닐. 누르면 다시 안 돌아옵니다. 끌면 주르륵 터집니다.',
+  mount: (f, api) => bubbleSheet(f, api, { cols: pick(14, 9), rows: pick(9, 11), cell: pick(30, 30), color: 'var(--pok)' })
+});
+
+/* ── 2. 무한 뽁뽁이 ── */
+TOYS.push({
+  id: 'infinite', cat: 'pok', name: '무한 뽁뽁이',
+  desc: '터뜨려도 1.5초 뒤에 슬그머니 다시 부풉니다. 끝이 없어요.',
+  mount: (f, api) => bubbleSheet(f, api, { cols: pick(12, 8), rows: pick(8, 10), cell: pick(34, 32), refillMs: 1500, color: 'var(--pok)' })
+});
+
+/* ── 3. 대왕 뽁뽁이 ── */
+TOYS.push({
+  id: 'giant', cat: 'pok', name: '대왕 뽁뽁이',
+  desc: '가전제품 포장에 들어있는 그 큰 놈. 발로 밟는 소리가 납니다.',
+  mount: (f, api) => bubbleSheet(f, api, {
+    cols: pick(4, 3), rows: 3, cell: pick(96, 84), gap: 8,
+    pitch: .5, vol: 1.25, big: true, color: 'var(--pok)',
+    doneMsg: '창고에 있던 거 다 밟았다', words: ['뽀옥!']
+  })
+});
+
+/* ── 4. 좁쌀 뽁뽁이 ── */
+TOYS.push({
+  id: 'tiny', cat: 'pok', name: '좁쌀 뽁뽁이',
+  desc: '알이 아주 작아서 하나씩은 못 참습니다. 손가락으로 쓸어버리세요.',
+  mount: (f, api) => bubbleSheet(f, api, {
+    cols: pick(30, 18), rows: pick(20, 24), cell: pick(13, 13), gap: 2,
+    pitch: 1.75, vol: .45, color: 'var(--pok)',
+    doneMsg: '좁쌀 한 판 완파', words: ['뾱', '뾱뾱', '또르륵']
+  })
+});
+
+/* ── 5. 도미노 뽁뽁이 ── */
+TOYS.push({
+  id: 'domino', cat: 'pok', name: '도미노 뽁뽁이',
+  desc: '하나만 눌러도 옆으로 옆으로 번져나갑니다. 딱 한 번만 눌러보세요.',
+  mount: (f, api) => bubbleSheet(f, api, {
+    cols: pick(17, 11), rows: pick(11, 13), cell: pick(26, 26),
+    chain: true, pitch: 1.15, vol: .7, color: 'var(--pok)',
+    doneMsg: '한 판이 통째로 넘어갔다', words: ['뽁!', '주르륵']
+  })
+});
+</script>
+
+<script>
+/* ══ 말랑이네 ══════════════════════════════════════════ */
+function hold(el, onDown, onUp){
+  const d = e => { try { el.setPointerCapture(e.pointerId); } catch (err) {} onDown(e); };
+  const u = e => onUp(e);
+  el.addEventListener('pointerdown', d);
+  addEventListener('pointerup', u);
+  addEventListener('pointercancel', u);
+  return () => { el.removeEventListener('pointerdown', d); removeEventListener('pointerup', u); removeEventListener('pointercancel', u); };
+}
+
+/* ── 6. 말랑이 ── */
+TOYS.push({
+  id: 'mandeuk', cat: 'man', name: '말랑이',
+  desc: '누르면 눈알이 튀어나오던 그 인형. 꾹 누르고 있으면 얼굴이 납작해집니다.',
+  mount(f, api){
+    f.innerHTML =
+      '<svg class="doll" viewBox="0 0 340 330">' +
+      '<ellipse cx="170" cy="302" rx="96" ry="15" fill="rgba(0,0,0,.13)"/>' +
+      '<g id="mb">' +
+        '<path d="M62 205 C20 195 18 150 44 140" stroke="#E0A81F" stroke-width="20" fill="none" stroke-linecap="round"/>' +
+        '<path d="M278 205 C320 195 322 150 296 140" stroke="#E0A81F" stroke-width="20" fill="none" stroke-linecap="round"/>' +
+        '<ellipse cx="170" cy="190" rx="112" ry="106" fill="#F5C63C"/>' +
+        '<ellipse cx="170" cy="222" rx="72" ry="62" fill="#FBDD86"/>' +
+        '<path id="mmouth" d="M132 222 Q170 250 208 222" stroke="#7A4A05" stroke-width="9" fill="none" stroke-linecap="round"/>' +
+        '<path id="mtongue" d="M0 0 Q-26 30 0 46 Q26 30 0 0Z" fill="#EE5C7E" transform="translate(170,232) scale(1,0)"/>' +
+        '<ellipse cx="86" cy="196" rx="20" ry="13" fill="#F09" opacity=".22"/>' +
+        '<ellipse cx="254" cy="196" rx="20" ry="13" fill="#F09" opacity=".22"/>' +
+      '</g>' +
+      '<g id="me">' +
+        '<line id="sL" x1="126" y1="160" x2="126" y2="160" stroke="#F5C63C" stroke-width="26" stroke-linecap="round"/>' +
+        '<line id="sR" x1="214" y1="160" x2="214" y2="160" stroke="#F5C63C" stroke-width="26" stroke-linecap="round"/>' +
+        '<g id="eL"><circle r="27" fill="#fff" stroke="#7A4A05" stroke-width="4"/><circle id="pL" r="12" fill="#1B1B1B"/><circle cx="-5" cy="-6" r="4" fill="#fff"/></g>' +
+        '<g id="eR"><circle r="27" fill="#fff" stroke="#7A4A05" stroke-width="4"/><circle id="pR" r="12" fill="#1B1B1B"/><circle cx="-5" cy="-6" r="4" fill="#fff"/></g>' +
+      '</g></svg>' +
+      '<div class="label-mid">꾹 누르고 있어 보세요</div>';
+    const svg = f.querySelector('svg'), body = f.querySelector('#mb');
+    const sL = f.querySelector('#sL'), sR = f.querySelector('#sR');
+    const eL = f.querySelector('#eL'), eR = f.querySelector('#eR');
+    const tongue = f.querySelector('#mtongue'), mouth = f.querySelector('#mmouth');
+    const label = f.querySelector('.label-mid');
+
+    let s = 0, target = 0, sq = null, raf = 0, count = DB.rec('mandeuk'), t0 = 0, longest = 0;
+    api.val(count); api.key('꾹 누른 횟수');
+
+    function draw(){
+      const b = 1 + .42 * s, h = 1 - .45 * s;
+      body.setAttribute('transform', 'translate(170,296) scale(' + b + ',' + h + ') translate(-170,-296)');
+      /* 눈 줄기 뿌리는 납작해진 얼굴을 그대로 따라가야 눈이 뜯어져 보이지 않는다 */
+      const rootX = 44 * b, rootY = 296 - 136 * h;
+      const dx = 46 * s, dy = 78 * s;
+      const lx = 126 - dx, ly = 160 - dy, rx = 214 + dx, ry = 160 - dy;
+      sL.setAttribute('x1', 170 - rootX); sL.setAttribute('y1', rootY);
+      sR.setAttribute('x1', 170 + rootX); sR.setAttribute('y1', rootY);
+      sL.setAttribute('x2', lx); sL.setAttribute('y2', ly);
+      sR.setAttribute('x2', rx); sR.setAttribute('y2', ry);
+      const sw = 26 - 7 * s;
+      sL.setAttribute('stroke-width', sw); sR.setAttribute('stroke-width', sw);
+      eL.setAttribute('transform', 'translate(' + lx + ',' + ly + ') scale(' + (1 + .5 * s) + ')');
+      eR.setAttribute('transform', 'translate(' + rx + ',' + ry + ') scale(' + (1 + .5 * s) + ')');
+      tongue.setAttribute('transform', 'translate(170,' + (232 + 8 * s) + ') scale(' + (1 + .3 * s) + ',' + s + ')');
+      mouth.setAttribute('d', s > .25
+        ? 'M122 214 Q170 ' + (214 + 60 * s) + ' 218 214'
+        : 'M132 222 Q170 250 208 222');
+    }
+    function loop(now){
+      const dt = .016;
+      const sp = target > s ? 2.9 : 4.2;
+      s += (target - s) * Math.min(1, dt * sp * 3);
+      if (Math.abs(target - s) < .002) s = target;
+      draw();
+      if (sq) sq.set(s);
+      if (target > 0 || s > .002) raf = requestAnimationFrame(loop);
+      else { if (sq){ sq.stop(); sq = null; } raf = 0; }
+    }
+    const off = hold(svg,
+      e => {
+        target = 1; t0 = performance.now();
+        if (!sq) sq = SND.squeak(330, 1100);
+        if (!raf) raf = requestAnimationFrame(loop);
+        label.textContent = '눈 튀어나온다…';
+        vib(12);
+        fx(e.clientX, e.clientY - 30, '꾸욱', 'var(--man)', 24, true);
+      },
+      e => {
+        if (target === 0) return;
+        target = 0;
+        const held = (performance.now() - t0) / 1000;
+        longest = Math.max(longest, held);
+        if (held >= 3) ach('squeeze3');
+        count++; api.val(count); DB.setRec('mandeuk', count); api.bump(1);
+        SND.boing(240); vib(20);
+        const r = svg.getBoundingClientRect();
+        fx(r.left + r.width / 2, r.top + r.height * .3, held > 1.6 ? '뿌우웅!' : '뿅!', 'var(--man)', 38, true);
+        label.textContent = held > 2.4 ? '오래도 눌렀다' : '한 번 더?';
+        if (!raf) raf = requestAnimationFrame(loop);
+      });
+    draw();
+    api.tool('간지럽히기', () => {
+      let i = 0;
+      const t = setInterval(() => {
+        target = target ? 0 : 1;
+        if (!raf) raf = requestAnimationFrame(loop);
+        SND.squelch(.16, i % 2 === 0); SND.pluck(520 + i * 70, .07);
+        if (++i > 7){ clearInterval(t); target = 0; }
+      }, 110);
+      api.bump(1);
+    });
+    return () => { off(); cancelAnimationFrame(raf); if (sq) sq.stop(); };
+  }
+});
+
+/* ── 7. 볼록이 ── */
+TOYS.push({
+  id: 'bollok', cat: 'man', name: '볼록이',
+  desc: '누르면 볼이 계속 부풉니다. 100%를 넘기면 터져요. 안 터뜨리고 몇 %까지 버티나 해보세요.',
+  mount(f, api){
+    f.innerHTML =
+      '<svg class="doll" viewBox="0 0 340 320" id="bsvg">' +
+      '<ellipse cx="170" cy="292" rx="80" ry="13" fill="rgba(0,0,0,.13)"/>' +
+      '<g id="bg">' +
+        '<circle id="bbody" cx="170" cy="170" r="86" fill="#8ED8A6"/>' +
+        '<ellipse id="chL" cx="96" cy="192" rx="26" ry="20" fill="#5FBF83"/>' +
+        '<ellipse id="chR" cx="244" cy="192" rx="26" ry="20" fill="#5FBF83"/>' +
+        '<circle cx="140" cy="152" r="11" fill="#1B1B1B"/>' +
+        '<circle cx="200" cy="152" r="11" fill="#1B1B1B"/>' +
+        '<circle cx="136" cy="148" r="4" fill="#fff"/>' +
+        '<circle cx="196" cy="148" r="4" fill="#fff"/>' +
+        '<path id="bmouth" d="M150 200 Q170 214 190 200" stroke="#1B1B1B" stroke-width="8" fill="none" stroke-linecap="round"/>' +
+        '<text id="btext" x="170" y="246" text-anchor="middle" font-family="Jua,sans-serif" font-size="26" fill="rgba(0,0,0,.42)"></text>' +
+      '</g></svg>' +
+      '<div class="gauge"><i></i></div>' +
+      '<div class="label-mid">누르고 있으면 부풉니다</div>';
+    const svg = f.querySelector('#bsvg'), g = f.querySelector('#bg');
+    const bodyC = f.querySelector('#bbody'), chL = f.querySelector('#chL'), chR = f.querySelector('#chR');
+    const mouth = f.querySelector('#bmouth');
+    const bar = f.querySelector('.gauge i'), label = f.querySelector('.label-mid');
+
+    let p = 0, holding = false, burst = false, raf = 0, sq = null, best = DB.rec('bollok');
+    const BASE = activeColor() || '#8ED8A6';
+    const stamp = DB.data.stamp;
+    const txt = f.querySelector('#btext');
+    txt.textContent = stamp;
+    bodyC.setAttribute('fill', BASE);
+    chL.setAttribute('fill', mix(BASE, '#000000', .18));
+    chR.setAttribute('fill', mix(BASE, '#000000', .18));
+    api.val(best); api.key('최고 기록 %');
+
+    function draw(){
+      const sc = 1 + .62 * p;
+      g.setAttribute('transform', 'translate(170,240) scale(' + sc + ',' + (1 + .5 * p) + ') translate(-170,-240)');
+      bodyC.setAttribute('fill', mix(BASE, '#F0537A', clamp(p * 1.15, 0, 1)));
+      const cw = 26 + 18 * p;
+      chL.setAttribute('rx', cw); chR.setAttribute('rx', cw);
+      mouth.setAttribute('d', p > .5 ? 'M148 202 Q170 ' + (202 - 26 * p) + ' 192 202' : 'M150 200 Q170 214 190 200');
+      bar.style.width = Math.min(100, p * 100) + '%';
+      bar.classList.toggle('hot', p > .72);
+    }
+    function pop(){
+      burst = true; holding = false;
+      if (sq){ sq.stop(); sq = null; }
+      ach('burst');
+      SND.burst(.55); vib([30, 40, 60]); api.shake();
+      const r = svg.getBoundingClientRect();
+      fx(r.left + r.width / 2, r.top + r.height / 2, stamp ? stamp + ' 뻥!!!' : '뻥!!!', 'var(--man)', 54, true);
+      svg.style.visibility = 'hidden';
+      const fr = f.getBoundingClientRect();
+      for (let i = 0; i < 16; i++){
+        const d = document.createElement('div');
+        d.className = 'puff';
+        const sz = rnd(10, 26);
+        d.style.cssText = 'width:' + sz + 'px;height:' + sz + 'px;background:' + mix(BASE,'#F0537A',.6) +
+          ';left:' + (r.left - fr.left + r.width/2) + 'px;top:' + (r.top - fr.top + r.height/2) +
+          'px;transition:transform .7s cubic-bezier(.2,.7,.3,1),opacity .7s';
+        f.appendChild(d);
+        requestAnimationFrame(() => {
+          d.style.transform = 'translate(' + rnd(-220,220) + 'px,' + rnd(-190,150) + 'px) rotate(' + rnd(-180,180) + 'deg)';
+          d.style.opacity = '0';
+        });
+        setTimeout(() => d.remove(), 750);
+      }
+      label.textContent = '다시 만드는 중…';
+      api.bump(3);
+      setTimeout(() => {
+        p = 0; burst = false; draw();
+        svg.style.visibility = 'visible';
+        label.textContent = '다시 부풀려 볼까요';
+        SND.squelch(.25, true);
+      }, 1000);
+    }
+    function loop(){
+      const dt = .016;
+      if (holding){
+        p += dt * .42;
+        if (p >= 1){ p = 1; draw(); pop(); raf = 0; return; }
+      } else {
+        p -= dt * .9;
+        if (p <= 0){ p = 0; draw(); raf = 0; if (sq){ sq.stop(); sq = null; } return; }
+      }
+      if (sq) sq.set(p * .9);
+      draw();
+      raf = requestAnimationFrame(loop);
+    }
+    const off = hold(svg,
+      () => {
+        if (burst) return;
+        holding = true; label.textContent = '조금만 더…';
+        if (!sq) sq = SND.air();
+        if (!raf) raf = requestAnimationFrame(loop);
+        vib(10);
+      },
+      () => {
+        if (!holding) return;
+        holding = false;
+        const pct = Math.round(p * 100);
+        api.bump(1);
+        SND.squelch(.3, false);
+        const r = svg.getBoundingClientRect();
+        fx(r.left + r.width / 2, r.top + r.height * .25, '푸슈슈—', 'var(--man)', 30, true);
+        if (pct >= 95) ach('bollok95');
+        if (DB.setRec('bollok', pct)){ best = pct; label.textContent = '신기록! ' + pct + '%'; }
+        else label.textContent = pct + '% 에서 손 뗌 (최고 ' + best + '%)';
+        api.val(Math.max(best, pct));
+        if (!raf) raf = requestAnimationFrame(loop);
+      });
+    draw();
+    api.tool('기록 지우기', () => { DB.clear('bollok'); best = 0; api.val(0); label.textContent = '처음부터 다시'; SND.tone(330, .12); });
+    return () => { off(); cancelAnimationFrame(raf); if (sq) sq.stop(); };
+  }
+});
+
+/* ── 8. 쭈욱이 ── */
+TOYS.push({
+  id: 'jjuk', cat: 'man', name: '쭈욱이',
+  desc: '당길수록 화면이 뒤로 물러나서 한도 없이 늘어납니다. 너무 당기면 뚝 끊어져요.',
+  mount(f, api){
+    f.innerHTML =
+      '<svg class="doll" viewBox="0 0 340 400" id="jsvg">' +
+      '<g id="jzoom">' +
+      '<ellipse cx="170" cy="378" rx="74" ry="14" fill="rgba(0,0,0,.13)"/>' +
+      '<ellipse cx="170" cy="352" rx="66" ry="26" fill="#5B8DEF"/>' +
+      '<path id="jbody" fill="#77A6FF"/>' +
+      '<g id="jhead">' +
+        '<circle id="jface" r="46" fill="#77A6FF"/>' +
+        '<circle cx="-16" cy="-8" r="9" fill="#12203A"/><circle cx="16" cy="-8" r="9" fill="#12203A"/>' +
+        '<circle cx="-19" cy="-11" r="3" fill="#fff"/><circle cx="13" cy="-11" r="3" fill="#fff"/>' +
+        '<path id="jmouth" d="M-14 16 Q0 26 14 16" stroke="#12203A" stroke-width="6" fill="none" stroke-linecap="round"/>' +
+      '</g></g></svg>' +
+      '<div class="gauge"><i></i></div>' +
+      '<div class="label-mid">머리를 잡고 당겨보세요</div>';
+    const svg = f.querySelector('#jsvg'), zoomG = f.querySelector('#jzoom');
+    const bodyP = f.querySelector('#jbody'), head = f.querySelector('#jhead');
+    const face = f.querySelector('#jface'), mouth = f.querySelector('#jmouth');
+    const label = f.querySelector('.label-mid'), bar = f.querySelector('.gauge i');
+
+    /* 화면 밖까지 당겨도 되도록, 늘어난 만큼 그림 전체를 뒤로 물린다 */
+    const BX = 170, BY = 348, REST = 150, DMAX = 330;
+    const SNAPS = [3, 5.5, 1e9], SNAPN = ['잘 끊김', '보통', '안 끊김'];
+    let snapIdx = DB.data.jjukSnap == null ? 1 : DB.data.jjukSnap;
+    let hx = BX, hy = BY - REST, vx = 0, vy = 0, drag = false, raf = 0, sq = null;
+    let broken = false, brokenT = 0, best = DB.rec('jjuk'), peak = REST;
+    api.val((best / 100).toFixed(2)); api.key('최고 배율');
+
+    /* 길이 → 축소율. 당길 때 쓰는 식의 역함수라 손끝과 머리가 늘 붙어 있다.
+       판 끝(DMAX)까지 당기면 5.8배, 거기서 더 끌어내면 화면이 계속 물러나며 끝없이 늘어난다 */
+    const K = .62, LEDGE = DMAX / (1 - K);
+    function zoomFor(len){
+      if (len <= LEDGE) return 1 - K * clamp((len - REST) / ((DMAX - REST) + K * len), 0, 1);
+      return DMAX / len;
+    }
+
+    function toSvg(e){
+      const r = svg.getBoundingClientRect();
+      const sc = Math.min(r.width / 340, r.height / 400);
+      const ox = r.left + (r.width - 340 * sc) / 2, oy = r.top + (r.height - 400 * sc) / 2;
+      return { x: (e.clientX - ox) / sc, y: (e.clientY - oy) / sc };
+    }
+    function draw(){
+      const dx = hx - BX, dy = hy - BY;
+      const len = Math.hypot(dx, dy), ratio = len / REST;
+      const z = zoomFor(len);
+      zoomG.setAttribute('transform',
+        'translate(170,348) scale(' + z.toFixed(4) + ') translate(-170,-348)');
+      const t = clamp((ratio - 1) / 4, 0, 1);
+      const hw = 46 * (1 - .42 * t);
+      if (broken){
+        bodyP.setAttribute('d', 'M118 348 C118 296,150 286,170 286 C190 286,222 296,222 348Z');
+      } else {
+        const bw = 52 * (1 - .55 * t);
+        const mx = (BX + hx) / 2, my = (BY + hy) / 2;
+        const nx = len ? -dy / len : 0, ny = len ? dx / len : 0;
+        bodyP.setAttribute('d',
+          'M' + (BX - bw) + ' ' + BY +
+          ' C' + (BX - bw) + ' ' + (BY - 60) + ',' + (mx + nx * hw * 1.15) + ' ' + (my + ny * hw * 1.15) + ',' + (hx + nx * hw) + ' ' + (hy + ny * hw) +
+          ' A' + hw + ' ' + hw + ' 0 0 0 ' + (hx - nx * hw) + ' ' + (hy - ny * hw) +
+          ' C' + (mx - nx * hw * 1.15) + ' ' + (my - ny * hw * 1.15) + ',' + (BX + bw) + ' ' + (BY - 60) + ',' + (BX + bw) + ' ' + BY + 'Z');
+      }
+      head.setAttribute('transform', 'translate(' + hx.toFixed(1) + ',' + hy.toFixed(1) + ') scale(' + (1 - .3 * t).toFixed(3) + ',' + (1 + .2 * t).toFixed(3) + ')');
+      const col = mix('#77A6FF', '#F0537A', clamp(t * 1.05, 0, 1));
+      face.setAttribute('fill', col); bodyP.setAttribute('fill', col);
+      mouth.setAttribute('d', t > .35 ? 'M-14 20 Q0 ' + (20 - 22 * t) + ' 14 20' : 'M-14 16 Q0 26 14 16');
+      const snapAt = SNAPS[snapIdx];
+      const tens = snapAt > 90 ? clamp((ratio - 1) / 11, 0, 1) : clamp((ratio - 1) / (snapAt - 1), 0, 1);
+      bar.style.width = (tens * 100).toFixed(1) + '%';
+      bar.classList.toggle('hot', tens > .72);
+      if (sq) sq.set(t * .85);
+      return ratio;
+    }
+    function reform(){
+      broken = false; vx = 0; vy = 0;
+      hx = BX; hy = BY - REST - 70;
+      SND.boing(220, .24); SND.squelch(.22, true);
+      label.textContent = '다시 붙였습니다';
+    }
+    function doSnap(ratio){
+      broken = true; drag = false; brokenT = performance.now();
+      if (sq){ sq.stop(); sq = null; }
+      const dx = hx - BX, dy = hy - BY, l = Math.hypot(dx, dy) || 1;
+      vx = dx / l * 24; vy = dy / l * 24;
+      SND.burst(.5); SND.tone(150, .2, 'sawtooth', .16);
+      vib([40, 30, 70]); api.shake(); api.bump(2);
+      const r = svg.getBoundingClientRect();
+      fx(r.left + r.width / 2, r.top + r.height * .3, '뚝!!', 'var(--man)', 54, true);
+      ach('snap');
+      score(ratio, true);
+      label.textContent = '아이고… 끊어졌다';
+    }
+    function score(ratio, quiet){
+      const v = Math.round(ratio * 100);
+      if (v >= 300) ach('jjuk3');
+      const isNew = DB.setRec('jjuk', v);
+      if (isNew) best = v;
+      api.key('최고 배율');
+      api.val((Math.max(best, v) / 100).toFixed(2));
+      if (quiet) return;
+      label.textContent = isNew
+        ? '신기록! ' + (v / 100).toFixed(2) + '배'
+        : (v / 100).toFixed(2) + '배 (최고 ' + (best / 100).toFixed(2) + '배)';
+    }
+    function loop(){
+      if (broken){
+        hx += vx; hy += vy; vy += 1.4; vx *= .995;
+        if (performance.now() - brokenT > 850) reform();
+      } else if (!drag){
+        const dx = BX - hx, dy = (BY - REST) - hy;
+        vx = (vx + dx * .16) * .86; vy = (vy + dy * .16) * .86;
+        hx += vx; hy += vy;
+        if (Math.abs(vx) < .12 && Math.abs(vy) < .12 && Math.abs(dx) < .6 && Math.abs(dy) < .6){
+          hx = BX; hy = BY - REST; draw(); raf = 0; return;
+        }
+      }
+      draw();
+      raf = requestAnimationFrame(loop);
+    }
+    const onMove = e => {
+      if (!drag || broken) return;
+      const p = toSvg(e);
+      let dx = p.x - BX, dy = p.y - BY;
+      let d = Math.hypot(dx, dy);
+      if (d < 1){ dx = 0; dy = -1; d = 1; }
+      const u = clamp((d - REST) / (DMAX - REST), 0, 1);
+      const len = d > DMAX
+        ? LEDGE + (d - DMAX) * 6
+        : Math.max(45, d / (1 - K * u));
+      hx = BX + dx / d * len;
+      hy = Math.min(BY + dy / d * len, BY - 24);
+      const cur = Math.hypot(hx - BX, hy - BY);
+      peak = Math.max(peak, cur);
+      const ratio = cur / REST;
+      api.key('늘어난 배율'); api.val(ratio.toFixed(2));
+      if (ratio >= SNAPS[snapIdx]){ doSnap(ratio); return; }
+      label.textContent = ratio > 4 ? '위험한데…' : ratio > 2.2 ? '쭈우우욱—' : '쭈우욱—';
+    };
+    const onDown = e => {
+      if (broken) return;
+      drag = true; peak = REST;
+      try { svg.setPointerCapture(e.pointerId); } catch (err) {}
+      if (!sq) sq = SND.squeak(150, 620);
+      SND.squelch(.2, true);
+      onMove(e);
+      if (!raf) raf = requestAnimationFrame(loop);
+    };
+    const onUp = () => {
+      if (!drag) return;
+      drag = false;
+      if (sq){ sq.stop(); sq = null; }
+      SND.boing(200, .26); vib(18); api.bump(1);
+      const r = svg.getBoundingClientRect();
+      fx(r.left + r.width / 2, r.top + r.height * .2, peak / REST > 3 ? '뽀요요요옹' : '뽀요요옹', 'var(--man)', 34, true);
+      score(peak / REST);
+      if (!raf) raf = requestAnimationFrame(loop);
+    };
+    svg.addEventListener('pointerdown', onDown);
+    svg.addEventListener('pointermove', onMove);
+    addEventListener('pointerup', onUp);
+    addEventListener('pointercancel', onUp);
+    draw();
+    api.seg('고무 강도', SNAPN, snapIdx, i => {
+      snapIdx = i; DB.set('jjukSnap', i); SND.click(1, .8);
+      label.textContent = i === 2 ? '이제 안 끊어집니다. 끝까지 당겨보세요' : '고무를 ‘' + SNAPN[i] + '’ 걸로 갈았습니다';
+      draw();
+    });
+    api.tool('튕겨보기', () => {
+      if (broken) return;
+      vx += rnd(-16, 16); vy -= rnd(10, 22);
+      SND.boing(260, .2); api.bump(1);
+      if (!raf) raf = requestAnimationFrame(loop);
+    });
+    api.tool('기록 지우기', () => {
+      DB.clear('jjuk'); best = 0; api.key('최고 배율'); api.val('0.00');
+      label.textContent = '처음부터 다시'; SND.tone(330, .12);
+    });
+    return () => {
+      cancelAnimationFrame(raf); if (sq) sq.stop();
+      removeEventListener('pointerup', onUp); removeEventListener('pointercancel', onUp);
+    };
+  }
+});
+</script>
+
+<script>
+/* ══ 쪼물딱 코너 ═══════════════════════════════════════ */
+
+/* ── 9. 팝잇 ── */
+TOYS.push({
+  id: 'popit', cat: 'jjo', name: '팝잇',
+  desc: '실리콘 판을 손가락으로 눌러 뒤집습니다. 뒤집고 판을 돌려서 또 누르고, 끝이 없죠.',
+  mount(f, api){
+    const PAL = ['#F0537A', '#4FB3E8', '#7BC950', '#F5A623', '#9B6BE8', '#2FBFA7'];
+    const ac = activeColor();
+    if (ac) PAL.unshift(ac);
+    let pi = 0, n = 0;
+    const board = document.createElement('div');
+    board.className = 'board';
+    const cols = SMALL() ? 5 : 6, N = cols * cols;
+    board.style.gridTemplateColumns = 'repeat(' + cols + ',minmax(0,1fr))';
+    board.style.width = 'min(100%,' + (cols * 62) + 'px)';
+    board.style.setProperty('--boardc', PAL[0]);
+    const pits = [];
+    for (let i = 0; i < N; i++){
+      const d = document.createElement('div');
+      d.className = 'pit'; d.dataset.i = i;
+      board.appendChild(d); pits.push(d);
+    }
+    f.appendChild(board);
+    fitToField(f, board, cols, cols, 28);
+    api.val(0); api.key('뒤집은 횟수');
+
+    function flip(i, quiet){
+      const d = pits[i]; if (!d) return;
+      const inNow = d.classList.toggle('in');
+      SND.pop(inNow ? .92 : .74, quiet ? .45 : .8);
+      if (!quiet){
+        n++; api.val(n); api.bump(1); vib(6);
+        if (n >= 100) ach('popit100');
+        const r = d.getBoundingClientRect();
+        fx(r.left + r.width / 2, r.top, inNow ? '뽁' : '똑', 'var(--jjo)', 20);
+      }
+    }
+    let down = false, lastI = -1;
+    const hit = e => {
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      if (el && el.classList.contains('pit') && board.contains(el)){
+        const i = +el.dataset.i;
+        if (i !== lastI){ lastI = i; flip(i); }
+      }
+    };
+    const onDown = e => { down = true; lastI = -1; try { board.setPointerCapture(e.pointerId); } catch (err) {} hit(e); };
+    const onMove = e => { if (down) hit(e); };
+    const onUp = () => { down = false; lastI = -1; };
+    board.addEventListener('pointerdown', onDown);
+    board.addEventListener('pointermove', onMove);
+    addEventListener('pointerup', onUp);
+    addEventListener('pointercancel', onUp);
+
+    const timers = [];
+    api.tool('판 뒤집기', () => {
+      pits.forEach((d, i) => {
+        const x = i % cols, y = (i / cols) | 0;
+        timers.push(setTimeout(() => flip(i, true), (x + y) * 45));
+      });
+      n += N; api.val(n); api.bump(N);
+    });
+    api.tool('색 바꾸기', () => {
+      pi = (pi + 1) % PAL.length;
+      board.style.setProperty('--boardc', PAL[pi]);
+      SND.tone(520 + pi * 60, .1);
+    });
+    return () => {
+      timers.forEach(clearTimeout);
+      removeEventListener('pointerup', onUp); removeEventListener('pointercancel', onUp);
+    };
+  }
+});
+
+/* ── 10. 피젯 스피너 ── */
+TOYS.push({
+  id: 'spinner', cat: 'jjo', name: '피젯 스피너',
+  desc: '한 손가락으로 휙 튕기세요. 잘 돌리면 한참 갑니다.',
+  mount(f, api){
+    const wrap = document.createElement('div');
+    wrap.className = 'spin-wrap';
+    wrap.innerHTML =
+      '<svg viewBox="0 0 300 300" style="width:100%;height:100%;overflow:visible">' +
+      '<g id="sp">' +
+        '<circle cx="150" cy="72" r="52" fill="#2FBFA7"/>' +
+        '<circle cx="82" cy="188" r="52" fill="#F0537A"/>' +
+        '<circle cx="218" cy="188" r="52" fill="#F5A623"/>' +
+        '<circle cx="150" cy="150" r="62" fill="#3A4A5C"/>' +
+        '<circle cx="150" cy="150" r="34" fill="#E8EEF4"/>' +
+        '<circle cx="150" cy="150" r="20" fill="#8C9AA8"/>' +
+        '<circle cx="150" cy="72" r="20" fill="#12303A" opacity=".35"/>' +
+        '<circle cx="82" cy="188" r="20" fill="#12303A" opacity=".35"/>' +
+        '<circle cx="218" cy="188" r="20" fill="#12303A" opacity=".35"/>' +
+      '</g></svg>' +
+      '<div class="rpm mono">0 RPM</div>';
+    f.appendChild(wrap);
+    const g = wrap.querySelector('#sp'), rpmEl = wrap.querySelector('.rpm');
+    let ang = 0, vel = 0, drag = false, last = 0, raf = 0, whir = null;
+    let best = DB.rec('spinner'), spun = 0;
+    api.val(best); api.key('최고 RPM');
+
+    const cen = () => { const r = wrap.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; };
+    const at = e => { const c = cen(); return Math.atan2(e.clientY - c.y, e.clientX - c.x) * 180 / Math.PI; };
+
+    function loop(){
+      if (!drag){
+        ang += vel;
+        vel *= .9915;
+        if (Math.abs(vel) < .04) vel = 0;
+      }
+      g.setAttribute('transform', 'rotate(' + ang.toFixed(2) + ' 150 150)');
+      const rpm = Math.round(Math.abs(vel) * 60 * 60 / 360);
+      rpmEl.textContent = rpm + ' RPM';
+      if (whir) whir.set(Math.abs(vel) / 26);
+      if (rpm >= 3000) ach('spin3000');
+      if (rpm > best){ best = rpm; DB.setRec('spinner', rpm); }
+      api.val(Math.max(best, rpm));
+      if (vel === 0 && !drag){
+        raf = 0; if (whir){ whir.stop(); whir = null; }
+        return;
+      }
+      raf = requestAnimationFrame(loop);
+    }
+    const onDown = e => {
+      drag = true; try { wrap.setPointerCapture(e.pointerId); } catch (err) {}
+      last = at(e); vel = 0;
+      if (!whir) whir = SND.whir();
+      if (!raf) raf = requestAnimationFrame(loop);
+      SND.click(1.4, .4);
+    };
+    const onMove = e => {
+      if (!drag) return;
+      const a = at(e);
+      let d = a - last;
+      while (d > 180) d -= 360;
+      while (d < -180) d += 360;
+      last = a; ang += d;
+      vel = vel * .55 + d * .45;
+      g.setAttribute('transform', 'rotate(' + ang.toFixed(2) + ' 150 150)');
+    };
+    const onUp = () => {
+      if (!drag) return;
+      drag = false;
+      vel = clamp(vel, -34, 34);
+      spun++; api.bump(1);
+      if (Math.abs(vel) > 6){
+        const c = cen();
+        fx(c.x, c.y - 100, '위이이잉', 'var(--jjo)', 30, true);
+        vib(14);
+      }
+      if (!raf) raf = requestAnimationFrame(loop);
+    };
+    wrap.addEventListener('pointerdown', onDown);
+    wrap.addEventListener('pointermove', onMove);
+    addEventListener('pointerup', onUp);
+    addEventListener('pointercancel', onUp);
+    api.tool('힘껏 튕기기', () => {
+      vel = 30 + Math.random() * 6;
+      if (!whir) whir = SND.whir();
+      if (!raf) raf = requestAnimationFrame(loop);
+      const c = cen(); fx(c.x, c.y - 100, '휘리릭!', 'var(--jjo)', 32, true);
+      api.bump(1); vib(20);
+    });
+    api.tool('세워두기', () => { vel = 0; });
+    return () => {
+      cancelAnimationFrame(raf); if (whir) whir.stop();
+      removeEventListener('pointerup', onUp); removeEventListener('pointercancel', onUp);
+    };
+  }
+});
+
+/* ── 11. 슬라임 ── */
+TOYS.push({
+  id: 'slime', cat: 'jjo', name: '슬라임',
+  desc: '주무르는 대로 모양이 그대로 남습니다. 손가락 여러 개로 동시에 잡아당겨도 돼요.',
+  mount(f, api){
+    const fb = fieldBox(f);
+    const W = Math.round(clamp(fb.w, 200, 520));
+    const H = Math.round(clamp(fb.h, 150, 400));
+    const cv = document.createElement('canvas');
+    cv.className = 'slime-c';
+    cv.style.width = W + 'px'; cv.style.height = H + 'px';
+    const dpr = Math.min(2, devicePixelRatio || 1);
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    f.appendChild(cv);
+    const lab = document.createElement('div');
+    lab.className = 'label-mid';
+    lab.textContent = '잡아서 주물러 보세요 · 모양이 그대로 남습니다';
+    f.appendChild(lab);
+    const ctx = cv.getContext('2d');
+    ctx.scale(dpr, dpr);
+
+    /* ── 점·용수철 준비 ─────────────────────────────
+       L[i] : i↔i+1 이웃 거리 (겉면 길이)
+       D[i] : i↔i+2 거리 (꺾인 각도를 기억하는 뼈대)
+       두 값이 주무르는 동안 조금씩 늘어붙어(소성 변형) 모양이 남는다 */
+    const N = 60, PAD = 8;
+    const R0 = Math.min(W, H) * .27;
+    const CX = W / 2, CY = H / 2;
+    const L0 = 2 * R0 * Math.sin(Math.PI / N);
+    const D0 = 2 * R0 * Math.sin(2 * Math.PI / N);
+    const A00 = Math.PI * R0 * R0;
+    const MIND = L0 * 1.1;
+    let A0 = A00;
+    const pts = [], L = [], D = [];
+    for (let i = 0; i < N; i++){
+      const a = i / N * Math.PI * 2;
+      const x = CX + Math.cos(a) * R0, y = CY + Math.sin(a) * R0;
+      pts.push({ x: x, y: y, px: x, py: y });
+      L.push(L0); D.push(D0);
+    }
+
+    const BASE = activeColor() || '#8FD94A';
+    const stamp = DB.data.stamp;
+    let mem = clamp((DB.data.slimeMem == null ? 100 : DB.data.slimeMem) / 100, 0, 1);
+    let touches = DB.rec('slime'), grabs = new Map(), sq = null, raf = 0, idle = 0, shaped = false;
+    api.val(touches); api.key('쪼물딱 횟수');
+
+    const GW = [.14, .34, .66, 1, .66, .34, .14];
+    function solve(a, b, rest, k){
+      const A = pts[a], B = pts[b];
+      let dx = B.x - A.x, dy = B.y - A.y;
+      const d = Math.hypot(dx, dy);
+      if (d < .0001) return;
+      const t = (d - rest) / d * .5 * k;
+      dx *= t; dy *= t;
+      A.x += dx; A.y += dy; B.x -= dx; B.y -= dy;
+    }
+    function pin(){
+      grabs.forEach(g => {
+        for (let k = 0; k < g.off.length; k++){
+          const o = g.off[k], q = pts[o.j];
+          q.x += (g.x + o.dx - q.x) * o.w;
+          q.y += (g.y + o.dy - q.y) * o.w;
+        }
+      });
+    }
+    function signedArea(){
+      let a = 0;
+      for (let i = 0; i < N; i++){ const p = pts[i], q = pts[(i + 1) % N]; a += p.x * q.y - q.x * p.y; }
+      return a / 2;
+    }
+    /* 부피(넓이)는 늘 일정하게 — 길게 뽑으면 그만큼 몸통이 얇아진다 */
+    function areaSolve(k){
+      const a = signedArea(), sgn = a < 0 ? -1 : 1;
+      let per = 0;
+      for (let i = 0; i < N; i++){ const p = pts[i], q = pts[(i + 1) % N]; per += Math.hypot(q.x - p.x, q.y - p.y); }
+      if (per < 1) return;
+      const off = clamp((A0 - Math.abs(a)) / per * k, -2.5, 2.5);
+      for (let i = 0; i < N; i++){
+        const p = pts[i], u = pts[(i - 1 + N) % N], v = pts[(i + 1) % N];
+        const tx = v.x - u.x, ty = v.y - u.y;
+        const tl = Math.hypot(tx, ty) || 1;
+        p.x += (ty / tl) * sgn * off;
+        p.y += (-tx / tl) * sgn * off;
+      }
+    }
+    /* 겉면끼리 파고들지 않게 */
+    function repel(){
+      for (let i = 0; i < N; i++){
+        for (let j = i + 2; j < N; j++){
+          if (i === 0 && j === N - 1) continue;
+          const A = pts[i], B = pts[j];
+          let dx = B.x - A.x, dy = B.y - A.y;
+          const d2 = dx * dx + dy * dy;
+          if (d2 > MIND * MIND || d2 < .0001) continue;
+          const d = Math.sqrt(d2);
+          const t = (MIND - d) / d * .3;
+          dx *= t; dy *= t;
+          A.x -= dx; A.y -= dy; B.x += dx; B.y += dy;
+        }
+      }
+    }
+    function bounds(){
+      for (let i = 0; i < N; i++){
+        const p = pts[i];
+        if (p.x < PAD) p.x = PAD; else if (p.x > W - PAD) p.x = W - PAD;
+        if (p.y < PAD) p.y = PAD; else if (p.y > H - PAD) p.y = H - PAD;
+      }
+    }
+    function step(){
+      for (let i = 0; i < N; i++){
+        const p = pts[i];
+        let vx = clamp((p.x - p.px) * .92, -20, 20);
+        let vy = clamp((p.y - p.py) * .92, -20, 20);
+        p.px = p.x; p.py = p.y;
+        p.x += vx; p.y += vy;
+      }
+      for (let it = 0; it < 3; it++){
+        pin();
+        for (let i = 0; i < N; i++) solve(i, (i + 1) % N, L[i], .95);
+        for (let i = 0; i < N; i++) solve(i, (i + 2) % N, D[i], .3);
+        areaSolve(.72);
+        bounds();
+      }
+      repel(); pin(); bounds();
+
+      /* 주무르는 동안에만 모양이 눌러붙는다. 되돌아오는 정도는 ‘모양 기억’ 값 */
+      const creep = grabs.size ? .16 * mem : 0;
+      const back = (1 - mem) * (1 - mem) * .05;
+      /* 얇게 뽑아 놓으면 그 넓이가 새 기준이 된다 — 놓아도 다시 부풀지 않게 */
+      if (creep){
+        A0 += (Math.abs(signedArea()) - A0) * creep * .6;
+        A0 = clamp(A0, A00 * .45, A00 * 1.6);
+      } else if (back){
+        A0 += (A00 - A0) * back;
+      }
+      if (creep || back){
+        let per = 0;
+        for (let i = 0; i < N; i++){
+          const a = pts[i], b = pts[(i + 1) % N], c = pts[(i + 2) % N];
+          if (creep){
+            L[i] += (Math.hypot(b.x - a.x, b.y - a.y) - L[i]) * creep;
+            D[i] += (Math.hypot(c.x - a.x, c.y - a.y) - D[i]) * creep;
+          }
+          if (back){
+            L[i] += (L0 - L[i]) * back;
+            D[i] += (D0 - D[i]) * back;
+          }
+          L[i] = clamp(L[i], L0 * .3, L0 * 4.5);
+          per += L[i];
+        }
+        for (let i = 0; i < N; i++) D[i] = clamp(D[i], D0 * .12, (L[i] + L[(i + 1) % N]) * .98);
+        if (!shaped && per > N * L0 * 1.5){ shaped = true; ach('shape'); }
+      }
+    }
+    function draw(){
+      ctx.clearRect(0, 0, W, H);
+      let cx = 0, cy = 0, lo = W, hi = 0, bot = 0;
+      for (let i = 0; i < N; i++){
+        cx += pts[i].x; cy += pts[i].y;
+        if (pts[i].x < lo) lo = pts[i].x;
+        if (pts[i].x > hi) hi = pts[i].x;
+        if (pts[i].y > bot) bot = pts[i].y;
+      }
+      cx /= N; cy /= N;
+      ctx.beginPath();
+      ctx.ellipse((lo + hi) / 2, Math.min(H - 4, bot + 7), Math.max(18, (hi - lo) * .42), 8, 0, 0, 7);
+      ctx.fillStyle = 'rgba(20,30,40,.11)'; ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo((pts[N - 1].x + pts[0].x) / 2, (pts[N - 1].y + pts[0].y) / 2);
+      for (let i = 0; i < N; i++){
+        const p = pts[i], q = pts[(i + 1) % N];
+        ctx.quadraticCurveTo(p.x, p.y, (p.x + q.x) / 2, (p.y + q.y) / 2);
+      }
+      ctx.closePath();
+      const gr = ctx.createRadialGradient(cx - R0 * .4, cy - R0 * .5, R0 * .1, cx, cy, R0 * 1.7);
+      gr.addColorStop(0, lighten(BASE, .48));
+      gr.addColorStop(.55, BASE);
+      gr.addColorStop(1, mix(BASE, '#000000', .34));
+      ctx.fillStyle = gr; ctx.fill();
+      ctx.strokeStyle = 'rgba(20,40,10,.3)'; ctx.lineWidth = 2; ctx.stroke();
+      ctx.save(); ctx.clip();
+      ctx.beginPath();
+      ctx.ellipse(cx - R0 * .38, cy - R0 * .5, R0 * .3, R0 * .16, -.5, 0, 7);
+      ctx.fillStyle = 'rgba(255,255,255,.62)'; ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(cx + R0 * .3, cy + R0 * .45, R0 * .2, R0 * .1, .4, 0, 7);
+      ctx.fillStyle = 'rgba(255,255,255,.3)'; ctx.fill();
+      ctx.restore();
+      /* 잡은 자리 표시 */
+      grabs.forEach(g => {
+        ctx.beginPath();
+        ctx.arc(g.x, g.y, 13, 0, 7);
+        ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 2.5; ctx.stroke();
+      });
+      if (stamp){
+        ctx.font = Math.round(R0 * .42) + 'px Jua, sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillStyle = 'rgba(20,30,10,.4)';
+        ctx.fillText(stamp, cx, cy);
+      }
+    }
+    function loop(){
+      step(); draw();
+      let mv = 0;
+      for (let i = 0; i < N; i++) mv = Math.max(mv, Math.abs(pts[i].x - pts[i].px) + Math.abs(pts[i].y - pts[i].py));
+      if (sq) sq.set(clamp(mv / 6, 0, 1) * .7);
+      if (grabs.size || mv > .08) idle = 0; else idle++;
+      raf = idle > 24 ? 0 : requestAnimationFrame(loop);
+    }
+    const wake = () => { idle = 0; if (!raf) raf = requestAnimationFrame(loop); };
+    const local = e => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+
+    const onDown = e => {
+      const p = local(e);
+      let bi = 0, bd = 1e9;
+      for (let i = 0; i < N; i++){
+        const d = (pts[i].x - p.x) * (pts[i].x - p.x) + (pts[i].y - p.y) * (pts[i].y - p.y);
+        if (d < bd){ bd = d; bi = i; }
+      }
+      const off = [];
+      for (let k = -3; k <= 3; k++){
+        const j = (bi + k + N) % N;
+        off.push({ j: j, dx: pts[j].x - p.x, dy: pts[j].y - p.y, w: GW[k + 3] });
+      }
+      grabs.set(e.pointerId, { x: p.x, y: p.y, off: off });
+      try { cv.setPointerCapture(e.pointerId); } catch (err) {}
+      if (!sq) sq = SND.goo();
+      SND.squelch(.2, true);
+      lab.textContent = grabs.size > 1 ? '양쪽으로 쭈욱—' : '쭈욱—';
+      wake();
+    };
+    const onMove = e => {
+      const g = grabs.get(e.pointerId);
+      if (!g) return;
+      const p = local(e);
+      g.x = p.x; g.y = p.y;
+    };
+    const onUp = e => {
+      if (!grabs.has(e.pointerId)) return;
+      grabs.delete(e.pointerId);
+      if (!grabs.size && sq){ sq.stop(); sq = null; }
+      SND.squelch(.28, false); vib(12);
+      touches++; api.val(touches); DB.setRec('slime', touches); api.bump(1);
+      if (touches >= 100) ach('slime100');
+      const r = cv.getBoundingClientRect();
+      fx(r.left + r.width / 2, r.top + r.height * .25, ['뿌직', '철퍽', '주물럭', '쫀득'][(Math.random() * 4) | 0], 'var(--lime)', 30, true);
+      lab.textContent = '모양은 그대로 남아 있어요';
+      wake();
+    };
+    cv.addEventListener('pointerdown', onDown);
+    cv.addEventListener('pointermove', onMove);
+    addEventListener('pointerup', onUp);
+    addEventListener('pointercancel', onUp);
+
+    api.tool('도로 뭉치기', () => {
+      A0 = A00;
+      for (let i = 0; i < N; i++){
+        L[i] = L0; D[i] = D0;
+        const a = i / N * Math.PI * 2;
+        const p = pts[i];
+        p.x += (CX + Math.cos(a) * R0 - p.x) * .5;
+        p.y += (CY + Math.sin(a) * R0 - p.y) * .5;
+        p.px = p.x; p.py = p.y;
+      }
+      shaped = false;
+      SND.squelch(.32, true); api.bump(1);
+      lab.textContent = '동그랗게 다시 뭉쳤습니다';
+      wake();
+    });
+    api.tool('탁 치기', () => {
+      for (let i = 0; i < N; i++){ pts[i].px = pts[i].x - rnd(-9, 9); pts[i].py = pts[i].y - rnd(-9, 9); }
+      SND.squelch(.32, true); api.bump(1);
+      lab.textContent = '부르르—';
+      wake();
+    });
+    api.range('모양 기억', 0, 100, Math.round(mem * 100), v => {
+      mem = v / 100; DB.set('slimeMem', v);
+      lab.textContent = v > 85 ? '주무른 모양이 그대로 남습니다' : v > 40 ? '천천히 원래대로 돌아옵니다' : '고무처럼 바로 돌아옵니다';
+      wake();
+    });
+    draw(); wake();
+    return () => {
+      cancelAnimationFrame(raf); if (sq) sq.stop();
+      removeEventListener('pointerup', onUp); removeEventListener('pointercancel', onUp);
+    };
+  }
+});
+
+/* ── 12. 딸깍 볼펜 ── */
+TOYS.push({
+  id: 'pen', cat: 'jjo', name: '딸깍 볼펜',
+  desc: '수업 시간에 뒷자리에서 나던 그 소리. 옆 사람 눈치 안 봐도 됩니다.',
+  mount(f, api){
+    f.innerHTML =
+      '<svg class="pen" viewBox="0 0 160 380" id="pensvg">' +
+      '<g id="knock"><rect x="66" y="14" width="28" height="34" rx="8" fill="#E8446E"/></g>' +
+      '<rect x="52" y="44" width="56" height="250" rx="16" fill="#3A4A5C"/>' +
+      '<rect x="62" y="70" width="14" height="200" rx="7" fill="rgba(255,255,255,.22)"/>' +
+      '<rect x="96" y="60" width="10" height="120" rx="5" fill="#C9D5DF"/>' +
+      '<path d="M52 294 L80 348 L108 294Z" fill="#5A6B7C"/>' +
+      '<rect id="tip" x="75" y="340" width="10" height="0" rx="4" fill="#12203A"/>' +
+      '</svg>' +
+      '<div class="label-mid">누르세요. 스페이스바도 됩니다</div>';
+    const svg = f.querySelector('#pensvg'), knock = f.querySelector('#knock'), tip = f.querySelector('#tip');
+    let out = false, n = DB.rec('pen'), times = [];
+    api.val(n); api.key('총 딸깍');
+    const lab = f.querySelector('.label-mid');
+    function clickPen(){
+      out = !out;
+      knock.setAttribute('transform', out ? 'translate(0,10)' : 'translate(0,0)');
+      tip.setAttribute('height', out ? 18 : 0);
+      SND.clack(out ? 1.06 : .84, 1.05);
+      vib(5);
+      n++; api.val(n); DB.setRec('pen', n); api.bump(1);
+      if (n >= 200) ach('pen200');
+      const r = svg.getBoundingClientRect();
+      fx(r.left + r.width / 2, r.top + 20, out ? '딸깍' : '깍', 'var(--jjo)', 24);
+      const now = performance.now();
+      times.push(now);
+      times = times.filter(t => now - t < 4000);
+      if (times.length > 3){
+        const cpm = Math.round((times.length - 1) / ((now - times[0]) / 60000));
+        lab.textContent = '분당 ' + cpm + '번 딸깍 중';
+      }
+    }
+    const onDown = () => clickPen();
+    const onKey = e => { if (e.code === 'Space' || e.key === ' '){ e.preventDefault(); clickPen(); } };
+    svg.addEventListener('pointerdown', onDown);
+    addEventListener('keydown', onKey);
+    api.tool('연타', () => {
+      let i = 0;
+      const t = setInterval(() => { clickPen(); if (++i > 11) clearInterval(t); }, 95);
+    });
+    return () => { svg.removeEventListener('pointerdown', onDown); removeEventListener('keydown', onKey); };
+  }
+});
+
+/* ── 13. 딸깍 스위치판 ── */
+TOYS.push({
+  id: 'switch', cat: 'jjo', name: '딸깍 스위치판',
+  desc: '아무 의미 없는 스위치 여덟 개. 하나씩 소리가 다릅니다.',
+  mount(f, api){
+    const NOTES = [262, 294, 330, 392, 440, 523, 587, 659];
+    const bank = document.createElement('div');
+    bank.className = 'sw-bank';
+    const sws = [];
+    NOTES.forEach((hz, i) => {
+      const b = document.createElement('button');
+      b.className = 'sw'; b.type = 'button';
+      b.setAttribute('aria-pressed', 'false');
+      b.innerHTML = '<i></i><b>' + (i + 1) + '</b>';
+      bank.appendChild(b); sws.push(b);
+    });
+    f.appendChild(bank);
+    let n = 0;
+    api.val(0); api.key('올린 횟수');
+    function toggle(i, quiet){
+      const b = sws[i], on = b.classList.toggle('on');
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      if (sws.every(x => x.classList.contains('on'))) ach('sw8');
+      SND.clack(on ? 1 : .78, .85);
+      SND.pluck(NOTES[i] * (on ? 1 : .5), on ? .18 : .09);
+      if (!quiet){
+        n++; api.val(n); api.bump(1); vib(6);
+        const r = b.getBoundingClientRect();
+        fx(r.left + r.width / 2, r.top, on ? '딸깍' : '탁', 'var(--jjo)', 20);
+      }
+    }
+    const onClick = e => {
+      const b = e.target.closest('.sw');
+      if (b) toggle(sws.indexOf(b));
+    };
+    bank.addEventListener('click', onClick);
+    const timers = [];
+    api.tool('전부 내리기', () => {
+      sws.forEach((b, i) => { if (b.classList.contains('on')) timers.push(setTimeout(() => toggle(i, true), i * 70)); });
+    });
+    api.tool('물결치기', () => {
+      sws.forEach((b, i) => timers.push(setTimeout(() => toggle(i, true), i * 90)));
+      n += 8; api.val(n); api.bump(8);
+    });
+    return () => { bank.removeEventListener('click', onClick); timers.forEach(clearTimeout); };
+  }
+});
+</script>
+
+<script>
+/* ══ 조립 ══════════════════════════════════════════════ */
+const CATS = [
+  { id: 'pok', name: '뽁뽁이', en: 'BUBBLE WRAP', c: 'var(--pok)', t: 'var(--pok-t)' },
+  { id: 'man', name: '말랑이네', en: 'SQUEEZE', c: 'var(--man)', t: 'var(--man-t)' },
+  { id: 'jjo', name: '쪼물딱', en: 'FIDGET', c: 'var(--jjo)', t: 'var(--jjo-t)' }
+];
+const HINTS = {
+  classic: '끌면 주르륵 터집니다',
+  infinite: '가만 두면 슬그머니 다시 부풉니다',
+  giant: '한 알씩 꾹 밟아보세요',
+  tiny: '손가락으로 쓸어버리세요',
+  domino: '한 알만 눌러도 번져나갑니다',
+  mandeuk: '길게 누를수록 눈이 튀어나옵니다',
+  bollok: '100%를 넘기면 뻥 터집니다',
+  jjuk: '멀리 당길수록 화면이 뒤로 물러납니다',
+  popit: '끌면 여러 개가 한 번에 뒤집힙니다',
+  spinner: '빙 돌리듯 튕기세요',
+  slime: '손가락 두 개로 잡아당겨도 됩니다',
+  pen: '스페이스바로도 눌립니다',
+  switch: '여덟 개가 각각 다른 소리입니다'
+};
+const shelf = document.getElementById('shelf');
+const stage = document.getElementById('stage');
+const field = document.getElementById('field');
+const toolsEl = document.getElementById('tools');
+const nameEl = document.getElementById('t-name');
+const descEl = document.getElementById('t-desc');
+const valEl = document.getElementById('t-val');
+const keyEl = document.getElementById('t-key');
+const tallyEl = document.getElementById('tally');
+const muteEl = document.getElementById('mute');
+
+const btns = {};
+CATS.forEach(cat => {
+  const box = document.createElement('div');
+  box.style.setProperty('--c', cat.c);
+  box.style.setProperty('--tint', cat.t);
+  const list = TOYS.filter(t => t.cat === cat.id);
+  box.innerHTML = '<div class="cat-h"><span class="bar"></span><strong>' + cat.name +
+    '</strong><em>' + list.length + '종</em></div>';
+  const ul = document.createElement('div');
+  ul.className = 'cat-list';
+  list.forEach(toy => {
+    const b = document.createElement('button');
+    b.className = 'toy-btn'; b.type = 'button';
+    b.innerHTML = '<span class="dot"></span>' + toy.name;
+    b.onclick = () => select(toy.id);
+    ul.appendChild(b); btns[toy.id] = b;
+  });
+  box.style.flex = list.length + ' 1 auto';
+  box.appendChild(ul);
+  shelf.appendChild(box);
+});
+
+let cleanup = null;
+function select(id){
+  const toy = TOYS.find(t => t.id === id) || TOYS[0];
+  if (cleanup){ try { cleanup(); } catch (e) {} cleanup = null; }
+  const cat = CATS.find(c => c.id === toy.cat);
+  stage.style.setProperty('--c', cat.c);
+  stage.style.setProperty('--tint', cat.t);
+  Object.keys(btns).forEach(k => btns[k].setAttribute('aria-current', k === id ? 'true' : 'false'));
+  nameEl.textContent = toy.name;
+  descEl.textContent = toy.desc;
+  field.innerHTML = ''; toolsEl.innerHTML = '';
+  valEl.textContent = '0'; keyEl.textContent = '';
+  const api = {
+    bump(n){ tally(n); },
+    val(v){ valEl.textContent = typeof v === 'number' ? v.toLocaleString('ko-KR') : v; },
+    key(k){ keyEl.textContent = k; },
+    tool(label, fn){
+      const b = document.createElement('button');
+      b.className = 'tool'; b.type = 'button'; b.textContent = label;
+      b.onclick = fn; toolsEl.appendChild(b);
+      return b;
+    },
+    seg(label, opts, idx, fn){
+      const wrap = document.createElement('div');
+      wrap.className = 'seg';
+      wrap.setAttribute('aria-label', label);
+      opts.forEach((o, i) => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.textContent = o;
+        b.setAttribute('aria-pressed', i === idx ? 'true' : 'false');
+        b.onclick = () => {
+          [...wrap.children].forEach((c, k) => c.setAttribute('aria-pressed', k === i ? 'true' : 'false'));
+          fn(i);
+        };
+        wrap.appendChild(b);
+      });
+      toolsEl.appendChild(wrap);
+    },
+    range(label, min, max, val, fn){
+      const w = document.createElement('label');
+      w.className = 'rng';
+      const s = document.createElement('span'); s.textContent = label;
+      const inp = document.createElement('input');
+      inp.type = 'range'; inp.min = min; inp.max = max; inp.value = val;
+      inp.oninput = e => fn(+e.target.value);
+      w.appendChild(s); w.appendChild(inp);
+      toolsEl.appendChild(w);
+    },
+    shake(){
+      if (REDUCED) return;
+      stage.classList.remove('shake');
+      void stage.offsetWidth;
+      stage.classList.add('shake');
+      setTimeout(() => stage.classList.remove('shake'), 360);
+    }
+  };
+  try { cleanup = toy.mount(field, api) || null; }
+  catch (err){ field.textContent = '이 장난감이 고장났어요. 다른 걸 골라주세요.'; console.error(err); }
+  const hint = document.createElement('span');
+  hint.className = 'hint';
+  hint.textContent = HINTS[id] || '누르고 끌면 더 재밌어요';
+  toolsEl.appendChild(hint);
+  DB.last(id);
+  if (!DB.data.seen) DB.data.seen = [];
+  if (DB.data.seen.indexOf(id) < 0){
+    DB.data.seen.push(id); DB.set('seen', DB.data.seen);
+    if (DB.data.seen.length >= TOYS.length) ach('alltoys');
+    else refreshBar();
+  }
+}
+
+let tallyN = DB.data.tally;
+function tally(n){
+  const before = rankOf(tallyN).lv;
+  tallyN = DB.bump(n);
+  tallyEl.textContent = tallyN.toLocaleString('ko-KR');
+  tallyEl.classList.add('bump');
+  clearTimeout(tally._t);
+  tally._t = setTimeout(() => tallyEl.classList.remove('bump'), 130);
+  const now = rankOf(tallyN);
+  if (now.lv > before){
+    if (now.lv >= 4) ach('lv4');
+    refreshBar();
+    toast('Lv.' + now.lv + ' 승급 — 이제 ‘' + now.name + '’ 입니다', 3200);
+    SND.tone(523, .13); setTimeout(() => SND.tone(659, .13), 120); setTimeout(() => SND.tone(784, .3), 240);
+    fx(innerWidth / 2, innerHeight * .42, 'LEVEL UP!', 'var(--jjo)', 44, true);
+  } else if (n > 0 && tallyN % 50 === 0) refreshBar();
+}
+tallyEl.textContent = tallyN.toLocaleString('ko-KR');
+
+/* ══ 설정 바 ═══════════════════════════════════════════ */
+const bar = document.getElementById('bar');
+function chip(html, fn){
+  const b = document.createElement('button');
+  b.className = 'chip'; b.type = 'button'; b.innerHTML = html;
+  b.onclick = fn; return b;
+}
+function refreshBar(){
+  const r = rankOf(DB.data.tally);
+  bar.innerHTML = '';
+  const lv = document.createElement('div');
+  lv.className = 'lv';
+  lv.innerHTML = '<b>Lv.' + r.lv + '</b>' + r.name +
+    (r.next ? '<i>다음까지 ' + (r.next - DB.data.tally).toLocaleString('ko-KR') + '번</i>' : '<i>만렙</i>');
+  bar.appendChild(lv);
+  bar.appendChild(chip('✎ ' + (DB.data.stamp ? '‘' + DB.data.stamp + '’ 새겨짐' : '새길 글자'), openStamp));
+  const ac = activeColor();
+  bar.appendChild(chip('<span class="sw" style="background:' + (ac || 'var(--bub1)') + '"></span>색 도감<span class="n">' +
+    DB.data.dex.length + '/' + DEX.length + '</span>', openDex));
+  bar.appendChild(chip('도장판<span class="n">' + (DB.data.ach || []).length + '/' + ACHS.length + '</span>', openAch));
+  bar.appendChild(chip('오늘의 운세', () => openFortune(false)));
+  bar.appendChild(chip('↺ 처음부터', openReset));
+}
+
+/* ── 각인 ── */
+function openStamp(){
+  modal((box, close) => {
+    box.innerHTML = '<h3>무엇을 부숴볼까요</h3>' +
+      '<p class="sub">적은 글자가 뽁뽁이 알과 볼록이, 슬라임에 새겨집니다. 최대 5글자.</p>';
+    const inp = document.createElement('input');
+    inp.className = 'txt'; inp.maxLength = 5; inp.value = DB.data.stamp;
+    inp.placeholder = '월요일';
+    box.appendChild(inp);
+    const row = document.createElement('div');
+    row.className = 'row';
+    const clr = document.createElement('button');
+    clr.className = 'tool'; clr.textContent = '지우기';
+    clr.onclick = () => { apply(''); };
+    const ok = document.createElement('button');
+    ok.className = 'tool'; ok.textContent = '새기기';
+    ok.onclick = () => apply(inp.value.trim());
+    row.appendChild(clr); row.appendChild(ok);
+    box.appendChild(row);
+    inp.onkeydown = e => { if (e.key === 'Enter') apply(inp.value.trim()); };
+    function apply(v){
+      DB.set('stamp', v);
+      refreshBar(); select(DB.last()); close();
+      toast(v ? '‘' + v + '’ 새겼습니다. 실컷 부수세요' : '각인을 지웠습니다');
+      SND.click(1, 1);
+    }
+  });
+}
+
+/* ── 색 도감 ── */
+function openDex(){
+  modal((box, close) => {
+    box.innerHTML = '<h3>숨은 색 도감</h3>' +
+      '<p class="sub">뽁뽁이를 터뜨리다 보면 반짝이는 알이 섞여 있습니다. 그걸 터뜨리면 색이 하나씩 열려요. ' +
+      '연 색을 고르면 뽁뽁이·볼록이·팝잇·슬라임이 그 색으로 바뀝니다.<br><b>' +
+      DB.data.dex.length + ' / ' + DEX.length + '</b> 모음</p>';
+    const grid = document.createElement('div');
+    grid.className = 'dex';
+    DEX.forEach((c, i) => {
+      const got = dexHas(i);
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = got ? (DB.data.color === i ? 'on' : '') : 'locked';
+      b.innerHTML = '<span class="sw" style="background:' + (got ? c[1] : 'var(--line)') + '"></span>' +
+        (got ? c[0] : '???');
+      if (got) b.onclick = () => {
+        DB.set('color', DB.data.color === i ? null : i);
+        refreshBar(); select(DB.last()); close();
+        SND.tone(700, .16);
+        toast(DB.data.color === null ? '기본 색으로 돌아왔어요' : '‘' + c[0] + '’ 색으로 갈아끼웠어요');
+      };
+      grid.appendChild(b);
+    });
+    box.appendChild(grid);
+    const row = document.createElement('div');
+    row.className = 'row';
+    const rst = document.createElement('button');
+    rst.className = 'tool'; rst.textContent = '기본색으로';
+    rst.onclick = () => { DB.set('color', null); refreshBar(); select(DB.last()); close(); };
+    const cl = document.createElement('button');
+    cl.className = 'tool'; cl.textContent = '닫기'; cl.onclick = close;
+    row.appendChild(rst); row.appendChild(cl);
+    box.appendChild(row);
+  });
+}
+
+/* ── 도장판 ── */
+function openAch(){
+  modal((box, close) => {
+    const got = (DB.data.ach || []).length;
+    box.innerHTML = '<h3>도장판</h3>' +
+      '<p class="sub">장난감을 만지다 보면 하나씩 찍힙니다. 굳이 다 모을 필요는 없어요.<br><b>' +
+      got + ' / ' + ACHS.length + '</b> 개</p>';
+    const g = document.createElement('div');
+    g.className = 'achs';
+    ACHS.forEach(a => {
+      const d = document.createElement('div');
+      const has = achHas(a[0]);
+      if (has) d.className = 'got';
+      d.innerHTML = '<b>' + (has ? a[1] : '???') + '</b>' + a[2];
+      g.appendChild(d);
+    });
+    box.appendChild(g);
+    const row = document.createElement('div');
+    row.className = 'row';
+    const wipe = document.createElement('button');
+    wipe.className = 'tool'; wipe.textContent = '↺ 처음부터';
+    wipe.onclick = () => { close(); openReset(); };
+    const cl = document.createElement('button');
+    cl.className = 'tool'; cl.textContent = '닫기'; cl.onclick = close;
+    row.appendChild(wipe); row.appendChild(cl);
+    box.appendChild(row);
+  });
+}
+
+/* ── 전부 초기화 ── */
+function openReset(){
+  modal((box, close) => {
+    const d = DB.data;
+    box.innerHTML = '<h3>처음부터 다시</h3>' +
+      '<p class="sub">이 브라우저에 쌓아둔 기록을 전부 지웁니다. 되돌릴 수 없어요.</p>';
+    const list = document.createElement('div');
+    list.className = 'fort';
+    list.style.cssText = 'font-size:14px;text-align:left;line-height:1.95';
+    list.innerHTML =
+      '· 누적 <b>' + d.tally.toLocaleString('ko-KR') + '번</b> 쪼물딱 · Lv.' + rankOf(d.tally).lv + ' ‘' + rankOf(d.tally).name + '’<br>' +
+      '· 장난감별 최고 기록 (볼록이 %, 쭈욱이 배율, 스피너 RPM…)<br>' +
+      '· 숨은 색 <b>' + (d.dex || []).length + ' / ' + DEX.length + '</b>개<br>' +
+      '· 도장판 <b>' + (d.ach || []).length + ' / ' + ACHS.length + '</b>개<br>' +
+      '· 새긴 글자' + (d.stamp ? ' ‘' + d.stamp + '’' : ' 없음') + ' · 고른 색 · 소리 설정';
+    box.appendChild(list);
+    const row = document.createElement('div');
+    row.className = 'row';
+    const no = document.createElement('button');
+    no.className = 'tool'; no.textContent = '그냥 둘래요'; no.onclick = close;
+    const yes = document.createElement('button');
+    yes.className = 'tool';
+    yes.style.cssText = 'border-color:var(--man);box-shadow:0 3px 0 var(--man);color:var(--man)';
+    yes.textContent = '전부 지우기';
+    let armed = false;
+    yes.onclick = () => {
+      if (!armed){
+        armed = true;
+        yes.textContent = '정말요? 한 번 더 누르면 지워집니다';
+        SND.tone(300, .14);
+        return;
+      }
+      try { localStorage.removeItem('jjomullak.v1'); } catch (e) {}
+      location.reload();
+    };
+    row.appendChild(no); row.appendChild(yes);
+    box.appendChild(row);
+  });
+}
+
+/* ── 오늘의 운세 ── */
+function openFortune(auto){
+  const key = todayKey();
+  /* 열 때마다 새로 뽑는다 — 사람마다, 볼 때마다 다르게 */
+  const f = pickOne(FORTUNES);
+  const luckyToy = pickOne(TOYS);
+  const luckyColor = pickOne(DEX);
+  modal((box, close) => {
+    box.innerHTML = '<h3>오늘의 쪼물딱 운세</h3><p class="sub">' + key + '</p>' +
+      '<div class="fort">' + f + '</div>' +
+      '<div class="fort-l"><span>행운의 장난감 · ' + luckyToy.name + '</span>' +
+      '<span>행운의 색 · <b style="color:' + luckyColor[1] + '">' + luckyColor[0] + '</b></span></div>';
+    const row = document.createElement('div');
+    row.className = 'row';
+    const go = document.createElement('button');
+    go.className = 'tool'; go.textContent = luckyToy.name + ' 만지러 가기';
+    go.onclick = () => { close(); select(luckyToy.id); };
+    const cl = document.createElement('button');
+    cl.className = 'tool'; cl.textContent = '닫기'; cl.onclick = close;
+    row.appendChild(go); row.appendChild(cl);
+    box.appendChild(row);
+  });
+  if (auto) DB.set('fortuneDay', key);
+}
+refreshBar();
+if (DB.data.fortuneDay !== todayKey()) setTimeout(() => openFortune(true), 800);
+
+addEventListener('pointerdown', function wakeSnd(){
+  SND.wake();
+  removeEventListener('pointerdown', wakeSnd);
+}, { passive: true });
+
+muteEl.onclick = () => {
+  const on = SND.toggle();
+  muteEl.setAttribute('aria-pressed', on ? 'true' : 'false');
+  muteEl.textContent = on ? '소리 켜짐' : '소리 꺼짐';
+  if (on) SND.tone(660, .12);
+};
+
+const foot = document.createElement('p');
+foot.className = 'foot';
+foot.textContent = '소리를 켜야 제맛입니다 · 기록은 이 브라우저에만 남습니다 · 위 ‘↺ 처음부터’로 전부 지울 수 있어요';
+document.querySelector('.wrap').appendChild(foot);
+
+select(TOYS.some(t => t.id === DB.last()) ? DB.last() : TOYS[0].id);
+
+/* 화면 폭이 크게 바뀌면 판을 새로 깐다 (뽁뽁이 칸 수가 달라지므로) */
+let wasSmall = SMALL(), rzT = null;
+addEventListener('resize', () => {
+  clearTimeout(rzT);
+  rzT = setTimeout(() => {
+    if (SMALL() !== wasSmall){ wasSmall = SMALL(); select(DB.last()); }
+  }, 220);
+});
+</script>
+
+</body>
+</html>
