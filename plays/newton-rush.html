@@ -59,6 +59,40 @@ html,body{height:100%;overscroll-behavior:none}.shell{height:100dvh;min-height:5
 @media(max-width:620px){.shell{min-height:0;padding:8px max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));height:100svh;height:100dvh}.control-bar{min-height:76px;padding:7px 10px}.game-buttons{gap:12px}.game-buttons button{min-height:60px;font-size:16px}.concept-strip{height:136px;min-height:136px}.concept-strip #lore-card,.concept-strip #lore-rest{height:118px;min-height:118px}.lore-copy p{font-size:14px;line-height:1.45}.touch-hint{display:block;font-size:9px}.key-hint{display:none}body[data-mode=running] .chapter-rail,body[data-mode=paused] .chapter-rail,body[data-mode=transition] .chapter-rail{display:none}body[data-mode=running] .play-layout,body[data-mode=paused] .play-layout,body[data-mode=transition] .play-layout{grid-template-rows:minmax(0,1fr)}.event-bar{min-height:44px}.event-bar .effect-list{flex-wrap:nowrap;overflow-x:auto;max-width:100%}#result .modal-card{padding:18px}.result-stats{gap:15px}#quiz,#result{padding:10px}#quiz .modal-card,#result .modal-card{max-height:calc(100dvh - 20px)}}
 @media(max-height:500px) and (orientation:landscape){.shell{min-height:0;height:100dvh;padding:5px max(8px,env(safe-area-inset-right)) max(5px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));gap:5px;grid-template-rows:auto minmax(0,1fr)}footer{display:none}.top{min-height:32px}.brand h1{font-size:18px}.brand-mark{height:30px;width:30px;font-size:22px}.brand small,.rail-head,.best{display:none}.top-actions .small-btn{min-height:32px;font-size:10px;padding:5px 9px}.play-layout{grid-template-columns:96px minmax(0,1fr);grid-template-rows:minmax(0,1fr);gap:8px}.chapter-rail{display:flex}.chapter-rail .worlds{height:100%;grid-template-columns:1fr;grid-template-rows:repeat(5,minmax(0,1fr))}.chapter-rail .world-info b{font-size:11px}.chapter-rail .world-info{margin:0}.chapter-rail .world-number,.chapter-rail .world-check{display:none}.hud{min-height:39px;padding:3px 12px}.hud-world{display:none}.score{font-size:20px}.hearts{font-size:19px}.concept-strip{height:78px;min-height:78px;padding:5px 12px}.concept-strip #lore-card,.concept-strip #lore-rest{height:68px;min-height:68px}.lore-heading strong{font-size:14px}.lore-copy small{font-size:10px}.lore-copy p{font-size:13px;line-height:1.25;margin:3px 0 0}#lore-portrait,#lore-diagram{width:42px;height:42px;flex-basis:42px}.event-bar{min-height:30px;padding:3px 10px;gap:4px}.event-bar .toast,.event-bar .effect-pill{font-size:10px}.control-bar{min-height:53px;padding:4px 10px}.game-buttons{width:100%;gap:24px}.game-buttons button{min-height:45px;font-size:14px}.world-rule{display:none}body[data-mode=running] .top,body[data-mode=paused] .top,body[data-mode=transition] .top,body[data-mode=running] .chapter-rail,body[data-mode=paused] .chapter-rail,body[data-mode=transition] .chapter-rail{display:none}body[data-mode=running] .shell,body[data-mode=paused] .shell,body[data-mode=transition] .shell{grid-template-rows:minmax(0,1fr)}body[data-mode=running] .play-layout,body[data-mode=paused] .play-layout,body[data-mode=transition] .play-layout{grid-template-columns:minmax(0,1fr)}.welcome .tag{font-size:7px}.welcome h2{font-size:24px;margin:6px 0}.welcome .primary{min-height:32px;padding:7px 13px}.welcome p,.touch-hint{display:none}.welcome-overlay{padding:12px 20px}}
 
+/* Keep touch controls above the feedback row and browser navigation area. */
+@media (max-width:620px), (max-height:500px) and (orientation:landscape) {
+  .shell { height:100svh; }
+  .game > .control-bar { order:1; border-top:1px solid #d7e2ed; }
+  .game > .event-bar { order:2; max-height:68px; overflow-y:auto; }
+}
+@media (max-width:620px) and (orientation:portrait) {
+  .control-bar { min-height:84px; padding:8px 10px 14px; }
+}
+
+/* Reserve feedback space so pickups cannot resize and clear the canvas. */
+.event-bar {
+  display:grid; grid-template-columns:minmax(0,1fr); grid-template-rows:20px 26px;
+  height:64px; min-height:64px; max-height:64px; padding:6px 16px;
+  gap:4px; overflow:hidden; align-content:center;
+}
+.event-bar .toast {
+  grid-column:1; grid-row:1; min-width:0; white-space:nowrap;
+  overflow:hidden; text-overflow:ellipsis; line-height:20px;
+}
+.event-bar .effect-list {
+  grid-column:1; grid-row:2; min-width:0; height:26px;
+  flex-wrap:nowrap; overflow-x:auto; overflow-y:hidden; align-items:center;
+}
+.event-bar:has(.toast[hidden]):has(.effect-list:empty):before { grid-column:1; grid-row:1 / 3; }
+@media(max-width:620px) {
+  .game > .event-bar { height:68px; min-height:68px; max-height:68px; padding:8px 10px; overflow:hidden; }
+}
+@media(max-height:500px) and (orientation:landscape) {
+  .game > .event-bar { height:50px; min-height:50px; max-height:50px; padding:4px 10px; grid-template-rows:16px 24px; gap:2px; overflow:hidden; }
+  .event-bar .toast { line-height:16px; }
+  .event-bar .effect-list { height:24px; }
+}
+
 </style></head>
 <body><main class="shell">
 <header class="top"><div class="brand"><div class="brand-mark" aria-hidden="true">N<span>✦</span></div><div><h1>뉴턴 러시</h1><small>NEWTON'S LITTLE ADVENTURE</small></div></div><div class="top-actions"><span class="best">나의 최고 기록 <b id="best">0</b></span><button id="sound" class="small-btn" aria-pressed="true">♪ 소리 켬</button><button id="show-ranking" class="small-btn">🏆 랭킹</button><button id="help" class="small-btn">플레이 방법 ↗</button></div></header>
@@ -486,7 +520,7 @@ globalThis.NEWTON_LORE=[
 <script>
 'use strict';
 const $=id=>document.getElementById(id);
-const canvas=$('game'),ctx=canvas.getContext('2d');
+const canvas=$('game'),ctx=canvas.getContext('2d',{alpha:false});
 const WORLDS=[
   {
     "name": "고전 역학",
@@ -558,7 +592,7 @@ try{best=Number(localStorage.getItem('newton-rush-best-v2'))||0;sound=localStora
 function fresh(world=selected){return {mode:'ready',resumeMode:'running',worldId:world,startWorld:world,time:0,worldTime:0,world:0,distance:0,score:0,gems:0,hearts:3,smashes:0,mass:1,speed:42,force:0,accel:0,y:0,vy:0,jumps:0,sliding:false,slideTime:0,massFlash:0,boost:0,giant:0,magnet:0,invincible:0,massTokens:[],items:[],obstacles:[],particles:[],labels:[],segment:0,nextSegment:430,toastTime:0,shake:0,frame:0,transitionTime:0,seen:new Set([world]),clears:0,giantCount:0,pickups:0,seed:137+world*41};}
 let s=fresh();s.seenLore=new Set();s.quiz=null;
 function rng(){s.seed=(Math.imul(s.seed,1664525)+1013904223)>>>0;return s.seed/4294967296;}
-function resize(){const r=canvas.getBoundingClientRect();H=480;W=H*r.width/Math.max(r.height,1);ground=H-66;playerX=Math.min(190,W*.24);pixelScale=9*Math.min(1,Math.max(.56,W/1050));const d=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(r.width*d);canvas.height=Math.round(r.height*d);ctx.setTransform(canvas.width/W,0,0,canvas.height/H,0,0);}
+function resize(){const r=canvas.getBoundingClientRect();if(r.width<=0||r.height<=0)return;const d=Math.min(devicePixelRatio||1,matchMedia('(pointer:coarse), (max-width:620px)').matches?1.5:2),width=Math.round(r.width*d),height=Math.round(r.height*d);if(canvas.width===width&&canvas.height===height)return;H=480;W=H*r.width/r.height;ground=H-66;playerX=Math.min(190,W*.24);pixelScale=9*Math.min(1,Math.max(.56,W/1050));canvas.width=width;canvas.height=height;ctx.setTransform(canvas.width/W,0,0,canvas.height/H,0,0);if(last)draw();}
 new ResizeObserver(resize).observe(canvas);resize();
 function beep(type){if(!sound)return;try{audioContext??=new(window.AudioContext||window.webkitAudioContext)();if(audioContext.state==='suspended')audioContext.resume();const osc=audioContext.createOscillator(),gain=audioContext.createGain();osc.connect(gain);gain.connect(audioContext.destination);const t=audioContext.currentTime;const tones={gem:[880,1300,.07],jump:[280,560,.11],mass:[250,340,.1],force:[420,980,.2],giant:[160,670,.35],hit:[150,55,.25],heart:[640,950,.2],magnet:[310,850,.23],smash:[95,45,.13],switch:[390,690,.12],clear:[540,1250,.6]};const[a,b,d]=tones[type]||tones.gem;osc.type=['hit','smash'].includes(type)?'triangle':'sine';osc.frequency.setValueAtTime(a,t);osc.frequency.exponentialRampToValueAtTime(b,t+d);gain.gain.setValueAtTime(.035,t);gain.gain.exponentialRampToValueAtTime(.001,t+d);osc.start(t);osc.stop(t+d);}catch{}}
 // Original, quiet eight-bar tune. Audio starts only after a player gesture.
@@ -642,7 +676,7 @@ function label(t,x,y,color=C.ink){s.labels.push({text:t,x,y,color,life:.95});}
 function collect(it){if(it.dead)return;it.dead=true;s.pickups++;const x=it.x-s.world,y=ground-it.h;
   if(['gem','particle','photon','rainbow'].includes(it.type)){const bonus=it.type==='rainbow'?200:100;s.gems++;s.score+=bonus;beep('gem');burst(x,y,5,it.type==='particle'?C.coral:C.blue);if(s.gems%10===0)label('보석 10개! +1,000',x,y-10,C.blue);}
   else if(it.type==='mass'){const merged=Physics.merge(s.mass,s.speed);s.mass=merged.mass;s.speed=merged.speed;s.massTokens.push(s.time+10);s.massFlash=1.5;beep('mass');burst(x,y,24,C.lime,1.3);message('m +0.5 kg · 몸집이 커지고 잠깐 느려져! (10초)',3.2);}
-  else if(it.type==='force'){s.boost=6;beep('force');burst(x,y,16,C.coral);message('F 획득! 6초 동안 추진력 UP!',2.1);}
+  else if(it.type==='force'){s.boost=6;beep('force');burst(x,y,8,C.coral,.7);message('F 획득! 6초 동안 추진력 UP!',2.1);}
   else if(it.type==='giant'){s.giant=7;s.giantCount++;s.sliding=false;s.slideTime=0;s.invincible=Math.max(s.invincible,.5);beep('giant');burst(playerX,ground-baseline()-s.y-60,35,C.lime,1.7);message('갈릴레이의 어깨 위로! 7초 동안 돌파!',2.7);s.shake=reduced?0:.2;}
   else if(it.type==='magnet'){s.magnet=6;beep('magnet');burst(x,y,18,C.violet);message('G 중력 보너스! 아이템이 모여든다!',2.2);}
   else if(it.type==='heart'){s.hearts=Math.min(3,s.hearts+1);beep('heart');burst(x,y,15,'#f59aaf');message('하트 회복! ♥',1.5);}
@@ -704,10 +738,10 @@ function updateLore(){
   if($('lore-rest-title').textContent!==restTitle)$('lore-rest-title').textContent=restTitle;if($('lore-rest-copy').textContent!==restCopy)$('lore-rest-copy').textContent=restCopy;
   if(bonus){$('lore-card').hidden=true;$('lore-rest').hidden=false;return;}
 
-  const index=s.mode==='ready'?-1:LORE[s.worldId].findIndex(c=>s.worldTime>=c.at&&s.worldTime<c.at+7.7),card=$('lore-card');card.hidden=index<0;$('lore-rest').hidden=index>=0;if(index<0)return;
+  const index=s.mode==='ready'?-1:LORE[s.worldId].findIndex(c=>s.worldTime>=c.at&&s.worldTime<c.at+7.7),card=$('lore-card');if(card.hidden!==(index<0))card.hidden=index<0;if($('lore-rest').hidden!==(index>=0))$('lore-rest').hidden=index>=0;if(index<0)return;
   const clue=LORE[s.worldId][index],age=s.worldTime-clue.at,key=s.worldId+':'+index;
   if(card.dataset.clue!==key){card.dataset.clue=key;$('lore-name').textContent=clue.name.replace('한스 크리스티안 ','').replace('제임스 프레스콧 ','').replace('제임스 클러크 ','');$('lore-topic').textContent=clue.topic;$('lore-idea').textContent=clue.idea.replaceAll('\n',' ');$('lore-count').textContent=(index+1)+' / '+LORE[s.worldId].length;$('lore-portrait').style.backgroundImage='url("'+assetUrl('assets/scientist-portraits.webp')+'")';$('lore-portrait').style.backgroundPosition=(clue.art%4)*100/3+'% '+Math.floor(clue.art/4)*100/3+'%';}
-  card.style.transform=reduced?'none':'translateX('+(age<1.1?Math.pow(1-age/1.1,3)*110:age>6.8?-Math.pow((age-6.8)/.9,3)*110:0)+'%)';
+  const transform=reduced?'none':'translateX('+(age<1.1?Math.pow(1-age/1.1,3)*110:age>6.8?-Math.pow((age-6.8)/.9,3)*110:0)+'%)';if(card.style.transform!==transform)card.style.transform=transform;
   const art=$('lore-diagram').getContext('2d');art.clearRect(0,0,90,90);drawIdea(clue.diagram,45,45,art);
 }
 function drawObstacle(ob){
@@ -761,7 +795,7 @@ function drawObstacle(ob){
   if(id===4){rr(x+3,y+4,width-6,h-6,10,'#efd09b',light);rr(x+9,y+10,width-18,h-19,7,'#f5e7b7');circle(cx-6,cy,2,dark);circle(cx+6,cy,2,dark);ctx.beginPath();ctx.arc(cx,cy+3,6,.2,Math.PI-.2);ctx.strokeStyle=dark;ctx.lineWidth=2;ctx.stroke();for(let j=0;j<3;j++)circle(x+13+j*13,y+14,2,'#d59ec3');}
 }
 function drawBackground(){const w=WORLDS[s.worldId],img=backgrounds[s.worldId],off=s.mode==='ready'?renderT*9:s.world;ctx.fillStyle=w.sky;ctx.fillRect(0,0,W,H);
-  if(img.complete&&img.naturalWidth){const rh=H+38,rw=rh*img.naturalWidth/img.naturalHeight;const scroll=off*.11%rw;for(let i=-1;i<=Math.ceil(W/rw)+1;i++){const x=i*rw-scroll;ctx.save();if(i%2){ctx.translate(x+rw,0);ctx.scale(-1,1);ctx.drawImage(img,0,-32,rw,rh);}else ctx.drawImage(img,x,-32,rw,rh);ctx.restore();}}
+  if(img.complete&&img.naturalWidth){const rh=H+38,rw=rh*img.naturalWidth/img.naturalHeight;const scroll=off*.11%rw;for(let i=-1;i<=Math.ceil(W/rw)+1;i++){const x=i*rw-scroll;if(x+rw<0||x>W)continue;ctx.save();if(i%2){ctx.translate(x+rw,0);ctx.scale(-1,1);ctx.drawImage(img,0,-32,rw,rh);}else ctx.drawImage(img,x,-32,rw,rh);ctx.restore();}}
   ctx.fillStyle=s.worldId===1||s.worldId===3?'#10244810':'#ffffff08';ctx.fillRect(0,0,W,ground);
   for(let i=0;i<10;i++){const x=((i*173-off*.23)%(W+100)+W+100)%(W+100)-50;const y=60+(i*61)%290+Math.sin(renderT*.7+i)*8;circle(x,y,1.5+(i%2),'#fff9');}
   ctx.fillStyle=w.floor;ctx.fillRect(0,ground,W,H-ground);ctx.fillStyle=w.edge;ctx.fillRect(0,ground,W,8);ctx.fillStyle='#ffffff70';ctx.fillRect(0,ground,W,2);ctx.fillStyle='#ffffff13';ctx.fillRect(0,ground+14,W,2);
@@ -792,7 +826,7 @@ function drawPlayer(preview=false){const size=preview?216:riderSize(),x=preview?
   if(s.giant>0&&!preview){ctx.save();ctx.shadowColor='#eaff99';ctx.shadowBlur=25;ctx.beginPath();ctx.ellipse(x,floor-size*.5,size*.55,size*.57,0,0,Math.PI*2);ctx.fillStyle='#eaff9925';ctx.fill();ctx.strokeStyle='#eaff99';ctx.lineWidth=2;ctx.stroke();ctx.restore();}
   if(s.magnet>0&&!preview){ctx.save();ctx.setLineDash([6,10]);ctx.beginPath();ctx.ellipse(x,floor-size*.5,size*.65,size*.62,renderT*.4,0,Math.PI*2);ctx.strokeStyle='#e2b5ff';ctx.lineWidth=2;ctx.stroke();ctx.restore();}
   if(s.boost>0&&!preview){for(let i=0;i<3;i++)line(x-size*.3-12-i*12,floor-size*.25-i*16,x-size*.3-42-i*12,floor-size*.25-i*16,'#ffdec0',4);}
-  const alpha=!preview&&s.invincible>0&&Math.floor(renderT*13)%2?.48:1,bounce=moving&&s.y===0&&!reduced?Math.sin(phase*Math.PI)*1.3:0;
+  const alpha=!preview&&s.invincible>0?.78:1,bounce=moving&&s.y===0&&!reduced?Math.sin(phase*Math.PI)*1.3:0;
   if(!preview&&s.giant>0){
     const cell=masterSprite.naturalWidth/2,f=Math.floor(phase*.48)%4,entry=Math.min(1,(7-s.giant)/.24),mx=x-(1-entry)*100;
     if(masterSprite.complete&&cell){ctx.save();ctx.globalAlpha=alpha;ctx.drawImage(masterSprite,(f%2)*cell,Math.floor(f/2)*cell,cell,cell,mx-size*.51,floor-size*.99,size,size);ctx.restore();}
@@ -805,9 +839,10 @@ function drawPlayer(preview=false){const size=preview?216:riderSize(),x=preview?
 }
 function draw(){ctx.clearRect(0,0,W,H);ctx.save();if(s.shake&&!reduced)ctx.translate((Math.random()-.5)*6,(Math.random()-.5)*5);drawBackground();if(s.mode==='ready'){drawPlayer(true);for(let i=0;i<5;i++)gem(W*.76-91+i*45,ground-234-Math.sin(i/4*Math.PI)*28,16);drawItem({type:s.worldId%2?'magnet':'giant',x:W*.94,h:168,phase:1},true);}else{for(const it of s.items)drawItem(it);for(const ob of s.obstacles)drawObstacle(ob);drawPlayer();}
   for(const p of s.particles){ctx.globalAlpha=Math.min(1,p.life*2);ctx.fillStyle=p.color;ctx.fillRect(p.x,p.y,p.r,p.r);}ctx.globalAlpha=1;for(const l of s.labels){ctx.globalAlpha=Math.min(1,l.life*2);ctx.lineWidth=4;ctx.strokeStyle='#ffffffc7';ctx.font='800 16px Arial, Malgun Gothic, sans-serif';ctx.textAlign='center';ctx.strokeText(l.text,l.x,l.y);txt(l.text,l.x,l.y,16,l.color);}ctx.globalAlpha=1;ctx.restore();}
-function updateHUD(){document.body?.setAttribute('data-mode',s.mode);$('score').textContent=s.score.toLocaleString();$('best').textContent=best.toLocaleString();$('hearts').textContent='♥'.repeat(s.hearts)+'♡'.repeat(3-s.hearts);$('hearts').setAttribute('aria-label','하트 '+s.hearts+'개');$('clock').textContent=Math.floor(s.time/60)+':'+String(Math.floor(s.time%60)).padStart(2,'0')+' · '+(s.mode==='ready'?0:Math.round(s.speed))+' m/s';$('progress').setAttribute('aria-valuenow',s.worldTime.toFixed(1));$('progress-bar').style.width=(s.worldTime/45*100)+'%';$('slide').classList.toggle('active',s.sliding);$('slide').disabled=s.mode!=='running';
-  $('live-stat').textContent=s.worldId===4?'마지막 보너스 챕터':'도전 '+(s.clears+1)+'단계 · 발견 '+s.seenLore.size+'/'+LORE[s.worldId].length;
-  const pills=[];if(s.giant>0)pills.push('<span class="effect-pill gold">거장 탑승 '+Math.ceil(s.giant)+'s</span>');if(s.massTokens.length)pills.push('<span class="effect-pill mass-effect">m '+s.mass.toFixed(2)+' kg · '+Math.ceil(Math.max(...s.massTokens)-s.time)+'s</span>');if(s.boost>0)pills.push('<span class="effect-pill">F 가속 '+Math.ceil(s.boost)+'s</span>');if(s.magnet>0)pills.push('<span class="effect-pill">G 보너스 '+Math.ceil(s.magnet)+'s</span>');$('effects').innerHTML=s.mode==='over'?'':pills.join('');}
+function putText(id,value){const element=$(id);if(element.textContent!==value)element.textContent=value;}
+function updateHUD(){if(document.body&&document.body.dataset.mode!==s.mode)document.body.setAttribute('data-mode',s.mode);putText('score',s.score.toLocaleString());putText('best',best.toLocaleString());putText('hearts','♥'.repeat(s.hearts)+'♡'.repeat(3-s.hearts));$('hearts').setAttribute('aria-label','하트 '+s.hearts+'개');putText('clock',Math.floor(s.time/60)+':'+String(Math.floor(s.time%60)).padStart(2,'0')+' · '+(s.mode==='ready'?0:Math.round(s.speed))+' m/s');$('progress').setAttribute('aria-valuenow',s.worldTime.toFixed(1));$('progress-bar').style.width=(s.worldTime/45*100)+'%';$('slide').classList.toggle('active',s.sliding);$('slide').disabled=s.mode!=='running';
+  putText('live-stat',s.worldId===4?'마지막 보너스 챕터':'도전 '+(s.clears+1)+'단계 · 발견 '+s.seenLore.size+'/'+LORE[s.worldId].length);
+  const pills=[];if(s.giant>0)pills.push('<span class="effect-pill gold">거장 탑승 '+Math.ceil(s.giant)+'s</span>');if(s.massTokens.length)pills.push('<span class="effect-pill mass-effect">m '+s.mass.toFixed(2)+' kg · '+Math.ceil(Math.max(...s.massTokens)-s.time)+'s</span>');if(s.boost>0)pills.push('<span class="effect-pill">F 가속 '+Math.ceil(s.boost)+'s</span>');if(s.magnet>0)pills.push('<span class="effect-pill">G 보너스 '+Math.ceil(s.magnet)+'s</span>');const effects=$('effects'),markup=s.mode==='over'?'':pills.join('');if(effects.innerHTML!==markup)effects.innerHTML=markup;}
 function loop(now){if(!last)last=now;const dt=Math.min(.05,(now-last)/1000);last=now;if(['running','transition'].includes(s.mode)){renderT+=dt;accumulator+=dt;while(accumulator>=1/120){step(1/120);accumulator-=1/120;}hudClock+=dt;if(hudClock>.08){updateHUD();hudClock=0;}}else if(s.mode==='ready')renderT+=reduced?0:dt;draw();updateLore();musicTick();requestAnimationFrame(loop);}
 function openGuide(){helpPaused=['running','transition'].includes(s.mode);if(helpPaused)pause();$('guide').showModal();}
 function closeGuide(){$('guide').close();}
