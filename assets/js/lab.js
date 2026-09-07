@@ -100,7 +100,7 @@
     return `<div class="side-box"><div class="side-box-title">${title}</div><div class="side-row">${body}</div></div>`;
   }
 
-  function updateSidebarSelection(center) {
+  function updateSidebarSelection(reveal) {
     let selected;
     els.sideMenu.querySelectorAll("[data-cat]").forEach((el) => {
       const active = el.dataset.section === state.section && el.dataset.cat === state.activeCategory;
@@ -108,22 +108,27 @@
       el.setAttribute("aria-pressed", String(active));
       if (active) selected = el;
     });
-    if (!center || !selected || !window.matchMedia("(max-width: 860px)").matches) return;
+    if (!reveal || !selected || !window.matchMedia("(max-width: 860px)").matches) return;
     requestAnimationFrame(() => {
       const row = selected.closest(".side-row");
       const itemBounds = selected.getBoundingClientRect();
       const rowBounds = row.getBoundingClientRect();
+      const rightEdge = rowBounds.left + row.clientWidth;
+      const adjustment = itemBounds.left < rowBounds.left
+        ? itemBounds.left - rowBounds.left
+        : itemBounds.right > rightEdge ? itemBounds.right - rightEdge : 0;
+      if (Math.abs(adjustment) < 1) return;
       row.scrollTo({
-        left: row.scrollLeft + itemBounds.left - rowBounds.left + itemBounds.width / 2 - row.clientWidth / 2,
+        left: row.scrollLeft + adjustment,
         behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
       });
     });
   }
 
-  function renderSidebar(center = false) {
+  function renderSidebar(reveal = false) {
     // Keep the existing scroll containers when changing filters or searching.
     if (els.sideMenu.childElementCount) {
-      updateSidebarSelection(center);
+      updateSidebarSelection(reveal);
       return;
     }
     const catRows = [{ id: "all", name: "전체", icon: "🗂️" }, ...state.categories].map((c) => ({
@@ -326,8 +331,8 @@
     setupPreviewObserver();
   }
 
-  function render(center = false) {
-    renderSidebar(center);
+  function render(reveal = false) {
+    renderSidebar(reveal);
     renderExperiments();
   }
 
