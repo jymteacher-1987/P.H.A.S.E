@@ -100,7 +100,32 @@
     return `<div class="side-box"><div class="side-box-title">${title}</div><div class="side-row">${body}</div></div>`;
   }
 
-  function renderSidebar() {
+  function updateSidebarSelection(center) {
+    let selected;
+    els.sideMenu.querySelectorAll("[data-cat]").forEach((el) => {
+      const active = el.dataset.section === state.section && el.dataset.cat === state.activeCategory;
+      el.classList.toggle("active", active);
+      el.setAttribute("aria-pressed", String(active));
+      if (active) selected = el;
+    });
+    if (!center || !selected || !window.matchMedia("(max-width: 860px)").matches) return;
+    requestAnimationFrame(() => {
+      const row = selected.closest(".side-row");
+      const itemBounds = selected.getBoundingClientRect();
+      const rowBounds = row.getBoundingClientRect();
+      row.scrollTo({
+        left: row.scrollLeft + itemBounds.left - rowBounds.left + itemBounds.width / 2 - row.clientWidth / 2,
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
+      });
+    });
+  }
+
+  function renderSidebar(center = false) {
+    // Keep the existing scroll containers when changing filters or searching.
+    if (els.sideMenu.childElementCount) {
+      updateSidebarSelection(center);
+      return;
+    }
     const catRows = [{ id: "all", name: "전체", icon: "🗂️" }, ...state.categories].map((c) => ({
       id: c.id,
       name: c.name,
@@ -125,10 +150,18 @@
       el.addEventListener("click", () => {
         state.section = el.dataset.section;
         state.activeCategory = el.dataset.cat;
-        render();
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        render(true);
+      });
+      el.setAttribute("role", "button");
+      el.tabIndex = 0;
+      el.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          el.click();
+        }
       });
     });
+    updateSidebarSelection(true);
   }
 
   // ---------- 미리보기 지연 로딩 ----------
@@ -293,8 +326,8 @@
     setupPreviewObserver();
   }
 
-  function render() {
-    renderSidebar();
+  function render(center = false) {
+    renderSidebar(center);
     renderExperiments();
   }
 

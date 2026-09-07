@@ -443,6 +443,7 @@ body.page-home .hero > .wrap{ width:100%; }
     scrollbar-width:none; -ms-overflow-style:none;
   }
   .side-row::-webkit-scrollbar{ display:none; }
+  .side-row::before,.side-row::after{ content:""; flex:0 0 50%; }
   .side-item{ flex:0 0 auto; white-space:nowrap; margin-bottom:0; }
 }
 
