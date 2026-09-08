@@ -3,3 +3,6 @@
 # LF 로 바꿔 버린다. 그러면 두 사이트가 서로 다른 바이트를 서비스하게 되고
 # '똑같이' 가 깨진다. 줄 끝을 건드리지 않도록 텍스트 취급에서 뺀다.
 plays/hero-maker.html -text
+
+# 이미지와 음악을 내장한 완성 HTML을 검증한 바이트 그대로 게시한다.
+plays/physics-fighter.html -text
