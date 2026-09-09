@@ -298,6 +298,20 @@
         "알파입자",
         "원자핵"
       ]
+    },
+    {
+      "id": "bernoulli-principle",
+      "title": "베르누이의 원리",
+      "category": "mechanics",
+      "description": "전체압력이 일정할 때 속력이 커지면 압력이 낮아지는 베르누이 원리를 관찰합니다.",
+      "path": "experiments/bernoulli-principle.html",
+      "date": "2026-09-09",
+      "tags": [
+        "베르누이",
+        "유체",
+        "압력",
+        "에너지 보존"
+      ]
     }
   ],
   "plays": [
