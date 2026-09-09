@@ -88,6 +88,47 @@ body:has(#fightScreen:not([hidden])) footer{display:none}
  #fightScreen .battle-info{padding:4px 0}
  #fightScreen .keyboard-help{display:none}
 }
+
+/* 세로 화면은 같은 조작부를 경기장 아래에 배치해 손가락에 가리지 않는다. */
+.portrait-controls{display:none}
+@media(orientation:portrait) and (max-width:950px),(orientation:portrait) and (any-pointer:coarse){
+ .portrait-controls{display:block;flex:0 0 auto;margin-top:6px;border:1px solid #344650;border-radius:10px;background:linear-gradient(145deg,#15232c,#0d171e);padding-bottom:env(safe-area-inset-bottom)}
+ .portrait-hint{margin:0;padding:7px 10px 0;text-align:center;font-size:10px;line-height:14px;color:#aabdc8}
+ #portraitControls .touch-controls{position:relative;inset:auto;display:flex;flex-direction:row-reverse;align-items:center;justify-content:space-between;gap:10px;width:100%;height:auto;min-height:138px;padding:10px 14px 12px;z-index:auto}
+ :root[data-control-side="left"] #portraitControls .touch-controls{flex-direction:row}
+ #portraitControls .joystick-area,#portraitControls .attack-buttons{position:static;inset:auto;transform:none;margin:0;flex:0 0 auto}
+ #portraitControls .joystick{width:112px;height:112px;background:radial-gradient(circle,#698a9d38 0 47%,#91b8cf20 48% 67%,#bfddec80 68% 69%,#0b151e 70%)}
+ #portraitControls .joystick::before{inset:-10px}
+ #portraitControls .joy-knob{width:46px;height:46px;left:32px;top:32px;background:#6e92a9;border-color:#c5e6f5;box-shadow:0 4px 10px #0006}
+ #portraitControls .joy-n,#portraitControls .joy-s{left:50px}
+ #portraitControls .joy-w,#portraitControls .joy-e{top:48px}
+ #portraitControls .joystick>span{color:#e3f8ffb3}
+ #portraitControls .attack-buttons{grid-template-columns:repeat(2,58px);gap:8px}
+ #portraitControls .attack{width:58px;height:54px;transform:none;backdrop-filter:none;touch-action:none}
+ #portraitControls .attack b{font-size:22px}
+ #portraitControls .attack span{font-size:9px}
+ #portraitControls .attack.punch{background:#35462b}
+ #portraitControls .attack.kick{background:#50322d}
+ #portraitControls .attack.heavy{border-width:2px;box-shadow:0 3px 0 #0007,inset 0 0 10px #ffffff16}
+ #portraitControls .attack.active,#portraitControls .attack:active{background:#75896a}
+ #fightScreen:has(.overlay:not([hidden])) #portraitControls{opacity:.35}
+ #fightScreen:has(.overlay:not([hidden])) #portraitControls *{pointer-events:none}
+ #fightScreen .hud{padding:6px 10px}
+ #fightScreen .name-line{margin-bottom:4px}
+ #fightScreen .timer-block small{display:none}
+ #fightScreen .meter-line{margin-top:4px}
+ #fightScreen .power-hud{padding:5px 11px}
+ #fightScreen .battle-info{gap:6px;padding:5px 0}
+ #fightScreen .battle-info .tip{display:none}
+ #fightScreen .battle-actions{width:100%;justify-content:space-between;gap:8px}
+ #fightScreen .battle-actions .text-button{min-height:32px;padding:6px 4px;font-size:11px}
+}
+@media(orientation:portrait) and (max-width:340px){
+ #portraitControls .touch-controls{padding-inline:10px;gap:6px}
+ #portraitControls .attack-buttons{grid-template-columns:repeat(2,52px);gap:8px 6px}
+ #portraitControls .attack{width:52px}
+ #portraitControls .attack span{font-size:8px}
+}
 </style><style>.ending-screen{flex:1;min-height:0;display:flex;flex-direction:column;gap:12px}.ending-heading{display:flex;justify-content:space-between;align-items:center;gap:10px}.ending-heading h1{font-size:22px;letter-spacing:-1px;margin:0}.ending-theater{position:relative;flex:1;min-height:0;border:1px solid #46535b;border-radius:8px;overflow:hidden;background:#090e19}.ending-theater canvas{width:100%;height:100%;display:block;object-fit:contain}.ending-caption{position:absolute;left:5%;right:5%;bottom:5%;padding:16px 20px;border-left:3px solid var(--accent);background:#08111aeb;box-shadow:0 10px 40px #0003}.ending-caption strong{font-size:12px;color:var(--accent)}.ending-caption p{font-size:clamp(13px,2vw,20px);line-height:1.55;margin:6px 0 0;word-break:keep-all}.ending-paper{position:absolute;right:5%;top:10%;width:33%;max-width:350px;padding:20px;background:#efe9d8;color:#27312c;border:1px solid #fff6;transform:rotate(3deg);box-shadow:10px 12px 0 #0003}.ending-paper .micro{font-size:9px;color:#6a7861}.ending-paper h2{font-size:clamp(16px,2vw,26px);margin:10px 0;word-break:keep-all}.ending-paper p{font-size:11px;line-height:1.5}.ending-paper a{display:inline-block;color:#355a32;font-size:11px;margin-top:8px;text-underline-offset:4px}.ending-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;flex:0 0 auto}.ending-actions>div{display:flex;gap:8px}.ending-actions .quiet{font-size:12px}.ending-actions .start-button{min-width:0;font-size:14px;padding:11px 18px}.credits-window{position:absolute;inset:0;overflow:hidden;background:radial-gradient(ellipse at 50% 100%,#18263a,#080c14 70%);text-align:center;mask-image:linear-gradient(transparent,#000 8% 92%,transparent)}.credits-roll{position:absolute;left:10%;right:10%;top:0;will-change:transform}.credits-roll .credits-kicker{color:var(--lime);letter-spacing:4px;font-size:11px}.credits-roll h2{font:900 clamp(24px,4vw,48px) Arial;margin:18px 0 65px;color:#eef3df}.credit-row{margin:0 0 39px}.credit-row span{display:block;font-size:12px;color:#8a9ba7;margin-bottom:7px}.credit-row strong{font-size:27px;font-weight:700;color:#e8eeed}.credit-row.joke strong{font-size:18px}.credits-tail{font-size:13px;line-height:2;color:#9baaaf;margin:70px 0}.ending-thanks{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;background:#0a121de8}.ending-thanks .earth{font-size:65px}.ending-thanks h2{font-size:clamp(23px,4vw,43px);margin:14px 0}.ending-thanks p{font-size:13px;color:#a9b9c4;line-height:1.8}.ending-thanks small{font-size:11px;color:var(--lime)}
 @media(max-width:660px){.ending-screen{gap:9px}.ending-heading h1{font-size:16px}.ending-heading .micro{font-size:8px}.ending-paper{top:7%;right:6%;width:54%;padding:13px}.ending-paper h2{font-size:18px}.ending-paper p{font-size:9px}.ending-caption{left:4%;right:4%;bottom:4%;padding:12px}.ending-caption p{font-size:14px}.ending-actions{flex-wrap:wrap;justify-content:center}.ending-actions .quiet{font-size:10px;padding:8px}.ending-actions .start-button{font-size:12px;padding:10px 14px}.credit-row strong{font-size:25px}}
 @media(max-height:560px) and (orientation:landscape){body:has(#endingScreen:not([hidden])) .topbar{display:none}.ending-screen{gap:6px}.ending-heading h1{font-size:15px}.ending-heading .micro{font-size:8px}.ending-paper{top:6%;width:32%;padding:12px}.ending-paper h2{font-size:16px;margin:7px 0}.ending-paper p{font-size:9px;margin:5px 0}.ending-paper a{font-size:9px;margin-top:3px}.ending-caption{padding:8px 13px;bottom:4%}.ending-caption p{font-size:12px;margin-top:4px}.ending-caption strong{font-size:9px}.ending-actions .quiet{font-size:10px;min-height:27px;padding:6px 10px}.ending-actions .start-button{font-size:11px;padding:7px 14px}.ending-thanks .earth{font-size:37px}.ending-thanks h2{margin:8px 0;font-size:25px}.ending-thanks p{margin:5px;font-size:11px}}
@@ -133,6 +174,7 @@ body:has(#fightScreen:not([hidden])) footer{display:none}
     </div><div class="input-ribbon"><span>INPUT</span><output id="inputReadout">—</output></div><div class="training-label" id="trainingLabel" hidden>TRAINING · HP 자동 회복 · 기 무한</div><div class="overlay" id="pauseOverlay" hidden><div class="overlay-card"><span class="micro lime">TAKE A BREATH</span><h2>잠깐, 사고 실험.</h2><p>재개하면 바로 경기가 이어집니다.</p><button class="start-button compact" id="resumeBtn">계속 싸우기 →</button><button class="quiet" id="exitBtn">캐릭터 선택으로</button></div></div><div class="overlay" id="resultOverlay" hidden><div class="overlay-card"><span class="micro lime" id="resultTag">PEER REVIEW COMPLETE</span><h2 id="resultTitle">논문 통과!</h2><p id="resultBody"></p><div class="result-stats" id="resultStats"></div><button class="start-button compact" id="nextBtn">다음 대결 →</button><button class="quiet" id="resultSelectBtn">캐릭터 선택으로</button></div></div></div>
       <div class="power-hud"><div class="power-block"><div class="power-title"><span>THEORY GAUGE</span><b id="pPowerText">40%</b></div><div class="power-track"><div id="pPower"></div></div></div><span class="center-mark">VS</span><div class="power-block enemy"><div class="power-title"><b id="ePowerText">40%</b><span>THEORY GAUGE</span></div><div class="power-track"><div id="ePower"></div></div></div></div>
     </div>
+    <div class="portrait-controls" id="portraitControls"><p class="portrait-hint">가로로 돌리면 더 넓게 · 세로는 아래에서 조작</p></div>
     <div class="battle-info"><span class="tip" id="battleTip">상대 반대 방향을 누르면 가드. 공격도 실험적으로!</span><div class="battle-actions"><button class="text-button control-swap" id="swapControls" type="button">⇄ 조작 좌우 바꾸기</button><button class="text-button" id="battleGuideBtn">기술표 · 설정 ↗</button></div></div>
 
     <div class="keyboard-help"><span><kbd>←</kbd><kbd>↓</kbd><kbd>↑</kbd><kbd>→</kbd> 이동 · 앉기 · 점프</span><span><kbd>A</kbd> 작은손 <kbd>S</kbd> 큰손 <kbd>Z</kbd> 작은발 <kbd>X</kbd> 큰발</span><span>뒤로 가드 · 앞앞 대시 · <kbd>?</kbd> 기술표</span></div>
@@ -149,7 +191,7 @@ body:has(#fightScreen:not([hidden])) footer{display:none}
   </section>
   <footer><span>© PHYSICS FIGHTER <i>·</i> SCIENCE HITS DIFFERENT.</span><span>실제 과학에서 영감을 받은 과장된 허구의 대전입니다. 공식을 인체에 적용하지 마세요 ㅋㅋ</span></footer>
 </main>
-<dialog id="guide"><div class="dialog-top"><span class="micro lime">COMMAND LAB</span><button class="quiet" id="closeGuide" aria-label="기술표 닫기">닫기 ✕</button></div><h2>공식은 외웠고, 커맨드는?</h2><p class="guide-intro">방향은 <b>상대를 바라보는 기준</b>입니다. 오른쪽에 서면 좌우가 자동으로 반대가 됩니다.</p><div class="guide-tabs" id="guideTabs"></div><div id="moveList"></div><div class="controls-settings"><label for="controlSide">조이스틱 위치</label><select id="controlSide"><option value="right">오른쪽 · 왼손으로 공격</option><option value="left">왼쪽 · 오른손으로 공격</option></select><small>A·S·Z·X 버튼은 반대편으로 이동합니다.</small></div><div class="audio-settings"><label for="bgmVolume">BGM <small>PEER REVIEW ’98 · 오리지널</small></label><input id="bgmVolume" type="range" min="0" max="100" value="55" aria-label="배경음악 음량"></div><div class="guide-basics"><h3>공통 조작 & 콤보</h3><p><b>방향키</b> 이동 / ↑ 짧게 소점프 · 길게 일반 점프 / ↓ 앉기 / ← 가드 / ↙ 하단 가드 / →→ 대시</p><p><b>↓ + Z / X</b> 앉아 작은발 / 앉아 쓸어차기. 서서 가드를 뚫는 하단 공격입니다.</p><p><b>A / S</b> 작은손 / 큰손 &nbsp; <b>Z / X</b> 작은발 / 큰발</p><p>방향을 순서대로 입력한 뒤 손·발을 누르세요. 키보드는 대각선 없이 ↓ → + 손, → ↓ → + 손처럼 입력하면 됩니다. 한 번의 커맨드는 약 0.9초 안에, 초필살기는 약 1.5초 안에 입력!</p><p><b>A / Z는 약, S / X는 강.</b> 약공격은 빠른 견제와 콤보, 강공격은 큰 피해와 밀어내기에 유리하지만 준비·회수가 깁니다. 같은 필살기도 강 입력은 기본 피해가 약 입력의 약 1.56배이고, 장풍이 더 크고 빠릅니다. 강 장풍은 약 장풍 하나를 뚫고 약해진 채 진행합니다. 설치·보호 기술은 강 입력의 범위나 지속 시간이 더 큽니다.</p><p><b>추천 콤보:</b> 가까이서 A → S → ↓→S. 기본기 적중 직후 필살기로 연결하면 연속 공격!</p><p>서서 가드는 하단 발차기에 뚫리고, 앉은 가드는 점프 공격에 뚫립니다. 필살기를 막으면 약간의 체력이 줄어요. 특수기에는 재사용 대기시간이 있습니다.</p><p>폰: 기본은 오른쪽 조이스틱 + 왼쪽 A/S/Z/X. 위 설정이나 대전 중 좌우 바꾸기로 변경할 수 있습니다. 경기장 안 반투명 조이스틱과 A/S/Z/X 버튼으로 조작합니다. 연습실은 상대가 공격하지 않고 HP와 기가 회복됩니다.</p><p>캐릭터를 고르거나 시작하면 BGM이 재생됩니다. 선택실·대전·보스전 음악이 달라집니다. 대사는 경기 시작 전, 3·2·1 카운트 전에만 나옵니다.</p><p><b>Esc</b> 일시정지 · <b>?</b> 기술표 · 탭을 벗어나면 자동 일시정지</p></div></dialog>
+<dialog id="guide"><div class="dialog-top"><span class="micro lime">COMMAND LAB</span><button class="quiet" id="closeGuide" aria-label="기술표 닫기">닫기 ✕</button></div><h2>공식은 외웠고, 커맨드는?</h2><p class="guide-intro">방향은 <b>상대를 바라보는 기준</b>입니다. 오른쪽에 서면 좌우가 자동으로 반대가 됩니다.</p><div class="guide-tabs" id="guideTabs"></div><div id="moveList"></div><div class="controls-settings"><label for="controlSide">조이스틱 위치</label><select id="controlSide"><option value="right">오른쪽 · 왼손으로 공격</option><option value="left">왼쪽 · 오른손으로 공격</option></select><small>A·S·Z·X 버튼은 반대편으로 이동합니다.</small></div><div class="audio-settings"><label for="bgmVolume">BGM <small>PEER REVIEW ’98 · 오리지널</small></label><input id="bgmVolume" type="range" min="0" max="100" value="55" aria-label="배경음악 음량"></div><div class="guide-basics"><h3>공통 조작 & 콤보</h3><p><b>방향키</b> 이동 / ↑ 짧게 소점프 · 길게 일반 점프 / ↓ 앉기 / ← 가드 / ↙ 하단 가드 / →→ 대시</p><p><b>↓ + Z / X</b> 앉아 작은발 / 앉아 쓸어차기. 서서 가드를 뚫는 하단 공격입니다.</p><p><b>A / S</b> 작은손 / 큰손 &nbsp; <b>Z / X</b> 작은발 / 큰발</p><p>방향을 순서대로 입력한 뒤 손·발을 누르세요. 키보드는 대각선 없이 ↓ → + 손, → ↓ → + 손처럼 입력하면 됩니다. 한 번의 커맨드는 약 0.9초 안에, 초필살기는 약 1.5초 안에 입력!</p><p><b>A / Z는 약, S / X는 강.</b> 약공격은 빠른 견제와 콤보, 강공격은 큰 피해와 밀어내기에 유리하지만 준비·회수가 깁니다. 같은 필살기도 강 입력은 기본 피해가 약 입력의 약 1.56배이고, 장풍이 더 크고 빠릅니다. 강 장풍은 약 장풍 하나를 뚫고 약해진 채 진행합니다. 설치·보호 기술은 강 입력의 범위나 지속 시간이 더 큽니다.</p><p><b>추천 콤보:</b> 가까이서 A → S → ↓→S. 기본기 적중 직후 필살기로 연결하면 연속 공격!</p><p>서서 가드는 하단 발차기에 뚫리고, 앉은 가드는 점프 공격에 뚫립니다. 필살기를 막으면 약간의 체력이 줄어요. 특수기에는 재사용 대기시간이 있습니다.</p><p>폰: 기본은 오른쪽 조이스틱 + 왼쪽 A/S/Z/X. 위 설정이나 대전 중 좌우 바꾸기로 변경할 수 있습니다. 세로 화면에서는 경기장 아래 조이스틱과 A/S/Z/X 버튼으로 조작합니다. 가로로 돌리면 넓은 경기장 안에 반투명 조작부가 나타납니다. 연습실은 상대가 공격하지 않고 HP와 기가 회복됩니다.</p><p>캐릭터를 고르거나 시작하면 BGM이 재생됩니다. 선택실·대전·보스전 음악이 달라집니다. 대사는 경기 시작 전, 3·2·1 카운트 전에만 나옵니다.</p><p><b>Esc</b> 일시정지 · <b>?</b> 기술표 · 탭을 벗어나면 자동 일시정지</p></div></dialog>
 <script>'use strict';
 // Original music: PEER REVIEW '98. All notes, drums and timbres are synthesized locally.
 (() => {
@@ -631,7 +673,17 @@ function setupAgentTools(){const registry=document.modelContext;if(!registry?.re
 function setControlSide(side,persist=true){if(!['left','right'].includes(side))return false;game.controlSide=side;document.documentElement.dataset.controlSide=side;$('controlSide').value=side;$('controlSideLabel').textContent=side==='right'?'공격키: 좌 · 조이스틱: 우':'조이스틱: 좌 · 공격키: 우';$('selectSwapControls').setAttribute('aria-label',side==='right'?'조이스틱을 왼쪽으로 바꾸기':'조이스틱을 오른쪽으로 바꾸기');$('swapControls').setAttribute('aria-label',side==='right'?'조이스틱을 왼쪽으로 옮기기':'조이스틱을 오른쪽으로 옮기기');clearInputs();if(persist){try{window.localStorage?.setItem('physics-fighter-control-side',side);}catch{}if(game.screen==='fight')setTip(side==='right'?'오른쪽 조이스틱 · 왼쪽 공격 버튼':'왼쪽 조이스틱 · 오른쪽 공격 버튼');}return true;}
 function setupControlSide(){let saved='right';try{saved=window.localStorage?.getItem('physics-fighter-control-side')||'right';}catch{}setControlSide(['left','right'].includes(saved)?saved:'right',false);$('controlSide').addEventListener('change',e=>setControlSide(e.target.value));$('swapControls').onclick=$('selectSwapControls').onclick=()=>setControlSide(game.controlSide==='right'?'left':'right');}
 function syncScreenHeight(){const layout=window.innerHeight,visible=window.visualViewport?.height||layout,height=Math.floor(Math.min(layout,visible));if(height>0)document.documentElement.style.setProperty('--app-height',height+'px');}
-function setupViewport(){syncScreenHeight();window.addEventListener('resize',syncScreenHeight);window.visualViewport?.addEventListener('resize',syncScreenHeight);}
+function setupViewport(){
+ syncScreenHeight();window.addEventListener('resize',syncScreenHeight);window.visualViewport?.addEventListener('resize',syncScreenHeight);
+ const portrait=window.matchMedia('(orientation:portrait) and (max-width:950px),(orientation:portrait) and (any-pointer:coarse)');
+ function placeControls(){
+  const controls=$('touchControls'),target=portrait.matches?$('portraitControls'):canvas.parentElement;
+  if(controls.parentElement===target)return;
+  // 회전 중 누르고 있던 손가락의 입력이 새 위치에서 계속 남지 않게 한다.
+  clearInputs();target.appendChild(controls);resizeArena();
+ }
+ placeControls();portrait.addEventListener('change',placeControls);
+}
 initRoster();setupUI();setupInput();setupAgentTools();setupViewport();setupControlSide();if(window.PhysicsSprites){const b=$('startBtn'),label=b.innerHTML;b.disabled=true;b.innerHTML='동작 준비 중…';window.PhysicsSprites.ready.then(results=>{if(results.every(r=>r.ok)){b.disabled=false;b.innerHTML=label;}else{b.innerHTML='이미지를 다시 불러와 주세요';console.error('Incomplete animation assets',results);}});}$('bgmVolume').addEventListener('input',e=>window.PhysicsAudio?.setVolume(+e.target.value/100));requestAnimationFrame(frame);
 // Deterministic simulation access for local engine checks; no gameplay shortcuts are bound to the UI.
 if(typeof module!=='undefined'&&module.exports)module.exports={C,BASICS,STRENGTH,CommandBuffer,fireSpecial,addZone,updateZones,updateFighter,updateEffects,attackInput,game,held,buffer,startGame,beginRound,beginMatch,step,basic,special,hit,emitProjectile,updateProjectiles,collision,relativeDirection,finishRound,nextMatch,canAct,makeFighter,selectCharacter,returnToSelect,startEnding,draw,resizeArena,view,syncScreenHeight,setControlSide,setupControlSide};

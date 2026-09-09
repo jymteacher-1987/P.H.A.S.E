@@ -106,6 +106,42 @@ html,body{height:100%;overscroll-behavior:none}.shell{height:100dvh;min-height:5
   .lore-copy p { font-size:14px; line-height:1.4; }
 }
 
+
+/* 가로 폰에서는 버튼을 무대 위로 옮겨 달리는 화면의 높이를 확보한다. */
+@media(max-height:560px) and (orientation:landscape){
+ .shell{height:var(--runner-height,100dvh);min-height:0;padding:4px max(8px,env(safe-area-inset-right)) max(4px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));gap:4px;grid-template-rows:auto minmax(0,1fr)}
+ footer{display:none}
+ body[data-mode=running] .top,body[data-mode=paused] .top,body[data-mode=transition] .top,
+ body[data-mode=running] .chapter-rail,body[data-mode=paused] .chapter-rail,body[data-mode=transition] .chapter-rail{display:none}
+ body[data-mode=running] .shell,body[data-mode=paused] .shell,body[data-mode=transition] .shell{grid-template-rows:minmax(0,1fr)}
+ body[data-mode=running] .play-layout,body[data-mode=paused] .play-layout,body[data-mode=transition] .play-layout{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
+ .play-layout>.ranking-panel{display:none}
+ .game{min-width:0;border-radius:12px}
+ .hud{min-height:38px;padding:2px 10px}
+ .hud .icon-btn{width:40px;height:38px;min-height:38px}
+ .concept-strip{height:64px;min-height:64px;padding:5px 12px}
+ .concept-strip #lore-card,.concept-strip #lore-rest{height:54px;min-height:54px;gap:10px}
+ .lore-heading{gap:8px}.lore-heading strong{font-size:14px}
+ .lore-heading span,.lore-copy small{font-size:10px}
+ .lore-copy small{display:none}
+ .lore-copy p{font-size:12px;line-height:1.35;margin:3px 0 0}
+ #lore-portrait,#lore-diagram{width:40px;height:40px;flex-basis:40px}
+ #lore-rest b{font-size:14px}#lore-rest p{font-size:12px;margin:3px 0 0}
+ .stage{min-height:0;min-width:0}
+ .stage canvas{position:absolute;inset:0}
+ .game>.control-bar{display:none}
+ .game>.event-bar{height:28px;min-height:28px;max-height:28px;padding:3px 10px;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:20px;gap:8px;order:2}
+ .event-bar .toast{grid-column:1;grid-row:1;line-height:20px;font-size:10px}
+ .event-bar .effect-list{grid-column:2;grid-row:1;height:20px;max-width:42vw;gap:4px}
+ .event-bar .effect-pill{font-size:10px;padding:3px 7px}
+ .event-bar:has(.toast[hidden]):has(.effect-list:empty):before{grid-row:1;grid-column:1 / -1;font-size:10px}
+ .stage>.game-buttons{position:absolute;right:12px;bottom:10px;display:none;width:auto;gap:14px;z-index:3;pointer-events:none}
+ body[data-mode=running] .stage>.game-buttons{display:flex}
+ .stage>.game-buttons button{flex:none;pointer-events:auto;width:94px;min-width:0;height:60px;min-height:60px;padding:8px 10px;border:1px solid #ffffffa6;border-radius:16px;color:#fff;font-size:15px;background:#182c4870;box-shadow:0 3px 12px #10203426;text-shadow:0 1px 3px #000;touch-action:none}
+ .stage>.game-buttons .jump-btn{background:#315a736b}
+ .stage>.game-buttons .jump-btn span{margin-left:3px;font-size:12px}
+ .stage>.game-buttons button.active,.stage>.game-buttons button:active{background:#365c91bd;border-color:#e1f6a2}
+}
 </style></head>
 <body><main class="shell">
 <header class="top"><div class="brand"><div class="brand-mark" aria-hidden="true">N<span>✦</span></div><div><h1>뉴턴 러시</h1><small>NEWTON'S LITTLE ADVENTURE</small></div></div><div class="top-actions"><span class="best">나의 최고 기록 <b id="best">0</b></span><button id="sound" class="small-btn" aria-pressed="true">♪ 소리 켬</button><button id="show-ranking" class="small-btn">🏆 랭킹</button><button id="help" class="small-btn">플레이 방법 ↗</button></div></header>
@@ -607,6 +643,12 @@ let s=fresh();s.seenLore=new Set();s.quiz=null;
 function rng(){s.seed=(Math.imul(s.seed,1664525)+1013904223)>>>0;return s.seed/4294967296;}
 function resize(){const r=canvas.getBoundingClientRect();if(r.width<=0||r.height<=0)return;const d=Math.min(devicePixelRatio||1,matchMedia('(pointer:coarse), (max-width:620px)').matches?1.5:2),width=Math.round(r.width*d),height=Math.round(r.height*d);if(canvas.width===width&&canvas.height===height)return;H=480;W=H*r.width/r.height;ground=H-66;playerX=Math.min(190,W*.24);pixelScale=9*Math.min(1,Math.max(.56,W/1050));canvas.width=width;canvas.height=height;ctx.setTransform(canvas.width/W,0,0,canvas.height/H,0,0);if(last)draw();}
 new ResizeObserver(resize).observe(canvas);resize();
+function setupMobileLayout(){
+ const landscape=matchMedia('(max-height:560px) and (orientation:landscape)'),buttons=document.querySelector('.game-buttons'),bar=document.querySelector('.control-bar');
+ function fitHeight(){document.documentElement.style.setProperty('--runner-height',Math.floor(Math.min(innerHeight,window.visualViewport?.height||innerHeight))+'px');}
+ function placeButtons(){const target=landscape.matches?canvas.parentElement:bar;if(buttons.parentElement!==target){slide(false);target.appendChild(buttons);}fitHeight();resize();}
+ landscape.addEventListener('change',placeButtons);window.addEventListener('resize',fitHeight);window.visualViewport?.addEventListener('resize',fitHeight);placeButtons();
+}
 function beep(type){if(!sound)return;try{audioContext??=new(window.AudioContext||window.webkitAudioContext)();if(audioContext.state==='suspended')audioContext.resume();const osc=audioContext.createOscillator(),gain=audioContext.createGain();osc.connect(gain);gain.connect(audioContext.destination);const t=audioContext.currentTime;const tones={gem:[880,1300,.07],jump:[280,560,.11],mass:[250,340,.1],force:[420,980,.2],giant:[160,670,.35],hit:[150,55,.25],heart:[640,950,.2],magnet:[310,850,.23],smash:[95,45,.13],switch:[390,690,.12],clear:[540,1250,.6]};const[a,b,d]=tones[type]||tones.gem;osc.type=['hit','smash'].includes(type)?'triangle':'sine';osc.frequency.setValueAtTime(a,t);osc.frequency.exponentialRampToValueAtTime(b,t+d);gain.gain.setValueAtTime(.035,t);gain.gain.exponentialRampToValueAtTime(.001,t+d);osc.start(t);osc.stop(t+d);}catch{}}
 // Original, quiet eight-bar tune. Audio starts only after a player gesture.
 let musicGain=null,musicNext=0,musicStep=0;
@@ -631,7 +673,7 @@ function focusGame(){canvas.tabIndex=0;canvas.focus({preventScroll:true});}
 function selectWorld(id){if(!Number.isInteger(id)||id<0||id>=WORLDS.length)return false;selected=id;s=fresh(id);s.seenLore=new Set();s.quiz=null;$('welcome').hidden=false;for(const el of ['paused','result','transition','toast','quiz'])$(el).hidden=true;$('pause').disabled=true;$('jump').disabled=false;applyWorld();updateHUD();return true;}
 function applyWorld(){const w=WORLDS[s.worldId];document.documentElement.style.setProperty('--accent',w.accent);$('hud-world').textContent=String(s.worldId+1).padStart(2,'0')+' · '+w.place;$('rule-icon').textContent=w.icon;$('rule-title').textContent=w.rule;$('rule-hint').textContent=w.hint;$('discovery').textContent=w.fact;$('welcome-copy').innerHTML=w.intro;$('stamp-number').textContent=String(s.worldId+1).padStart(2,'0');$('stamp-label').textContent=w.en;document.querySelectorAll('[data-world]').forEach(el=>{const active=Number(el.dataset.world)===s.worldId;el.classList.toggle('selected',active);el.setAttribute('aria-pressed',String(active));});}
 function start(){s=fresh(selected);globalThis.NewtonRanking?.begin(selected);s.seenLore=new Set();s.quiz=null;s.checkpoint=chapterCheckpoint();s.mode='running';last=0;accumulator=0;for(const el of ['welcome','result','paused','transition','quiz','toast'])$(el).hidden=true;$('pause').disabled=false;$('jump').disabled=false;$('pause').textContent='Ⅱ';$('pause').setAttribute('aria-label','일시 정지');applyWorld();spawnAhead();updateHUD();beep('jump');focusGame();}
-function pause(){if(['running','transition'].includes(s.mode)){s.sliding=false;s.resumeMode=s.mode;s.mode='paused';$('paused').hidden=false;$('pause').textContent='▶';$('pause').setAttribute('aria-label','계속 달리기');}else if(s.mode==='paused'){s.mode=s.resumeMode;last=0;accumulator=0;$('paused').hidden=true;$('pause').textContent='Ⅱ';$('pause').setAttribute('aria-label','일시 정지');focusGame();}}
+function pause(){if(['running','transition'].includes(s.mode)){s.sliding=false;s.resumeMode=s.mode;s.mode='paused';$('paused').hidden=false;$('pause').textContent='▶';$('pause').setAttribute('aria-label','계속 달리기');}else if(s.mode==='paused'){s.mode=s.resumeMode;last=0;accumulator=0;$('paused').hidden=true;$('pause').textContent='Ⅱ';$('pause').setAttribute('aria-label','일시 정지');focusGame();}updateHUD();}
 function baseline(){return 0;}
 function jump(){if(s.mode!=='running'||s.jumps>=2||$('guide').open)return;s.sliding=false;s.vy=s.jumps===0?525:475;s.jumps++;s.y=Math.max(s.y,1);beep('jump');burst(playerX,ground-s.y,9,C.cyan);}
 function slide(active){if(s.mode!=='running'||$('guide').open){s.sliding=false;return;}s.sliding=active;if(active&&s.y>0)s.vy=Math.min(s.vy,-650);if(!active)s.slideTime=0;$('slide').classList.toggle('active',active);}
@@ -883,6 +925,6 @@ if(modelContext?.registerTool){const register=tool=>{try{Promise.resolve(modelCo
  register({name:'pause_newton_run',title:'뉴턴 러시 일시 정지',description:'Pause the current run without changing its score.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:false},execute:()=>{if(['running','transition'].includes(s.mode))pause();return{mode:s.mode,score:s.score};}});
  window.addEventListener('pagehide',()=>lifecycle.abort(),{once:true});
 }
-updateSound();applyWorld();updateHUD();requestAnimationFrame(loop);
+setupMobileLayout();updateSound();applyWorld();updateHUD();requestAnimationFrame(loop);
 
 </script></body></html>
