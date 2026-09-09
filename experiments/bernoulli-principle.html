@@ -52,7 +52,7 @@
   </g>
   <text x="75" y="252" text-anchor="middle" fill="#718b86" font-size="11" font-family="Malgun Gothic,sans-serif" id="blower-label">후— 불어 보세요</text>
 </svg>
-    <canvas id="scene" role="img" aria-label="빠르기는 같게 두고 방향만 흐름 쪽으로 정렬시킨 모형 입자와, 벽에 부딪힌 자리의 노란빛"></canvas>
+    <canvas id="scene" role="img" aria-label="열운동이 줄어드는 만큼 한 방향 흐름이 커지는 모형 입자와, 벽에 부딪힌 자리의 노란빛"></canvas>
   </div><div class="legend"><span><i class="dot"></i>기체 분자(모형)</span><span><i class="dot gold"></i>벽에 충돌</span></div></div>
   <div class="gauge"><div><div class="gauge-title">압력 P</div><div class="gauge-number"><span id="pressure">100.0</span><span class="unit">Pa</span></div><div class="gauge-note">주변 압력 기준</div></div><div class="gauge-chart" id="gauge-chart" role="img" aria-label="정압 100 파스칼"><div class="gauge-fill" id="pressure-column"></div></div><div class="gauge-note">노란빛 = 벽 충돌</div></div></div>
   <div class="energy" aria-label="압력과 운동 에너지 항의 합">
@@ -63,7 +63,7 @@
   <div class="controls"><div><div class="control-heading"><label for="strength">빨라진 정도</label><output for="strength"><b id="strength-value">0</b><span> %</span></output></div><div class="presets"><button class="preset" data-value="0" aria-pressed="true">멈춤</button><button class="preset" data-value="40" aria-pressed="false">중간</button><button class="preset" data-value="100" aria-pressed="false">빠르게</button></div></div><div><input class="range" id="strength" type="range" min="0" max="100" step="1" value="0" aria-label="빨라진 정도"><div class="ticks"><span>멈춰 있음</span><span>빠르게 →</span></div><div class="velocity"><span>흐름의 속력 v =</span><output id="speed" for="strength">0.0</output><span>m/s</span></div></div></div>
   <div class="insight" id="insight" aria-live="polite">흐름이 없을 때 압력 P가 가장 큽니다</div>
 </section>
-<p class="explanation">기체 분자의 운동은 두 몫으로 나눌 수 있어요. 하나는 <b>사방으로 제멋대로 날아다니는 열운동</b>, 다른 하나는 <b>전체가 한쪽으로 쏠려 흘러가는 운동</b>입니다. 흐름의 속력 v는 두 번째 몫, 곧 분자들의 <b>평균 속도</b>예요. 그래서 흐름 한가운데에도 거꾸로 가는 분자가 있습니다. 평균을 내면 오른쪽일 뿐이죠.</p>
+<p class="explanation">기체 분자의 운동은 두 몫으로 나눌 수 있어요. 하나는 <b>사방으로 제멋대로 날아다니는 열운동</b>, 다른 하나는 <b>전체가 한쪽으로 쏠려 흘러가는 운동</b>입니다. 흐름의 속력 v는 두 번째 몫, 곧 분자들의 <b>평균 속도</b>예요.</p>
 <p class="explanation">벽을 두드려 <b>압력 P</b>를 만드는 것은 첫 번째 몫뿐입니다. 함께 흘러가는 운동은 벽과 나란히 지나갈 뿐이라 벽을 밀지 못하거든요.</p>
 <p class="explanation">흐름이 빨라지는 곳에서는 에너지의 일부가 열운동에서 흐름 쪽으로 옮겨 갑니다. 그만큼 열운동이 잦아들어 <b>벽에 부딪히는 횟수도, 한 번에 전달하는 운동량도 줄고</b> 압력 P가 낮아지죠. 줄어든 P는 사라진 것이 아니라 ½ρv²이 되어 있어서, 같은 높이의 같은 유선에서 <b>P + ½ρv² = 일정</b>이 유지됩니다.</p>
 <p class="conditions">입자·충돌은 개념 모형 · 압력 수치는 베르누이 식으로 계산<br>ρ = 1.2 kg/m³ 일정 · 수평 정상 흐름 · 같은 유선 위에서만 비교 · 손실·추가 에너지 공급 없음</p>
@@ -73,16 +73,17 @@
 (() => {
   const $=id=>document.getElementById(id),canvas=$('scene'),ctx=canvas.getContext('2d');
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const RHO=1.2,TOTAL_PRESSURE=100,MAX_SPEED=12,PARTICLE_SPEED=190,ALIGN_CAP=.8;
+  const RHO=1.2,TOTAL_PRESSURE=100,MAX_SPEED=12,THERMAL_SPEED=180,DRIFT_SPEED=200;
   const state={strength:0,paused:reduced,time:0,points:[],flashes:[],collisionCount:0};
   let width=600,height=270,dpr=1,last=null;
   // The gauge uses Bernoulli with a fixed total gauge pressure.
-  // The particle animation is a separate constant-speed direction model:
-  // every dot travels at 190 CSS px/s at EVERY setting and viewport size.
-  // Flow reduces the transverse component and biases directions to the right;
-  // it does NOT add drift to an unchanged random velocity distribution.
-  // ALIGN_CAP keeps that bias below 1, so some molecules always run upstream:
-  // real thermal speeds dwarf the flow, and a fully aligned gas would be wrong.
+  // The particle animation splits a molecule's velocity the way the text does:
+  // a random thermal part plus a drift that every dot shares, in CSS px/s.
+  // The thermal part scales with sqrt(P / total), so its sideways speed and the
+  // wall collision rate both fall with P; the drift grows with v instead.
+  // Slow flow therefore looks unruly and fast flow sweeps one way, which is
+  // only legible because thermal motion is scaled down far harder here than in
+  // real air, where it dwarfs the flow and hides the drift completely.
   // This schematic is not a molecular derivation of Bernoulli's equation.
   // Yellow glints come only from actual wall intersections, never a timer.
   function model(strength=state.strength){
@@ -96,17 +97,15 @@
     state.points=[];
     // Balanced quadrants give zero mean flow at rest, without speed outliers.
     for(let i=0;i<24;i++){
-      const transverse=Math.sin((i+.5)/24*Math.PI/2),turnAt=((i*11)%24+.5)/24;
+      const angle=(i+.5)/24*Math.PI/2,ux=Math.cos(angle),uy=Math.sin(angle);
       for(const sx of [-1,1])for(const sy of [-1,1]){
-        state.points.push({x:random(),y:.01+random()*.98,transverse,turnAt,sx,sy,r:2.5});
+        state.points.push({x:random(),y:.01+random()*.98,ux:sx*ux,uy:sy*uy,r:2.5});
       }
     }
   }
   function particleVelocity(p){
-    const spread=Math.sqrt(model().P/TOTAL_PRESSURE);
-    const y=p.sy*p.transverse*spread;
-    const right=p.sx>0||state.strength/100*ALIGN_CAP>=p.turnAt;
-    return {vx:(right?1:-1)*PARTICLE_SPEED*Math.sqrt(Math.max(0,1-y*y)),vy:PARTICLE_SPEED*y};
+    const thermal=THERMAL_SPEED*Math.sqrt(model().P/TOTAL_PRESSURE);
+    return {vx:DRIFT_SPEED*state.strength/100+thermal*p.ux,vy:thermal*p.uy};
   }
   function update(){
     const m=model(),s=state.strength;
@@ -135,8 +134,8 @@
       if(p.y<0||p.y>1){
         const wall=p.y<0?0:1,hitAt=(wall-oldY)/vy;
         const x=((oldX+vx*hitAt)%1+1)%1;
-        p.y=2*wall-p.y;p.sy=-p.sy;state.collisionCount++;
-        const strength=.25+.75*Math.abs(velocity.vy)/PARTICLE_SPEED;
+        p.y=2*wall-p.y;p.uy=-p.uy;state.collisionCount++;
+        const strength=.25+.75*Math.abs(velocity.vy)/THERMAL_SPEED;
         state.flashes.push({x,wall,time:state.time-dt+hitAt,strength});
       }
     }
@@ -165,7 +164,7 @@
       const cx=width*position,length=Math.min(width*.24,25+m.v*4),y=20;
       ctx.strokeStyle='#3b8ab4';ctx.fillStyle='#3b8ab4';ctx.lineWidth=2+m.v*.1;ctx.beginPath();ctx.moveTo(cx-length/2,y);ctx.lineTo(cx+length/2,y);ctx.stroke();ctx.beginPath();ctx.moveTo(cx+length/2,y);ctx.lineTo(cx+length/2-6,y-4);ctx.lineTo(cx+length/2-6,y+4);ctx.closePath();ctx.fill();
     }
-    ctx.font='10px "Malgun Gothic",sans-serif';ctx.fillStyle='#96a6af';ctx.fillText('빠르기는 같게 · 열운동이 흐름으로 정렬',width/2,height-18);
+    ctx.font='10px "Malgun Gothic",sans-serif';ctx.fillStyle='#96a6af';ctx.fillText('열운동은 줄고 · 한 방향 흐름은 커집니다',width/2,height-18);
   }
   function resize(){const rect=canvas.getBoundingClientRect();width=rect.width;height=rect.height;dpr=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);render();}
   function frame(now){if(last===null)last=now;const dt=Math.min(.05,(now-last)/1000);last=now;if(!state.paused&&!document.hidden){step(dt);render();}requestAnimationFrame(frame);}
