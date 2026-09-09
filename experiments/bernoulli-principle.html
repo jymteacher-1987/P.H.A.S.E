@@ -27,7 +27,7 @@
 </head>
 <body>
 <main>
-<header><p class="eyebrow">가상 물리 실험실 · 베르누이의 원리</p><h1>속력이 빨라지면, 압력은?</h1><p class="intro">입 안에 멈춰 있던 공기가 밖으로 나오며 빨라집니다. 같은 공기의 속력 v와 압력 P가 어떻게 맞바뀌는지 따라가 보세요.</p><p class="rotate-hint">가로로 돌리면 관을 더 넓게 볼 수 있어요.</p></header>
+<header><p class="eyebrow">가상 물리 실험실 · 베르누이의 원리</p><h1>속력이 빨라지면, 압력은?</h1><p class="intro">입 안에 눌린 채 멈춰 있던 공기가 밖으로 나오며 빨라집니다. 같은 공기의 속력 v와 압력 P가 어떻게 맞바뀌는지 따라가 보세요.</p><p class="rotate-hint">가로로 돌리면 관을 더 넓게 볼 수 있어요.</p></header>
 <section class="lab" aria-label="전체압력이 일정한 베르누이의 원리 실험">
   <div class="toolbar"><span class="status">P + ½ρv²의 합은 일정</span><div class="actions"><button id="pause" class="btn" aria-pressed="false">Ⅱ 일시정지</button><button id="reset" class="btn">↺ 처음으로</button></div></div>
   <div class="visual"><div class="pipe-view"><div class="direction"><span>흐름 방향</span><svg class="flow-arrow" viewBox="0 0 150 18" aria-hidden="true"><path d="M2 9 H145 M138 3 L145 9 L138 15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>오른쪽</span></div><div class="assembly">
@@ -54,7 +54,7 @@
 </svg>
     <canvas id="scene" role="img" aria-label="열운동이 줄어드는 만큼 한 방향 흐름이 커지는 모형 입자와, 벽에 부딪힌 자리의 노란빛"></canvas>
   </div><div class="legend"><span><i class="dot"></i>기체 분자(모형)</span><span><i class="dot gold"></i>벽에 충돌</span></div></div>
-  <div class="gauge"><div><div class="gauge-title">압력 P</div><div class="gauge-number"><span id="pressure">100.0</span><span class="unit">Pa</span></div><div class="gauge-note">주변 압력 기준</div></div><div class="gauge-chart" id="gauge-chart" role="img" aria-label="정압 100 파스칼"><div class="gauge-fill" id="pressure-column"></div></div><div class="gauge-note">노란빛 = 벽 충돌</div></div></div>
+  <div class="gauge"><div><div class="gauge-title">압력 P</div><div class="gauge-number"><span id="pressure">100.0</span><span class="unit">Pa</span></div><div class="gauge-note">주변 공기보다 높은 만큼</div></div><div class="gauge-chart" id="gauge-chart" role="img" aria-label="주변 공기보다 100 파스칼 높음"><div class="gauge-fill" id="pressure-column"></div></div><div class="gauge-note">노란빛 = 벽 충돌</div></div></div>
   <div class="energy" aria-label="압력과 운동 에너지 항의 합">
     <div class="formula"><span class="p-color">P</span><span>+</span><span class="q-color">½ρv²</span><span>=</span><span class="total-color">일정</span></div>
     <div class="value-row"><b class="p-color" id="p-value">100.0</b><span>+</span><b class="q-color" id="q-value">0.0</b><span>=</span><b class="total-color">100.0</b><small>Pa</small></div>
@@ -113,8 +113,8 @@
     $('pressure').textContent=m.P.toFixed(1);$('p-value').textContent=m.P.toFixed(1);$('q-value').textContent=m.q.toFixed(1);
     $('pressure-column').style.height=(m.P/TOTAL_PRESSURE*100)+'%';
     $('energy-p').style.width=(m.P/TOTAL_PRESSURE*100)+'%';$('energy-q').style.width=(m.q/TOTAL_PRESSURE*100)+'%';
-    $('gauge-chart').setAttribute('aria-label',`주변 압력 기준 정압 ${m.P.toFixed(1)} Pa`);
-    $('strength').setAttribute('aria-valuetext',`빨라진 정도 ${s}퍼센트, 속력 ${m.v.toFixed(1)}미터 매 초, 정압 ${m.P.toFixed(1)}파스칼`);
+    $('gauge-chart').setAttribute('aria-label',`주변 공기보다 ${m.P.toFixed(1)} 파스칼 높음`);
+    $('strength').setAttribute('aria-valuetext',`빨라진 정도 ${s}퍼센트, 속력 ${m.v.toFixed(1)}미터 매 초, 주변보다 ${m.P.toFixed(1)}파스칼 높음`);
     $('pause').textContent=state.paused?'▶ 재생':'Ⅱ 일시정지';$('pause').setAttribute('aria-pressed',String(state.paused));
     $('blower-wind').style.opacity=s===0?'0':String(.35+.65*s/100);
     $('blower-wind').style.animationDuration=(1.1-.85*s/100)+'s';$('blower-wind').style.animationPlayState=state.paused||s===0?'paused':'running';
