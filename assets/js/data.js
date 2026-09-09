@@ -20,8 +20,10 @@ const SITE = (function () {
     if (!isFirebaseConfigured()) return false;
     if (firebaseReady) return true;
     try {
-      firebase.initializeApp(window.FIREBASE_CONFIG);
-      db = firebase.firestore();
+      // 뉴턴 러시의 랭킹 등 다른 Firebase 프로젝트와 기본 앱이 충돌하지 않게 한다.
+      const app = firebase.apps.find((app) => app.name === "phase-site")
+        || firebase.initializeApp(window.FIREBASE_CONFIG, "phase-site");
+      db = app.firestore();
       firebaseReady = true;
     } catch (e) {
       console.warn("Firebase 초기화 실패:", e);
@@ -82,29 +84,57 @@ const SITE = (function () {
     return `daily_${y}-${m}-${day}`;
   }
 
-  async function recordVisitAndGetCounts() {
-    if (!initFirebase()) return { today: null, total: null, configured: false };
+  let visitRecorded = false;
+  let visitInFlight = null;
 
-    const alreadyCounted = sessionStorage.getItem("visit_counted") === "1";
-    const dKey = todayKey();
-    const totalRef = db.collection("counters").doc("total");
-    const dailyRef = db.collection("counters").doc(dKey);
-
+  // 기존과 동일하게 같은 탭의 세션 동안 한 번 집계한다.
+  // 페이지 이동·새로고침뿐 아니라 동시에 호출되어도 중복 증가하지 않는다.
+  async function recordVisit() {
+    if (window.self !== window.top || !/^https?:$/.test(location.protocol)) {
+      return { configured: false, skipped: true };
+    }
+    if (!initFirebase()) return { configured: false };
     try {
-      if (!alreadyCounted) {
+      visitRecorded = visitRecorded || sessionStorage.getItem("visit_counted") === "1";
+    } catch (_) { /* 저장소를 사용할 수 없어도 현재 문서에서는 중복을 막는다. */ }
+    if (visitRecorded) return { configured: true };
+    if (visitInFlight) return visitInFlight;
+
+    visitInFlight = (async () => {
+      try {
+        const dKey = todayKey();
         const inc = firebase.firestore.FieldValue.increment(1);
-        await totalRef.set({ count: inc }, { merge: true });
-        await dailyRef.set({ count: inc, date: dKey.replace("daily_", "") }, { merge: true });
-        sessionStorage.setItem("visit_counted", "1");
+        const batch = db.batch();
+        // 두 집계를 한 번에 기록한다. 한쪽만 성공하고 재시도 때 또 늘어나는 것을 방지.
+        batch.set(db.collection("counters").doc("total"), { count: inc }, { merge: true });
+        batch.set(db.collection("counters").doc(dKey), { count: inc, date: dKey.replace("daily_", "") }, { merge: true });
+        await batch.commit();
+        visitRecorded = true;
+        try { sessionStorage.setItem("visit_counted", "1"); } catch (_) {}
+        return { configured: true };
+      } catch (error) {
+        console.warn("방문자 카운터 오류:", error);
+        return { configured: true, error: true };
       }
-      const [totalSnap, dailySnap] = await Promise.all([totalRef.get(), dailyRef.get()]);
+    })().finally(() => { visitInFlight = null; });
+    return visitInFlight;
+  }
+
+  async function recordVisitAndGetCounts() {
+    const result = await recordVisit();
+    if (!result.configured || result.error) return { today: null, total: null, ...result };
+    try {
+      const [totalSnap, dailySnap] = await Promise.all([
+        db.collection("counters").doc("total").get(),
+        db.collection("counters").doc(todayKey()).get(),
+      ]);
       return {
         today: dailySnap.exists ? dailySnap.data().count : 0,
         total: totalSnap.exists ? totalSnap.data().count : 0,
         configured: true,
       };
-    } catch (e) {
-      console.warn("방문자 카운터 오류:", e);
+    } catch (error) {
+      console.warn("방문자 카운터 조회 오류:", error);
       return { today: null, total: null, configured: true, error: true };
     }
   }
@@ -113,6 +143,7 @@ const SITE = (function () {
     isFirebaseConfigured,
     initFirebase,
     getAllData,
+    recordVisit,
     recordVisitAndGetCounts,
     get db() {
       initFirebase();
