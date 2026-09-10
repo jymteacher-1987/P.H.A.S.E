@@ -53,6 +53,7 @@
   .view-box .vsub{font-size:12px;color:var(--muted);margin:6px 4px 0;font-family:ui-monospace,monospace;min-height:16px;}
   canvas{display:block;width:100%;border-radius:10px;touch-action:none;}
   .graphs{display:flex;flex-direction:column;gap:6px;}
+  .model-note{font-size:11.5px;color:var(--muted);line-height:1.65;margin:12px 2px 0;word-break:keep-all;}
   .graph-wrap{margin-top:16px;padding-top:14px;border-top:1px dashed var(--line);}
   .graph-label{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800;margin:2px 2px -2px;flex-wrap:wrap;}
   .graph-label .sw{width:18px;height:4px;border-radius:99px;}
@@ -97,23 +98,23 @@
 
   <section class="section">
     <div class="sec-head"><span class="num">실험 1</span><h2>발전기와 자기 선속의 변화</h2>
-      <span class="hint">코일이 옆모습이 되는 0°·180°(자속 최대)에서 보이는 앞↔뒤 면이 바뀝니다.</span></div>
+      <span class="hint">코일 앞면의 법선이 자기장 B와 같은 방향인 상태를 θ=0°로 합니다.</span></div>
     <div class="views">
       <div class="view-box">
         <div class="vtitle"><span class="dot" style="background:var(--n-pole)"></span>발전기 — 회전 코일 · 브러시 · 회로</div>
         <canvas id="gen"></canvas>
-        <div class="vsub" id="genSub">코일면이 자기장과 수직(0°·180°)이면 통과 최대, 나란하면(90°·270°) 0</div>
+        <div class="vsub" id="genSub">코일면이 자기장과 수직(0°·180°)이면 자속의 크기 최대, 나란하면(90°·270°) 0</div>
       </div>
       <div class="view-box">
-        <div class="vtitle"><span class="dot" style="background:var(--face-f)"></span>고정 코일면 — 통과 자속 변화 관찰</div>
+        <div class="vtitle"><span class="dot" style="background:var(--face-f)"></span>정면으로 펼친 코일면 — 통과 자속 관찰</div>
         <canvas id="flux"></canvas>
-        <div class="vsub" id="fluxSub">고정 코일면 · 통과 자기력선 개수 ∝ 자속</div>
+        <div class="vsub" id="fluxSub">같은 코일 앞면 · 기호 개수 ∝ |자속|</div>
       </div>
     </div>
     <div class="legend">
       <span><i style="background:var(--n-pole)"></i>N극</span>
       <span><i style="background:var(--s-pole)"></i>S극</span>
-      <span><i style="background:var(--face-f)"></i>고정 코일면</span>
+      <span><i style="background:var(--face-f)"></i>코일 앞면(기준면)</span>
       <span><i style="background:var(--face-b)"></i>코일 뒷면(파랑)</span>
       <span><i style="background:var(--face-f);border-radius:50%"></i>A·B·C·D 앞쪽 도선</span>
       <span><i style="background:var(--face-b);border-radius:50%;opacity:.5"></i>A·B·C·D 뒤쪽 도선(점선)</span>
@@ -122,18 +123,19 @@
 
     <div class="graph-wrap">
       <div class="graph-label">
-        <span class="sw" style="background:var(--flux)"></span>자속 Φ
-        <span class="sw" style="background:var(--emf);margin-left:10px;"></span>외부 회로 전류
-        <span class="eq" style="margin-left:auto;">Φ가 0일 때 전류 최대 (90° 위상차)</span></div>
+        <span class="sw" style="background:var(--flux)"></span>자속 Φ/Φ₀
+        <span class="sw" style="background:var(--emf);margin-left:10px;"></span>외부 회로 전류 I/I₀
+        <span class="eq" style="margin-left:auto;">자속 0일 때 전류의 크기 최대 (90° 위상차)</span></div>
       <canvas id="mainGraph"></canvas>
       <div class="graph-label" style="margin-top:2px;font-weight:600;color:var(--muted);font-size:11.5px;">
         <span id="graphMode">교류 발전 — 전류는 sin 형태로 방향이 주기적으로 바뀜</span></div>
     </div>
+    <p class="model-note">오른쪽은 회전 코일의 같은 앞면을 정면으로 펼친 보기입니다. ⊙·⊗는 코일면에 수직인 외부 자기장 성분을 나타내며, 기호 개수는 자속 크기의 근사 표현입니다.<br>전류는 현재 속도의 최댓값 I₀로 정규화했습니다. 실제 최대 유도 기전력은 회전 속도에 비례합니다. 저항성 부하를 가정하며 전구·검류계 반응은 단순화했습니다.<br>고리 안쪽의 연결선은 절연되어 있으며 각 고리에만 고정 접합됩니다. 회전축과 지지대는 생략했습니다.</p>
   </section>
 
   <section class="section">
     <div class="sec-head"><span class="num">실험 2</span><h2>다양한 발전 방식</h2>
-      <span class="hint">에너지원이 터빈을, 터빈이 코일을 직접 돌립니다.</span></div>
+      <span class="hint">이 모형에서는 터빈이 코일을 돌려 전기를 만듭니다.</span></div>
     <div class="plant-btns">
       <button class="plant-btn" data-plant="hydro"><span class="pico">💧</span>수력 발전</button>
       <button class="plant-btn" data-plant="thermal"><span class="pico">🔥</span>화력 발전</button>
@@ -141,8 +143,9 @@
     </div>
     <canvas id="turbine"></canvas>
     <div class="plant-explain" id="plantExplain">
-      <b>수력 · 화력 · 원자력</b> 버튼을 누르면 에너지원이 터빈을 돌리는 과정이 나타납니다. <b>물의 낙하</b>(수력), <b>화석연료로 끓인 수증기</b>(화력), <b>핵분열 에너지로 끓인 수증기</b>(원자력) — 방법은 달라도 모두 터빈으로 <b>같은 코일</b>을 돌려 전기를 만듭니다.
+      <b>수력 · 화력 · 원자력</b> 버튼을 누르면 에너지원이 터빈을 돌리는 과정이 나타납니다. 수력은 <b>물의 흐름</b>으로, 이 모형의 화력과 원자력은 열로 만든 <b>고압 증기의 흐름과 팽창</b>으로 터빈을 돌립니다. 터빈의 회전이 발전기를 구동합니다.
     </div>
+    <p class="model-note">이 실험은 원리를 보여 주는 회전 코일 모형입니다. 실제 대형 발전기는 보통 자기장을 만드는 회전자가 돌고, 발전 전류가 흐르는 코일은 고정됩니다. 화력은 증기터빈 방식을 예로 들었습니다.</p>
   </section>
 
   <footer>전자기 유도 학습용 · 모든 요소가 회전각 θ=ωt 로 동기화됩니다.</footer>
@@ -222,8 +225,9 @@ function loadState(theta){const s=Math.sin(theta);
 function curRGB(L){return !L.cond?'150,160,180':(L.pos?COL.emf:COL.emf2);}
 
 function drawCurrentArrows(ctx,x,y,w,h,L,scale){
+  if(!L.cond||L.mag<1e-8)return; // 전류 0에는 방향 화살표를 그리지 않는다.
   const rgb=curRGB(L),n=Math.max(5,Math.round((2*(w+h))/110)),mag=L.mag;
-  const lw=(1.3+3.4*mag)*scale,head=(3.6+5*mag)*scale,alpha=L.cond?(0.18+0.5*mag):0.10;
+  const lw=(1.3+3.4*mag)*scale,head=(3.6+5*mag)*scale,alpha=L.cond?(0.18+0.5*mag)*Math.min(1,mag*5):0;
   ctx.lineCap='round';
   for(let i=0;i<n;i++){const t=(i/n)+state.flow*L.dir,p=rectPoint(t,x,y,w,h);
     let ang=Math.atan2(p.ty,p.tx);if(L.dir<0)ang+=Math.PI;
@@ -232,13 +236,14 @@ function drawCurrentArrows(ctx,x,y,w,h,L,scale){
     arrowHead(ctx,p.x,p.y,ang,head,`rgba(${rgb},${alpha})`);}
 }
 function drawPathArrows(ctx,pts,L,scale){
+  if(!L.cond||L.mag<1e-8)return; // 관습적 전류의 방향 표시. 전하 궤적이 아니다.
   // 연속 경로(pts)를 따라 흐르는 전류 화살표. 코일 끝→회로→전구→코일 끝을 하나로.
   const rgb=curRGB(L),mag=L.mag;
   const segs=[];let total=0;
   for(let i=0;i<pts.length-1;i++){const dx=pts[i+1].x-pts[i].x,dy=pts[i+1].y-pts[i].y,len=Math.hypot(dx,dy);
     segs.push({a:pts[i],len,ang:Math.atan2(dy,dx)});total+=len;}
   const n=Math.max(6,Math.round(total/105));
-  const lw=(1.3+3.4*mag)*scale,head=(3.6+5*mag)*scale,alpha=L.cond?(0.18+0.5*mag):0.10;
+  const lw=(1.3+3.4*mag)*scale,head=(3.6+5*mag)*scale,alpha=L.cond?(0.18+0.5*mag)*Math.min(1,mag*5):0;
   ctx.lineCap='round';
   for(let i=0;i<n;i++){let t=((i/n)+state.flow*L.dir)%1;if(t<0)t+=1;
     let d=t*total,k=0;while(k<segs.length-1&&d>segs[k].len){d-=segs[k].len;k++;}
@@ -299,107 +304,218 @@ function drawCornerLabels(ctx,items,scale){
 /* ============================================================
    발전기
    ============================================================ */
-function drawGen(c,theta){
-  const {ctx,w,h}=c;ctx.clearRect(0,0,w,h);
-  const cx=w/2,coilCy=h*0.28,cosT=Math.cos(theta),sinT=Math.sin(theta),L=loadState(theta),rgb=curRGB(L);
-  // 자석
-  const pw=w*0.13,ph=h*0.27,py=coilCy-ph/2;
-  function pole(x,col,lab){const g=ctx.createLinearGradient(x,0,x+pw,0);g.addColorStop(0,col);g.addColorStop(1,shade(col,.78));
-    ctx.fillStyle=g;roundRect(ctx,x,py,pw,ph,8);ctx.fill();
-    ctx.fillStyle='#fff';ctx.font='800 22px '+FONT;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(lab,x+pw/2,coilCy);}
-  pole(w*0.03,COL.n,'N');pole(w*0.84,COL.s,'S');
-  for(let i=0;i<5;i++){const y=coilCy-40+i*20;arrow(ctx,w*0.18,y,w*0.80,y,'rgba(123,77,255,.30)',1.6,6);}
-  ctx.fillStyle='rgba(123,77,255,.75)';ctx.font='700 11px '+FONT;ctx.textAlign='left';ctx.textBaseline='alphabetic';
-  ctx.fillText('자기장 B (균일·일정)',w*0.18,coilCy-48);
-
-  // 회전 코일: 세로축(y) 중심 회전을 아래로 살짝 기울여 3D로 봄. 가로폭 ∝ |sinθ|.
-  const SF=0.40,CF=0.91;                                   // 약 24° 내려본 시점
-  const proj=(X,Y,Z)=>({x:cx+X,y:coilCy-Y*CF+Z*SF});
-  const cP=(sw,su)=>{const X=sw*COILW*sinT,Y=su*COILH,Z=sw*COILW*(-cosT);return proj(X,Y,Z);};
-  const A=cP(-1,1),B=cP(1,1),Cc=cP(1,-1),D=cP(-1,-1);      // 좌우 변이 실제로 앞뒤로 돌며 자리바꿈
-  // 회전각에 따라 보이는 면 색(앞=주황/뒤=파랑)이 바뀐다.
-  const showFront=sinT>=0, faceRGB=showFront?COL.faceF:COL.faceB;
-  ctx.beginPath();ctx.moveTo(A.x,A.y);ctx.lineTo(B.x,B.y);ctx.lineTo(Cc.x,Cc.y);ctx.lineTo(D.x,D.y);ctx.closePath();
-  ctx.fillStyle=`rgba(${faceRGB},.18)`;ctx.fill();
-  // 가림(occlusion): 깊이 z가 큰 변=앞(진하게), 작은 변=뒤(흐리게) → 회전방향 명확
-  const zL=COILW*cosT, zR=-COILW*cosT, leftFront=zL>=zR;   // 왼쪽 변이 앞인가
-  const seg=(p,q,col,lw)=>{ctx.strokeStyle=col;ctx.lineWidth=lw;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.stroke();};
-  ctx.lineJoin='round';
-  // 강체 사각 코일: 윗변·아랫변·양옆변 모두 진한 선으로(아랫변 두 끝이 슬립링으로 빠짐)
-  seg(A,B,`rgb(${faceRGB})`,3.2);          // 윗변
-  if(leftFront){seg(B,Cc,`rgba(${faceRGB},.55)`,2.8);seg(A,D,`rgb(${faceRGB})`,3.2);}
-  else{seg(A,D,`rgba(${faceRGB},.55)`,2.8);seg(B,Cc,`rgb(${faceRGB})`,3.2);}
-  
-  const ringY=h*0.45,coilBot=proj(0,-COILH,0).y,RE=11;
-
-  const circ_top=h*0.545,circ_bot=h*0.86,halfW=Math.min(w*0.34,140),lx=cx-halfW,rx=cx+halfW;
-  // 32 모양: 코일 끝(D·Cc)에서 고리 높이까지 수직으로 내려온 뒤 직각으로 고리에 연결
-  const lead=(corner,tx,ty,col)=>{ctx.strokeStyle=col;ctx.lineWidth=2.6;ctx.lineCap='round';ctx.lineJoin='round';
-    ctx.beginPath();ctx.moveTo(corner.x,corner.y);ctx.lineTo(corner.x,ty);ctx.lineTo(tx,ty);ctx.stroke();};
-  lead(D,  cx-RE, ringY-11, '#b06a22');   // D 끝 → 위 고리 (항상)
-  lead(Cc, cx+RE, ringY+11, '#8a4f1a');   // Cc 끝 → 아래 고리 (항상)
-  // 코일 변 전류는 아래에서 외부 회로와 하나의 연속 루프로 묶어 그림(동기화)
-  drawSlipRings(ctx,cx,ringY,lx,rx,circ_top);
-
-  // 외부 회로 (윗변 없는 ⊔): 위쪽은 코일이 닫아줌 → 코일+회로가 하나의 폐회로
-  const rr=14;
-  ctx.strokeStyle=COL.wire;ctx.lineWidth=5;ctx.lineJoin='round';ctx.lineCap='round';
-  ctx.beginPath();
-  ctx.moveTo(lx,circ_top);
-  ctx.lineTo(lx,circ_bot-rr);ctx.arcTo(lx,circ_bot,lx+rr,circ_bot,rr);
-  ctx.lineTo(rx-rr,circ_bot);ctx.arcTo(rx,circ_bot,rx,circ_bot-rr,rr);
-  ctx.lineTo(rx,circ_top);
-  ctx.stroke();
-  // 전류: 코일 변 → 리드 → 슬립링 → 브러시 → 외부 회로 → 전구 → 반대 브러시 → 슬립링 → 리드 → 코일, 하나의 폐루프로 동기화
-  const lidY=circ_top-18;
-  const loop=[
-    Cc, B, A, D,                                              // 코일 3변 (Cc→B→A→D)
-    {x:D.x,y:ringY-11},{x:cx-RE,y:ringY-11},                  // D 리드 → 위 슬립링
-    {x:cx+RE+10,y:ringY-11},                                  // 위 슬립링 → 위 브러시
-    {x:cx+RE+10,y:lidY},{x:rx,y:lidY},{x:rx,y:circ_top},      // 외부 회로 (우)
-    {x:rx,y:circ_bot},{x:lx,y:circ_bot},                      // 전구 통과(아랫변)
-    {x:lx,y:circ_top},{x:lx,y:lidY},{x:cx-RE-10,y:lidY},      // 외부 회로 (좌)
-    {x:cx-RE-10,y:ringY+11},                                  // 아래 브러시
-    {x:cx+RE,y:ringY+11},{x:Cc.x,y:ringY+11},Cc            // 아래 슬립링 → Cc 리드 → 코일(닫힘)
-  ];
-  drawPathArrows(ctx,loop,L,0.95);
-  // 라벨을 전류 흐름순으로: A=좌하(D자리), B=좌상(A자리), C=우상(B자리), D=우하(Cc자리)
-  // 좌변(A,B)·우변(C,D) 중 cosθ≥0이면 좌변이 앞
-  const leftFrontLbl=cosT>=0;
-  drawCornerLabels(ctx,[
-    {ch:'A',p:D, front:leftFrontLbl},{ch:'B',p:A, front:leftFrontLbl},
-    {ch:'C',p:B, front:!leftFrontLbl},{ch:'D',p:Cc,front:!leftFrontLbl}
-  ],1);
-  // 회전방향 배지
-  const bx=cx,by=(circ_top+circ_bot)/2-4,br=Math.min(22,(circ_bot-circ_top)*0.2);
-  drawRotArrow(ctx,bx,by,br,L.pos,rgb,0.85);
-  ctx.fillStyle=COL.muted;ctx.font='600 11px '+FONT;ctx.textAlign='center';ctx.textBaseline='alphabetic';
-  ctx.fillText('전류 '+(L.mag<0.04?'0 (자속 최대)':coilSeq(L.pos))+' · 교류로 주기적 반전',bx,by+br+14);
-  drawLoad(ctx,cx,circ_bot+2,L,1);
+// 도체를 먼저 같은 3차원 좌표계에서 구성한 뒤 화면에 투영한다.
+// 회전각에 따라 도선 길이나 연결 상대를 바꾸지 않는다. 축/지지대는 그림에서 생략한다.
+function generatorGeometry(w,h,theta){
+  const cx=w/2,coilCy=h*0.29,cosT=Math.cos(theta),sinT=Math.sin(theta);
+  const modelScale=Math.min(1.34,(w*0.46)/(2*COILW));
+  const cw=COILW*modelScale,ch=COILH*modelScale;
+  // 기존 정면 시점. 자기장(+X)은 화면 가로, 공통 회전축(Y)은 화면 세로이다.
+  const pitch=Math.asin(.4),yaw=0;
+  const SF=Math.sin(pitch),CF=Math.cos(pitch),SY=Math.sin(yaw),CY=Math.cos(yaw);
+  const proj=(X,Y,Z)=>({x:cx+CY*X-SY*SF*Y-SY*CF*Z,y:coilCy-CF*Y+SF*Z,X,Y,Z});
+  const depthPoint=p=>SY*p.X+CY*SF*p.Y+CY*CF*p.Z;
+  const cP=(sw,su)=>proj(sw*cw*sinT,su*ch,-sw*cw*cosT);
+  const A=cP(-1,1),B=cP(1,1),Cc=cP(1,-1),D=cP(-1,-1);
+  const ringY=h*0.565,outerRadius=19,innerRadius=10,leadRadius=6,jacketRadius=2,terminalRadius=14.5;
+  const upperY=ringY-16,lowerY=ringY+16,ringHalfThickness=3;
+  const ringPoint=(ry,r,a,elevation=0)=>proj(r*Math.cos(a),(coilCy-ry)/CF+elevation,r*Math.sin(a));
+  const upperAngle=theta+Math.PI/2,lowerAngle=theta-Math.PI/2;
+  const leftNeck=proj(-leadRadius*sinT,-ch,leadRadius*cosT);
+  const rightNeck=proj(leadRadius*sinT,-ch,-leadRadius*cosT);
+  const upperEntry=ringPoint(upperY,leadRadius,upperAngle,ringHalfThickness);
+  const lowerEntry=ringPoint(lowerY,leadRadius,lowerAngle,ringHalfThickness);
+  const upperTerminal=ringPoint(upperY,terminalRadius,upperAngle,ringHalfThickness);
+  const lowerTerminal=ringPoint(lowerY,terminalRadius,lowerAngle,ringHalfThickness);
+  const leftLead=[leftNeck,upperEntry,upperTerminal],rightLead=[rightNeck,lowerEntry,lowerTerminal];
+  const brushAngle=Math.atan2(-SY*CF,CY);
+  const upperBrushContact=ringPoint(upperY,outerRadius,brushAngle);
+  const lowerBrushContact=ringPoint(lowerY,outerRadius,brushAngle+Math.PI);
+  const upperBrushOuter={x:upperBrushContact.x+14,y:upperBrushContact.y};
+  const lowerBrushOuter={x:lowerBrushContact.x-14,y:lowerBrushContact.y};
+  const showFront=cosT*SY+sinT*CY*CF>=0,leftFront=-sinT*SY+cosT*CY*CF>=0;
+  return {cx,coilCy,cw,ch,SF,CF,SY,CY,cosT,sinT,A,B,Cc,D,proj,depthPoint,ringPoint,ringY,showFront,leftFront,
+    upperBrushContact,lowerBrushContact,upperBrushOuter,lowerBrushOuter,
+    outerRadius,innerRadius,leadRadius,jacketRadius,terminalRadius,ringHalfThickness,
+    upperY,lowerY,upperAngle,lowerAngle,leftNeck,rightNeck,upperEntry,lowerEntry,upperTerminal,lowerTerminal,leftLead,rightLead};
 }
 
-function drawSlipRings(ctx,cx,ringY,lx,rx,circ_top){
-  // 서로 분리된 두 고리(위/아래). 코일 두 끝이 각각 다른 고리에 연결(절연),
-  // 브러시는 코일선 반대쪽에서 고리에 닿아 전류를 외부 회로로 뽑아냄.
-  const r1y=ringY-11, r2y=ringY+11, rEx=11, rEy=4;
-  ctx.lineCap='round';ctx.lineJoin='round';
-  // 분리된 두 고리
-  for(const ry of [r1y,r2y]){
-    ctx.fillStyle='#cfd7e3';ctx.strokeStyle='#7d8ba3';ctx.lineWidth=2;
-    ctx.beginPath();ctx.ellipse(cx,ry,rEx,rEy,0,0,TWO_PI);ctx.fill();ctx.stroke();}
-  // 탄소 브러시: 위 고리=오른쪽, 아래 고리=왼쪽 (코일선과 반대쪽)
-  ctx.fillStyle='#39414f';
-  roundRect(ctx,cx+rEx,r1y-4.5,11,9,2);ctx.fill();
-  roundRect(ctx,cx-rEx-11,r2y-4.5,11,9,2);ctx.fill();
-  // 브러시 → 외부 회로 (윗바 수평으로 빼낸 뒤, 양 끝에서 직각으로 수직 낙하 → ㅁ 모양으로 닫힘)
-  const lidY=circ_top-18;
-  ctx.strokeStyle=COL.wire;ctx.lineWidth=5;ctx.lineCap='round';ctx.lineJoin='round';
-  ctx.beginPath();ctx.moveTo(cx+rEx+10,r1y);ctx.lineTo(cx+rEx+10,lidY);ctx.lineTo(rx,lidY);ctx.lineTo(rx,circ_top);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(cx-rEx-10,r2y);ctx.lineTo(cx-rEx-10,lidY);ctx.lineTo(lx,lidY);ctx.lineTo(lx,circ_top);ctx.stroke();
-  // 라벨
-  ctx.fillStyle=COL.muted;ctx.font='600 10px '+FONT;ctx.textBaseline='middle';
-  ctx.textAlign='left';ctx.fillText('슬립링',cx+rEx+24,r1y);
-  ctx.textAlign='right';ctx.fillText('브러시',cx-rEx-24,r2y);
+function drawGen(c,theta){
+  const {ctx,w,h}=c;ctx.clearRect(0,0,w,h);ctx.save();
+  const G=generatorGeometry(w,h,theta);
+  const {cx,coilCy,cw,ch,cosT,sinT,A,B,Cc,D,ringY,outerRadius,leftNeck,rightNeck,leftLead,rightLead,upperY,lowerY}=G;
+  const L=loadState(theta),rgb=curRGB(L),{showFront,leftFront}=G,faceRGB=showFront?COL.faceF:COL.faceB;
+  const circ_top=h*0.69,circ_bot=h*0.875,halfW=Math.min(w*0.34,154),lx=cx-halfW;
+  const rx=Math.min(w-16,Math.max(cx+halfW,G.upperBrushOuter.x+12)),lidY=circ_top-16;
+  const line=(pts,col,width)=>{
+    ctx.strokeStyle=col;ctx.lineWidth=width;ctx.lineCap='round';ctx.lineJoin='round';
+    ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke();
+  };
+  const polygon=(pts,fill,stroke)=>{
+    ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();
+    ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1;ctx.stroke();}
+  };
+  const metal=(x1,y1,x2,y2,stops)=>{const g=ctx.createLinearGradient(x1,y1,x2,y2);stops.forEach(([at,col])=>g.addColorStop(at,col));return g;};
+
+  // 두께가 있는 자석. 자기장은 원본과 같이 왼쪽 N극에서 오른쪽 S극으로 향한다.
+  const pw=w*0.13,ph=h*0.315,py=coilCy-ph/2,depth=Math.min(15,w*0.036);
+  function pole(x,col,lab){
+    const dx=depth,dy=-depth*0.65;
+    ctx.save();ctx.shadowColor='rgba(28,45,70,.14)';ctx.shadowBlur=12;ctx.shadowOffsetY=7;
+    polygon([{x,y:py},{x:x+pw,y:py},{x:x+pw,y:py+ph},{x,y:py+ph}],col);ctx.restore();
+    polygon([{x,y:py},{x:x+dx,y:py+dy},{x:x+pw+dx,y:py+dy},{x:x+pw,y:py}],shade(col,1.12),shade(col,.88));
+    polygon([{x:x+pw,y:py},{x:x+pw+dx,y:py+dy},{x:x+pw+dx,y:py+ph+dy},{x:x+pw,y:py+ph}],shade(col,.67),shade(col,.66));
+    const g=metal(x,py,x+pw,py+ph,[[0,shade(col,1.10)],[.55,col],[1,shade(col,.84)]]);
+    polygon([{x,y:py},{x:x+pw,y:py},{x:x+pw,y:py+ph},{x,y:py+ph}],g,shade(col,.83));
+    line([{x:x+2,y:py+2},{x:x+pw-2,y:py+2}],'rgba(255,255,255,.40)',1.2);
+    ctx.fillStyle='#fff';ctx.font='800 26px '+FONT;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(lab,x+pw/2,coilCy);
+  }
+  pole(w*0.025,COL.n,'N');pole(w*0.83,COL.s,'S');
+  const fieldLeft=w*0.155+depth+5,fieldRight=w*0.825-5;
+  for(let i=0;i<5;i++){
+    const y=coilCy-48+i*24;
+    arrow(ctx,fieldLeft,y,fieldRight,y,'rgba(123,77,255,.24)',1.25,5);
+  }
+  ctx.fillStyle='rgba(110,72,216,.92)';ctx.font='700 11px '+FONT;ctx.textAlign='center';ctx.textBaseline='alphabetic';
+  ctx.fillText('자기장 B (균일·일정)',cx,18);
+
+  // 앞/뒤 면은 면의 법선과 카메라 방향의 내적으로 판정한다. θ의 물리적 정의는 유지한다.
+  const face=metal(cx-cw,coilCy-ch,cx+cw,coilCy+ch,[[0,`rgba(${faceRGB},.07)`],[1,`rgba(${faceRGB},.18)`]]);
+  polygon([A,B,Cc,D],face);
+  function wire(pts,front){
+    ctx.save();
+    if(!front)ctx.globalAlpha=.56;
+    line(pts,showFront?'#9a4f20':'#29487e',front?6.6:4.8);
+    line(pts,`rgb(${faceRGB})`,front?4.8:3.2);
+    if(front){ctx.translate(-.65,-.85);line(pts,showFront?'#ffcc92':'#a8c9ff',1.25);}
+    ctx.restore();
+  }
+  // 양쪽 세로변은 길이가 같고 아랫변이 같은 높이에서 안으로 좁아진다.
+  // 두 절연선은 고리의 외부 접촉면이 아니라 중앙 구멍 안쪽을 나란히 통과한다.
+  // A(내부 D)→위 고리→오른쪽 브러시, D(내부 Cc)→아래 고리→왼쪽 브러시.
+  wire(leftFront?[B,Cc]:[A,D],false);
+  wire([A,B],true);
+  wire(leftFront?[Cc,rightNeck]:[D,leftNeck],false);
+  wire(leftFront?[D,leftNeck]:[Cc,rightNeck],true);
+  drawSlipRings(ctx,G,lx,rx,circ_top,L);
+  wire(leftFront?[A,D]:[B,Cc],true);
+
+  const rr=15;
+  function circuitStroke(col,width){
+    ctx.strokeStyle=col;ctx.lineWidth=width;ctx.lineJoin='round';ctx.lineCap='round';ctx.beginPath();
+    ctx.moveTo(lx,circ_top);ctx.lineTo(lx,circ_bot-rr);ctx.arcTo(lx,circ_bot,lx+rr,circ_bot,rr);
+    ctx.lineTo(rx-rr,circ_bot);ctx.arcTo(rx,circ_bot,rx,circ_bot-rr,rr);ctx.lineTo(rx,circ_top);ctx.stroke();
+  }
+  circuitStroke('#66768e',5.5);circuitStroke('#b3c0d2',2);
+  // 완전한 도전 고리에서는 전류가 양쪽 호로 나뉜다. 임의의 최단 경로 하나를 그리지 않는다.
+  // 화살표는 코일과 외부 배선에서 관습적 전류의 방향만 표시한다.
+  const brushR=G.upperBrushOuter,brushL=G.lowerBrushOuter;
+  drawPathArrows(ctx,[rightNeck,Cc,B,A,D,leftNeck],L,0.95);
+  drawPathArrows(ctx,[brushR,{x:brushR.x,y:lidY},{x:rx,y:lidY},{x:rx,y:circ_top},
+    {x:rx,y:circ_bot},{x:lx,y:circ_bot},{x:lx,y:circ_top},{x:lx,y:lidY},{x:brushL.x,y:lidY},brushL],L,0.95);
+  drawCornerLabels(ctx,[
+    {ch:'A',p:D,front:leftFront},{ch:'B',p:A,front:leftFront},
+    {ch:'C',p:B,front:!leftFront},{ch:'D',p:Cc,front:!leftFront}
+  ],1);
+  // 외부 회로의 전류 방향: 양의 반주기에는 오른쪽 아래로 → 부하 → 왼쪽 위로.
+  const bx=cx,by=(circ_top+circ_bot)/2-19,br=Math.min(20,(circ_bot-circ_top)*0.2);
+  const zeroCurrent=L.mag<1e-8;
+  if(!zeroCurrent)drawRotArrow(ctx,bx,by,br,L.pos,rgb,0.85*Math.min(1,L.mag*5));
+  else{ctx.fillStyle=COL.muted;ctx.font='700 17px '+FONT;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('I = 0',bx,by);}
+  ctx.fillStyle=COL.muted;ctx.font='600 11px '+FONT;ctx.textAlign='center';ctx.textBaseline='alphabetic';
+  ctx.fillText('외부 회로 전류'+(zeroCurrent?' 0':' · 방향이 주기적으로 반전'),bx,by+br+14);
+  drawLoad(ctx,cx,circ_bot+2,L,1);
+  ctx.fillStyle=COL.muted;ctx.font='600 10.5px '+FONT;ctx.textAlign='center';ctx.textBaseline='alphabetic';
+  ctx.fillText('코일·슬립링은 함께 회전 · 브러시는 고정',cx,h-7);
+  ctx.restore();
+}
+
+function drawSlipRings(ctx,G,lx,rx,circ_top,L){
+  const {cx,coilCy,CF,SF,proj,ringPoint,depthPoint,outerRadius,innerRadius,ringHalfThickness,
+    upperY,lowerY,upperAngle,lowerAngle,leftLead,rightLead,jacketRadius,
+    upperBrushContact,lowerBrushContact,upperBrushOuter,lowerBrushOuter}=G;
+  const lidY=circ_top-16;
+  ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
+  // 고정 배선과 브러시는 코일/고리의 회전각과 관계없이 같은 자리에 있다.
+  const cable=pts=>{
+    ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));
+    ctx.strokeStyle='#66768e';ctx.lineWidth=5.5;ctx.stroke();ctx.strokeStyle='#b3c0d2';ctx.lineWidth=2;ctx.stroke();
+  };
+  cable([[upperBrushOuter.x,upperBrushOuter.y],[upperBrushOuter.x,lidY],[rx,lidY],[rx,circ_top]]);
+  cable([[lowerBrushOuter.x,lowerBrushOuter.y],[lowerBrushOuter.x,lidY],[lx,lidY],[lx,circ_top]]);
+
+  // 도선과 고리의 모든 조각을 같은 시점의 깊이로 정렬한다.
+  // annulus의 중앙은 실제로 비워 두며, 뒤쪽 선은 앞쪽 고리 몸체에 가려진다.
+  const scene=[],depth=depthPoint;
+  const face=(points,color)=>{
+    scene.push({z:points.reduce((s,p)=>s+depth(p),0)/points.length,draw(){
+      ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();
+      ctx.fillStyle=color;ctx.fill();ctx.strokeStyle=color;ctx.lineWidth=.4;ctx.stroke();
+    }});
+  };
+  const tube=(p,q,color,width)=>{
+    const length=Math.hypot(q.X-p.X,q.Y-p.Y,q.Z-p.Z),n=Math.max(1,Math.ceil(length/1.5));
+    const point=t=>proj(p.X+(q.X-p.X)*t,p.Y+(q.Y-p.Y)*t,p.Z+(q.Z-p.Z)*t);
+    for(let i=0;i<n;i++){
+      const a=point(i/n),b=point((i+1)/n);
+      scene.push({z:(depth(a)+depth(b))/2+width*.025,draw(){
+        ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+      }});
+    }
+  };
+  const ring=(ry,terminalAngle)=>{
+    const n=96,top=ringHalfThickness,bottom=-ringHalfThickness;
+    for(let i=0;i<n;i++){
+      const a=i*TWO_PI/n,b=(i+1)*TWO_PI/n;
+      const ot1=ringPoint(ry,outerRadius,a,top),ot2=ringPoint(ry,outerRadius,b,top);
+      const ob1=ringPoint(ry,outerRadius,a,bottom),ob2=ringPoint(ry,outerRadius,b,bottom);
+      const it1=ringPoint(ry,innerRadius,a,top),it2=ringPoint(ry,innerRadius,b,top);
+      const ib1=ringPoint(ry,innerRadius,a,bottom),ib2=ringPoint(ry,innerRadius,b,bottom);
+      face([ob1,ob2,ib2,ib1],'#8e5c32');
+      face([it1,it2,ib2,ib1],shade('#b1864a',.68+.22*Math.sin((a+b)/2)));
+      face([ot1,ot2,ob2,ob1],shade('#d4a15f',.80+.19*Math.cos((a+b)/2+1.0)));
+      face([ot1,ot2,it2,it1],'#efd09a');
+      // 고리 윗면의 가는 기준표시도 코일과 함께 회전한다. 절단면/분할 고리가 아니다.
+      const mid=(a+b)/2,d=Math.atan2(Math.sin(mid-terminalAngle),Math.cos(mid-terminalAngle));
+      if(Math.abs(d)<.07){
+        const r1=ringPoint(ry,outerRadius-1,a,top+.08),r2=ringPoint(ry,outerRadius-1,b,top+.08);
+        const r3=ringPoint(ry,outerRadius-3,b,top+.08),r4=ringPoint(ry,outerRadius-3,a,top+.08);
+        face([r1,r2,r3,r4],'#875c31');
+      }
+    }
+  };
+  ring(upperY,upperAngle);ring(lowerY,lowerAngle);
+  for(const lead of[leftLead,rightLead]){
+    // 절연 피복을 입힌 축방향 연결선: r=6, 피복 포함 r≤8 < 고리 구멍 r=10.
+    tube(lead[0],lead[1],'#35475f',2*jacketRadius);
+    tube(lead[0],lead[1],'#a9bad0',1.1);
+    // 자기 고리의 윗면에만 접합하는 짧은 도체. 바깥 브러시 접촉면을 침범하지 않는다.
+    tube(lead[1],lead[2],'#9b622f',2.8);
+    const t=lead[2];
+    scene.push({z:depth(t)+1.5,draw(){
+      ctx.fillStyle='#8e633b';ctx.strokeStyle='#fff1ca';ctx.lineWidth=.8;
+      ctx.beginPath();ctx.ellipse(t.x,t.y,2.3,1.7,0,0,TWO_PI);ctx.fill();ctx.stroke();
+    }});
+  }
+  scene.sort((a,b)=>a.z-b.z);scene.forEach(p=>p.draw());
+
+  function brush(x,y){
+    const g=ctx.createLinearGradient(0,y-5,0,y+5);g.addColorStop(0,'#647085');g.addColorStop(.4,'#394556');g.addColorStop(1,'#202c3e');
+    ctx.fillStyle=g;ctx.strokeStyle='#253247';ctx.lineWidth=1;
+    roundRect(ctx,x,y-5,14,10,2);ctx.fill();ctx.stroke();
+    ctx.strokeStyle='#9ba7b7';ctx.beginPath();ctx.moveTo(x+2,y-3);ctx.lineTo(x+11,y-3);ctx.stroke();
+  }
+  brush(upperBrushContact.x,upperBrushContact.y);brush(lowerBrushContact.x-14,lowerBrushContact.y);
+  const upperCenter=ringPoint(upperY,0,0),labelX=Math.min(cx*2-38,upperCenter.x+80);
+  ctx.strokeStyle='#9caac0';ctx.lineWidth=.85;
+  ctx.beginPath();ctx.moveTo(upperCenter.x+7,upperY-9);ctx.lineTo(labelX-8,upperY-22);ctx.lineTo(labelX+30,upperY-22);ctx.stroke();
+  const brushLabelX=lowerBrushContact.x-36;
+  ctx.beginPath();ctx.moveTo(lowerBrushContact.x-7,lowerBrushContact.y-5);ctx.lineTo(brushLabelX,lowerBrushContact.y-14);ctx.lineTo(brushLabelX-20,lowerBrushContact.y-14);ctx.stroke();
+  ctx.fillStyle=COL.muted;ctx.font='600 10px '+FONT;ctx.textBaseline='bottom';
+  ctx.textAlign='left';ctx.fillText('슬립링',labelX,upperY-25);
+  ctx.textAlign='right';ctx.fillText('브러시',brushLabelX,lowerBrushContact.y-17);
+  ctx.restore();
 }
 /* 부하 */
 function drawLoad(ctx,x,y,L,sc){
@@ -446,11 +562,11 @@ function drawGalvo(ctx,x,y,L,sc){
    ============================================================ */
 function drawFlux(c,theta){
   const {ctx,w,h}=c;ctx.clearRect(0,0,w,h);
-  const phi=fluxValue(theta),into=phi<=0,L=loadState(theta),mag=Math.abs(phi),zero=mag<0.04;
+  const phi=fluxValue(theta),into=phi<=0,L=loadState(theta),mag=Math.abs(phi),zero=mag<1e-8;
   const coilL=coilCurrentState(theta,L.mag);
   const cx=w/2,cy=h*0.45;
   ctx.fillStyle=COL.muted;ctx.font='600 11.5px '+FONT;ctx.textAlign='center';ctx.textBaseline='alphabetic';
-  ctx.fillText('고정 코일면 · 자속과 코일 내부 전류 방향',w/2,18);
+  ctx.fillText('같은 코일 앞면 · 자속과 코일 전류 방향',w/2,18);
   // 기준면: 위치·크기·색 모두 고정
   const fixedW=COILW*1.60,fixedH=COILH*1.46;
   const bx=cx-fixedW,by=cy-fixedH,bw=fixedW*2,bh=fixedH*2,refRGB=COL.faceF;
@@ -477,9 +593,9 @@ function drawFlux(c,theta){
   // 상단 상태 (개수 아님 — 방향 + 자속 세기)
   ctx.font='800 14px '+FONT;ctx.textAlign='center';ctx.textBaseline='alphabetic';
   ctx.fillStyle=zero?COL.muted:COL.flux;
-  ctx.fillText(zero?'자속 0 (면이 자기장과 나란함)':(into?'⊗ 자기장이 면으로 들어감(−)':'⊙ 자기장이 면에서 나옴(+)'),cx,by-24);
+  ctx.fillText(zero?'자속 0 (면이 자기장과 나란함)':(into?'⊗ 자기장 수직 성분: 들어감(−)':'⊙ 자기장 수직 성분: 나옴(+)'),cx,by-24);
   ctx.fillStyle=`rgb(${curRGB(coilL)})`;ctx.font='800 13px '+FONT;
-  ctx.fillText('코일 전류 경로: '+(coilL.mag<0.04?'0':coilSeq(coilL.pos)),cx,by-7);
+  ctx.fillText('코일 전류 경로: '+(coilL.mag<1e-8?'0':coilSeq(coilL.pos)),cx,by-7);
   // 자속 값(연속) + 막대
   const barY=by+bh+28, barW=bw, bx0=cx-barW/2;
   ctx.fillStyle=COL.muted;ctx.font='700 12px '+FONT;ctx.textAlign='center';
@@ -499,7 +615,7 @@ function drawFlux(c,theta){
   // 전류/요약
   ctx.textAlign='center';
   ctx.fillStyle=`rgb(${curRGB(L)})`;ctx.font='800 13px '+FONT;
-  const cur=L.mag<0.04?'유도 전류 0':'코일 전류 '+coilSeq(coilL.pos)+' · '+Math.round(L.mag*100)+'%';
+  const cur=L.mag<1e-8?'유도 전류 0':'코일 전류 '+coilSeq(coilL.pos)+' · '+Math.round(L.mag*100)+'%';
   ctx.fillText(cur,cx,h-9);
 }
 
@@ -542,7 +658,7 @@ function drawTurbine(c,theta){
   if(state.plant==='manual'){
     ctx.fillStyle=COL.muted;ctx.font='600 14px '+FONT;ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.fillText('수력 · 화력 · 원자력 버튼을 누르면',w/2,h*0.42);
-    ctx.fillText('터빈이 같은 코일을 직접 돌리는 과정이 나타납니다.',w/2,h*0.42+22);return;}
+    ctx.fillText('이 모형에서는 터빈이 코일을 돌립니다.',w/2,h*0.42+22);return;}
   const coilY=h*0.24,shaftY=h*0.46;
   const turbX=w*0.36;
   const genX=w*0.64;
@@ -623,7 +739,7 @@ function drawReactor(ctx,turbX,shaftY,h,nuclear){
   ctx.fillStyle='rgba(58,123,213,.8)';
   for(let i=0;i<7;i++){const bx=boilerX+12+i*9,by=boilerY+boilerH-7+Math.sin(now/190+i)*3;
     ctx.beginPath();ctx.arc(bx,by,2.2,0,TWO_PI);ctx.fill();}
-  // 수증기: 보일러 위로 곧장 '올라가며' 터빈을 돌림 (날아가 때리는 것 아님)
+  // 고압 증기가 압력 차에 따라 흐르며 팽창해 터빈을 구동한다. 위쪽 화살표는 이 모형의 유동 경로이다.
   const colX=srcX,sBot=boilerY+1,sTop=shaftY+12;
   const grad=ctx.createLinearGradient(0,sBot,0,sTop);
   grad.addColorStop(0,'rgba(178,191,209,.34)');grad.addColorStop(1,'rgba(178,191,209,.06)');
@@ -637,7 +753,7 @@ function drawReactor(ctx,turbX,shaftY,h,nuclear){
   ctx.fillStyle=COL.muted;ctx.font='600 10.5px '+FONT;ctx.textAlign='right';ctx.textBaseline='middle';
   ctx.fillText('물 끓임',boilerX-5,boilerY+boilerH/2);
   ctx.fillStyle='rgba(120,134,156,.95)';ctx.font='600 10px '+FONT;ctx.textAlign='left';
-  ctx.fillText('수증기 상승',colX+15,(sBot+sTop)/2);
+  ctx.fillText('고압 증기 흐름',colX+15,(sBot+sTop)/2);
   ctx.fillStyle=nuclear?'#2f8f6b':'#c0563a';ctx.font='700 10.5px '+FONT;ctx.textAlign='center';ctx.textBaseline='alphabetic';
   ctx.fillText(nuclear?'핵분열 · 질량 결손':'화석연료 연소',srcX,heatY+heatH+13);
   if(nuclear){ctx.fillStyle='rgba(47,143,107,.9)';ctx.font='600 9.5px '+FONT;
@@ -688,9 +804,9 @@ document.querySelectorAll('#loadSeg button').forEach(b=>{
     document.getElementById('genSub').textContent=m[state.load];});
 });
 const plantData={
-  hydro:{text:'<b>수력 발전</b> — 높은 곳의 물이 떨어지는 힘으로 터빈을 돌리고, 그 회전이 코일을 돌려 전기를 만듭니다.'},
-  thermal:{text:'<b>화력 발전</b> — 화석연료를 태운 열로 물을 끓이고, 그 <b>수증기</b>가 터빈을 돌려 코일을 회전시킵니다.'},
-  nuclear:{text:'<b>원자력 발전</b> — 핵분열 때의 <b>질량 결손</b>이 에너지(E=Δmc²)로 바뀌어 물을 끓이고, 그 수증기가 터빈을 돌립니다. <b>화력과 원자력</b>은 물을 끓일 <b>열을 얻는 방법</b>만 다를 뿐, 수증기로 터빈을 돌리는 점은 같습니다.'}
+  hydro:{text:'<b>수력 발전</b> — 높은 곳에서 낮은 곳으로 흐르는 물이 터빈을 돌립니다. 터빈의 회전이 발전기를 구동해 전기를 만듭니다.'},
+  thermal:{text:'<b>화력 발전(증기터빈 방식)</b> — 화석연료를 태운 열로 물을 끓입니다. <b>고압 증기가 흐르며 팽창하는 과정</b>에서 터빈을 돌리고, 터빈의 회전이 발전기를 구동합니다.'},
+  nuclear:{text:'<b>원자력 발전</b> — 핵분열 때의 <b>질량 결손</b>에 해당하는 에너지(E=Δmc²)가 방출됩니다. 이 열로 만든 <b>고압 증기가 흐르며 팽창하는 과정</b>에서 터빈을 돌리고, 터빈의 회전이 발전기를 구동합니다. 이 모형의 화력과 원자력은 <b>열을 얻는 방법</b>이 다르며, 증기로 터빈을 돌리는 원리는 같습니다.'}
 };
 document.querySelectorAll('.plant-btn').forEach(b=>{
   b.addEventListener('click',()=>{document.querySelectorAll('.plant-btn').forEach(x=>x.classList.remove('active'));
@@ -701,3 +817,4 @@ resizeAll();requestAnimationFrame(frame);setTimeout(resizeAll,350);
 </script>
 </body>
 </html>
+
