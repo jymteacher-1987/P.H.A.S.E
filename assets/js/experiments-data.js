@@ -330,21 +330,6 @@ window.EXPERIMENTS_DATA = {
       ]
     },
     {
-      "id": "jjomuldak-factory",
-      "title": "쪼물딱 공장",
-      "icon": "🫧",
-      "description": "뽁뽁이, 말랑이, 팝잇처럼 손으로 조물조물 만지는 장난감을 모아 둔 놀이터입니다. 누르고 당기고 터뜨리며 색 도감을 채워보세요.",
-      "path": "plays/jjomuldak-factory.html",
-      "date": "2026-09-05",
-      "tags": [
-        "뽁뽁이",
-        "말랑이",
-        "팝잇",
-        "과학 놀이",
-        "촉각"
-      ]
-    },
-    {
       "id": "newton-rush",
       "title": "뉴턴 러시",
       "icon": "💎",
@@ -394,7 +379,7 @@ window.EXPERIMENTS_DATA = {
       "title": "거인의 어깨: 프린키피아의 탄생",
       "icon": "🍎",
       "description": "뉴턴과 함께 탐험하고 보스를 상대하며 갈릴레오·데카르트·하위헌스의 연구를 만나보세요. 네 가지 실험을 관찰하고 기록을 모아 세 운동 법칙을 정리하는 횡스크롤 액션 게임입니다.",
-      "path": "plays/giants-shoulders.html",
+      "path": "plays/giants-shoulders.html?v=mobile-controls-20260911",
       "date": "2026-09-11",
       "tags": [
         "뉴턴",
@@ -404,6 +389,21 @@ window.EXPERIMENTS_DATA = {
         "하위헌스",
         "운동 법칙",
         "과학 놀이"
+      ]
+    },
+    {
+      "id": "jjomuldak-factory",
+      "title": "쪼물딱 공장",
+      "icon": "🫧",
+      "description": "뽁뽁이, 말랑이, 팝잇처럼 손으로 조물조물 만지는 장난감을 모아 둔 놀이터입니다. 누르고 당기고 터뜨리며 색 도감을 채워보세요.",
+      "path": "plays/jjomuldak-factory.html",
+      "date": "2026-09-05",
+      "tags": [
+        "뽁뽁이",
+        "말랑이",
+        "팝잇",
+        "과학 놀이",
+        "촉각"
       ]
     }
   ]
