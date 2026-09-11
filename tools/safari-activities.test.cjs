@@ -58,7 +58,7 @@ test('WebKit: all activities on small iPhone screens, older APIs, game start and
             window.DecompressionStream = undefined;
             window.createImageBitmap = () => Promise.reject(new Error('Test: image bitmap unavailable'));
             sessionStorage.setItem('visit_counted', '1');
-            if (id === 'giants-shoulders') {
+            if (id === 'giants-shoulders' || id === 'newton-rush') {
               Element.prototype.requestFullscreen = undefined;
               Element.prototype.webkitRequestFullscreen = undefined;
             }
@@ -96,7 +96,7 @@ test('WebKit: all activities on small iPhone screens, older APIs, game start and
             // Loading must finish without requiring a first keyboard/mouse action.
             await frame.waitForFunction(selector => !document.querySelector(selector)?.disabled, selector);
             for (const [width, height] of [[320, 460], [568, 260], [568, 210], [375, 550], [667, 310], [320, 460]]) {
-              if (height === 210 && entry.id !== 'giants-shoulders') continue;
+              if (height === 210 && entry.id === 'physics-fighter') continue;
               if (needsLandscape && height > width) continue;
               await page.setViewportSize({ width, height });
               await page.waitForTimeout(150);
@@ -113,6 +113,29 @@ test('WebKit: all activities on small iPhone screens, older APIs, game start and
               assert.equal(await frame.locator('body').getAttribute('data-mode'), 'running');
               await reachable(frame.locator('#jump'), 'Jump control');
               await frame.locator('#jump').tap();
+              // A nonzero canvas is not enough: short Safari screens must devote
+              // nearly all their height to gameplay, not stacked information rows.
+              for (const [width, height] of [[568, 260], [667, 310], [568, 210]]) {
+                await page.setViewportSize({ width, height });
+                await page.waitForTimeout(180);
+                const stage = await frame.locator('#stage').boundingBox();
+                assert.ok(stage.height >= height * .9 && stage.y >= 0 && stage.y + stage.height <= height,
+                  `Runner at ${width}×${height} must fill the visible height; got ${stage.height}px`);
+                for (const control of ['#jump', '#slide', '#pause']) await reachable(frame.locator(control), control);
+              }
+              const stageBeforeLore = await frame.locator('#stage').boundingBox();
+              await frame.locator('#lore-card').waitFor({ state: 'visible' });
+              await page.waitForTimeout(1150); // Let the actual science note slide into view.
+              const note = await frame.locator('#lore-idea').boundingBox();
+              assert.ok(note.width > 0 && note.x >= 0 && note.x + note.width <= 568 && note.y + note.height < 120,
+                'Science clue must remain readable above the runner');
+              assert.equal((await frame.locator('#stage').boundingBox()).height, stageBeforeLore.height,
+                'Science notes must not shrink gameplay');
+              if (process.env.SAFARI_SCREENSHOTS === '1') await page.screenshot({ path: path.join(resultsDir, 'newton-se-landscape-play.png') });
+              await frame.locator('#pause').tap();
+              await reachable(frame.locator('#resume'), 'Resume on shortest landscape screen');
+              await frame.locator('#resume').tap();
+              assert.equal(await frame.locator('body').getAttribute('data-mode'), 'running');
             }
             if (entry.id === 'physics-fighter') assert.equal(await frame.locator('#fightScreen').isVisible(), true);
             if (entry.id === 'giants-shoulders') assert.equal(await frame.locator('[data-do=new]').count(), 0);

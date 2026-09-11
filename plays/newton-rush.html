@@ -179,6 +179,39 @@ html,body{height:100%;overscroll-behavior:none}.shell{height:100dvh;min-height:5
  .welcome .tag{display:none}.welcome h2{font-size:21px;margin:0 0 8px}
  .stage>.game-buttons button{width:78px;height:48px;min-height:48px;font-size:13px}
 }
+/* Short landscape screens need the whole height for the runner, even with Safari's toolbar. */
+@media(max-height:560px) and (orientation:landscape){
+ body:not([data-mode=ready]) .game{position:relative;isolation:isolate}
+ body:not([data-mode=ready]) .game>.hud{
+  position:absolute;inset:0 0 auto;z-index:4;border:0;background:linear-gradient(#f3f8f4e6,#f3f8f499,transparent);
+  pointer-events:none
+ }
+ body:not([data-mode=ready]) .hud .icon-btn{pointer-events:auto}
+ body:not([data-mode=ready]) .game>.concept-strip{
+  position:absolute;inset:44px 10px auto;z-index:3;height:auto;min-height:0;padding:4px 8px;
+  border:0;border-radius:9px;background:#fbfdf2df;pointer-events:none
+ }
+ body:not([data-mode=ready]) .concept-strip #lore-card,
+ body:not([data-mode=ready]) .concept-strip #lore-rest{height:auto;min-height:36px}
+ body:not([data-mode=ready]) .concept-strip:has(#lore-card[hidden]){background:none;padding-block:0}
+ body:not([data-mode=ready]) #lore-rest{justify-content:flex-start;min-height:0!important}
+ body:not([data-mode=ready]) #lore-rest>span,body:not([data-mode=ready]) #lore-rest p{display:none}
+ body:not([data-mode=ready]) #lore-rest b{font-size:11px;text-shadow:0 1px 3px #fff,0 0 6px #fff}
+ body:not([data-mode=ready]) .game>.event-bar{
+  position:absolute;inset:auto 220px 4px 10px;z-index:3;height:auto;min-height:0;max-height:48px;
+  padding:0;display:flex;flex-direction:column;align-items:flex-start;gap:2px;border:0;background:none;
+  overflow:hidden;pointer-events:none
+ }
+ body:not([data-mode=ready]) .event-bar:before{display:none}
+ body:not([data-mode=ready]) .event-bar .toast{
+  flex:0 0 auto;line-height:16px;padding:1px 5px;border-radius:5px;background:#f1f5fae6;max-width:100%
+ }
+ body:not([data-mode=ready]) .event-bar .effect-list{flex:0 0 auto;max-width:100%;height:20px;pointer-events:auto}
+ body:not([data-mode=running]) .game>.concept-strip,body:not([data-mode=running]) .game>.event-bar{visibility:hidden}
+ .stage>.game-buttons{right:10px;bottom:8px;gap:10px}
+ .stage>.game-buttons button{width:82px;height:52px;min-height:52px}
+}
+
 </style></head>
 <body><main class="shell">
 <header class="top"><div class="brand"><div class="brand-mark" aria-hidden="true">N<span>✦</span></div><div><h1>뉴턴 러시</h1><small>NEWTON'S LITTLE ADVENTURE</small></div></div><div class="top-actions"><span class="best">나의 최고 기록 <b id="best">0</b></span><button id="sound" class="small-btn" aria-pressed="true">♪ 소리 켬</button><button id="show-ranking" class="small-btn">🏆 랭킹</button><button id="help" class="small-btn">플레이 방법 ↗</button></div></header>

@@ -109,9 +109,9 @@ window.PHASE_PREVIEWS = {
       "bytes": 23530
     },
     "newton-rush": {
-      "src": "assets/previews/newton-rush-dc15f51bd7.webp",
-      "sourceHash": "b70656b4e094e4876252c383e7871fda7988fc61c100811143456c6824cb7f64",
-      "bytes": 39750
+      "src": "assets/previews/newton-rush-5d499ec413.webp",
+      "sourceHash": "ad32536a74ce369ece8b243e39d1fe5fda72922f0b1e5c469394e6d42f8e5bcc",
+      "bytes": 39516
     },
     "physics-fighter": {
       "src": "assets/previews/physics-fighter-b8fd370d4b.webp",
