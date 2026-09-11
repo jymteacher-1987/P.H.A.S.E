@@ -19,9 +19,9 @@ window.PHASE_PREVIEWS = {
       "bytes": 20402
     },
     "shm-circular-motion": {
-      "src": "assets/previews/shm-circular-motion-24acc24917.webp",
-      "sourceHash": "3c8ff38a1c4a2b98f4763c05f37675fdafb28bba04d1b1640aabee74399fa223",
-      "bytes": 21632
+      "src": "assets/previews/shm-circular-motion-19b966373a.webp",
+      "sourceHash": "bee1772f24a61836deb14452462ea460959c1ca86513ed788ddaf7e072c2003d",
+      "bytes": 21966
     },
     "rocket-motion": {
       "src": "assets/previews/rocket-motion-30443d3343.webp",
