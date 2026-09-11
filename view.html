@@ -2,9 +2,13 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>실험 보기 — 가상 물리 실험실</title>
-<link rel="stylesheet" href="assets/css/style.css" />
+<link rel="stylesheet" href="assets/css/style.css?v=918d159dfb" />
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="P.H.A.S.E">
+<meta name="theme-color" content="#152335">
 </head>
 <body class="page-view">
 
@@ -29,12 +33,14 @@
   <iframe id="expFrame" class="viewer-frame" title="실험 화면" allow="camera; fullscreen" allowfullscreen></iframe>
 </div>
 
+<a class="viewer-app-back" href="lab.html" aria-label="실험실로 돌아가기">↩</a>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="assets/js/experiments-data.js?v=e3494c6af3"></script>
+<script src="assets/js/experiments-data.js?v=8b20f9e55a"></script>
 <script src="assets/js/firebase-config.js"></script>
 <script src="assets/js/data.js?v=visits-20260909"></script>
 <script src="assets/js/visit-entry.js?v=visits-20260909"></script>
-<script src="assets/js/view.js"></script>
+<script src="assets/js/view.js?v=2d8d6cc38d"></script>
 </body>
 </html>

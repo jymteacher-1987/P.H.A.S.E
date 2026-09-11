@@ -1,3 +1,37 @@
+(function () {
+  const standalone = window.navigator.standalone === true || window.matchMedia('(display-mode:standalone)').matches;
+  document.documentElement.classList.toggle('standalone-viewer', standalone);
+  document.querySelector('.viewer-app-back').addEventListener('click', event => {
+    if (parent !== window) {
+      event.preventDefault();
+      parent.postMessage({ type: 'phase-exit-activity' }, location.origin);
+    }
+  });
+  // visualViewport follows Safari's address bar and the on-screen keyboard.
+  function fit() {
+    const height = Math.floor(window.visualViewport?.height || window.innerHeight);
+    document.documentElement.style.setProperty('--viewer-height', `${height}px`);
+  }
+  window.addEventListener('resize', fit);
+  window.addEventListener('pageshow', fit);
+  window.visualViewport?.addEventListener('resize', fit);
+  fit();
+  document.getElementById('expFrame').addEventListener('load', function () {
+    // Navigation/rotation cannot grant fullscreen permission. Try once, during
+    // the player's first real tap, on browsers that support element fullscreen.
+    try {
+      this.contentDocument?.addEventListener('click', event => {
+        if (standalone || !event.isTrusted || !window.matchMedia('(any-pointer:coarse), (max-width:700px), (max-height:500px) and (max-width:950px)').matches) return;
+        const root = document.documentElement;
+        const request = root.requestFullscreen || root.webkitRequestFullscreen;
+        try { if (parent !== window && (parent.document.fullscreenElement || parent.document.webkitFullscreenElement)) return; } catch (_) {}
+        if (!request || document.fullscreenElement || document.webkitFullscreenElement) return;
+        try { Promise.resolve(request.call(root)).then(fit, fit); } catch (_) { fit(); }
+      }, { once: true });
+    } catch (_) { /* External activities still use the full visible frame. */ }
+  });
+})();
+
 (async function () {
   const params = new URLSearchParams(location.search);
   const id = params.get("id");

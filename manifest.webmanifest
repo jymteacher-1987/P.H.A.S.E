@@ -1,0 +1,10 @@
+{
+  "name": "P.H.A.S.E · 가상 물리 실험실",
+  "short_name": "P.H.A.S.E",
+  "lang": "ko",
+  "start_url": "./lab.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f7fb",
+  "theme_color": "#152335"
+}

@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko">
-<head><script defer src="../assets/js/visit-entry.js?v=visits-20260909"></script>
+<head><script src="../assets/js/browser-compat.js?v=iphone-20260911"></script><script defer src="../assets/js/visit-entry.js?v=visits-20260909"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Science Hero Lab · P.H.A.S.E 가상 물리 실험실</title>
@@ -2455,7 +2455,7 @@ async function normalizePhotoFile(file){
   try{
     if(typeof createImageBitmap === 'function'){
       try{ source = await createImageBitmap(file, {imageOrientation:'from-image'}); }
-      catch(_){ source = await createImageBitmap(file); }
+      catch(_){ try{ source = await createImageBitmap(file); }catch(_){ /* Safari may only decode this format through an image element. */ } }
     }
     if(!source){ url = URL.createObjectURL(file); source = await loadImageElement(url); }
     const w = source.width || source.naturalWidth, h = source.height || source.naturalHeight;
@@ -5329,7 +5329,7 @@ function leanShot(b, n){
   const act = state.shot === 'activate'
     ? ([1,3,2,0].map(i=>g[i]).find(x=>x && ACTION_MOMENT[x.id]) || g.find(x=>ACTION_MOMENT[x.id]) || null) : null;
   /* 발동 장면 원문은 길다. 핵심 두 문장만 쓴다 — 무슨 일이 벌어지는가와 몸이 어떻게 반응하는가. */
-  const moment = act ? actionMomentForPrompt(act).split(/(?<=\.)\s+/).slice(0,3).join(' ') : '';
+  const moment = act ? (actionMomentForPrompt(act).match(/[\s\S]+?(?:\.(?=\s)|$)/g)||[]).slice(0,3).map(part=>part.trim()).join(' ') : '';
   /* ★ 촬영 컷 원문에는 '로우앵글 광각 3/4 카메라' 같은 문장이 들어 있다.
      사진이 붙어 있으면 그건 얼굴을 새 각도로 다시 그리라는 말이 되어 닮음을 깨뜨린다.
      컷은 그대로 두고, 그 각도가 '몸에만' 적용된다는 것을 바로 옆에서 못박는다. */

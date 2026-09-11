@@ -173,6 +173,9 @@
   let previewObserver;
   function setupPreviewObserver() {
     if (previewObserver) previewObserver.disconnect();
+    // Running many canvas games just to show cards exhausts older phones.
+    // Keep their menu light; launch the chosen activity when its card is tapped.
+    if (window.matchMedia('(any-pointer:coarse), (max-width:700px), (max-height:500px) and (max-width:950px)').matches) return;
     previewObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -317,7 +320,7 @@
           : `view.html?id=${encodeURIComponent(e.id)}&src=${e.source}`;
         return `
         <a class="exp-card ${isNew(e) ? "new" : ""}" href="${url}">
-          <div class="exp-preview" data-src="${e.path}"><span class="ph"></span></div>
+          <div class="exp-preview" data-src="${e.path}"><span class="ph"><span class="preview-icon" aria-hidden="true">${e.icon || (isPlay ? '🎈' : catInfo(e.category).icon)}</span><span class="preview-prompt">눌러서 시작하기</span></span></div>
           <div class="body">
             <span class="tag" data-cat="${tagCat}">${tag}</span>
             <h3>${e.title}</h3>
