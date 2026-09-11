@@ -1,5 +1,5 @@
 // ================================================================
-// 실험실 페이지 로직: 좌측 영역 메뉴, 검색, 실험 카드(+라이브 미리보기) 렌더링
+// 실험실 페이지 로직: 좌측 영역 메뉴, 검색, 실험 카드(+대표 장면 이미지) 렌더링
 //
 // 좌측 메뉴는 박스 두 개로 나뉜다.
 //   [물리 가상실험] 교육과정 영역별 필터 (전체 / 과학의 기초 / 역학과 에너지 / …)
@@ -169,97 +169,12 @@
     updateSidebarSelection(true);
   }
 
-  // ---------- 미리보기 지연 로딩 ----------
-  let previewObserver;
-  function setupPreviewObserver() {
-    if (previewObserver) previewObserver.disconnect();
-    // Running many canvas games just to show cards exhausts older phones.
-    // Keep their menu light; launch the chosen activity when its card is tapped.
-    if (window.matchMedia('(any-pointer:coarse), (max-width:700px), (max-height:500px) and (max-width:950px)').matches) return;
-    previewObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          const box = entry.target;
-          loadPreview(box);
-          previewObserver.unobserve(box);
-        });
-      },
-      { rootMargin: "200px" }
-    );
-    els.expGrid.querySelectorAll(".exp-preview[data-src]").forEach((box) => previewObserver.observe(box));
-  }
-
-  // Virtual "desktop-style" viewport every experiment is rendered at inside
-  // its preview iframe (see .exp-preview iframe in style.css — fixed
-  // 900x675, same 4:3 ratio as the card). This keeps the source page out of
-  // its own mobile breakpoint so it shows its normal roomy layout, and the
-  // scale below always slightly OVER-covers the real card size so there is
-  // never visible empty margin — some experiments don't use their full
-  // canvas width/height, and a bit of edge-cropping on those looks far
-  // better than dead space around the preview.
-  //
-  // The crop is anchored to the TOP-LEFT corner (see transform-origin:
-  // top left + top:0/left:0 in style.css), not the center. Experiment
-  // titles/headings almost always sit at the top (and often start near
-  // the left), so any spare overscaled area is pushed off the bottom and
-  // right edges instead of being split evenly around all four sides —
-  // that keeps the title fully visible instead of clipping its top line.
-  const PREVIEW_W = 900;
-  const PREVIEW_OVERSCALE = 1.18;
-
-  // 미리보기 iframe을 언제 "보여줄지" 정하는 값들.
-  //
-  // 예전에는 iframe을 붙이는 즉시 자리표시자(.ph)를 지웠는데, 그러면 실험
-  // 페이지의 body 배경이 먼저 칠해진다. 빛의 3원색(rgb-cmy-light)처럼 배경이
-  // 어둡고(#101418) 파일까지 무거운 실험은 새까만 사각형이 몇 초 떠 있다가
-  // 뒤늦게 내용이 나타나서 보기 나빴다.
-  //
-  // 그래서 load가 끝난 뒤 GRACE만큼 더 기다렸다가(스크립트가 첫 화면을
-  // 그릴 여유) 자리표시자를 걷어내고 iframe을 페이드인한다. load가 아예
-  // 안 오는 경우를 대비해 TIMEOUT을 안전장치로 둔다 — 이게 없으면 자리표시자가
-  // 영영 남는다. 아직도 검은 화면이 보이면 GRACE부터 키울 것.
-  //
-  // 미리보기는 실험이 실제로 돌아가는 모습을 그대로 보여준다. 한때 첫 화면이
-  // 그려진 뒤 iframe 안의 애니메이션을 끊어 사진처럼 세워 본 적이 있는데,
-  // 원운동과 단진동처럼 자취가 천천히 쌓이는 실험은 곡선이 반쯤 그려진 채
-  // 잘려 보여서 되돌렸다. 다시 시도하려거든 그 실험부터 확인할 것.
-  const PREVIEW_REVEAL_GRACE = 600;
-  const PREVIEW_REVEAL_TIMEOUT = 10000;
-
-  function loadPreview(box) {
-    const src = box.dataset.src;
-    if (!src) return;
-    const iframe = document.createElement("iframe");
-    iframe.src = src;
-    iframe.loading = "lazy";
-    iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
-    iframe.tabIndex = -1;
-    iframe.classList.add("loading");
-
-    const ph = box.querySelector(".ph");
-    let revealed = false;
-    function reveal() {
-      if (revealed) return;
-      revealed = true;
-      iframe.classList.remove("loading");
-      if (ph) {
-        ph.classList.add("fade-out");
-        setTimeout(() => ph.remove(), 320);
-      }
-    }
-    iframe.addEventListener("load", () => setTimeout(reveal, PREVIEW_REVEAL_GRACE));
-    setTimeout(reveal, PREVIEW_REVEAL_TIMEOUT);
-
-    box.appendChild(iframe);
-
-    function fitPreview() {
-      const scale = (box.clientWidth / PREVIEW_W) * PREVIEW_OVERSCALE;
-      iframe.style.transform = `scale(${scale})`;
-    }
-    fitPreview();
-    const ro = new ResizeObserver(fitPreview);
-    ro.observe(box);
+  // Pre-rendered scene images: browsing the catalog never runs activities.
+  function previewMarkup(exp) {
+    const scene = exp.source === 'static' ? window.PHASE_PREVIEWS?.items?.[exp.id] : null;
+    const escape = value => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+    if (!scene) return '<span class="preview-unavailable">미리보기 준비 중</span>';
+    return '<img src="' + escape(scene.src) + '" alt="' + escape(exp.title) + ' 실제 장면" width="720" height="540" loading="lazy" decoding="async">';
   }
 
   // ---------- 검색/필터 매칭 ----------
@@ -320,7 +235,7 @@
           : `view.html?id=${encodeURIComponent(e.id)}&src=${e.source}`;
         return `
         <a class="exp-card ${isNew(e) ? "new" : ""}" href="${url}">
-          <div class="exp-preview" data-src="${e.path}"><span class="ph"><span class="preview-icon" aria-hidden="true">${e.icon || (isPlay ? '🎈' : catInfo(e.category).icon)}</span><span class="preview-prompt">눌러서 시작하기</span></span></div>
+          <div class="exp-preview">${previewMarkup(e)}</div>
           <div class="body">
             <span class="tag" data-cat="${tagCat}">${tag}</span>
             <h3>${e.title}</h3>
@@ -331,7 +246,14 @@
       })
       .join("");
 
-    setupPreviewObserver();
+    els.expGrid.querySelectorAll('.exp-preview img').forEach(img => {
+      img.addEventListener('error', () => {
+        const note = document.createElement('span');
+        note.className = 'preview-unavailable';
+        note.textContent = '미리보기를 불러오지 못했어요';
+        img.replaceWith(note);
+      }, { once: true });
+    });
   }
 
   function render(reveal = false) {

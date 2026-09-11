@@ -1,7 +1,6 @@
 /* Keep the activity launch and fullscreen request in the same real tap.
    A document navigation would discard the activation needed by mobile browsers. */
 (function () {
-  const phone = window.matchMedia('(any-pointer:coarse), (max-width:700px), (max-height:500px) and (max-width:950px)');
   let layer = null, savedTitle = '', savedFocus = null;
   function fit() {
     if (layer) layer.style.height = Math.floor(window.visualViewport?.height || innerHeight) + 'px';
@@ -39,7 +38,7 @@
     }
   }
   document.addEventListener('click', event => {
-    if (!phone.matches || layer || !event.isTrusted || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    if (!window.PHASE_DEVICE?.isPhoneOrTablet || layer || !event.isTrusted || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     const link = event.target.closest('a[href]');
     if (!link || link.hasAttribute('download') || link.target === '_blank') return;
     const url = new URL(link.href, location.href);

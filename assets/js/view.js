@@ -21,7 +21,7 @@
     // the player's first real tap, on browsers that support element fullscreen.
     try {
       this.contentDocument?.addEventListener('click', event => {
-        if (standalone || !event.isTrusted || !window.matchMedia('(any-pointer:coarse), (max-width:700px), (max-height:500px) and (max-width:950px)').matches) return;
+        if (standalone || !event.isTrusted || !window.PHASE_DEVICE?.isPhoneOrTablet) return;
         const root = document.documentElement;
         const request = root.requestFullscreen || root.webkitRequestFullscreen;
         try { if (parent !== window && (parent.document.fullscreenElement || parent.document.webkitFullscreenElement)) return; } catch (_) {}

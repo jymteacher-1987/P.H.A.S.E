@@ -388,41 +388,10 @@ body.page-home .hero > .wrap{ width:100%; }
 }
 .exp-card{ position:relative; }
 
-/* live preview thumbnail — the iframe always renders each experiment at a
-   fixed "desktop-style" virtual viewport (900x675, same 4:3 ratio as the
-   box) so the source page shows its normal roomy layout instead of
-   collapsing into its own mobile breakpoint inside a small card. lab.js
-   then scales that canvas up (never down, never "contain") to always
-   fully cover the real card size — slightly over-scaled on purpose so
-   there's zero empty margin even if the experiment's own content is
-   narrower than the canvas. A little cropping at the edges is fine; dead
-   space around the preview is not. See fitPreview() in lab.js. */
-.exp-preview{
-  position:relative; width:100%; aspect-ratio: 4 / 3; background: var(--surface-2);
-  overflow:hidden; border-bottom:1px solid var(--border);
-}
-.exp-preview iframe{
-  position:absolute; top:0; left:0; width:900px; height:675px;
-  border:none; pointer-events:none; background:#fff;
-  transform-origin: top left;
-  transition: opacity .35s ease;
-}
-/* 실험 페이지가 다 그려지기 전까지는 iframe을 숨겨 둔다.
-   빛의 3원색처럼 body 배경이 어둡거나(#101418) 파일이 무거운 실험은
-   iframe을 바로 보여주면 새까만 화면이 먼저 번쩍인 뒤에야 내용이 떴다.
-   lab.js가 load 이후에 .loading을 떼면서 부드럽게 나타나게 한다. */
-.exp-preview iframe.loading{ opacity:0; }
-/* 미리보기가 뜨기 전 자리표시자.
-   예전에는 돌아가는 모래시계(⏳)를 띄웠는데, 카드 17장이 동시에 돌아가니
-   목록이 어수선하고 "아직 안 됐다"는 인상만 줬다. 지금은 카드 배경과 같은
-   톤의 빈 판이라 눈에 띄지 않고, 그림이 준비되면 조용히 바뀐다.
-   글자도 아이콘도 없으므로 실험 제목이 그만큼 먼저 눈에 들어온다. */
-.exp-preview .ph{
-  position:absolute; inset:0;
-  background: var(--surface-2);
-  transition: opacity .3s ease;
-}
-.exp-preview .ph.fade-out{ opacity:0; }
+/* Static screenshots keep activity scripts and animations out of the menu. */
+.exp-preview{position:relative;width:100%;aspect-ratio:4 / 3;background:var(--surface-2);overflow:hidden;border-bottom:1px solid var(--border)}
+.exp-preview img{display:block;width:100%;height:100%;object-fit:cover}
+.preview-unavailable{position:absolute;inset:0;display:grid;place-items:center;color:var(--text-faint);font-size:13px}
 
 @media (max-width: 860px){
   .lab-shell{ grid-template-columns: 1fr; }
@@ -518,15 +487,11 @@ iframe.viewer-frame{ display:block; width:100%; height:100%; border:none; backgr
 .viewer-app-back{display:none}
 /* Home Screen apps have no browser Back button; reserve an exit only there. */
 .standalone-viewer .viewer-app-back{display:grid;place-items:center;position:fixed;bottom:max(3px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:100;width:44px;height:36px;border-radius:14px;border:1px solid #ffffff88;background:#152335c9;color:#fff;text-decoration:none;font-size:22px;touch-action:manipulation}
-/* On phones the activity fills the visible page, in both orientations. */
-@media (any-pointer:coarse), (max-width:700px), (max-height:500px) and (max-width:950px) {
-  html:has(body.page-view){scrollbar-gutter:auto;overflow:hidden}
-  body.page-view{height:var(--viewer-height,100dvh);min-height:0;overflow:hidden}
-  body.page-view>.site-nav{display:none}
-  body.page-view .viewer-frame-wrap{position:fixed;top:env(safe-area-inset-top,0px);left:env(safe-area-inset-left,0px);height:calc(var(--viewer-height,100dvh) - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));width:calc(100% - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px))}
-}
-.exp-preview .ph{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
-.preview-icon{font-size:64px;line-height:1.2}.preview-prompt{font-size:13px;color:var(--text-dim)}
+/* Phone/tablet detection is independent of desktop window size. */
+html.phone-tablet:has(body.page-view){scrollbar-gutter:auto;overflow:hidden}
+.phone-tablet body.page-view{height:var(--viewer-height,100dvh);min-height:0;overflow:hidden}
+.phone-tablet body.page-view>.site-nav{display:none}
+.phone-tablet body.page-view .viewer-frame-wrap{position:fixed;top:env(safe-area-inset-top,0px);left:env(safe-area-inset-left,0px);height:calc(var(--viewer-height,100dvh) - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));width:calc(100% - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px))}
 .mobile-activity-open{overflow:hidden!important;scrollbar-gutter:auto}
 .mobile-activity-layer{position:fixed;z-index:2000;inset:0;width:100%;height:100dvh;box-sizing:border-box;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);background:#07131c}
 .mobile-activity-frame{display:block;width:100%;height:100%;border:0;background:#07131c}

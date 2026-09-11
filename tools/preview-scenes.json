@@ -1,0 +1,9 @@
+{
+  "free-fall-projectile": { "steps": [{ "click": "[data-mode=strobe]" }, { "click": "#playBtn" }, { "wait": 1400 }] },
+  "shm-circular-motion": { "steps": [{ "click": "#launch" }, { "wait": 3600 }] },
+  "rocket-motion": { "steps": [{ "click": "#btnPlay" }, { "wait": 4500 }] },
+  "newton-rush": { "steps": [{ "click": "#start" }, { "wait": 1000 }] },
+  "physics-fighter": { "steps": [{ "select": "#mode", "value": "practice" }, { "click": "#startBtn" }, { "wait": 1800 }] },
+  "giants-shoulders": { "steps": [{ "click": "[data-do=new]" }, { "wait": 1500 }] },
+  "jjomuldak-factory": { "steps": [{ "click": "button:text-is('닫기')" }, { "wait": 400 }] }
+}

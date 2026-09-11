@@ -1,0 +1,14 @@
+{
+  "name": "phase-preview-tools",
+  "private": true,
+  "scripts": {
+    "previews": "node tools/generate-previews.cjs",
+    "previews:check": "node tools/generate-previews.cjs --check",
+    "test": "node --test tools/*.test.cjs"
+  },
+  "engines": { "node": ">=22" },
+  "devDependencies": {
+    "playwright": "1.62.1",
+    "sharp": "0.35.4"
+  }
+}
