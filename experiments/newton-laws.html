@@ -145,6 +145,31 @@
   .formula .hl{color:var(--blue);} .formula .hr{color:var(--red);} .formula .hg{color:var(--green);}
   .formula small{display:block;font-family:'Noto Sans KR',sans-serif;font-size:10px;color:var(--ink-soft);font-weight:600;letter-spacing:.5px;margin-bottom:3px;}
 
+  .panel-info{display:contents;}
+  /* Keep the drawing visible on short phones; details can scroll independently. */
+  @media(max-height:600px){
+    .app{gap:6px;padding-top:6px;padding-bottom:6px;}
+    .kicker,.h-rule{display:none;}
+    .h-title{font-size:18px;margin-top:0;}
+    .tab{min-height:36px;flex-direction:row;justify-content:center;padding:5px 3px;gap:5px;}
+    .tab .num{display:none;}
+    .panel{gap:6px;}
+    .stage{min-height:150px;}
+    .panel-info{display:flex;flex-direction:column;gap:6px;min-height:0;overflow-y:auto;flex:0 1 auto;}
+    .note{min-height:0;padding:7px 9px;}
+    .note .txt{font-size:11px;line-height:1.4;}
+    .controls{gap:6px;}
+    .seg-btn{min-height:44px;}
+    button.act{min-height:44px;}
+  }
+  @media(max-height:420px) and (min-width:480px){
+    .panel.active{display:grid;grid-template-columns:minmax(0,1fr) minmax(210px,40%);grid-template-rows:minmax(0,1fr);}
+    .stage{height:100%;min-width:0;min-height:140px;}
+    .panel-info{min-width:0;}
+    .chips{top:12px;left:6px;gap:4px;}
+    .chip{min-width:65px;padding:4px 6px;}
+    .chip .v{font-size:14px;}
+  }
   @media(min-height:740px){ .note{min-height:66px;} .note .txt{font-size:14px;} }
 </style>
 </head>
@@ -171,6 +196,7 @@
       </div>
       <canvas id="cv1"></canvas>
     </div>
+    <div class="panel-info">
     <div class="note" id="note1"><span class="tag">NOTE</span><div class="txt" id="note1txt">정지한 물체는 힘을 받기 전까지 계속 멈춰 있습니다. 밀기 버튼을 눌러 보세요.</div></div>
     <div class="controls">
       <div class="seg">
@@ -183,6 +209,7 @@
         <button class="act ghost" id="l1-reset"><span class="ic">↺</span> 다시</button>
       </div>
     </div>
+    </div>
   </section>
 
   <!-- ================= LAW 2 ================= -->
@@ -190,6 +217,7 @@
     <div class="stage">
       <canvas id="cv2"></canvas>
     </div>
+    <div class="panel-info">
     <div class="formula" id="l2-formula">
       <small>현재 가속도</small>
       a = <span class="hl">F</span> / <span class="hr">m</span> = <span class="hl" id="l2-fF">6</span> / <span class="hr" id="l2-fm">3</span> = <span class="hg" id="l2-fa">2.00</span> m/s²
@@ -211,6 +239,7 @@
         <button class="act ghost" id="l2-reset"><span class="ic">↺</span> 다시</button>
       </div>
     </div>
+    </div>
   </section>
 
   <!-- ================= LAW 3 ================= -->
@@ -218,6 +247,7 @@
     <div class="stage">
       <canvas id="cv3"></canvas>
     </div>
+    <div class="panel-info">
     <div class="formula" id="l3-formula">
       <small>서로 주고받는 힘 · 작용과 반작용</small>
       <span class="hr">A가 B를</span> 미는 힘 = <span class="hl">B가 A를</span> 미는 힘
@@ -240,6 +270,7 @@
         <button class="act ghost" id="l3-pause"><span class="ic">⏸</span> 일시정지</button>
         <button class="act ghost" id="l3-reset"><span class="ic">↺</span> 다시</button>
       </div>
+    </div>
     </div>
   </section>
 </div>

@@ -62,7 +62,7 @@
       "title": "뉴턴 운동 법칙 시뮬레이터",
       "category": "mechanics",
       "description": "뉴턴의 운동 법칙을 직접 조작하며 확인하는 시뮬레이터.",
-      "path": "experiments/newton-laws.html?v=9100d8925c",
+      "path": "experiments/newton-laws.html?v=802cd7b806",
       "date": "2026-07-28",
       "tags": [
         "뉴턴",
@@ -364,7 +364,7 @@
       "title": "거인의 어깨: 프린키피아의 탄생",
       "icon": "🍎",
       "description": "뉴턴과 함께 탐험하고 보스를 상대하며 갈릴레오·데카르트·하위헌스의 연구를 만나보세요. 네 가지 실험을 관찰하고 기록을 모아 세 운동 법칙을 정리하는 횡스크롤 액션 게임입니다.",
-      "path": "plays/giants-shoulders.html?v=9e81b37770",
+      "path": "plays/giants-shoulders.html?v=a11ed2bd6d",
       "date": "2026-09-11",
       "tags": [
         "뉴턴",

@@ -40,7 +40,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install --with-deps chromium webkit
       - name: Install Korean fonts
         run: sudo apt-get install -y fonts-noto-cjk
       - name: Capture changed scenes
@@ -50,6 +50,13 @@ jobs:
           if [ "$FORCE" = "true" ]; then npm run previews -- --force; else npm run previews; fi
           npm run previews:check
           npm test
+      - name: Save Safari test failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: safari-small-screen-failures
+          path: .preview-tmp/safari/
+          if-no-files-found: ignore
       - name: Save images and cache versions
         id: save
         run: |

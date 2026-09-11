@@ -4,7 +4,7 @@
 
 ## 새 실험을 추가하거나 수정할 때
 
-1. 실험 HTML을 `experiments/` 또는 `plays/`에 저장하고 기존처럼 `data/experiments.json`과 `assets/js/experiments-data.js`에 등록합니다.
+1. 실험 HTML을 `experiments/` 또는 `plays/`에 저장하고 기존처럼 `data/experiments.json`과 `assets/js/experiments-data.js`에 등록합니다. 두 목록의 ID와 경로는 같아야 합니다. 새 HTML도 기존 활동처럼 `<head>`에서 `../assets/js/browser-compat.js`를 먼저 불러와 구형 Safari의 그리기 대체 처리를 사용하세요. 메뉴 링크는 공통 `view.html?id=...` 뷰어를 유지합니다.
 2. 필요하면 `tools/preview-scenes.json`에 촬영 전에 누를 버튼과 대기 시간을 적습니다. 예: `"newton-rush": { "steps": [{ "click": "#start" }, { "wait": 1000 }] }`. `select` + `value`, `press`, `target`(촬영할 요소), `viewport`도 지원합니다. 별도 설정이 없으면 첫 실험 화면을 촬영합니다.
 3. `main`에 올리면 **Update activity previews** 작업이 새롭거나 바뀐 장면만 촬영하고, 사진·목록을 GitHub에 저장한 뒤 Pages 배포를 요청합니다. 이전 이미지가 준비돼 있으면 새 촬영에 실패해도 유지됩니다. 실행 오류나 빈 캡처는 작업 실패로 표시되니 Actions 결과를 확인하세요.
 
@@ -18,7 +18,7 @@ Node.js 22 이상에서:
 
 ```sh
 npm ci
-npx playwright install chromium
+npx playwright install chromium webkit
 npm run previews
 npm run previews:check
 npm test
@@ -31,3 +31,13 @@ npm test
 ## 폰·패드 전체화면
 
 `assets/js/device.js`가 iPhone, iPad(데스크톱 웹사이트 모드 포함), Android 폰·태블릿을 구분합니다. 화면이 좁거나 터치가 된다는 이유만으로 컴퓨터를 모바일로 판단하지 않습니다. 폰·패드는 카드 터치 때 지원되는 전체화면을 요청하고 실험이 보이는 화면을 채웁니다. 컴퓨터는 일반 뷰어와 수동 전체화면 버튼을 사용합니다. 주소창 숨김 여부는 각 모바일 브라우저의 전체화면 지원에 따릅니다.
+
+거인의 어깨는 `assets/js/giants-screen.js`가 폰·패드의 게임 제목줄·하단 여백을 접어 처음부터 이용 가능한 높이를 확보합니다. '크게 보기'도 Fullscreen API가 없거나 거절돼도 같은 방식으로 확대하며 '화면 복원'으로 돌아옵니다. Safari 주소창이 남은 568×210 조건과 Fullscreen API를 제거한 조건에서 시작 버튼을 누르는 검사를 포함합니다. 실제 주소창을 숨기는 방법과 페이지 안에서 게임 크기를 맞추는 처리는 별개입니다.
+
+## Safari 계열과 SE 크기 검사
+
+`npm test`는 Chromium 목록 검사와 WebKit 활동 검사를 함께 실행합니다. WebKit 검사는 등록된 모든 활동을 320×460 및 568×260 화면에서 열고, 시작·재생과 설정 변경 후 실행 오류 및 회전 시 캔버스 크기를 검사합니다. 뉴턴 러시·물리학자 대전·거인의 어깨는 375×550 및 667×310도 포함해 시작 버튼이 화면 안에서 실제로 눌리는지 검사합니다. 거인의 어깨처럼 가로 전용인 활동은 세로 방향의 회전 안내가 표시되고 가로로 돌리면 사라지는지 확인한 뒤, 가로 화면에서 시작 버튼을 검사합니다. 구형 Safari에 없는 일부 API를 꺼서 그리기·사진 읽기 대체 처리도 검증합니다.
+
+새 놀이에 별도 시작 화면이 생기면 `tools/safari-activities.test.cjs`에 시작 버튼과 시작 성공 조건을 추가하세요. 실패한 화면과 오류는 Actions의 `safari-small-screen-failures` 첨부 파일로 남습니다. 검사 실패는 업로드 작업자가 코드를 수정하고 재검사해야 합니다. 현재 브랜치 기반 Pages 배포와 검사 작업은 별도로 실행되므로 검사가 실패했다고 이미 올라간 원본 배포까지 자동 취소되지는 않습니다.
+
+**검사의 한계:** 최신 WebKit과 SE 화면 조건을 재현한 검사이며 실제 iPhone SE 하드웨어·구형 iOS Safari를 직접 실행하는 검사는 아닙니다. iOS 버전별 차이, 실제 기기의 메모리 한계, 카메라·마이크 권한, 유료 AI 연결, 실제 Safari 주소창·전체화면 동작까지 보장하지 않습니다. 모든 새 게임을 자동 수정하는 기능도 아닙니다. 실제 기기에서 문제가 생기면 게임 이름·증상·iOS 버전을 확인해 수정해야 합니다.
