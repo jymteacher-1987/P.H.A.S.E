@@ -5,6 +5,7 @@ const path = require('node:path');
 const http = require('node:http');
 const { chromium, devices } = require('playwright');
 const root = path.resolve(__dirname, '..');
+const catalog = JSON.parse(fs.readFileSync(path.join(root, 'data/experiments.json'), 'utf8'));
 
 test('Static catalog images, device-specific launch, direct entry and browser Back', { timeout: 120000 }, async () => {
   const server = http.createServer((req, res) => {
@@ -48,7 +49,7 @@ test('Static catalog images, device-specific launch, direct entry and browser Ba
         const requests = [], errors = [];
         page.on('request', request => requests.push(request.url()));
         page.on('pageerror', error => errors.push(error.message));
-        for (const [query, count] of [['', 20], ['?play=all', 6]]) {
+        for (const [query, count] of [['', catalog.experiments.length], ['?play=all', catalog.plays.length]]) {
           requests.length = 0;
           await page.goto(origin + '/lab.html' + query);
           await page.waitForFunction(count => document.querySelectorAll('.exp-preview img').length === count, count);
@@ -68,7 +69,7 @@ test('Static catalog images, device-specific launch, direct entry and browser Ba
           assert.equal(await page.evaluate(() => window.fullscreenCalls), 1, name + ' requests fullscreen on card tap');
           await page.goBack();
           assert.equal(await page.locator('.mobile-activity-layer').count(), 0, name + ' exits on browser Back');
-          assert.equal(await page.locator('.exp-preview img').count(), 6);
+          assert.equal(await page.locator('.exp-preview img').count(), catalog.plays.length);
         } else {
           assert.equal(await page.locator('.mobile-activity-layer').count(), 0, name);
           assert.equal(await page.evaluate(() => window.fullscreenCalls), 0, name + ' remains windowed');

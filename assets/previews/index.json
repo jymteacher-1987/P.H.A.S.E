@@ -132,6 +132,11 @@
       "src": "assets/previews/jjomuldak-factory-4e9aca2bcc.webp",
       "sourceHash": "32c3dd7e5920decef9d1dc4d68762aa44e2614355b68f534d20a1cdc0bea060f",
       "bytes": 26100
+    },
+    "bamti-escape": {
+      "src": "assets/previews/bamti-escape-f9f5e8a1c8.webp",
+      "sourceHash": "eda636c0bd2fad8fbf1346462aa776b544d5405fea6e53ecb8cc74ec92fb1c82",
+      "bytes": 23070
     }
   }
 }

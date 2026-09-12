@@ -76,6 +76,29 @@ test('WebKit: all activities on small iPhone screens, older APIs, game start and
           ]));
           await page.waitForTimeout(900);
           const rotationNotice = frame.locator('#rotate, #rotateOverlay');
+          if (entry.id === 'bamti-escape') {
+            for (const theme of ['school', 'wave', 'prom', 'manor', 'temple', 'apes']) {
+              await page.setViewportSize({ width: 568, height: 260 });
+              await frame.locator('[data-id=' + theme + ']').tap();
+              const game = await (await frame.locator('#frame').elementHandle()).contentFrame();
+              const start = game.locator(theme === 'prom' ? '#btnStart' : '#startBtn');
+              await start.scrollIntoViewIfNeeded();
+              await reachable(start, theme + ' start');
+              await start.tap();
+              await page.waitForTimeout(250);
+              assert.equal(await game.locator('#intro').isVisible(), false, theme + ' started');
+              assert.ok(await game.locator('canvas').first().evaluate(c => c.width > 0 && c.height > 0), theme + ' canvas');
+              await page.setViewportSize({ width: 320, height: 460 });
+              await frame.locator('#rotateHint').waitFor({ state: 'visible' });
+              assert.equal(await frame.locator('#rotateHint').isVisible(), true, theme + ' rotate hint');
+              await page.setViewportSize({ width: 568, height: 210 });
+              await frame.locator('#rotateHint').waitFor({ state: 'hidden' });
+              await reachable(frame.locator('#backBtn'), theme + ' return control');
+              await frame.locator('#backBtn').tap();
+              await frame.locator('#okBtn').tap();
+              assert.equal(await frame.locator('#menu').isVisible(), true);
+            }
+          }
           const needsLandscape = await rotationNotice.count() > 0 && await rotationNotice.first().isVisible();
           if (needsLandscape) {
             assert.match(await rotationNotice.first().innerText(), /가로|돌려/, 'Portrait must explain how to enter the landscape activity');
