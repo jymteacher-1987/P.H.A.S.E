@@ -51,3 +51,9 @@ npm test
 `afterlight-physics.test.cjs`는 반사 벡터, 편광판의 해석해, 독립적인 복소 전기장 계산, 모든 거울 배치의 에너지 보존과 16개 구역의 해법을 확인합니다. `afterlight-browser.test.cjs`는 Chromium과 WebKit에서 실제 버튼으로 모든 구역과 엔딩을 완료하고 저장·복원·힌트·되돌리기·오늘의 회선·작은 화면·저장 불가 환경을 검사합니다. 일반 Safari 활동 검사에도 시작 버튼과 첫 회선 전송이 포함됩니다.
 
 게임의 수치와 시각화는 이상적인 고전 광학 모형입니다. 실제 광속, 광자 궤적, 양자 측정, 장치의 회절·비이상적 손실을 시뮬레이션하지 않습니다. 게임 내 광학 기록에 가정과 출처가 있습니다.
+
+## 패러데이: 스파크 항해
+
+`plays/faraday-flight.html`과 `assets/faraday-flight/`가 5스테이지 비행 슈팅입니다. 수정 후 `node tools/faraday-register.cjs`를 실행하면 모든 게임 파일의 캐시 버전과 두 등록 목록을 함께 갱신합니다. 놀이 목록에서 잔광 바로 위에 등록합니다. 캐릭터와 보스는 투명 이미지의 여러 동작을 연속으로 재생합니다.
+
+과학 모형, 역사 출처, 창작 이미지 제작 기록과 검사 방법은 `assets/faraday-flight/README.md`에 있습니다. `faraday-physics.test.cjs`, `faraday-browser.test.cjs` 및 일반 Safari 활동 검사에서 검사합니다. 전투 난이도를 재현하는 이동 속도 제한 자동 조작은 별도의 `faraday-playtest.cjs`입니다. 보스 전환을 강제로 만드는 기능 검사를 실제 난이도 완주 검사와 구분합니다.

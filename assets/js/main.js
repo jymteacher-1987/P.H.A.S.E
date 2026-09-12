@@ -21,7 +21,7 @@
 
   // ---------- 데이터 로드 (영역 미리보기용) ----------
   const { categories, experiments, plays } = await SITE.getAllData();
-  // 실험 개수와 과학 놀이 개수는 성격이 달라 합치지 않고 "19+1" 형태로 나란히 보여준다.
+  // 실험 개수와 과학 놀이 개수를 더하지 않고 나란히 보여준다.
   if (els.expTotalCount) {
     const playCount = (plays || []).length;
     els.expTotalCount.innerHTML = playCount
@@ -34,8 +34,11 @@
     const q = els.searchInput.value.trim();
     location.href = "lab.html" + (q ? `?q=${encodeURIComponent(q)}` : "");
   }
-  els.searchBtn.addEventListener("click", goSearch);
-  els.searchInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") goSearch();
-  });
+  // The current home has navigation cards; older layouts also have a search form.
+  if (els.searchBtn && els.searchInput) {
+    els.searchBtn.addEventListener("click", goSearch);
+    els.searchInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") goSearch();
+    });
+  }
 })();

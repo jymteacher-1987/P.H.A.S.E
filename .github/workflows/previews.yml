@@ -10,6 +10,7 @@ on:
       - 'assets/js/**'
       - 'assets/css/**'
       - 'assets/afterlight/**'
+      - 'assets/faraday-flight/**'
       - 'tools/**'
       - 'package*.json'
       - '.github/workflows/previews.yml'
@@ -59,6 +60,7 @@ jobs:
           path: |
             .preview-tmp/safari/
             .preview-tmp/afterlight/
+            .preview-tmp/faraday/
           if-no-files-found: ignore
       - name: Save images and cache versions
         id: save

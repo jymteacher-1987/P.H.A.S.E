@@ -49,6 +49,9 @@ test('Static catalog images, device-specific launch, direct entry and browser Ba
         const requests = [], errors = [];
         page.on('request', request => requests.push(request.url()));
         page.on('pageerror', error => errors.push(error.message));
+        await page.goto(origin + '/index.html');
+        await page.waitForFunction(expected => document.querySelector('#expTotalCount')?.textContent.replace(/\s/g, '') === expected,
+          catalog.experiments.length + '+' + catalog.plays.length);
         for (const [query, count] of [['', catalog.experiments.length], ['?play=all', catalog.plays.length]]) {
           requests.length = 0;
           await page.goto(origin + '/lab.html' + query);

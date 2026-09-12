@@ -163,6 +163,22 @@ test('WebKit: all activities on small iPhone screens, older APIs, game start and
             if (entry.id === 'physics-fighter') assert.equal(await frame.locator('#fightScreen').isVisible(), true);
             if (entry.id === 'giants-shoulders') assert.equal(await frame.locator('[data-do=new]').count(), 0);
           }
+          if (entry.id === 'faraday-flight') {
+            await frame.waitForFunction(() => !document.querySelector('#startBtn').disabled);
+            for (const viewport of [{width:320,height:460},{width:568,height:210},{width:667,height:310}]) {
+              await page.setViewportSize(viewport);
+              await page.waitForTimeout(150);
+              await reachable(frame.locator('#startBtn'), 'Faraday start '+viewport.width+'x'+viewport.height);
+            }
+            await page.setViewportSize({width:320,height:460});
+            await frame.locator('#startBtn').click();
+            await frame.waitForFunction(() => document.body.dataset.mode === 'play');
+            await reachable(frame.locator('#pulseBtn'), 'Faraday special');
+            await frame.locator('#pulseBtn').click();
+            await frame.locator('#pauseBtn').click();
+            await frame.locator('[data-action=resume]').click();
+            assert.equal(await frame.locator('#modal').isVisible(), false);
+          }
           if (entry.id === 'afterlight') {
             const start = frame.locator('#startBtn');
             for (const [width, height] of [[320, 460], [568, 260], [568, 210], [375, 550], [667, 310]]) {

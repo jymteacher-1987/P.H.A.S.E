@@ -74,5 +74,13 @@
   },
   "afterlight": {
     "steps": []
+  },
+  "faraday-flight": {
+    "viewport": {"width": 960, "height": 720},
+    "steps": [
+      {"click": "#titleSound"},
+      {"click": "#startBtn"},
+      {"wait": 9000}
+    ]
   }
 }
