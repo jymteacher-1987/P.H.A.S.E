@@ -1,0 +1,55 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function owns(uid) { return request.auth != null && request.auth.uid == uid; }
+    function valid(d) {
+      return d.keys().hasAll(['nickname','score','gems','distance','worlds','startWorld','finished','duration','runToken','updatedAt'])
+        && d.keys().hasOnly(['nickname','score','gems','distance','worlds','startWorld','finished','duration','runToken','updatedAt'])
+        && d.nickname is string && d.nickname.size() >= 1 && d.nickname.size() <= 12
+        && d.score is int && d.score >= 0 && d.score <= 250000 && d.score % 50 == 0
+        && d.gems is int && d.gems >= 0 && d.gems <= 2500
+        && d.distance is int && d.distance >= 0 && d.distance <= 25000
+        && d.worlds is int && d.worlds >= 0 && d.worlds <= 5
+        && d.startWorld is int && d.startWorld >= 0 && d.startWorld <= 4
+        && d.finished is bool && d.duration is number && d.duration >= 0 && d.duration <= 226
+        && d.runToken is string && d.runToken.size() == 36
+        && d.updatedAt == request.time
+        && d.score >= d.gems * 100 + d.worlds * 500
+        && d.worlds <= 5 - d.startWorld
+        && d.duration + 1 >= d.worlds * 45
+        && d.duration <= (5 - d.startWorld) * 45 + 1
+        && d.score <= d.duration * 2100 + 1050
+        && d.distance <= d.duration * 105 + 100
+        && (!d.finished || d.worlds == 5 - d.startWorld);
+    }
+    function improves(d) {
+      return d.score > resource.data.score
+        || (d.score == resource.data.score && d.gems > resource.data.gems)
+        || (d.score == resource.data.score && d.gems == resource.data.gems && d.distance > resource.data.distance);
+    }
+    match /newtonScores/{uid} {
+      allow list: if request.query.limit != null && request.query.limit <= 10;
+      allow get: if owns(uid);
+      allow create: if owns(uid) && valid(request.resource.data);
+      allow update: if owns(uid) && valid(request.resource.data) && improves(request.resource.data);
+      allow delete: if false;
+    }
+    // Faraday uses a separate collection and independent difficulty boards.
+    function validFaraday(d) {
+      return d.keys().hasAll(['nickname','score','cleared','runToken','version','updatedAt'])
+        && d.keys().hasOnly(['nickname','score','cleared','runToken','version','updatedAt'])
+        && d.nickname is string && d.nickname.size() >= 1 && d.nickname.size() <= 12
+        && d.score is int && d.score >= 0 && d.score <= 1000000
+        && d.cleared is int && d.cleared >= 0 && d.cleared <= 5
+        && d.runToken is string && d.runToken.size() == 36
+        && d.version == 2 && d.updatedAt == request.time;
+    }
+    match /faradayScores/{difficulty}/players/{uid} {
+      allow list: if difficulty in ['normal','easy'] && request.query.limit != null && request.query.limit <= 10;
+      allow get: if owns(uid);
+      allow create: if difficulty in ['normal','easy'] && owns(uid) && validFaraday(request.resource.data);
+      allow update: if difficulty in ['normal','easy'] && owns(uid) && validFaraday(request.resource.data) && request.resource.data.score > resource.data.score;
+      allow delete: if owns(uid);
+    }
+  }
+}

@@ -1594,3 +1594,144 @@ kbd {
     font-size: 19px;
   }
 }
+
+/* Clear actions are visible before optional history, including on phones. */
+.upgrades .upgrade.selected {
+  border-color: #b0ffd3;
+  background: #21554e;
+  box-shadow: inset 3px 0 #a9ffca;
+}
+.next-stage {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  margin-top: 15px;
+  box-shadow:
+    0 0 0 8px #0c2b38,
+    0 6px 20px #001b2a;
+}
+.clear-heading p {
+  margin: 8px 0 13px;
+}
+.clear-record {
+  margin-top: 24px;
+  border-top: 1px solid #88b5ac44;
+  padding-top: 14px;
+}
+.clear-record summary {
+  cursor: pointer;
+  font-size: 13px;
+  color: #bdd8cf;
+}
+.clear-record .record-title {
+  font-size: 19px;
+}
+.note-status {
+  font-size: 12px !important;
+  margin: 6px 0 !important;
+  color: #c7f0dd !important;
+  min-height: 22px;
+}
+.rank-shell {
+  margin-top: 20px;
+  border-top: 1px solid #94c9ba44;
+  padding-top: 16px;
+}
+.rank-heading,
+.rank-modes {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+}
+.rank-heading strong {
+  font-size: 20px;
+}
+.rank-modes {
+  margin: 12px 0;
+}
+.rank-modes button {
+  flex: 1;
+  padding: 9px;
+  border: 1px solid #8abbb755;
+  background: #173f49;
+  border-radius: 8px;
+  color: #cfe5da;
+}
+.rank-modes button.selected {
+  background: #295b50;
+  color: #d7ffdf;
+  border-color: #b3f2ce;
+}
+#faradayRankList {
+  padding: 0;
+  margin: 10px 0;
+  list-style: none;
+}
+#faradayRankList li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #a6d5c322;
+  font-size: 13px;
+}
+#faradayRankList li > span {
+  color: #8fbfb6;
+  font-size: 11px;
+}
+#faradayRankList b {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+#faradayRankList small {
+  display: block;
+  color: #95bcb2;
+  font-size: 10px;
+  font-weight: 400;
+}
+#faradayRankList strong {
+  color: #e9dda8;
+  white-space: nowrap;
+}
+.rank-note,
+#faradayRankStatus,
+#faradaySaveStatus {
+  font-size: 11px !important;
+  line-height: 1.5 !important;
+  margin: 9px 0 !important;
+}
+#faradayRankForm {
+  padding: 12px;
+  background: #173f44;
+  border-radius: 10px;
+  margin: 12px 0;
+}
+#faradayRankForm label {
+  font-size: 12px;
+}
+#faradayRankForm > div {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+#faradayNickname {
+  width: 0;
+  min-width: 0;
+  flex: 1;
+  background: #e5f4e9;
+  color: #183c3b;
+  border: 0;
+  border-radius: 7px;
+  padding: 9px;
+  font: 16px sans-serif;
+}
+#faradayRankSave {
+  width: auto;
+  margin: 0;
+  padding: 8px 14px;
+}
+.rank-shell button:disabled {
+  opacity: 0.55;
+}

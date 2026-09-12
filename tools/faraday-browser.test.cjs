@@ -210,6 +210,7 @@ test(
                 await page.evaluate(() => __faraday.state.mode),
                 "clear",
               );
+              if (i < 4) await page.locator(".clear-record summary").click();
               assert.ok(await page.locator(".history-card").isVisible());
               assert.ok(
                 (await page.locator(".history-card p").innerText()).length > 40,
@@ -221,6 +222,7 @@ test(
                 const b = page.locator("[data-upgrade]").first();
                 await reachable(b);
                 await b.click();
+                await page.locator("#nextStageBtn").click();
                 assert.equal(
                   await page.evaluate(() => __faraday.state.stage),
                   i + 1,
@@ -318,11 +320,33 @@ test(
       await page.click("[data-action=journal]");
       await page.locator("#speedControl").fill("0");
       await page.evaluate(() => __faraday.step(0.2));
+      assert.equal(
+        await page.evaluate(() => Math.abs(__faraday.noteState.sample.emf)),
+        0,
+      );
       await page.click('[data-note="1"]');
       await page.locator("#turnControl").fill("3");
       await page.locator("#fieldControl").fill("3");
       await page.evaluate(() => __faraday.step(0.2));
       await page.screenshot({ path: path.join(out, "journal.png") });
+      await page.click('[data-note="2"]');
+      await page.evaluate(() => __faraday.step(3));
+      const charged = await page.evaluate(() => __faraday.noteState.voltage);
+      assert.ok(charged > 1);
+      await page.locator("#speedControl").fill("0");
+      await page.evaluate(() => __faraday.step(3));
+      assert.equal(
+        await page.evaluate(() => __faraday.noteState.voltage),
+        charged,
+      );
+      assert.equal(await page.evaluate(() => __faraday.noteState.current), 0);
+      await page.locator("#noteDischarge").click();
+      await page.evaluate(() => __faraday.step(0.3));
+      assert.ok(
+        (await page.evaluate(() => __faraday.noteState.voltage)) <
+          charged * 0.3,
+      );
+      await page.screenshot({ path: path.join(out, "journal-discharge.png") });
       await page.click("#modalClose");
       await page.click("#startBtn");
       const before = await page.evaluate(() => __faraday.state.player.x);

@@ -115,6 +115,40 @@
       emf: turns * field * area * omega * Math.sin(angle),
     };
   }
+  // An axial magnet approaches a fixed coil and retreats without passing its center.
+  // Dimensionless dipole/loop flux profile; EMF is -N times its time derivative.
+  function movingInductionSample(turns, field, area, omega, phase) {
+    const distance = 1.45 + 1.25 * Math.cos(phase);
+    const velocity = -1.25 * omega * Math.sin(phase);
+    const flux = (field * area) / Math.pow(1 + distance * distance, 1.5);
+    const emf =
+      (3 * turns * field * area * distance * velocity) /
+      Math.pow(1 + distance * distance, 2.5);
+    return { distance, velocity, flux, emf };
+  }
+  // Ideal full-wave diode bridge feeding a capacitor through a resistance.
+  // Diodes block discharge back into the source; no load or leakage is modeled.
+  function capacitorStep(
+    voltage,
+    sourceEMF,
+    dt,
+    resistance = 1,
+    capacitance = 0.08,
+  ) {
+    const rectified = Math.abs(sourceEMF);
+    const next =
+      rectified > voltage
+        ? voltage +
+          (rectified - voltage) *
+            (1 - Math.exp(-dt / (resistance * capacitance)))
+        : voltage;
+    return {
+      voltage: next,
+      current: Math.max(0, (rectified - next) / resistance),
+      energy: 0.5 * capacitance * next * next,
+      rectified,
+    };
+  }
   return {
     dot,
     cross,
@@ -125,5 +159,7 @@
     pointSegmentDistance,
     trace,
     inductionSample,
+    movingInductionSample,
+    capacitorStep,
   };
 });

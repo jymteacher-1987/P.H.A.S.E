@@ -124,6 +124,8 @@
     friendTimer = 0,
     uiClock = 0;
   let rotorAngle = 0,
+    worldDistance = 0,
+    boostVisual = 0,
     magnetLevel = 0,
     heatTime = 0,
     pulseCharges = 1,
@@ -162,7 +164,7 @@
     return (difficulty === "easy" ? 7 : 5) + build.heart;
   }
   function generator() {
-    return P.inductionSample(
+    return P.movingInductionSample(
       1 + (wing - 1 + build.spread) * 0.16,
       (1 + magnetLevel * 0.16 + build.power * 0.15) * (heatTime > 0 ? 0.6 : 1),
       1,
@@ -513,7 +515,10 @@
         x,
         -35 - (pattern === "vee" ? Math.abs(i - (n - 1) / 2) * 40 : i * 18),
         pattern,
-        { phase: waveIndex * 0.7, shoot: stage === 0 ? 4.8 : 2.3 + random() },
+        {
+          phase: waveIndex * 0.7,
+          shoot: difficulty === "easy" ? 2.8 : 1.3 + random() * 0.5,
+        },
       );
     }
   }
@@ -662,39 +667,21 @@
       audio.effect(e.boss ? "clear" : "kill");
       if (e.boss) {
         finishClock = 1.8;
-        for (let i = 0; i < 22; i++)
-          pickups.push({
-            x: e.x + (random() - 0.5) * 170,
-            y: e.y + (random() - 0.5) * 75,
-            kind: "star",
-            age: 0,
-            vy: 70 * scale,
-          });
+        for (let i = 0; i < 4; i++)
+          addToken(e.x + (i - 1.5) * 36, e.y - (i % 2) * 35, 70 * scale);
         beams = [];
         bullets = [];
         shake = reduced ? 0 : 9;
       } else {
-        const count = level.bonus ? 3 : e.kind === 1 ? 3 : 1;
-        for (let i = 0; i < count; i++)
-          pickups.push({
-            x: e.x + (i - (count - 1) / 2) * 14,
-            y: e.y,
-            kind: "star",
-            age: 0,
-            vy: 85 * scale,
-          });
-        if (stats.kills % 5 === 0)
+        if (e.kind === 1 || stats.kills % 4 === 0)
+          addToken(e.x, e.y, 85 * scale);
+        if (stats.kills % 6 === 0)
           pickups.push({
             x: e.x,
             y: e.y - 20,
-            kind:
-              stats.kills % 30 === 0
-                ? "heart"
-                : stats.kills % 20 === 0
-                  ? "capacitor"
-                  : stats.kills % 10 === 0
-                    ? "magnet"
-                    : "power",
+            kind: ["power", "magnet", "power", "capacitor", "power", "heart"][
+              (Math.floor(stats.kills / 6) - 1) % 6
+            ],
             age: 0,
             vy: 63 * scale,
           });
@@ -702,6 +689,10 @@
       if (counter)
         floatText(e.x, e.y - 25, "+" + Math.floor(damage), "#ffe5a8", 22);
     }
+  }
+  function addToken(x, y, vy) {
+    if (pickups.filter((p) => !p.dead && p.kind === "star").length >= 6) return;
+    pickups.push({ x, y, vy, kind: "star", age: 0 });
   }
   function hurt() {
     if (mode !== "play" || player.inv > 0 || feverTime > 0) return;
@@ -740,11 +731,11 @@
     switch (item.kind) {
       case "star":
         combo++;
-        comboTimer = 2.6;
+        comboTimer = 3.8;
         collected++;
-        fever = Math.min(100, fever + (level.bonus ? 2.6 : 2));
+        fever = Math.min(100, fever + 10);
         score += Math.round(
-          20 *
+          60 *
             (1 + Math.min(4, Math.floor(combo / 8)) * 0.5) *
             (1 + build.magnet * 0.1),
         );
@@ -793,7 +784,7 @@
         if (!save.notes.includes("magnet")) {
           save.notes.push("magnet");
           persist();
-          say("더 강한 자석 · 같은 회전에서 더 큰 유도 전압", 2.6);
+          say("더 강한 자석 · 같은 움직임에서 더 큰 유도 전압", 2.6);
         }
         break;
       case "capacitor":
@@ -843,7 +834,25 @@
   }
   function update(dt) {
     time += dt;
-    if (typeof noteSpeed !== "undefined") noteAngle += noteSpeed * 3 * dt;
+    if (mode === "play" || mode === "title") {
+      boostVisual = lerp(
+        boostVisual,
+        mode === "play" && feverTime > 0 ? 1 : 0,
+        1 - Math.exp(-dt * 6),
+      );
+      worldDistance += dt * (mode === "play" ? 48 + boostVisual * 230 : 10);
+    }
+    if ($("noteCanvas")) {
+      noteAngle += noteSpeed * 3 * dt;
+      if (journalTab === 2) {
+        const sample = noteSample();
+        const c = P.capacitorStep(noteCapVoltage, sample.emf, dt);
+        noteCapVoltage = c.voltage;
+        noteCurrent = c.current;
+        if (notePulseTime > 0) noteCapVoltage *= Math.exp(-dt / 0.22);
+        notePulseTime = Math.max(0, notePulseTime - dt);
+      }
+    }
     if (mode !== "play") {
       animateEffects(dt);
       return;
@@ -857,7 +866,7 @@
     heatTime = Math.max(0, heatTime - dt);
     const g = generator();
     if (pulseCharges < 3) {
-      charge += Math.abs(g.emf) * 1.55 * (1 + build.cooldown * 0.2) * dt;
+      charge += Math.abs(g.emf) * 3.45 * (1 + build.cooldown * 0.2) * dt;
       if (charge >= 100) {
         charge -= 100;
         pulseCharges++;
@@ -907,11 +916,11 @@
       oldX = player.x;
     if (dx || dy) {
       const n = Math.hypot(dx, dy);
-      player.x += (dx / n) * 310 * dt;
-      player.y += (dy / n) * 310 * scale * dt;
+      player.x += (dx / n) * 310 * (1 + boostVisual * 0.22) * dt;
+      player.y += (dy / n) * 310 * (1 + boostVisual * 0.22) * scale * dt;
       pointer.active = false;
     } else if (pointer.active) {
-      const t = 1 - Math.exp(-18 * dt);
+      const t = 1 - Math.exp(-(18 + boostVisual * 5) * dt);
       player.x = lerp(player.x, pointer.x, t);
       player.y = lerp(player.y, pointer.y, t);
     }
@@ -951,14 +960,7 @@
       pickupClock -= dt;
       if (pickupClock <= 0) {
         const x = 75 + random() * 330;
-        for (let i = 0; i < (level.bonus ? 9 : 5); i++)
-          pickups.push({
-            x: x + Math.sin(i * 0.8) * 30,
-            y: -20 - i * 27,
-            kind: "star",
-            age: 0,
-            vy: 90 * scale,
-          });
+        addToken(x, -20, 90 * scale);
         if (stageTime > 7 && stageTime < 12)
           pickups.push({
             x: W / 2,
@@ -983,7 +985,7 @@
             age: 0,
             vy: 65 * scale,
           });
-        pickupClock = level.bonus ? 2.1 : 6.2;
+        pickupClock = 7.5;
       }
     } else if (level.boss && !bossStarted) spawnBoss();
     for (const e of enemies) {
@@ -1025,13 +1027,14 @@
           e.beamClock -= dt;
           if (e.shoot <= 0 && !charging) {
             const count =
-              stage === 0
+              (difficulty === "normal" ? 2 : 0) +
+              (stage === 0
                 ? 4
                 : stage === 2
                   ? 7 + e.phase
                   : stage === L.length - 1
                     ? 8 + e.phase * 2
-                    : 5 + e.phase;
+                    : 5 + e.phase);
             for (let i = 0; i < count; i++) {
               const angle =
                 Math.PI / 2 +
@@ -1039,7 +1042,9 @@
                 Math.sin(e.age) * (stage === 2 ? 0.38 : 0.12);
               enemyBullet(e, angle, 85 + e.phase * 14);
             }
-            e.shoot = (stage === L.length - 1 ? 1.55 : 2.15) - e.phase * 0.2;
+            e.shoot =
+              ((stage === L.length - 1 ? 1.55 : 2.15) - e.phase * 0.2) *
+              (difficulty === "normal" ? 0.72 : 1);
           }
           if (e.beamClock <= 0 && !charging) {
             launchBeam(e);
@@ -1069,21 +1074,20 @@
         else if (e.pattern === "vee")
           e.x = e.baseX + Math.sin(e.age * 0.7) * 12;
       }
-      if (
-        !e.boss &&
-        e.kind !== 1 &&
-        e.y > 50 * scale &&
-        e.y < player.y - 90 * scale
-      ) {
+      if (!e.boss && e.y > 50 * scale && e.y < player.y - 90 * scale) {
         e.shoot -= dt;
-        if (e.shoot <= 0 && !(stage === 0 && stageTime < 9)) {
+        if (e.shoot <= 0 && !charging && !(stage === 0 && stageTime < 5)) {
           const a = Math.atan2(player.y - e.y, player.x - e.x);
           enemyBullet(e, a, stage === 0 ? 75 : 88);
-          if (e.kind === 2 && stage > 3) {
+          if (
+            (difficulty === "normal" && (e.kind === 1 || stage >= 1)) ||
+            (e.kind === 2 && stage > 3)
+          ) {
             enemyBullet(e, a - 0.25, 84);
             enemyBullet(e, a + 0.25, 84);
           }
-          e.shoot = 3.6 + random();
+          e.shoot =
+            difficulty === "normal" ? 1.8 + random() * 0.6 : 3.6 + random();
         }
       }
       if (
@@ -1248,7 +1252,7 @@
     $("feverLabel").textContent =
       feverTime > 0
         ? "OVERDRIVE  " + feverTime.toFixed(1) + "s"
-        : "전지를 모아 오버드라이브!";
+        : "번개 토큰을 모아 오버드라이브!";
     const ready = pulseCharges > 0;
     $("pulseBtn").classList.toggle("ready", ready);
     $("pulseBtn").setAttribute("aria-disabled", String(!ready));
@@ -1334,9 +1338,7 @@
     if (world) {
       const iw = W,
         ih = (world.height / world.width) * iw,
-        offset =
-          (time * (mode === "play" ? (feverTime > 0 ? 75 : 22) : 10)) %
-          (ih * 2),
+        offset = worldDistance % (ih * 2),
         segments = Math.ceil(H / ih) + 3;
       for (let i = -1; i < segments; i++) {
         const y = i * ih + (offset % ih);
@@ -1380,52 +1382,41 @@
       starShape(x, y, i % 3 === 0 ? 3 : 1.8, "#effff6");
     }
     ctx.globalAlpha = 1;
+    if (boostVisual > 0.04 && !reduced) {
+      for (let i = 0; i < 12; i++) {
+        const x = i % 2 ? W - 10 - (i % 3) * 12 : 10 + (i % 3) * 12,
+          y = ((worldDistance * 2.4 + i * 97) % (H + 130)) - 65;
+        const g = ctx.createLinearGradient(x, y - 65, x, y);
+        g.addColorStop(0, "#d5fff000");
+        g.addColorStop(1, "#d5fff07a");
+        ctx.globalAlpha = boostVisual;
+        ctx.strokeStyle = g;
+        ctx.lineWidth = 1.2 * scale;
+        ctx.beginPath();
+        ctx.moveTo(x, y - 65);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    }
   }
   function drawGenerator() {
     if (!player || H < 370) return;
-    const x = 45,
-      y = H - 193 * scale,
-      r = 22 * scale;
     ctx.save();
-    ctx.fillStyle = "#082837c9";
-    ctx.beginPath();
-    ctx.roundRect(12, y - r - 13, 91 * scale, 62 * scale, 10);
-    ctx.fill();
-    ctx.strokeStyle = "#d9a778";
-    ctx.lineWidth = 1.6 * scale;
-    const turns = 5 + Math.min(6, wing + build.spread);
-    for (let i = 0; i < turns; i++) {
-      ctx.beginPath();
-      ctx.ellipse(
-        x + (i - (turns - 1) / 2) * 3 * scale,
-        y,
-        5 * scale,
-        18 * scale,
-        0,
-        0,
-        Math.PI * 2,
-      );
-      ctx.stroke();
-    }
-    ctx.translate(x, y);
-    ctx.rotate(rotorAngle);
-    ctx.fillStyle = heatTime > 0 ? "#ff7c51" : "#df8576";
-    ctx.fillRect(-16 * scale, -5 * scale, 16 * scale, 10 * scale);
-    ctx.fillStyle = "#70add4";
-    ctx.fillRect(0, -5 * scale, 16 * scale, 10 * scale);
-    ctx.font = "bold " + 7 * scale + "px sans-serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillStyle = "#fff";
-    ctx.fillText("N", -8 * scale, 0);
-    ctx.fillText("S", 8 * scale, 0);
-    ctx.restore();
+    ctx.translate(45, H - 190 * scale);
+    ctx.scale(scale, scale);
+    window.FaradayInductionDiagram.miniature(
+      ctx,
+      0,
+      0,
+      rotorAngle,
+      4 + Math.min(4, wing),
+    );
+    ctx.font = "9px sans-serif";
     ctx.fillStyle = "#e6c493";
-    ctx.font = 8 * scale + "px sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillText("발전 중", 18, y + r + 14 * scale);
-    const power = Math.abs(generator().emf);
-    glow(82 * scale, y, 7 * scale, "#d8ffb0" + (power > 1.5 ? "b0" : "25"));
+    ctx.textAlign = "center";
+    ctx.fillText("자석 왕복 → 발전", 7, 43);
+    ctx.restore();
   }
 
   function draw() {
@@ -1517,102 +1508,66 @@
       }
     }
     for (const item of pickups) {
-      const r = item.kind === "star" ? 8 * scale : 15 * scale;
-      glow(
-        item.x,
-        item.y,
-        r * 2.6,
-        item.kind === "heat"
-          ? "#ff563536"
-          : item.kind === "magnet"
-            ? "#ffb58030"
-            : "#ffe49f24",
-      );
+      const hazard = item.kind === "heat",
+        token = item.kind === "star",
+        r = (token ? 13 : 18) * scale;
       ctx.save();
       ctx.translate(item.x, item.y);
-      ctx.rotate(Math.sin(item.age * 2) * 0.07);
-      if (item.kind === "star") {
-        ctx.fillStyle = "#4c4b32";
-        ctx.beginPath();
-        ctx.roundRect(-r * 0.6, -r, r * 1.2, r * 2, 2);
-        ctx.fill();
-        ctx.fillStyle = "#ffe0a2";
-        ctx.fillRect(-r * 0.45, -r * 0.78, r * 0.9, r * 1.55);
-        ctx.fillRect(-r * 0.2, -r * 1.2, r * 0.4, r * 0.3);
-        ctx.fillStyle = "#74552e";
-        ctx.font = "bold " + 10 * scale + "px sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText("ϟ", 0, 0);
-      } else if (item.kind === "magnet") {
-        ctx.fillStyle = "#e88672";
-        ctx.fillRect(-r, -r * 0.55, r, r * 1.1);
-        ctx.fillStyle = "#659ac8";
-        ctx.fillRect(0, -r * 0.55, r, r * 1.1);
-        ctx.strokeStyle = "#ffeed0";
-        ctx.lineWidth = 1;
-        ctx.strokeRect(-r, -r * 0.55, r * 2, r * 1.1);
-        ctx.font = "bold " + 9 * scale + "px sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillStyle = "#fff1dc";
-        ctx.fillText("N", -r * 0.5, 0);
-        ctx.fillText("S", r * 0.5, 0);
-      } else if (item.kind === "heat") {
-        ctx.fillStyle = "#832d2b";
-        ctx.strokeStyle = "#ff9b73";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(0, -r - 3);
-        ctx.lineTo(r + 3, r);
-        ctx.lineTo(-r - 3, r);
+      ctx.fillStyle = hazard ? "#752b31" : "#103e40";
+      ctx.strokeStyle = hazard ? "#ff9779" : "#a5f5d0";
+      ctx.lineWidth = 2 * scale;
+      ctx.beginPath();
+      if (hazard) {
+        ctx.moveTo(0, -r - 2);
+        ctx.lineTo(r + 2, r);
+        ctx.lineTo(-r - 2, r);
         ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.fillStyle = "#ffe2b1";
-        ctx.font = "bold " + 18 * scale + "px sans-serif";
-        ctx.textAlign = "center";
-        ctx.fillText("!", 0, r * 0.6);
+      } else ctx.arc(0, 0, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = hazard ? "#ffe0bd" : "#e7fff1";
+      if (item.kind === "magnet") {
+        ctx.fillStyle = "#d57f78";
+        ctx.fillRect(-11 * scale, -5 * scale, 11 * scale, 10 * scale);
+        ctx.fillStyle = "#76a7d1";
+        ctx.fillRect(0, -5 * scale, 11 * scale, 10 * scale);
+        ctx.font = "bold " + 8 * scale + "px sans-serif";
+        ctx.fillStyle = "#fff";
+        ctx.fillText("N", -5.5 * scale, 0);
+        ctx.fillText("S", 5.5 * scale, 0);
       } else {
-        ctx.fillStyle = "#183443ed";
-        ctx.strokeStyle =
-          item.kind === "heart"
-            ? "#ffaaa9"
-            : item.kind === "capacitor"
-              ? "#adefff"
-              : "#ffe0a0";
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.roundRect(-r, -r, r * 2, r * 2, 5);
-        ctx.fill();
-        ctx.stroke();
-        if (item.kind === "power") {
-          ctx.strokeStyle = "#eaae75";
-          ctx.lineWidth = 2 * scale;
-          for (let j = 0; j < 5; j++) {
-            ctx.beginPath();
-            ctx.ellipse(
-              (j - 2) * 4 * scale,
-              0,
-              4 * scale,
-              9 * scale,
-              0,
-              0,
-              Math.PI * 2,
-            );
-            ctx.stroke();
-          }
-        } else {
-          ctx.fillStyle = ctx.strokeStyle;
-          ctx.font = "bold " + 19 * scale + "px sans-serif";
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-          ctx.fillText(
-            { capacitor: "ϟ", heart: "♥", coolant: "❄" }[item.kind] || "ϟ",
-            0,
-            1,
-          );
-        }
+        ctx.font = "bold " + (token ? 22 : 23) * scale + "px sans-serif";
+        ctx.fillText(
+          {
+            star: "ϟ",
+            power: "◎",
+            capacitor: "ϟ",
+            heart: "♥",
+            coolant: "❄",
+            heat: "!",
+          }[item.kind],
+          0,
+          scale,
+        );
+      }
+      if (!token) {
+        const name = {
+          power: "코일",
+          magnet: "자석",
+          capacitor: "축전기",
+          heart: "회복",
+          coolant: "냉각",
+          heat: "위험",
+        }[item.kind];
+        ctx.font = "bold " + 10 * scale + "px sans-serif";
+        ctx.textBaseline = "top";
+        ctx.lineWidth = 3 * scale;
+        ctx.strokeStyle = "#092f3d";
+        ctx.strokeText(name, 0, r + 4 * scale);
+        ctx.fillStyle = hazard ? "#ffc4af" : "#d5ffec";
+        ctx.fillText(name, 0, r + 4 * scale);
       }
       ctx.restore();
     }
@@ -1723,15 +1678,27 @@
     }
     if (player) {
       if (feverTime > 0) {
-        glow(player.x, player.y, 100 * scale, "#ffd57434");
-        for (let i = 0; i < 4; i++) {
-          ctx.strokeStyle = "#ffeab7" + ["45", "30", "25", "15"][i];
-          ctx.lineWidth = (15 - i * 2) * scale;
-          ctx.beginPath();
-          ctx.moveTo(player.x + (i - 1.5) * 18 * scale, player.y + 27 * scale);
-          ctx.lineTo(player.x + (i - 1.5) * 20 * scale, player.y + 150 * scale);
-          ctx.stroke();
-        }
+        // Short exhaust rooted at the nozzle. Boost transitions also drive background and steering.
+        ctx.save();
+        ctx.translate(player.x, player.y);
+        ctx.rotate(player.tilt);
+        const flame = ctx.createLinearGradient(0, 30 * scale, 0, 78 * scale);
+        flame.addColorStop(0, "#efffff");
+        flame.addColorStop(0.4, "#6deee8");
+        flame.addColorStop(1, "#63dbe800");
+        ctx.fillStyle = flame;
+        ctx.beginPath();
+        ctx.moveTo(-6 * scale, 32 * scale);
+        ctx.quadraticCurveTo(
+          -9 * scale,
+          55 * scale,
+          0,
+          (68 + Math.sin(time * 50) * 7) * scale,
+        );
+        ctx.quadraticCurveTo(9 * scale, 55 * scale, 6 * scale, 32 * scale);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
       }
       const alpha = player.inv > 0 ? 0.55 + Math.sin(time * 16) * 0.2 : 1;
       drawSprite(
@@ -1826,6 +1793,7 @@
   requestAnimationFrame(frame);
 
   function showModal(html, origin = mode) {
+    window.FaradayRanking?.stop();
     lastFocus = document.activeElement;
     modalOrigin = origin;
     $("modalContent").innerHTML = html;
@@ -1837,9 +1805,11 @@
       keys.clear();
       pointer.active = false;
     }
-    $("modal").querySelector(".modal-card").focus();
+    $("modal").querySelector(".modal-card").scrollTop = 0;
+    $("modal").querySelector(".modal-card").focus({ preventScroll: true });
   }
   function closeModal(resume = true) {
+    window.FaradayRanking?.stop();
     $("modal").hidden = true;
     $("modalContent").innerHTML = "";
     if (resume && mode === "paused") {
@@ -1916,7 +1886,7 @@
         fmt(score) +
         "</b></div><div><span>펄스 사용</span><b>" +
         stats.pulses +
-        "</b></div><div><span>모은 전지</span><b>" +
+        "</b></div><div><span>모은 토큰</span><b>" +
         stats.stars +
         '</b></div></div><div class="history-card"><span>발견의 기록</span><strong>' +
         level.lesson +
@@ -1937,13 +1907,31 @@
       );
     } else {
       const choices = U.choices(build, stage);
+      // Save the cleared boundary immediately; reloading resumes the NEXT stage.
+      save.checkpoint = {
+        stage: stage + 1,
+        build: clone(build),
+        score,
+        wing,
+        mode: difficulty,
+        magnetLevel,
+        pulseCharges,
+      };
+      persist();
       showModal(
-        head +
-          '<div class="upgrade-label">다음 하늘로 가져갈 발명 하나</div><div class="upgrades">' +
+        '<div class="clear-heading"><span class="eyebrow">STAGE ' +
+          (stage + 1) +
+          ' CLEAR</span><h2 id="modalTitle">' +
+          level.name +
+          ' 통과!</h2><p>발명 하나를 고르고 다음 하늘로 출발하세요.</p></div><div class="upgrades">' +
           choices
             .map(
-              (u) =>
-                '<button class="upgrade" data-upgrade="' +
+              (u, i) =>
+                '<button class="upgrade ' +
+                (i === 0 ? "selected" : "") +
+                '" aria-pressed="' +
+                (i === 0) +
+                '" data-upgrade="' +
                 u.id +
                 '"><span class="upgrade-icon">' +
                 u.icon +
@@ -1954,7 +1942,13 @@
                 '</small></span><span class="upgrade-arrow">→</span></button>',
             )
             .join("") +
-          "</div>",
+          '</div><button id="nextStageBtn" class="primary next-stage" data-action="next-stage">' +
+          (stage + 2) +
+          "스테이지 출발 · " +
+          (choices[0]?.name || "준비 완료") +
+          ' →</button><details class="clear-record"><summary>점수와 패러데이의 발견 기록</summary>' +
+          head.replace('id="modalTitle"', 'class="record-title"') +
+          "</details>",
         "clear",
       );
     }
@@ -1963,10 +1957,30 @@
   function selectUpgrade(id) {
     if (mode !== "clear") return;
     const u = U.upgrades.find((u) => u.id === id);
-    if (!u || build[id] >= u.max) return;
+    if (!u || build[id] >= u.max) {
+      startStage(stage + 1);
+      return;
+    }
     build[id]++;
     audio.effect("level");
     startStage(stage + 1);
+  }
+  function showRanking() {
+    showModal(
+      '<h2 id="modalTitle">공유 비행 순위</h2><div id="faradayRankHost"></div>',
+    );
+    window.FaradayRanking.mount($("faradayRankHost"), difficulty);
+  }
+  function resultRanking(cleared) {
+    const host = document.createElement("div");
+    host.id = "faradayRankHost";
+    $("modalContent").append(host);
+    window.FaradayRanking.mount(host, difficulty, {
+      score: Math.floor(score),
+      cleared,
+      mode: difficulty,
+      token: crypto.randomUUID(),
+    });
   }
   function failStage() {
     if (mode !== "play") return;
@@ -1997,6 +2011,7 @@
       "failed",
     );
     $("modalClose").hidden = true;
+    resultRanking(stage);
   }
   function ending() {
     setMode("ending");
@@ -2005,10 +2020,11 @@
         fmt(score) +
         "</b></div><div><span>완주</span><b>5 / 5</b></div><div><span>모은 훈장</span><b>" +
         save.stars.reduce((a, b) => a + b, 0) +
-        ' / 15</b></div></div><p class="result-fact">코일을 감고, 자석을 돌리고, 전기를 모았어요. 코일을 지나는 자기장의 변화로 전기를 만든다. 패러데이와 함께 기억할 작은 발견이에요.</p><button class="primary" data-action="map">별 세 개를 향해 다시 날기 →</button><button class="secondary" data-action="title">시작 화면으로</button>',
+        ' / 15</b></div></div><p class="result-fact">코일을 감고, 자석을 움직이고, 전기를 모았어요. 코일을 지나는 자기장의 변화로 전기를 만든다. 패러데이와 함께 기억할 작은 발견이에요.</p><button class="primary" data-action="map">별 세 개를 향해 다시 날기 →</button><button class="secondary" data-action="title">시작 화면으로</button>',
       "ending",
     );
     $("modalClose").hidden = true;
+    resultRanking(5);
   }
   function showMap() {
     const origin = mode;
@@ -2039,35 +2055,51 @@
   }
   function showHelp() {
     showModal(
-      '<span class="eyebrow">READY FOR TAKEOFF</span><h2 id="modalTitle">비행은 간단해요</h2><div class="help-row"><strong>① 움직이면, 패러데이도 함께</strong>마우스나 손가락을 누른 채 움직이세요.<br><small>키보드는 방향키 / W A S D. 공격은 자동이에요.</small></div><div class="help-row"><strong>② 전지와 부품을 모아요</strong>코일 ◎ 탄 수·미사일 강화 · 자석 N/S 피해 증가<br><small>♥ 체력 회복 · ϟ 축전기 충전 · 빨간 △ 과열 파편은 피하세요. 작은 전지를 연속으로 모으면 오버드라이브!</small></div><div class="help-row"><strong>③ 충전된 전기로 돌파해요</strong>축전기가 있으면 ϟ 스파크 폭풍 / SPACE.<br><small>노란 예고선이 번쩍일 때 쓰면 PERFECT! 적 탄환을 지우고 큰 피해를 줘요. 축전기는 발전기로도 충전돼요.</small></div><div class="help-row"><strong>④ 날개 끝은 닿아도 괜찮아요</strong>몸체 가운데 흰 점에 적이나 탄환이 닿지 않게 피하세요.</div><button class="secondary" data-action="close">준비됐어요</button>',
+      '<span class="eyebrow">READY FOR TAKEOFF</span><h2 id="modalTitle">비행은 간단해요</h2><div class="help-row"><strong>① 움직이면, 패러데이도 함께</strong>마우스나 손가락을 누른 채 움직이세요.<br><small>키보드는 방향키 / W A S D. 공격은 자동이에요.</small></div><div class="help-row"><strong>② 원 안의 토큰과 부품을 모아요</strong>코일 ◎ 탄 수·미사일 강화 · 자석 N/S 피해 증가<br><small>♥ 체력 회복 · ϟ 축전기 충전 · 빨간 △ 과열 파편은 피하세요. 초록 원의 번개 토큰을 연속으로 모으면 오버드라이브!</small></div><div class="help-row"><strong>③ 충전된 전기로 돌파해요</strong>축전기가 있으면 ϟ 스파크 폭풍 / SPACE.<br><small>노란 예고선이 번쩍일 때 쓰면 PERFECT! 적 탄환을 지우고 큰 피해를 줘요. 축전기는 발전기로도 충전돼요.</small></div><div class="help-row"><strong>④ 날개 끝은 닿아도 괜찮아요</strong>몸체 가운데 흰 점에 적이나 탄환이 닿지 않게 피하세요.</div><button class="secondary" data-action="close">준비됐어요</button>',
     );
   }
   let noteSpeed = 1,
     noteAngle = 0,
     noteTurns = 1,
-    noteField = 1;
+    noteField = 1,
+    noteCapVoltage = 0,
+    noteCurrent = 0,
+    notePulseTime = 0;
+  function noteSample() {
+    return P.movingInductionSample(
+      noteTurns,
+      noteField,
+      1,
+      noteSpeed * 3,
+      noteAngle,
+    );
+  }
   function showJournal(tab = 0) {
     journalTab = tab;
     noteSpeed = 1;
     noteTurns = 1;
     noteField = 1;
+    noteAngle = 0;
+    noteCapVoltage = 0;
+    noteCurrent = 0;
+    notePulseTime = 0;
     const descriptions = [
       [
-        "자기장이 바뀌면 전기가 생겨요",
-        "코일 속에서 자석을 돌리면 코일을 지나는 자기장이 변해요. 속도를 0으로 내려보세요. 멈춘 자석만으로는 계속 발전하지 않아요.",
+        "움직이는 자석으로 전기를 만들어요",
+        "자석을 코일에 넣고 빼면 코일을 지나는 자기장이 변해요. 넣을 때와 뺄 때는 전류 방향이 반대예요. 속도를 0으로 내려 멈춰 보세요.",
       ],
       [
-        "코일과 자석으로 출력을 키워요",
-        "같은 조건이라면 코일을 더 많이 감거나 더 강한 자석을 쓰면 유도 전압이 커져요. 두 조절기를 움직여 확인해 보세요.",
+        "코일과 자석으로 유도 전압을 키워요",
+        "같은 움직임과 코일 크기에서 감은 수를 늘리거나 더 강한 자석을 쓰면 유도 전압이 커져요. 미사일의 개수·종류·피해량은 이를 활용한 게임 규칙이에요.",
       ],
       [
-        "만든 전기를 모아뒀다가, 한 번에!",
-        "축전기는 전기 에너지를 잠시 저장하는 부품이에요. 게임에서는 충전된 축전기를 모아 스파크 폭풍을 사용해요.",
+        "정류기로 방향을 맞춘 뒤 저장해요",
+        "왕복 운동으로 만든 전기는 방향이 바뀌어요. 다이오드 4개로 된 정류기를 거치면 축전기의 위쪽 판은 +, 아래쪽 판은 −로 충전돼요. 두 판에 반대 전하가 쌓이며 에너지가 저장돼요.",
       ],
     ];
     showModal(
       '<span class="eyebrow">FARADAY’S LITTLE LABORATORY</span><h2 id="modalTitle">발명 노트</h2><div class="journal-tabs">' +
-        ["발전", "코일 · 자석", "축전기"]
+        ["발전", "코일 · 자석", "정류 · 축전기"]
           .map(
             (t, i) =>
               '<button data-note="' +
@@ -2082,134 +2114,62 @@
         '</div><canvas id="noteCanvas" width="680" height="400" aria-label="' +
         descriptions[tab][0] +
         ' 실험"></canvas>' +
-        (tab === 0
-          ? '<label class="journal-caption">자석의 회전 속도 <span id="speedValue">1배</span><input type="range" id="speedControl" min="0" max="3" step="0.1" value="1" aria-label="자석 회전 속도"></label>'
-          : tab === 1
-            ? '<label class="journal-caption">코일 감은 수<input type="range" id="turnControl" min="1" max="3" step="1" value="1" aria-label="코일 감은 수"></label><label class="journal-caption">자석의 세기<input type="range" id="fieldControl" min="1" max="3" step="0.1" value="1" aria-label="자석의 세기"></label>'
-            : "") +
+        '<p id="noteStatus" class="note-status" role="status"></p>' +
+        '<label class="journal-caption">자석의 왕복 속도 <span id="speedValue">1배</span><input type="range" id="speedControl" min="0" max="3" step="0.1" value="1" aria-label="자석 왕복 속도"></label>' +
+        (tab === 1
+          ? '<label class="journal-caption">코일 감은 수<input type="range" id="turnControl" min="1" max="3" step="1" value="1" aria-label="코일 감은 수"></label><label class="journal-caption">자석의 세기<input type="range" id="fieldControl" min="1" max="3" step="0.1" value="1" aria-label="자석의 세기"></label>'
+          : "") +
+        (tab === 2
+          ? '<button class="secondary" data-action="note-discharge" id="noteDischarge">자석을 멈추고 저장한 에너지로 전구 켜기</button>'
+          : "") +
         "<p><strong>" +
         descriptions[tab][0] +
         "</strong><br>" +
         descriptions[tab][1] +
         '</p><p class="science-detail">' +
         (tab === 0
-          ? "정확하게는 코일을 통과하는 자기선속이 변할 때 유도 전압이 생겨요. 회로가 닫혀 있으면 전류가 흐를 수 있어요."
+          ? "전구는 코일의 두 끝과 연결된 닫힌 회로에 있어요. 정확히는 자기선속이 변할 때 유도 전압이 생기며, 회로에 전류가 흐르면 전구가 켜져요. 여기서는 코일의 자체 유도와 전구의 열 관성은 생략했어요."
           : tab === 1
-            ? "코일의 간격만 벌어졌다고 항상 출력이 줄지는 않아요. 게임의 충돌은 코일 일부가 풀려 유효한 감은 수가 감소하는 상황이에요. 높은 온도는 자석의 성질을 약화시킬 수 있어요."
-            : "발전기의 전기 에너지는 자석을 움직이는 바람과 엔진의 일에서 와요. 자석이 에너지를 무한히 만들어 내지는 않아요.") +
-        '</p><p class="science-detail">패러데이는 1831년 전자기 유도를 발견했어요. 비행기·미사일·탄막을 지우는 펄스는 그 발견에서 상상한 게임 장비이며 실제로 그가 만든 무기는 아니에요. 미사일 종류와 피해량은 게임의 강화 규칙이에요.</p><a class="science-source" href="https://openstax.org/books/physics/pages/20-3-electromagnetic-induction" target="_blank" rel="noopener noreferrer">원리 · OpenStax 전자기 유도 ↗</a><a class="science-source" href="https://www.rigb.org/explore-science/explore/collection/michael-faradays-ring-coil-apparatus" target="_blank" rel="noopener noreferrer">역사 · 왕립연구소의 패러데이 실험 장치 ↗</a>',
+            ? "간격만 촘촘해진다고 전압이 무조건 커지지는 않아요. 게임의 충돌은 코일 일부가 풀려 유효한 감은 수가 줄어드는 설정이에요. 자석의 열에 의한 약화와 회복은 재료·온도에 따라 달라요. 7초 뒤 회복과 냉각 아이템은 게임 규칙이에요."
+            : "정류된 전압이 축전기 전압보다 높을 때만 충전 전류가 흘러요. 멈춰도 다이오드가 역방향 방전을 막아요. 사용 버튼은 자석을 멈추고 스위치를 닫아 전구로 에너지를 보내요. 판 사이의 절연층으로 전하가 건너가는 것은 아니에요. 이 모형은 다이오드 전압 강하·누설을 생략했으며, 실제 축전기는 서서히 방전될 수 있어요.") +
+        '</p><p class="science-detail">발전 에너지는 자석을 움직이는 외부의 일에서 와요. 자석이 에너지를 무한히 만들지는 않아요. 비행기·미사일·스파크 폭풍은 전자기 유도에서 상상한 게임 장비이며 패러데이가 만든 실제 무기가 아니에요.</p><a class="science-source" href="https://openstax.org/books/physics/pages/20-3-electromagnetic-induction" target="_blank" rel="noopener noreferrer">OpenStax · 전자기 유도 ↗</a><a class="science-source" href="https://wiki.analog.com/university/courses/electronics/text/chapter-6" target="_blank" rel="noopener noreferrer">Analog Devices · 정류기와 축전기 회로 ↗</a>',
     );
     drawNote();
   }
   function drawNote() {
     const c = $("noteCanvas");
     if (!c) return;
-    const n = c.getContext("2d");
-    n.clearRect(0, 0, 680, 400);
-    n.fillStyle = "#092936";
-    n.fillRect(0, 0, 680, 400);
-    const gen = P.inductionSample(
-        noteTurns,
-        noteField,
-        1,
-        noteSpeed * 3,
-        noteAngle,
-      ),
-      cx = 265,
-      cy = 175;
-    n.strokeStyle = "#7b9f9d";
-    n.lineWidth = 3;
-    n.beginPath();
-    n.moveTo(160, 185);
-    n.lineTo(105, 185);
-    n.lineTo(105, 305);
-    n.lineTo(560, 305);
-    n.lineTo(560, 185);
-    n.lineTo(370, 185);
-    n.stroke();
-    n.strokeStyle = "#dfa96e";
-    n.lineWidth = 4;
-    for (let i = 0; i < 7 + noteTurns * 4; i++) {
-      n.beginPath();
-      n.ellipse(
-        cx + (i - (6 + noteTurns * 4) / 2) * 12,
-        cy,
-        16,
-        65,
-        0,
-        0,
-        Math.PI * 2,
-      );
-      n.stroke();
-    }
-    n.save();
-    n.translate(cx, cy);
-    n.rotate(noteAngle);
-    n.fillStyle = "#d98270";
-    n.fillRect(-68, -17, 68, 34);
-    n.fillStyle = "#649fce";
-    n.fillRect(0, -17, 68, 34);
-    n.strokeStyle = "#ffdbb5";
-    n.lineWidth = 2;
-    n.strokeRect(-68, -17, 136, 34);
-    n.font = "bold 20px sans-serif";
-    n.textAlign = "center";
-    n.textBaseline = "middle";
-    n.fillStyle = "#fff4e1";
-    n.fillText("N", -34, 0);
-    n.fillText("S", 34, 0);
-    n.restore();
-    const brightness = Math.min(1, Math.abs(gen.emf) / 9);
-    n.fillStyle = "#b9ffbf";
-    n.globalAlpha = 0.15 + brightness * 0.75;
-    n.beginPath();
-    n.arc(560, 175, 35, 0, Math.PI * 2);
-    n.fill();
-    n.globalAlpha = 1;
-    n.strokeStyle = "#c5e5cd";
-    n.lineWidth = 2;
-    n.beginPath();
-    n.arc(560, 175, 25, 0, Math.PI * 2);
-    n.stroke();
-    n.font = '21px "Noto Sans KR",sans-serif';
-    n.fillStyle = "#efce9e";
-    n.textAlign = "center";
-    n.fillText("구리 코일", 265, 72);
-    n.fillStyle = "#d9ede1";
-    n.fillText(
-      noteSpeed === 0 ? "회전 멈춤 · 유도 전압 0" : "자석 회전 → 자기장 변화",
-      340,
-      355,
-    );
-    n.font = '16px "Noto Sans KR",sans-serif';
-    n.fillStyle = "#a8ccc5";
-    n.fillText("닫힌 회로", 175, 333);
-    n.fillText("전구", 560, 125);
-    if (journalTab === 2) {
-      n.fillStyle = "#0b2d3df5";
-      n.fillRect(395, 80, 250, 188);
-      n.strokeStyle = "#d6f9ef";
-      n.lineWidth = 6;
-      n.beginPath();
-      n.moveTo(475, 130);
-      n.lineTo(475, 230);
-      n.moveTo(515, 130);
-      n.lineTo(515, 230);
-      n.moveTo(440, 180);
-      n.lineTo(475, 180);
-      n.moveTo(515, 180);
-      n.lineTo(550, 180);
-      n.stroke();
-      n.fillStyle = "#ffe0a0";
-      n.font = "22px sans-serif";
-      n.fillText("+", 453, 117);
-      n.fillText("−", 537, 117);
-      n.font = '20px "Noto Sans KR",sans-serif';
-      n.fillText("축전기", 495, 262);
-    }
-    if ($("speedValue"))
-      $("speedValue").textContent =
-        noteSpeed === 0 ? "멈춤" : noteSpeed.toFixed(1) + "배";
+    const sample = noteSample();
+    window.FaradayInductionDiagram.draw(c, {
+      sample,
+      turns: noteTurns,
+      tab: journalTab,
+      voltage: noteCapVoltage,
+      current: noteCurrent,
+      flash: notePulseTime,
+    });
+    $("speedValue").textContent =
+      noteSpeed === 0 ? "멈춤" : noteSpeed.toFixed(1) + "배";
+    const direction =
+      Math.abs(sample.emf) < 0.02
+        ? "유도 전압 0"
+        : sample.emf < 0
+          ? "넣는 중 · 전류 ←"
+          : "빼는 중 · 전류 →";
+    const status =
+      journalTab === 2
+        ? notePulseTime > 0
+          ? "저장한 에너지로 전구 켜는 중"
+          : noteCurrent > 0.012
+            ? "정류기를 거쳐 충전 중"
+            : noteCapVoltage > 0.02
+              ? "충전 전류 0 · 저장한 에너지는 남아 있어요"
+              : "자석을 움직여 충전해 보세요"
+        : direction;
+    if ($("noteStatus").textContent !== status)
+      $("noteStatus").textContent = status;
+    if ($("noteDischarge"))
+      $("noteDischarge").disabled = noteCapVoltage < 0.03 || notePulseTime > 0;
   }
 
   deck.addEventListener("pointerdown", (e) => {
@@ -2262,6 +2222,7 @@
   $("modalClose").addEventListener("click", () => closeModal());
   document.addEventListener("keydown", (e) => {
     const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+    if (e.target instanceof HTMLInputElement && k !== "Escape") return;
     if (k === "Escape" || k === "p") {
       if (!$("modal").hidden) {
         if (!["clear", "failed", "ending"].includes(mode)) closeModal();
@@ -2331,7 +2292,19 @@
       persist();
       updateModeChoice();
     }
-    if (b.dataset.upgrade) selectUpgrade(b.dataset.upgrade);
+    if (b.dataset.upgrade && mode === "clear") {
+      for (const option of $("modalContent").querySelectorAll(
+        "[data-upgrade]",
+      )) {
+        const selected = option === b;
+        option.classList.toggle("selected", selected);
+        option.setAttribute("aria-pressed", String(selected));
+      }
+      const selected = U.upgrades.find((u) => u.id === b.dataset.upgrade);
+      if ($("nextStageBtn"))
+        $("nextStageBtn").textContent =
+          stage + 2 + "스테이지 출발 · " + selected.name + " →";
+    }
     if (b.dataset.stage !== undefined) {
       const s = Number(b.dataset.stage);
       if (s <= save.unlocked) {
@@ -2351,8 +2324,27 @@
     }
     if (b.dataset.note !== undefined) showJournal(Number(b.dataset.note));
     switch (b.dataset.action) {
+      case "ranking":
+        showRanking();
+        break;
+      case "note-discharge":
+        if (noteCapVoltage > 0.03) {
+          noteSpeed = 0;
+          noteCurrent = 0;
+          notePulseTime = 1.5;
+          $("speedControl").value = "0";
+        }
+        break;
+      case "next-stage":
+        selectUpgrade(
+          $("modalContent").querySelector("[data-upgrade].selected")?.dataset
+            .upgrade,
+        );
+        break;
       case "back-lab":
-        window.top.location.assign(new URL("../lab.html?play=all", location.href).href);
+        window.top.location.assign(
+          new URL("../lab.html?play=all", location.href).href,
+        );
         break;
       case "sound":
         toggleSound();
@@ -2455,7 +2447,7 @@
         '그림을 불러오지 못했어요. <button class="text-btn" onclick="location.reload()">다시 불러오기</button>';
       $("startText").textContent = "그림을 기다리고 있어요";
     });
-  // QA is opt-in by URL and exposes local simulation fixtures. No remote scores exist.
+  // QA is opt-in; this mode disables remote score registration in leaderboard.js.
   if (new URLSearchParams(location.search).has("qa"))
     window.__faraday = {
       manual(value = true) {
@@ -2463,6 +2455,15 @@
         accumulator = 0;
       },
       ready: () => loadPromise,
+      get noteState() {
+        return {
+          sample: noteSample(),
+          voltage: noteCapVoltage,
+          current: noteCurrent,
+          flash: notePulseTime,
+          speed: noteSpeed,
+        };
+      },
       get state() {
         return {
           mode,

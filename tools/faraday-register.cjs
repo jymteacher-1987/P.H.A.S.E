@@ -15,6 +15,8 @@ const hash = (s) =>
 const files = [
   "style.css",
   "physics.js",
+  "induction-diagram.js",
+  "leaderboard.js",
   "levels.js",
   "audio.js",
   "sprites.js",

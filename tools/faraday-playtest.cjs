@@ -139,6 +139,7 @@ const { chromium } = require("playwright"),
           }
         }
         await page.locator("[data-upgrade=" + upgrade + "]").click();
+        await page.locator('#nextStageBtn').click();
       }
     }
     fs.writeFileSync(
