@@ -6,5 +6,5 @@
   "physics-fighter": { "steps": [{ "select": "#mode", "value": "practice" }, { "click": "#startBtn" }, { "wait": 1800 }] },
   "giants-shoulders": { "steps": [] },
   "jjomuldak-factory": { "steps": [{ "click": "button:text-is('닫기')" }, { "wait": 400 }] },
-  "bamti-escape": { "steps": [{ "click": "[data-id=manor]" }, { "wait": 700 }, { "press": "Tab" }, { "press": "Enter" }, { "wait": 4500 }] }
+  "bamti-escape": { "steps": [] }
 }
