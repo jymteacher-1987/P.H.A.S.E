@@ -9,6 +9,7 @@ on:
       - 'data/experiments.json'
       - 'assets/js/**'
       - 'assets/css/**'
+      - 'assets/afterlight/**'
       - 'tools/**'
       - 'package*.json'
       - '.github/workflows/previews.yml'
@@ -55,7 +56,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: safari-small-screen-failures
-          path: .preview-tmp/safari/
+          path: |
+            .preview-tmp/safari/
+            .preview-tmp/afterlight/
           if-no-files-found: ignore
       - name: Save images and cache versions
         id: save

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080e1c">
+  <meta name="description" content="빛이 사라진 도시, 마지막 신호를 보내라. 반사·편광·간섭을 이용하는 16개 스테이지의 SF 물리 퍼즐 어드벤처.">
+  <title>잔광: 마지막 신호 · P.H.A.S.E</title>
+  <script src="../assets/js/browser-compat.js"></script>
+  <link rel="stylesheet" href="../assets/afterlight/style.css?v=01f437a19b">
+  <link rel="preload" as="image" href="../assets/afterlight/city.webp">
+</head>
+<body>
+  <main id="app">
+    <section id="titleScreen" class="screen title-screen" aria-label="잔광 시작 화면">
+      <img class="keyart" src="../assets/afterlight/city.webp" alt="정전된 해안 도시를 바라보는 신호 운반자">
+      <div class="title-shade"></div>
+      <div class="title-top"><span class="brand">P.H.A.S.E <span>ORIGINAL</span></span><button class="text-btn" data-action="sound" aria-label="소리 켜기">소리 OFF</button></div>
+      <div class="title-copy">
+        <p class="eyebrow">A SIGNAL WORTH SAVING</p>
+        <h1>잔광<span>마지막 신호</span></h1>
+        <p class="title-en">A F T E R L I G H T</p>
+        <p class="title-story">도시가 잠든 밤.<br>아직, 너에게 닿지 못한 빛이 있다.</p>
+        <div class="title-actions"><button id="startBtn" class="primary big" data-action="start">첫 신호 보내기 <span>↗</span></button><button id="continueBtn" class="secondary big" data-action="continue" hidden>이어 하기</button></div>
+        <div class="title-links"><button class="text-btn" data-action="map">구역 지도</button><button class="text-btn" data-action="archive">광학 기록</button><button id="dailyBtn" class="text-btn" data-action="daily" hidden>오늘의 회선</button></div>
+      </div>
+      <div class="title-bottom"><span>빛으로 풀어내는 4막 · 16개의 신호</span><span>터치 / 마우스 / 키보드</span></div>
+    </section>
+
+    <section id="playScreen" class="screen play-screen" hidden aria-label="게임 화면">
+      <header class="game-header"><button class="logo-btn" data-action="home" aria-label="시작 화면으로">잔광<span>AFTERLIGHT</span></button><div class="chapter"><span id="actLabel"></span><strong id="stageLabel"></strong></div><div class="header-actions"><button class="icon-btn" data-action="sound" aria-label="소리 켜기">♪</button><button class="icon-btn" data-action="pause" aria-label="일시 정지">Ⅱ</button></div></header>
+      <div id="progressRail" class="progress-rail" aria-label="도시 복구 진행"></div>
+      <div class="game-layout">
+        <div class="operation">
+          <div class="scene-heading"><div><p id="placeLabel" class="eyebrow"></p><h2 id="levelTitle"></h2></div><div class="moves"><div><strong id="moveCount">00</strong><span> 조작</span></div><small id="parLabel"></small></div></div>
+          <div id="boardWrap" class="board-wrap"><canvas id="board" width="840" height="600" aria-label="실시간 광학 장치 그림"></canvas><div id="boardControls" class="board-controls"></div><div id="boardTag" class="board-tag">LIVE OPTICAL LINK</div><div id="readyBadge" class="ready-badge" hidden>신호 준비 완료</div></div>
+          <div id="opticalControls" class="optical-controls"></div>
+          <div class="board-footer"><span id="boardLegend"></span><button class="text-btn" id="analysisBtn" data-action="analysis" aria-pressed="false">수치 보기</button></div>
+        </div>
+        <aside class="mission-panel">
+          <div class="transmission"><div id="speakerAvatar" class="speaker-avatar" aria-hidden="true">N</div><div><div class="transmission-label"><strong id="speakerName"></strong><span>연결됨</span></div><p id="dialogueText"></p></div></div>
+          <div class="mission-goal"><p class="eyebrow">YOUR MISSION</p><p id="taskText"></p><div id="receiverList" class="receiver-list" aria-live="polite"></div></div>
+          <div id="measurements" class="measurements" hidden></div>
+          <div class="mission-actions"><button id="sendBtn" class="primary" data-action="send" disabled>수신기를 연결해 주세요</button><div class="secondary-actions"><button class="secondary" data-action="undo" id="undoBtn" disabled>↶ 되돌리기</button><button class="secondary" data-action="hint">힌트</button><button class="secondary" data-action="reset">초기화</button></div></div>
+          <div id="hintBox" class="hint-box" hidden></div>
+          <div class="concept-strip"><span>빛의 기록</span><p id="conceptText"></p><button class="text-btn" data-action="archive">원리 자세히 보기 ↗</button></div>
+        </aside>
+      </div>
+      <footer class="game-footer"><span id="saveStatus">이 기기에 자동 저장</span><span>신호 애니메이션은 실제 빛의 속도가 아닙니다.</span></footer>
+    </section>
+
+    <section id="endingScreen" class="screen ending-screen" hidden aria-label="엔딩">
+      <img class="keyart" src="../assets/afterlight/city.webp" alt="새벽빛이 돌아온 도시">
+      <div class="ending-shade"></div><div class="ending-content"><p class="eyebrow">ALL SIGNALS RECEIVED</p><h2>우리가 연결한<br><em>새벽.</em></h2><p class="ending-story">빛이 도시를 밝힌 건 아니었다.<br>빛이 전한 명령을 받고, 사람들이 비상 전력망을 다시 켰다.<br><br>미라의 첫 메시지가 도착했다.<br>“여기 있어 줘서 고마워.”<br><br>노아가 대답했다.<br>“이제, 혼자 지키지 않을게.”</p><div id="endingStats" class="ending-stats"></div><p class="ending-last">다른 길을 지나도, 우리는 같은 새벽에 닿는다.</p><div class="ending-actions"><button class="primary" data-action="map">나의 신호 기록</button><button class="secondary" data-action="daily">오늘의 회선 도전</button><button class="text-btn" data-action="home">처음 화면</button></div></div>
+    </section>
+  </main>
+  <div id="modal" class="modal" hidden><section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-head"><h2 id="modalTitle"></h2><button id="modalClose" class="icon-btn" data-action="close" aria-label="닫기">×</button></div><div id="modalBody"></div></section></div>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <script src="../assets/afterlight/physics.js?v=4c5ee15753"></script>
+  <script src="../assets/afterlight/levels.js?v=3a656aeaf0"></script>
+  <script src="../assets/afterlight/game.js?v=bb40e66f00"></script>
+</body>
+</html>

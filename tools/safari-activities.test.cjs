@@ -163,6 +163,25 @@ test('WebKit: all activities on small iPhone screens, older APIs, game start and
             if (entry.id === 'physics-fighter') assert.equal(await frame.locator('#fightScreen').isVisible(), true);
             if (entry.id === 'giants-shoulders') assert.equal(await frame.locator('[data-do=new]').count(), 0);
           }
+          if (entry.id === 'afterlight') {
+            const start = frame.locator('#startBtn');
+            for (const [width, height] of [[320, 460], [568, 260], [568, 210], [375, 550], [667, 310]]) {
+              await page.setViewportSize({ width, height });
+              await page.waitForTimeout(180);
+              await reachable(start, 'Afterlight start ' + width + '×' + height);
+            }
+            await page.setViewportSize({ width: 320, height: 460 });
+            await start.tap();
+            assert.equal(await frame.locator('body').getAttribute('data-mode'), 'play');
+            const mirror = frame.locator('[data-action=rotate]').first();
+            await mirror.scrollIntoViewIfNeeded();
+            await reachable(mirror, 'Afterlight mirror');
+            await mirror.tap();
+            assert.ok(await frame.locator('#sendBtn').isEnabled(), 'Correct optical path enables sending');
+            await frame.locator('#sendBtn').tap();
+            await frame.locator('[data-action=next]').tap();
+            assert.equal(await frame.locator('#levelTitle').innerText(), '옥상 사이의 길');
+          }
           if (entry.id === 'hero-maker') {
             const normalized = await frame.evaluate(async () => {
               const canvas = document.createElement('canvas'); canvas.width = 40; canvas.height = 30;
