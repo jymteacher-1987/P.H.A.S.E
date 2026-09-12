@@ -73,14 +73,193 @@
     "steps": []
   },
   "afterlight": {
-    "steps": []
+    "viewport": {
+      "width": 1100,
+      "height": 825
+    },
+    "steps": [
+      {
+        "click": "#titleScreen [data-action=\"sound\"]"
+      },
+      {
+        "click": "#startBtn"
+      },
+      {
+        "click": "[data-action=\"rotate\"][data-part=\"0\"]"
+      },
+      {
+        "click": "#sendBtn"
+      },
+      {
+        "click": "[data-action=\"next\"]"
+      },
+      {
+        "click": "[data-action=\"rotate\"][data-part=\"0\"]"
+      },
+      {
+        "click": "[data-action=\"rotate\"][data-part=\"2\"]"
+      },
+      {
+        "click": "#sendBtn"
+      },
+      {
+        "click": "[data-action=\"next\"]"
+      },
+      {
+        "click": "[data-action=\"rotate\"][data-part=\"0\"]"
+      },
+      {
+        "click": "[data-action=\"rotate\"][data-part=\"1\"]"
+      },
+      {
+        "click": "[data-action=\"rotate\"][data-part=\"3\"]"
+      },
+      {
+        "click": "#sendBtn"
+      },
+      {
+        "click": "[data-action=\"next\"]"
+      },
+      {
+        "click": "[data-action=\"rotate\"][data-part=\"0\"]"
+      },
+      {
+        "click": "[data-action=\"rotate\"][data-part=\"1\"]"
+      },
+      {
+        "click": "[data-action=\"rotate\"][data-part=\"2\"]"
+      },
+      {
+        "click": "[data-action=\"rotate\"][data-part=\"3\"]"
+      },
+      {
+        "click": "[data-action=\"rotate\"][data-part=\"5\"]"
+      },
+      {
+        "click": "#sendBtn"
+      },
+      {
+        "click": "[data-action=\"next\"]"
+      },
+      {
+        "click": "[data-action=\"polar\"][data-part=\"0\"][data-delta=\"15\"]"
+      },
+      {
+        "click": "[data-action=\"polar\"][data-part=\"0\"][data-delta=\"15\"]"
+      },
+      {
+        "click": "[data-action=\"polar\"][data-part=\"0\"][data-delta=\"15\"]"
+      },
+      {
+        "click": "[data-action=\"polar\"][data-part=\"0\"][data-delta=\"15\"]"
+      },
+      {
+        "click": "[data-action=\"polar\"][data-part=\"0\"][data-delta=\"15\"]"
+      },
+      {
+        "click": "[data-action=\"polar\"][data-part=\"0\"][data-delta=\"15\"]"
+      },
+      {
+        "click": "#sendBtn"
+      },
+      {
+        "click": "[data-action=\"next\"]"
+      },
+      {
+        "click": "[data-action=\"polar\"][data-part=\"0\"][data-delta=\"-15\"]"
+      },
+      {
+        "click": "[data-action=\"polar\"][data-part=\"0\"][data-delta=\"-15\"]"
+      },
+      {
+        "click": "[data-action=\"polar\"][data-part=\"0\"][data-delta=\"-15\"]"
+      },
+      {
+        "click": "#sendBtn"
+      },
+      {
+        "click": "[data-action=\"next\"]"
+      },
+      {
+        "click": "[data-action=\"polar\"][data-part=\"0\"][data-delta=\"15\"]"
+      },
+      {
+        "click": "[data-action=\"polar\"][data-part=\"0\"][data-delta=\"15\"]"
+      },
+      {
+        "click": "[data-action=\"polar\"][data-part=\"0\"][data-delta=\"15\"]"
+      },
+      {
+        "click": "[data-action=\"polar\"][data-part=\"0\"][data-delta=\"15\"]"
+      },
+      {
+        "click": "#sendBtn"
+      },
+      {
+        "click": "[data-action=\"next\"]"
+      },
+      {
+        "click": "[data-action=\"polar\"][data-part=\"0\"][data-delta=\"-15\"]"
+      },
+      {
+        "click": "[data-action=\"polar\"][data-part=\"0\"][data-delta=\"-15\"]"
+      },
+      {
+        "click": "[data-action=\"polar\"][data-part=\"0\"][data-delta=\"-15\"]"
+      },
+      {
+        "click": "[data-action=\"polar\"][data-part=\"0\"][data-delta=\"-15\"]"
+      },
+      {
+        "click": "[data-action=\"polar\"][data-part=\"1\"][data-delta=\"15\"]"
+      },
+      {
+        "click": "[data-action=\"polar\"][data-part=\"1\"][data-delta=\"15\"]"
+      },
+      {
+        "click": "[data-action=\"polar\"][data-part=\"1\"][data-delta=\"15\"]"
+      },
+      {
+        "click": "[data-action=\"polar\"][data-part=\"1\"][data-delta=\"15\"]"
+      },
+      {
+        "click": "#sendBtn"
+      },
+      {
+        "click": "[data-action=\"next\"]"
+      },
+      {
+        "click": "[data-action=\"phase-set\"][data-value=\"180\"]"
+      },
+      {
+        "click": "#sendBtn"
+      },
+      {
+        "click": "[data-action=\"next\"]"
+      },
+      {
+        "click": "[data-action=\"phase-set\"][data-value=\"90\"]"
+      },
+      {
+        "wait": 600
+      }
+    ]
   },
   "faraday-flight": {
-    "viewport": {"width": 960, "height": 720},
+    "viewport": {
+      "width": 960,
+      "height": 720
+    },
     "steps": [
-      {"click": "#titleSound"},
-      {"click": "#startBtn"},
-      {"wait": 9000}
+      {
+        "click": "#titleSound"
+      },
+      {
+        "click": "#startBtn"
+      },
+      {
+        "wait": 9000
+      }
     ]
   }
 }

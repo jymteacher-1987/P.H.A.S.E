@@ -19,5 +19,5 @@ if(before<0)throw new Error('The requested activity hanbut was not found. Review
 data.plays.splice(before,0,entry);
 const json=JSON.stringify(data,null,2)+'\n';write('data/experiments.json',json);const js='window.EXPERIMENTS_DATA = '+json.trimEnd()+';\n';write('assets/js/experiments-data.js',js);
 for(const file of ['index.html','lab.html','view.html','admin-k7f3x9q2.html'])write(file,read(file).replace(/assets\/js\/experiments-data\.js(?:\?v=[^"\s]+)?/g,'assets/js/experiments-data.js?v='+hash(js)));
-const scenes=JSON.parse(read('tools/preview-scenes.json'));scenes.afterlight={steps:[]};write('tools/preview-scenes.json',JSON.stringify(scenes,null,2)+'\n');
+const scenes=JSON.parse(read('tools/preview-scenes.json'));scenes.afterlight??={steps:[]};write('tools/preview-scenes.json',JSON.stringify(scenes,null,2)+'\n');
 console.log('Registered afterlight immediately before hanbut; '+data.plays.length+' activities. Version '+version);
