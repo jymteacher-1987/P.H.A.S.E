@@ -8,7 +8,7 @@
   const KEY = 'phase-afterlight-v1';
   const clone = value => JSON.parse(JSON.stringify(value));
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let store = { version:1, completed:{}, checkpoint:null, sound:false, daily:null }, storageOK = true;
+  let store = { version:1, completed:{}, checkpoint:null, sound:true, audioVersion:2, daily:null }, storageOK = true;
   try {
     const raw = JSON.parse(localStorage.getItem(KEY));
     if (raw && raw.version === 1) {
@@ -17,20 +17,22 @@
         if (v && Number.isFinite(v.stars) && v.stars>=1 && v.stars<=3 && Number.isFinite(v.moves) && v.moves>=0 && Number.isFinite(v.elapsed) && v.elapsed>=0) store.completed[i]={stars:Math.round(v.stars),moves:v.moves,elapsed:v.elapsed};
       }
       if (raw.checkpoint && Number.isInteger(raw.checkpoint.index) && raw.checkpoint.index>=0 && raw.checkpoint.index<16) store.checkpoint=raw.checkpoint;
-      store.sound=raw.sound===true;
+      // Previous releases saved the silent default without recording an explicit choice.
+      // Adopt the requested new default once, then remember the user's on/off choice.
+      store.sound=raw.audioVersion===2?raw.sound!==false:true;
       if (raw.daily && /^\d{4}-\d{2}-\d{2}$/.test(raw.daily.date) && Number.isFinite(raw.daily.moves)) store.daily={date:raw.daily.date,moves:raw.daily.moves};
     }
   } catch (_) { /* A malformed or blocked save never prevents playing. */ }
   let state=null, level=null, result=null, undo=[], selected=-1, scene='title', ready=false, overlay=false, lastFocus=null;
   let analysis=false, completion=false, toastTimer=0, lastTime=performance.now(), renderTime=0, daily=false, dailyDate='';
-  let ctx=$('board').getContext('2d'), audio=null, master=null, musicClock=0, musicStep=0;
+  let ctx=$('board').getContext('2d'), audio=null, master=null, music=null;
   const palette={cyan:'#64f3de',amber:'#ffd38c',violet:'#b8a3ff',blue:'#6b9fff',white:'#e8f2ff',muted:'#8ca4be'};
   function writeStore() { try { localStorage.setItem(KEY,JSON.stringify(store)); storageOK=true; } catch (_) {storageOK=false;} $('saveStatus').textContent=storageOK?'이 기기에 자동 저장':'저장 공간을 사용할 수 없어 이번 실행에서만 기록됩니다'; }
   function checkpoint() { if (state && !daily) store.checkpoint=clone(state); writeStore(); }
   function initAudio() {
     if (!store.sound) return;
     try {
-      if (!audio) {const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;audio=new AC();master=audio.createGain();master.gain.value=.16;master.connect(audio.destination);}
+      if (!audio) {const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;audio=new AC();master=audio.createGain();master.gain.value=.16;const limiter=audio.createDynamicsCompressor();limiter.threshold.value=-12;limiter.knee.value=12;limiter.ratio.value=8;limiter.attack.value=.003;limiter.release.value=.18;master.connect(limiter);limiter.connect(audio.destination);music=window.AfterlightMusic.create(audio,master);}
       if (audio.state==='suspended') audio.resume().catch(()=>{});
     }catch(_){}
   }
@@ -67,7 +69,7 @@
     let seed=Number(dailyDate.replace(/-/g,''));const rnd=()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296;};
     const candidates=[LEVELS[2],LEVELS[3],LEVELS[12]];level=clone(candidates[Math.floor(rnd()*candidates.length)]);
     if(rnd()>.5){level.source.y=level.rows-1-level.source.y;level.parts.forEach((p,i)=>{p.y=level.rows-1-p.y;if(p.type==='mirror'||p.type==='split'){p.value=1-p.value;if(level.solution[i]!==undefined)level.solution[i]=1-level.solution[i];}});}
-    level.title='오늘의 회선';level.place=dailyDate+' · 같은 날, 같은 회선';level.task='모든 수신기를 연결하자. 가장 적은 조작에 도전해 봐.';level.intro=['노아','도시는 다시 깨어났어. 오늘도 회선을 점검할 시간이야. 힌트 없이, 어제보다 적은 조작으로 연결할 수 있을까?'];level.hint=['입력부터 끊긴 빛길을 차근차근 따라가 봐.','분할기는 파워를 절반으로 나눠. 목표값이 큰 수신기를 먼저 연결해 봐.'];level.after='오늘의 광회선 점검 완료. 다음 신호는 내일 다시 도착한다.';
+    level.title='오늘의 회선';level.place=dailyDate+' · 같은 날, 같은 회선';level.task='모든 수신기를 연결하자. 가장 적은 조작에 도전해 봐.';level.intro=['노아','도시는 다시 깨어났어. 오늘도 회선을 점검할 시간이야. 힌트 없이, 어제보다 적은 조작으로 연결할 수 있을까?'];level.hint=['입력부터 끊긴 빛길을 차근차근 따라가 봐.','빛 분할기는 광출력을 절반씩 나눠. 목표값이 큰 수신기를 먼저 연결해 봐.'];level.after='오늘의 광회선 점검 완료. 다음 신호는 내일 다시 도착한다.';
     state={index:0,values:level.parts.map(p=>(p.type==='mirror'||p.type==='split')?Math.floor(rnd()*2):(p.value||0)),phase:0,gates:[],moves:0,hints:0,sequenceStep:0,elapsed:0};
     const r=P.trace(level,state.values);if(level.parts.filter(p=>p.type==='target').every(p=>P.satisfied(r.targets[p.id]||0,p.goal))){const i=level.parts.findIndex(p=>p.type==='split'||p.type==='mirror');state.values[i]=1-state.values[i];}
     level.initialValues=state.values.slice();level.par=Object.entries(level.solution).filter(([i,v])=>state.values[i]!==v).length;undo=[];selected=-1;completion=false;switchScene('play');build();initAudio();
@@ -83,7 +85,7 @@
     $('progressRail').innerHTML=LEVELS.map((l,i)=>'<i class="'+(store.completed[i]?'done ':'')+(!daily&&i===state.index?'current':'')+'"></i>').join('');
     $('placeLabel').textContent=level.place;$('levelTitle').textContent=level.title;$('parLabel').textContent='★★★ 기준 '+level.par+'회';$('speakerName').textContent=level.intro[0];$('speakerAvatar').textContent=level.intro[0]==='노아'?'N':'M';$('speakerAvatar').classList.toggle('mira',level.intro[0]==='미라');$('dialogueText').textContent=level.intro[1];$('taskText').textContent=level.task;$('conceptText').textContent=level.note;
     $('hintBox').hidden=state.hints===0;if(state.hints)$('hintBox').textContent=level.hint[Math.min(state.hints-1,1)];
-    $('boardLegend').textContent=level.type==='route'?'청록 거울 / 보라 분할기 · 눌러 회전':level.type==='polar'?'각도는 빛을 정면으로 본 투과축 방향':'같은 광원 · 같은 편광 · 결맞는 두 빛길';
+    $('boardLegend').textContent=level.type==='route'?'청록 거울 / 보라 빛 분할기 · 눌러 회전':level.type==='polar'?'투과축: 통과할 수 있는 전기장 성분의 방향':'경로 위상차: 두 경로에서 누적된 위상의 차이';
     $('boardWrap').dataset.type=level.type;
     buildControls();update();
   }
@@ -96,7 +98,7 @@
     }else if(level.type==='polar'){
       $('opticalControls').innerHTML=level.filters.map((f,i)=>'<div class="dial-control '+(f.locked?'locked':'')+'">'+(!f.locked?'<button data-action="polar" data-part="'+i+'" data-delta="-15" aria-label="편광판 '+(i+1)+' 15도 줄이기">−</button>':'')+'<div><span>편광판 '+(i+1)+(f.locked?' · 고정':'')+'</span><strong id="angle'+i+'"></strong></div>'+(!f.locked?'<button data-action="polar" data-part="'+i+'" data-delta="15" aria-label="편광판 '+(i+1)+' 15도 늘리기">+</button>':'')+'</div>').join('');
     }else{
-      $('opticalControls').innerHTML='<div class="dial-control phase-control"><button data-action="phase" data-delta="-15" aria-label="위상차 15도 줄이기">−</button><div><span>두 팔의 위상차 Δφ</span><strong id="phaseValue"></strong></div><button data-action="phase" data-delta="15" aria-label="위상차 15도 늘리기">+</button></div>'+state.gates.map((g,i)=>'<button id="gate'+i+'" class="shutter" data-action="gate" data-part="'+i+'" '+(level.locks[i]?'disabled':'')+'><span>'+(i===0?'위쪽 팔':'아래쪽 팔')+(level.locks[i]?' · 고정':'')+'</span><b></b></button>').join('')+'<div class="phase-tools"><label class="sr-only" for="phaseSlider">위상차 조절</label><input id="phaseSlider" class="phase-slider" type="range" min="0" max="345" step="15" value="'+state.phase+'" aria-label="위상차 조절"><button data-action="phase-set" data-value="0">0°</button><button data-action="phase-set" data-value="90">90°</button><button data-action="phase-set" data-value="180">180°</button></div>';
+      $('opticalControls').innerHTML='<div class="dial-control phase-control"><button data-action="phase" data-delta="-15" aria-label="위상차 15도 줄이기">−</button><div><span>경로 위상차 δ</span><strong id="phaseValue"></strong></div><button data-action="phase" data-delta="15" aria-label="위상차 15도 늘리기">+</button></div>'+state.gates.map((g,i)=>'<button id="gate'+i+'" class="shutter" data-action="gate" data-part="'+i+'" '+(level.locks[i]?'disabled':'')+'><span>'+(i===0?'위쪽 경로':'아래쪽 경로')+(level.locks[i]?' · 고정':'')+'</span><b></b></button>').join('')+'<div class="phase-tools"><label class="sr-only" for="phaseSlider">위상차 조절</label><input id="phaseSlider" class="phase-slider" type="range" min="0" max="345" step="15" value="'+state.phase+'" aria-label="위상차 조절"><button data-action="phase-set" data-value="0">0°</button><button data-action="phase-set" data-value="90">90°</button><button data-action="phase-set" data-value="180">180°</button></div>';
       let dragging=false,dragRecorded=false;
       $('phaseSlider').addEventListener('pointerdown',()=>{dragging=true;dragRecorded=false;});
       $('phaseSlider').addEventListener('input',e=>{if(overlay||completion)return;const v=Number(e.target.value);if(v===state.phase)return;if(!dragging||!dragRecorded){undo.push(clone(state));state.moves++;dragRecorded=true;}state.phase=v;update();checkpoint();});
@@ -107,20 +109,20 @@
   function update() {
     const prev=ready;evaluate();if(!prev&&ready)tone(784,.3,'sine',.15);
     $('moveCount').textContent=String(state.moves).padStart(2,'0');$('undoBtn').disabled=undo.length===0||completion;
-    $('sendBtn').disabled=!ready&&!completion;$('sendBtn').textContent=completion?(daily?'지도 보기':state.index===15?'새벽 보기 ↗':'다음 구역으로 ↗'):ready?(level.sequence?'신호 '+(state.sequenceStep+1)+' / 3 전송 ↗':'복구 신호 전송 ↗'):'수신량을 목표에 맞춰 주세요';$('readyBadge').hidden=!ready;
+    $('sendBtn').disabled=!ready&&!completion;$('sendBtn').textContent=completion?(daily?'지도 보기':state.index===15?'새벽 보기 ↗':'다음 구역으로 ↗'):ready?(level.sequence?'신호 '+(state.sequenceStep+1)+' / 3 전송 ↗':'복구 신호 전송 ↗'):'수신 광출력을 목표에 맞춰 주세요';$('readyBadge').hidden=!ready;
     if(level.type==='route'){
       $('receiverList').innerHTML=level.parts.filter(p=>p.type==='target').map(p=>receiver(p.id,'수신기 '+p.id,result.targets[p.id]||0,p.goal)).join('');
       document.querySelectorAll('.node-btn').forEach(b=>{const i=Number(b.dataset.part);b.classList.toggle('selected',i===selected);b.setAttribute('aria-label',(level.parts[i].type==='split'?'분할기':'거울')+' '+(i+1)+' '+(state.values[i]===0?'/':'＼')+' 방향. 눌러 회전');b.dataset.value=state.values[i];});
-      $('measurements').innerHTML='<strong>입력 100%</strong><br>수신기 합계 '+pct(Object.values(result.targets).reduce((a,b)=>a+b,0))+' · 벽/흡수체 '+pct(result.absorbed)+'<br>화면 밖 '+pct(result.escaped)+(result.unresolved>0?'<br>닫힌 경로: '+pct(result.unresolved)+' (정상상태 계산 제외)':'')+'<br>반사각 = 입사각 = 45° (법선 기준)';
+      $('measurements').innerHTML='<strong>광원 출력 P₀ = 100%</strong><br>수신기 합계 '+pct(Object.values(result.targets).reduce((a,b)=>a+b,0))+' · 벽/흡수체 '+pct(result.absorbed)+'<br>화면 밖 '+pct(result.escaped)+(result.unresolved>0?'<br>닫힌 경로: '+pct(result.unresolved)+' (정상상태 계산 제외)':'')+'<br>반사각 = 입사각 = 45° (법선 기준)';
     }else if(level.type==='polar'){
       state.values.forEach((v,i)=>$('angle'+i).textContent=v+'°');$('receiverList').innerHTML=receiver('A','최종 수신기',result.power,level.goal);
-      $('measurements').innerHTML='<strong>입력 100% · '+(level.axis===null?'비편광':level.axis+'° 선편광')+'</strong><br>'+result.stages.map((s,i)=>'편광판 '+(i+1)+': '+pct(s.before)+' → '+pct(s.after)).join('<br>')+'<br>총 흡수 '+pct(result.absorbed)+' · 주파수는 그대로';
+      $('measurements').innerHTML='<strong>광원 출력 P₀ = 100% · '+(level.axis===null?'비편광':level.axis+'° 선편광')+'</strong><br>'+result.stages.map((s,i)=>{const incoming=i?state.values[i-1]:level.axis,diff=incoming===null?null:Math.abs(state.values[i]-incoming)%180,condition=s.before===0?'입사광 없음':diff===null?'비편광 · 평균 1/2':'θ = '+Math.min(diff,180-diff)+'°';return '편광판 '+(i+1)+' ('+condition+'): '+pct(s.before)+' → '+pct(s.after);}).join('<br>')+'<br>총 흡수 '+pct(result.absorbed)+'<br>'+(result.power===0?'최종 투과광 없음':'최종 투과광: '+result.angle+'° 선편광 · 주파수 유지')+'<br>θ는 각 판에 들어오는 빛의 진동축과 그 판의 투과축 사이 각도';
     }else{
       $('phaseValue').textContent=state.phase+'°';$('phaseSlider').value=state.phase;
       state.gates.forEach((g,i)=>{$('gate'+i).classList.toggle('closed',!g);$('gate'+i).querySelector('b').textContent=g?'셔터 열림':'셔터 닫힘';$('gate'+i).setAttribute('aria-pressed',String(!g));$('gate'+i).setAttribute('aria-label',(i===0?'위쪽':'아래쪽')+' 셔터 '+(g?'닫기':'열기'));});
       $('receiverList').innerHTML=receiver('A','출구 A',result.a,goals()[0])+receiver('B','출구 B',result.b,goals()[1]);
       if(level.sequence)$('taskText').textContent='마지막 신호 '+(state.sequenceStep+1)+' / 3 · '+['B에 전부 보내기','A에 전부 보내기','두 곳에 절반씩 보내기'][state.sequenceStep];
-      $('measurements').innerHTML='<strong>입력 100% · Δφ = '+state.phase+'°</strong><br>A '+pct(result.a)+' + B '+pct(result.b)+' + 흡수 '+pct(result.absorbed)+' = 100%<br>'+(state.gates.every(Boolean)?'A = sin²(Δφ/2), B = cos²(Δφ/2)':'한 팔만 열리면 위상차와 무관하게 A = B = 25%. 두 팔 모두 닫으면 0%.')+'<br>두 팔의 편광·주파수는 같음';
+      $('measurements').innerHTML='<strong>광원 출력 P₀ = 100% · δ = '+state.phase+'°</strong><br>A '+pct(result.a)+' + B '+pct(result.b)+' + 흡수 '+pct(result.absorbed)+' = 100%<br>'+(state.gates.every(Boolean)?'P<sub>A</sub>/P₀ = sin²(δ/2)<br>P<sub>B</sub>/P₀ = cos²(δ/2)':state.gates.some(Boolean)?'열린 경로의 50%가 다시 나뉘어 A·B에 25%씩 도착. δ와 무관.':'두 셔터가 입력의 100%를 흡수. A·B에는 빛이 도착하지 않음.')+'<br>δ는 경로에서 생기는 위상차. 분할기의 고정 반사·투과 위상은 식에 별도 반영.';
     }
     $('measurements').hidden=!analysis;
     draw(performance.now()/1000);
@@ -158,11 +160,27 @@
   function pause() {checkpoint();modal('잠시, 숨 고르기','<p>회선은 그대로 기다립니다. 시간 기록도 잠시 멈췄어요.</p><div class="pause-grid"><button class="primary" data-action="close">계속하기</button><button class="secondary" data-action="map">구역 지도</button><button class="secondary" data-action="archive">광학 기록</button><button class="secondary" data-action="home">시작 화면으로</button></div><p style="font-size:12px">터치 또는 클릭으로 조절 · Tab으로 장치 선택 · Enter/Space로 조작 · Z 되돌리기 · H 힌트 · Esc 일시 정지</p>');}
   function ending() {closeModal();const records=Object.values(store.completed);$('endingStats').innerHTML='<div><strong>'+records.length+' / 16</strong><span>연결된 구역</span></div><div><strong>'+records.reduce((n,r)=>n+r.stars,0)+' / 48</strong><span>신호 별</span></div><div><strong>'+formatTime(records.reduce((n,r)=>n+r.elapsed,0))+'</strong><span>저장된 구역 기록 합계</span></div>';switchScene('ending');chime();}
   const ARCHIVE=[
-    {name:'반사 · 분할',body:'<h3>방향을 바꿔도, 빛을 복제하지 않는다</h3><p>반사각과 입사각은 모두 거울 표면에 수직인 선, 즉 <strong>법선</strong>에서 잽니다. 게임의 대각선 거울에 수평·수직 광선이 들어오면 두 각은 모두 45°입니다.</p><div class="formula">θ입사 = θ반사</div><p>50:50 분할기는 들어온 광학 파워를 직진과 반사 경로로 절반씩 보냅니다. 하나의 광자를 반으로 잘라 그리는 모형이 아닙니다.</p><div class="formula">P직진 + P반사 = P입력</div><p>경로 퍼즐은 간섭하지 않는 서로 다른 수신 경로를 연결하는 광선 모형입니다. 빛길은 벽·수신기에 닿으면 흡수되고, 장치 없는 교차점에서는 서로 영향을 주지 않습니다. 여러 결맞는 빔의 재결합은 뒤의 전용 간섭계에서 계산합니다.</p><p><a href="https://openstax.org/books/college-physics-2e/pages/25-2-the-law-of-reflection" target="_blank" rel="noopener noreferrer">OpenStax · 반사 법칙 ↗</a></p>'},
-    {name:'편광',body:'<h3>빛의 진행 방향과 진동 방향은 다르다</h3><p>편광은 전기장의 진동 방향과 관련됩니다. 전기장은 빛이 진행하는 방향에 수직입니다. 게임의 원형 그림은 <strong>빛을 정면에서 본 투과축</strong>이며, 광선의 진행 경로를 나타내는 각도가 아닙니다. 판 사이에서 편광 방향이 저절로 조금씩 바뀌는 것도 아닙니다.</p><div class="formula">P출력 = P입력 cos²θ</div><p>이 식은 입사광이 선편광일 때 적용합니다. θ는 입사 편광과 편광판 투과축 사이의 각도입니다. 통과 후의 빛은 투과축 방향으로 선편광됩니다. 비편광 입력은 첫 이상적 선형 편광판에서 평균 파워의 절반이 통과합니다.</p><table class="archive-table"><tr><th>선편광 0°의 진행 순서</th><th>최종 파워</th></tr><tr><td>90° 판</td><td>0%</td></tr><tr><td>45° → 90° 판</td><td>25%</td></tr><tr><td>30° → 60° → 90° 판</td><td>42.1875%</td></tr></table><p>이 게임은 이상적인 흡수형 편광판을 사용합니다. 줄어든 광학 파워는 흡수되며, 투과된 빛의 주파수가 낮아져서 어두워지는 것이 아닙니다.</p><p><a href="https://openstax.org/books/university-physics-volume-3/pages/1-7-polarization" target="_blank" rel="noopener noreferrer">OpenStax · 편광과 말뤼스 법칙 ↗</a></p>'},
-    {name:'간섭',body:'<h3>어두운 출구는 에너지의 소멸이 아니다</h3><p>마흐–젠더 간섭계는 같은 광원에서 나눈 결맞는 두 빛을 다시 합칩니다. 여기서는 같은 주파수·편광, 이상적 50:50 분할기 두 개와 거울을 가정합니다. 두 출구 A·B를 항상 함께 표시합니다.</p><div class="formula">PA = P입 sin²(Δφ/2)<br>PB = P입 cos²(Δφ/2)</div><p>이 식은 두 팔이 모두 열려 있을 때의 <strong>이 장치의 위상 기준</strong>입니다. Δφ=0°에서 B가 밝도록 정했습니다. 출구 표기와 고정 반사 위상의 기준에 따라 A·B 식을 바꿔 쓰기도 합니다. 분할기의 반사·투과 위상을 포함해 계산했습니다.</p><p>한 팔을 닫으면 입력 파워의 50%는 그 셔터에 흡수됩니다. 남은 50%는 마지막 분할기에서 갈라져 A와 B에 25%씩 도착하고, 위상차를 바꿔도 출력은 변하지 않습니다.</p><div class="formula">PA + PB + P흡수 = P입력</div><p>실제 장치의 대비는 결맞음, 정렬, 편광, 손실 등에 제한됩니다. 게임은 고전적인 파동 모형이며 양자 측정이나 광자 검출 확률 실험을 재현하지 않습니다.</p><p><a href="https://link.springer.com/article/10.1007/s00340-021-07680-z" target="_blank" rel="noopener noreferrer">Applied Physics B · 광학 분할기와 마흐–젠더 간섭계 ↗</a></p>'},
-    {name:'모형 · 조작',body:'<h3>이 게임이 보여주는 것</h3><p>게임 속 빛은 <strong>통신 신호</strong>입니다. 도시의 전력은 비상 전력망에서 공급합니다. 레이저 파워의 배분과 데이터 전송량을 동일한 물리량으로 취급하지 않습니다.</p><ul><li>모든 백분율은 광원의 입력 광학 파워를 100%로 한 값입니다. 빔 단면적을 일정하게 가정할 때 세기의 비율과 같습니다.</li><li>움직이는 짧은 빛무늬는 경로를 읽기 위한 연출입니다. 실제 빛의 속도, 개별 광자, 전기장의 진동 속도를 표현하지 않습니다.</li><li>청록·보라·황금색은 장치와 출구를 구분하는 표시색입니다. 색 변화로 파장이나 주파수를 바꾸는 게임이 아닙니다.</li><li>장치 사이 거리는 실제 축척이 아닙니다. 간섭계의 위상 조절은 광학적 경로차 등을 바꾸는 장치의 제어값을 나타냅니다. 진공 파장 λ에 대해 Δφ=2πΔ(광학적 경로길이)/λ입니다.</li><li>회절, 거울의 실제 반사 손실, 편광판의 불완전성은 생략했습니다. 이상적인 모형과 실제 장치의 차이를 구분해 주세요.</li><li>수신기 목표 범위와 세 번의 최종 전송은 게임 규칙입니다. 광학 계산 결과 자체는 같은 물리 식으로 판정합니다.</li></ul><h3>조작과 저장</h3><p>거울·분할기는 누르면 회전합니다. 편광판은 ±로 15°씩 돌립니다. 간섭계는 ±·슬라이더·각도 버튼으로 위상차를 조절하고 셔터를 여닫습니다. 목표를 맞춘 뒤 <strong>복구 신호 전송</strong>을 눌러 확정합니다.</p><p>Tab으로 장치나 버튼을 선택한 뒤 Enter/Space로 조작할 수 있습니다. Z: 되돌리기, H: 힌트, Esc: 일시 정지. 힌트는 별 기록에만 영향을 주며, 다음 구역이나 엔딩을 막지 않습니다. 저장은 이 브라우저의 이 기기에 남습니다. 사이트 데이터 삭제·비공개 모드에서는 기록이 유지되지 않을 수 있습니다.</p><p>원화: 내장 이미지 생성 도구로 제작한 오리지널 배경. 게임 음악과 효과음: 이 게임에서 합성한 음원.</p>'}
-  ];
+  {
+    "name": "반사 · 분할",
+    "body": "<h3>거울은 방향을, 분할기는 배분을 바꾼다</h3>\n <p><strong>법선</strong>은 거울 표면에 수직인 기준선입니다. 입사각은 들어오는 광선과 법선 사이, 반사각은 나가는 광선과 법선 사이의 각도입니다. 둘은 같습니다. 게임의 대각선 거울에 수평·수직 광선이 들어오면 두 각 모두 45°입니다.</p>\n <div class=\"formula\">입사각 = 반사각</div>\n <p><strong>빛 분할기(빔 스플리터)</strong>는 빛의 일부를 통과시키고 일부를 반사하는 장치입니다. 게임의 이상적인 무손실 50:50 분할기는 한쪽에서 들어온 광출력의 절반을 직진시키고 절반을 반사합니다. 광출력은 단위 시간에 빛이 전달하는 에너지입니다. 전기장 진폭을 절반으로 만드는 것과는 다릅니다.</p>\n <div class=\"formula\">P<sub>직진</sub> = P<sub>반사</sub> = P<sub>입력</sub>/2</div>\n <p>경로 퍼즐에서는 빛을 선으로 나타내는 <strong>광선 모형</strong>을 씁니다. 게임의 불투명한 벽과 수신기는 도착한 빛을 흡수합니다. 별도 장치가 없는 곳에서 빛길이 교차해도 광선끼리 충돌해 꺾이지 않습니다. 겹친 파동의 간섭무늬는 이 화면에서 계산하지 않습니다. 두 경로를 다시 합칠 때의 간섭은 3막의 간섭계에서 다룹니다.</p>\n <p><a href=\"https://openstax.org/books/college-physics-2e/pages/25-2-the-law-of-reflection\" target=\"_blank\" rel=\"noopener noreferrer\">OpenStax · 반사 법칙 ↗</a></p>"
+  },
+  {
+    "name": "편광",
+    "body": "<h3>진행 방향, 진동축, 투과축을 구분하자</h3>\n <p>이 게임에서 빛의 전기장은 진행 방향에 수직으로 진동합니다. <strong>선편광</strong>은 전기장이 한 직선 방향으로 진동하는 빛입니다. <strong>투과축</strong>은 편광판이 통과시키는 전기장 성분의 방향입니다.</p>\n <p>배치도에서 빛은 왼쪽에서 오른쪽으로 갑니다. 그 아래 원은 빛을 정면에서 본 방향 표시입니다. 노란 화살표는 입사광의 진동축, 청록 화살표는 각 편광판의 투과축입니다. 가로가 0°, 세로가 90°입니다. 화살표는 축을 나타내는 기호이며, 판의 틈이나 분자 배열을 그린 것이 아닙니다. 빛이 완전히 차단되어도 판의 투과축은 그대로 있습니다.</p>\n <h3>말뤼스 법칙: 매 판의 입사광을 기준으로</h3>\n <div class=\"formula\">P<sub>통과 후</sub> = P<sub>통과 전</sub> cos²θ</div>\n <p>입사광이 선편광이고 판이 이상적인 선형 편광판일 때 적용합니다. <strong>θ는 그 판에 들어오는 빛의 진동축과 그 판의 투과축 사이 각도</strong>입니다. 투과된 빛이 있다면 그 빛은 투과축 방향으로 선편광됩니다. 다음 판에서는 이 새로운 진동축을 기준으로 θ를 다시 구합니다. 판 사이에서 빛길이나 진동축이 저절로 조금씩 꺾이는 과정이 아닙니다.</p>\n <table class=\"archive-table\"><tr><th>입사광 0° → 판의 투과축 순서</th><th>광원 대비 최종 광출력</th></tr><tr><td>90°</td><td>0%</td></tr><tr><td>45° → 90°</td><td>25%</td></tr><tr><td>30° → 60° → 90°</td><td>42.1875%</td></tr></table>\n <p>마지막 예에서는 매 판의 θ가 30°이므로 (cos²30°)³ = (3/4)³ = 27/64입니다. 25%, 42.1875%는 <strong>맨 처음 광원 출력에 대한 비율</strong>입니다.</p>\n <h3>비편광 빛의 첫 편광판</h3>\n <p><strong>비편광</strong>은 전기장의 진동 방향이 불규칙하게 변하며, 평균적으로 특정한 방향이 우세하지 않은 상태입니다. 비편광 빛이 첫 이상적인 선형 편광판을 만나면 판의 각도와 무관하게 평균 광출력의 절반이 통과합니다. 그 뒤의 빛은 선편광이므로 다음 판부터 말뤼스 법칙을 적용합니다.</p>\n <p>게임은 이상적인 <strong>흡수형 편광판</strong>을 가정합니다. 실제 편광 장치에는 투과하지 않는 성분을 반사하는 종류도 있습니다. 통과하지 못한 빛의 에너지는 판에 흡수됩니다. 투과광의 주파수가 낮아져 광출력이 줄어드는 것은 아닙니다. 서로 다른 판 배치를 비교하면 투과 광출력이 커질 수 있지만, 어느 배치에서도 광원 출력보다 커지지 않습니다.</p>\n <p><a href=\"https://openstax.org/books/university-physics-volume-3/pages/1-7-polarization\" target=\"_blank\" rel=\"noopener noreferrer\">OpenStax · 편광과 말뤼스 법칙 ↗</a></p>"
+  },
+  {
+    "name": "간섭",
+    "body": "<h3>두 빛의 전기장을 먼저 더한다</h3>\n <p><strong>간섭계</strong>는 빛을 여러 경로로 나눈 뒤 다시 합쳐 간섭을 관찰하는 장치입니다. 이 게임의 마흐–젠더 간섭계에는 두 빛 분할기와 두 거울이 있습니다. 나뉜 위쪽·아래쪽 경로를 간섭계의 <strong>팔</strong>이라고도 부릅니다.</p>\n <p>간섭할 때는 두 빛의 광출력을 따로 계산해 더하는 대신, 각 출구에서 <strong>전기장을 먼저 더한 후</strong> 그 진폭의 제곱으로 광출력을 구합니다. 두 성분이 강화되면 보강 간섭, 약해지면 상쇄 간섭입니다. 같은 크기의 두 성분이 완전히 상쇄하면 그 출구는 어두워집니다.</p>\n <p>게임에서는 같은 주파수와 편광을 가진 두 빛이 정확하게 겹치며, 측정 중 상대적인 위상 관계가 안정적으로 유지되는 <strong>결맞음</strong>을 가정합니다. 실제로는 같은 광원에서 나눴다는 사실만으로 모든 경로차에서 완전한 간섭이 보장되지는 않습니다.</p>\n <h3>경로 위상차 δ는 무엇일까?</h3>\n <p><strong>위상</strong>은 반복하는 진동이 한 주기 중 어디에 있는지를 나타냅니다. 360°가 한 주기, 180°가 반 주기입니다. 여기서 조절하는 <strong>δ는 두 경로를 지나며 생기는 위상차</strong>입니다. 광선이 꺾이는 각도나 편광판의 투과축 각도가 아닙니다.</p>\n <div class=\"formula\">δ = 2π(L<sub>위</sub> − L<sub>아래</sub>)/λ₀</div>\n <p>L은 각 경로의 <strong>광학적 경로 길이</strong>이며, 균일한 매질에서는 굴절률 n과 실제 길이 ℓ의 곱 nℓ입니다. λ₀는 진공에서의 파장입니다. 위 식의 δ는 라디안 단위이며 2π rad = 360°입니다. 게임에서는 이를 도(°)로 표시합니다.</p>\n <div class=\"formula\">P<sub>A</sub>/P₀ = sin²(δ/2)<br>P<sub>B</sub>/P₀ = cos²(δ/2)</div>\n <p>위 출력식은 <strong>두 셔터가 모두 열린 이 장치</strong>에 적용됩니다. P₀는 광원 출력입니다. 분할기의 반사·투과에 따른 고정 위상 변화는 출력식에 별도로 반영했습니다. δ=0°일 때 B가 최대, δ=180°일 때 A가 최대입니다. 조절값 δ를 각 출구에서 실제로 겹치는 두 전기장의 최종 위상차와 혼동하면 안 됩니다. “180°면 항상 보강 간섭”이라는 뜻도 아닙니다.</p>\n <h3>어두운 출구와 흡수는 다르다</h3>\n <p>두 경로가 열려 있으면 A가 어두워지는 만큼 B가 밝아지며, 두 출구의 광출력 합은 입력과 같습니다. 한 경로의 셔터를 닫으면 입력의 50%가 셔터에 흡수되고, 남은 50%가 마지막 분할기에서 나뉘어 A·B에 25%씩 도착합니다. 이때 δ를 바꿔도 광출력은 변하지 않습니다. 둘 다 닫으면 전부 흡수됩니다.</p>\n <div class=\"formula\">P<sub>A</sub> + P<sub>B</sub> + P<sub>흡수</sub> = P₀</div>\n <p><a href=\"https://link.springer.com/article/10.1007/s00340-021-07680-z\" target=\"_blank\" rel=\"noopener noreferrer\">Applied Physics B · 빛 분할기와 마흐–젠더 간섭계 ↗</a></p>"
+  },
+  {
+    "name": "모형 · 조작",
+    "body": "<h3>게임의 그림과 실제 장치</h3>\n <p>빛은 에너지를 전달합니다. 이 이야기의 광신호는 수신기에 도착해 <strong>전력망을 다시 연결하라는 명령</strong>을 전달합니다. 도시를 가동하는 전력은 별도의 비상 전력망에서 공급합니다. 광출력의 배분 비율을 데이터 전송량의 비율로 해석하지 않습니다.</p>\n <ul><li>움직이는 짧은 빛무늬는 경로를 읽기 위한 연출입니다. 실제 광속, 개별 광자, 전기장 진동을 표현하지 않습니다. 선의 굵기와 화면 밝기는 읽기 쉽게 조정했으므로 정량 비교에는 숫자를 사용하세요.</li><li>청록·보라·황금색은 장치와 출구를 구분하는 표시색입니다. 게임에서 색 표시가 달라져도 빛의 파장이나 주파수가 달라지는 것은 아닙니다.</li><li>장치 사이 거리는 실제 축척이 아닙니다. 위상 조절기는 경로 길이나 굴절률을 바꿔 경로 위상차를 조절하는 장치를 나타냅니다. 각 설정을 유지했을 때의 정상상태 출력을 계산합니다.</li><li>거울과 분할기는 손실이 없고, 편광판과 닫힌 셔터는 투과하지 않은 빛을 흡수한다고 가정합니다. 회절, 실제 반사 손실, 불완전한 편광판과 정렬 오차는 생략했습니다.</li><li>수신기의 목표 범위와 마지막 세 번의 전송은 게임 규칙입니다. 빛을 한 광자씩 검출하거나 양자 측정을 재현하는 게임은 아닙니다.</li></ul>\n <h3>조작과 저장</h3><p>거울·분할기는 누르면 회전합니다. 편광판의 투과축은 ±로 15°씩 돌립니다. 간섭계는 ±·슬라이더·각도 버튼으로 경로 위상차를 조절하고 셔터를 여닫습니다. 목표를 맞춘 뒤 <strong>복구 신호 전송</strong>을 눌러 확정합니다.</p>\n <p>Tab으로 장치나 버튼을 선택한 뒤 Enter/Space로 조작할 수 있습니다. Z: 되돌리기, H: 힌트, Esc: 일시 정지. 힌트는 별 기록에만 영향을 주며 다음 구역이나 엔딩을 막지 않습니다. 저장 기록은 현재 기기의 이 브라우저에 남습니다. 사이트 데이터 삭제·비공개 모드에서는 기록이 유지되지 않을 수 있습니다.</p>\n <p>배경은 이미지 생성 도구로 만든 오리지널 원화이며, 음악과 효과음은 게임에서 합성합니다.</p>"
+  },
+  {
+    "name": "용어 풀이",
+    "body": "<h3>100%는 무엇을 뜻할까?</h3>\n <p>모든 수신기와 목표에 표시한 백분율은 <strong>광원에서 출발한 광출력 P₀에 대한 비율</strong>입니다. 예를 들어 광원이 1 W라면 수신기 25%는 0.25 W입니다. 바로 앞 장치를 기준으로 한 비율이 아닙니다.</p>\n <h3>광출력 P · 빛의 세기 I</h3>\n <p><strong>광출력</strong>(광학 파워)은 빛이 단위 시간에 전달하는 에너지입니다. 단위는 와트(W)이며 1 W = 1 J/s입니다. 게임은 빠른 빛의 진동을 평균한 광출력을 표시합니다.</p>\n <p><strong>빛의 세기</strong>는 빛의 진행 방향에 수직인 단위 면적을 통과하는 평균 광출력이며 단위는 W/m²입니다. 빔 단면에서 세기가 균일하면 I = P/S입니다(S: 빔 단면적). 같은 광출력이라도 좁은 면적에 모으면 세기가 커집니다. 두 용어는 같은 물리량이 아닙니다.</p>\n <h3>진폭 · 편광 · 위상</h3>\n <p><strong>진폭</strong>은 전기장 진동의 최대 크기입니다. 같은 매질에서 빛의 세기는 진폭의 제곱에 비례합니다. 진폭이 절반이면 세기는 1/4입니다.</p>\n <p><strong>편광</strong>은 전기장의 진동 방향과 시간에 따른 변화 방식에 관한 성질입니다. 게임에서는 선편광과 비편광을 다룹니다. <strong>투과축</strong>은 편광판이 통과시키는 전기장 성분의 방향입니다.</p>\n <p><strong>위상</strong>은 진동 한 주기 안의 위치, <strong>위상차</strong>는 두 진동의 위상 차이입니다. 주파수는 1초 동안의 진동 횟수입니다. 위상차를 설정하는 것과 주파수를 바꾸는 것은 구분해야 합니다.</p>\n <p><strong>결맞음</strong>은 간섭을 관찰하는 동안 두 빛의 상대적인 위상 관계가 얼마나 안정적으로 유지되는지에 관한 성질입니다. 이 게임의 간섭계는 완전히 결맞는 빛을 가정합니다.</p>\n <p><a href=\"https://openstax.org/books/university-physics-volume-2/pages/16-3-energy-carried-by-electromagnetic-waves\" target=\"_blank\" rel=\"noopener noreferrer\">OpenStax · 빛의 에너지와 세기 ↗</a><br><a href=\"https://openstax.org/books/university-physics-volume-3/pages/3-1-youngs-double-slit-interference\" target=\"_blank\" rel=\"noopener noreferrer\">OpenStax · 간섭과 결맞음 ↗</a></p>"
+  }
+];
   function archive(tab=0) {modal('광학 기록','<nav class="archive-nav" aria-label="광학 기록 주제">'+ARCHIVE.map((a,i)=>'<button data-action="archive-tab" data-index="'+i+'" class="'+(i===tab?'active':'')+'">'+a.name+'</button>').join('')+'</nav><div class="archive-content">'+ARCHIVE[tab].body+'</div>');}
   document.addEventListener('click',e=>{
     const b=e.target.closest('[data-action]');if(!b||b.disabled)return;const action=b.dataset.action;
@@ -170,7 +188,7 @@
     if(action==='sound'){store.sound=!store.sound;initAudio();syncSound();writeStore();return;}
     if(action==='start'){enter(0);return;}if(action==='continue'){resume();return;}if(action==='daily'){dailyLevel();return;}
     if(action==='home'){checkpoint();closeModal();switchScene('title');refreshTitle();return;}
-    if(action==='map'){map();return;}if(action==='archive'){archive(level?({route:0,polar:1,interference:2}[level.type]):0);return;}if(action==='archive-tab'){archive(Number(b.dataset.index));return;}
+    if(action==='map'){map();return;}if(action==='archive'){archive(b.dataset.index!==undefined?Number(b.dataset.index):scene==='play'&&level?({route:0,polar:1,interference:2}[level.type]):4);return;}if(action==='archive-tab'){archive(Number(b.dataset.index));return;}
     if(action==='close'){closeModal();return;}if(action==='pause'){pause();return;}if(action==='ending'){ending();return;}
     if(action==='level'){enter(Number(b.dataset.index));return;}if(action==='next'){if(daily){map();return;}state.index===15?ending():enter(state.index+1);return;}
     if(action==='replay'){daily?dailyLevel():enter(state.index);return;}
@@ -231,23 +249,26 @@
     result.segments.forEach(s=>beam([xy(s.x1,s.y1),xy(s.x2,s.y2)],s.power,time));ctx.restore();
     level.parts.forEach((p,i)=>{const [x,y]=xy(p.x,p.y);if(p.type==='mirror'||p.type==='split')mirror(x,y,state.values[i],p.type==='split',i);else if(p.type==='target')target(x,y,p.id,result.targets[p.id]||0,p.goal);else{rect(x-cell*.4,y-cell*.4,cell*.8,cell*.8,5,'#233243','#3b4e61');ctx.save();ctx.beginPath();ctx.rect(x-cell*.4,y-cell*.4,cell*.8,cell*.8);ctx.clip();for(let n=-40;n<80;n+=13)line([[x-40+n,y-40],[x+40+n,y+40]],'#354659',3);ctx.restore();}});
     source(...xy(level.source.x,level.source.y));
-    label('입력 광학 파워 기준',420,563,12,'#6c8ba3');
+    label('광원 출력 P₀ = 100% 기준',420,563,12,'#6c8ba3');
   }
-  function axisDisc(x,y,angle,power,r=40){
-    circle(x,y,r,'#112837','#4c7185',1.5);ctx.save();ctx.beginPath();ctx.arc(x,y,r-3,0,Math.PI*2);ctx.clip();ctx.translate(x,y);ctx.rotate(-angle*Math.PI/180);for(let n=-r;n<=r;n+=10)line([[-r,n],[r,n]],'#3a7285',2,.5);line([[-r+6,0],[r-6,0]],palette.cyan,4,.5+.5*power,7);ctx.restore();circle(x,y,r+6,null,'#294556',1);
+  function axisDisc(x,y,angle,r=40,color=palette.cyan){
+    // A double-headed axis symbol, not a slit/molecular grating or an instantaneous E vector.
+    // A plate's transmission axis remains defined even when no light passes through it.
+    circle(x,y,r,'#112837','#4c7185',1.5);ctx.save();ctx.translate(x,y);ctx.setLineDash([2,4]);line([[-r+3,0],[r-3,0]],'#537080',1,.6);ctx.setLineDash([]);ctx.rotate(-angle*Math.PI/180);
+    const a=r-7;line([[-a,0],[a,0]],color,2.5);line([[-a+6,-4],[-a,0],[-a+6,4]],color,2);line([[a-6,-4],[a,0],[a-6,4]],color,2);ctx.restore();
   }
   function drawPolar(time){
     const n=state.values.length,xs=state.values.map((_,i)=>220+i*(400/Math.max(n-1,1))),sourceX=85,targetX=752;
     if(n===1)xs[0]=420;
-    label('광학 장치를 위에서 펼친 배치도',420,60,14,palette.muted);
+    label('위: 장치를 옆에서 본 배치도 · 빛은 왼쪽에서 오른쪽으로',420,60,14,palette.muted);
     const by=252;let last=sourceX,power=1;
     state.values.forEach((angle,i)=>{beam([[last,by],[xs[i],by]],power,time);last=xs[i];power=result.stages[i].after;});beam([[last,by],[targetX,by]],power,time);
     source(sourceX,by);label(level.axis===null?'비편광':level.axis+'° 선편광',sourceX,by+70,14,palette.white);
     state.values.forEach((angle,i)=>{rect(xs[i]-13,by-63,26,126,6,'#203d50','#6c9caf');line([[xs[i],by-52],[xs[i],by+52]],palette.cyan,2,.8);rect(xs[i]-27,by+62,54,10,2,'#345064');label('편광판 '+(i+1),xs[i],by-90,16,palette.white);label(pct(result.stages[i].after),xs[i],by+101,16,palette.cyan);});
     target(targetX,by,'A',result.power,level.goal);
-    label('아래 원은 빛을 정면으로 본 모습 · 투과축의 방향',420,408,14,palette.muted);
-    state.values.forEach((angle,i)=>{axisDisc(xs[i],489,angle,result.stages[i].after,35);label(angle+'°'+(level.filters[i].locked?' 고정':''),xs[i],550,16,level.filters[i].locked?palette.muted:palette.cyan);});
-    if(level.axis===null){circle(sourceX,489,29,'#112837','#4c7185');for(let k=0;k<6;k++){const a=k*Math.PI/6;line([[sourceX-22*Math.cos(a),489-22*Math.sin(a)],[sourceX+22*Math.cos(a),489+22*Math.sin(a)]],palette.amber,1.2,.65);}label('여러 편광 방향',sourceX,550,12,palette.muted);}else{axisDisc(sourceX,489,level.axis,1,28);label('입사 '+level.axis+'°',sourceX,550,13,palette.muted);}
+    label('아래: 빛을 정면에서 본 축의 방향 · 가로 0°, 세로 90°',420,408,14,palette.muted);
+    state.values.forEach((angle,i)=>{axisDisc(xs[i],489,angle,35);label('투과축 '+angle+'°',xs[i],550,14,level.filters[i].locked?palette.muted:palette.cyan);});
+    if(level.axis===null){circle(sourceX,489,29,'#112837','#4c7185');label('비편광',sourceX,489,12,palette.amber);label('고정된 진동축 없음',sourceX,550,11,palette.muted);}else{axisDisc(sourceX,489,level.axis,28,palette.amber);label('입사 진동축 '+level.axis+'°',sourceX,550,12,palette.amber);}
   }
   function drawInterference(time){
     const sx=78, left=237,right=596,upper=160,lower=420;
@@ -263,15 +284,15 @@
     label('분할',left,lower+49,14,palette.violet);label('재결합',right+1,upper+52,14,palette.violet);
     [upper,lower].forEach((y,i)=>{const open=state.gates[i];rect(357,y-24,34,48,5,open?'#143d3d':'#552b3c',open?'#4a9387':'#cf8191');if(!open)line([[363,y-16],[385,y+16]],'#ffa9ba',4);else line([[374,y-14],[374,y+14]],'#6bfdde',2,.6);label(open?'열림':'흡수',374,y+43,13,open?palette.cyan:'#ffb9bf');});
     rect(423,upper-32,91,64,9,'#252847','#8c82b9');label('위상 조절',468,upper-9,13,palette.violet);label(state.phase+'°',468,upper+13,20,'#e6dfff');
-    label('위쪽 팔',280,106,13,palette.muted);label('아래쪽 팔',453,lower-52,13,palette.muted);
+    label('위쪽 경로',280,106,13,palette.muted);label('아래쪽 경로',453,lower-52,13,palette.muted);
     const centreY=297;rect(295,centreY-31,225,64,8,'#0c1c2c','#31485e');label('A + B + 흡수 = 100%',408,centreY-8,15,palette.white);label('셔터 흡수 '+pct(result.absorbed),408,centreY+16,13,result.absorbed>0?'#ffb9bf':palette.cyan);
-    label('두 출구의 파워를 함께 관찰하세요.',420,544,15,palette.muted);
-    if(analysis){label('각 팔로 50%',109,510,13,palette.violet);label('고정 반사 위상을 포함한 위상 기준',420,572,12,palette.muted);}
+    label('A·B의 광출력 합과 셔터 흡수를 함께 관찰하세요.',420,544,15,palette.muted);
+    if(analysis){label('각 경로에 50%',109,510,13,palette.violet);label('경로 위상차 δ · 360°는 진동 한 주기',420,572,12,palette.muted);}
   }
   function draw(time){if(!state||!level||!result)return;ctx.clearRect(0,0,840,600);gridBackground();if(level.type==='route')drawRoute(time);else if(level.type==='polar')drawPolar(time);else drawInterference(time);}
   function frame(now){
     const dt=Math.min(100,now-lastTime);lastTime=now;
-    if(scene==='play'&&!overlay&&!completion&&!document.hidden){state.elapsed+=dt;if(now-renderTime>(reduced?500:33)){renderTime=now;draw(now/1000);}if(now-musicClock>950){musicClock=now;const notes=[130.81,196,261.63,196,164.81,220,293.66,220];tone(notes[musicStep++%8],1.6,'sine',.055);}}
+    if(scene==='play'&&!overlay&&!completion&&!document.hidden){state.elapsed+=dt;if(now-renderTime>(reduced?500:33)){renderTime=now;draw(now/1000);}if(music&&store.sound)music.tick(level.act);else if(music)music.pause();}else if(music)music.pause();
     requestAnimationFrame(frame);
   }
   syncSound();refreshTitle();requestAnimationFrame(frame);

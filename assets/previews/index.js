@@ -123,6 +123,11 @@ window.PHASE_PREVIEWS = {
       "sourceHash": "26ad4282eb58a18d4d56d83b493f463fae8aaea42d0477eb2e08dc28d4631dfd",
       "bytes": 31796
     },
+    "afterlight": {
+      "src": "assets/previews/afterlight-3b965e5104.webp",
+      "sourceHash": "9ad8e80caf10c16d9410dfb484642f983d1d467ad2436cc7ae4f7020c6820628",
+      "bytes": 29772
+    },
     "hanbut": {
       "src": "assets/previews/hanbut-4bd9052421.webp",
       "sourceHash": "df408f470ef996aa5d909bebe5331c1156e26953a8020c1b63212a5496730f16",
@@ -137,11 +142,6 @@ window.PHASE_PREVIEWS = {
       "src": "assets/previews/bamti-escape-31335fc127.webp",
       "sourceHash": "eda636c0bd2fad8fbf1346462aa776b544d5405fea6e53ecb8cc74ec92fb1c82",
       "bytes": 23136
-    },
-    "afterlight": {
-      "src": "assets/previews/afterlight-0844e37eff.webp",
-      "sourceHash": "ac34106d42977d9fc91df3bc4dc3aa5a38a2e254db324285b127c30f2d0f0fb3",
-      "bytes": 29710
     }
   }
 };

@@ -1,4 +1,5 @@
-/* Afterlight: dimensionless, ideal classical optical models. No particle simulation. */
+/* Afterlight: ideal classical optics, time-averaged powers normalized to source output.
+   The default source output is 1. No particle simulation. Angles are in degrees. */
 (function (root, factory) {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
@@ -19,11 +20,15 @@
       stages.push({ before, after: power, angle: next, absorbed: before - power });
       angle = next;
     }
+    // angle records the last axis setting; it does not describe a field if power is zero.
     return { power, angle, stages, absorbed };
   }
   // Two identical lossless 50:50 splitters B=(1/sqrt(2))*[[1,i],[i,1]].
-  // a=(sqrt(Tu)*exp(i*phi)-sqrt(Tl))/2; b=i*(sqrt(Tu)*exp(i*phi)+sqrt(Tl))/2.
-  // Fixed common mirror phases are absorbed into the phase reference.
+  // In the drawn geometry: upper port a=(sqrt(Tl)-sqrt(Tu)*exp(i*delta))/2;
+  // right port b=i*(sqrt(Tu)*exp(i*delta)+sqrt(Tl))/2. Tu/Tl are power transmissions.
+  // delta is the propagation phase difference between arms (upper minus lower).
+  // Splitter reflection/transmission phases are included separately through B above.
+  // Each arm has one identical mirror; their common phase cancels from the powers.
   function interferometer(phase, top = 1, bottom = 1, input = 1) {
     top = clamp(top); bottom = clamp(bottom);
     const cross = 2 * Math.sqrt(top * bottom) * Math.cos(phase * RAD);

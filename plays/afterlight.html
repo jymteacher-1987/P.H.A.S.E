@@ -7,7 +7,7 @@
   <meta name="description" content="빛이 사라진 도시, 마지막 신호를 보내라. 반사·편광·간섭을 이용하는 16개 스테이지의 SF 물리 퍼즐 어드벤처.">
   <title>잔광: 마지막 신호 · P.H.A.S.E</title>
   <script src="../assets/js/browser-compat.js"></script>
-  <link rel="stylesheet" href="../assets/afterlight/style.css?v=01f437a19b">
+  <link rel="stylesheet" href="../assets/afterlight/style.css?v=f36d61307d">
   <link rel="preload" as="image" href="../assets/afterlight/city.webp">
 </head>
 <body>
@@ -39,7 +39,7 @@
         </div>
         <aside class="mission-panel">
           <div class="transmission"><div id="speakerAvatar" class="speaker-avatar" aria-hidden="true">N</div><div><div class="transmission-label"><strong id="speakerName"></strong><span>연결됨</span></div><p id="dialogueText"></p></div></div>
-          <div class="mission-goal"><p class="eyebrow">YOUR MISSION</p><p id="taskText"></p><div id="receiverList" class="receiver-list" aria-live="polite"></div></div>
+          <div class="mission-goal"><p class="eyebrow">YOUR MISSION</p><p id="taskText"></p><div id="receiverList" class="receiver-list" aria-live="polite"></div><div class="power-reference"><span>광원 출력 100% 기준</span><button class="text-btn" data-action="archive" data-index="4">용어 풀이 ↗</button></div></div>
           <div id="measurements" class="measurements" hidden></div>
           <div class="mission-actions"><button id="sendBtn" class="primary" data-action="send" disabled>수신기를 연결해 주세요</button><div class="secondary-actions"><button class="secondary" data-action="undo" id="undoBtn" disabled>↶ 되돌리기</button><button class="secondary" data-action="hint">힌트</button><button class="secondary" data-action="reset">초기화</button></div></div>
           <div id="hintBox" class="hint-box" hidden></div>
@@ -51,13 +51,14 @@
 
     <section id="endingScreen" class="screen ending-screen" hidden aria-label="엔딩">
       <img class="keyart" src="../assets/afterlight/city.webp" alt="새벽빛이 돌아온 도시">
-      <div class="ending-shade"></div><div class="ending-content"><p class="eyebrow">ALL SIGNALS RECEIVED</p><h2>우리가 연결한<br><em>새벽.</em></h2><p class="ending-story">빛이 도시를 밝힌 건 아니었다.<br>빛이 전한 명령을 받고, 사람들이 비상 전력망을 다시 켰다.<br><br>미라의 첫 메시지가 도착했다.<br>“여기 있어 줘서 고마워.”<br><br>노아가 대답했다.<br>“이제, 혼자 지키지 않을게.”</p><div id="endingStats" class="ending-stats"></div><p class="ending-last">다른 길을 지나도, 우리는 같은 새벽에 닿는다.</p><div class="ending-actions"><button class="primary" data-action="map">나의 신호 기록</button><button class="secondary" data-action="daily">오늘의 회선 도전</button><button class="text-btn" data-action="home">처음 화면</button></div></div>
+      <div class="ending-shade"></div><div class="ending-content"><p class="eyebrow">ALL SIGNALS RECEIVED</p><h2>우리가 연결한<br><em>새벽.</em></h2><p class="ending-story">빛을 따라 복구 명령이 도착했다.<br>사람들이 비상 전력망을 다시 연결하자, 도시에 불이 돌아왔다.<br><br>미라의 첫 메시지가 도착했다.<br>“여기 있어 줘서 고마워.”<br><br>노아가 대답했다.<br>“이제, 혼자 지키지 않을게.”</p><div id="endingStats" class="ending-stats"></div><p class="ending-last">다른 길을 지나도, 우리는 같은 새벽에 닿는다.</p><div class="ending-actions"><button class="primary" data-action="map">나의 신호 기록</button><button class="secondary" data-action="daily">오늘의 회선 도전</button><button class="text-btn" data-action="home">처음 화면</button></div></div>
     </section>
   </main>
   <div id="modal" class="modal" hidden><section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-head"><h2 id="modalTitle"></h2><button id="modalClose" class="icon-btn" data-action="close" aria-label="닫기">×</button></div><div id="modalBody"></div></section></div>
   <div id="toast" class="toast" role="status" hidden></div>
-  <script src="../assets/afterlight/physics.js?v=4c5ee15753"></script>
-  <script src="../assets/afterlight/levels.js?v=3a656aeaf0"></script>
-  <script src="../assets/afterlight/game.js?v=bb40e66f00"></script>
+  <script src="../assets/afterlight/music.js?v=c90d70cde5"></script>
+  <script src="../assets/afterlight/physics.js?v=6ee3a96f4e"></script>
+  <script src="../assets/afterlight/levels.js?v=b8db660111"></script>
+  <script src="../assets/afterlight/game.js?v=daa3ea5275"></script>
 </body>
 </html>

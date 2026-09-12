@@ -19,6 +19,30 @@ test('Polarizers: independent analytic benchmark values and conservation',()=>{
   }
   for(let a=0;a<180;a+=15)for(let b=0;b<180;b+=15)for(let c=0;c<180;c+=15){const r=P.polarize(1,0,[a,b,c]);near(r.power+r.absorbed,1,'three-filter accounting');assert.ok(r.stages.every(x=>x.after<=x.before+1e-12));}
 });
+
+test('Polarizer chains agree with Cartesian field projections, including an unpolarized ensemble',()=>{
+  // Project x/y electric-field components with a 2x2 Jones matrix, not cos(angle difference).
+  // Unpolarized input is the incoherent equal mixture of orthogonal input states.
+  const project=(field,degrees)=>{const x=Math.cos(degrees*Math.PI/180),y=Math.sin(degrees*Math.PI/180);return [x*x*field[0]+x*y*field[1],x*y*field[0]+y*y*field[1]];};
+  const norm=v=>v[0]*v[0]+v[1]*v[1];
+  let checked=0;
+  for(let a=0;a<180;a+=15)for(let b=0;b<180;b+=15)for(let c=0;c<180;c+=15)for(let d=0;d<180;d+=15){
+    const filters=[a,b,c,d],fields=[[1,0],[0,1]],power=[1,1];
+    const linear=P.polarize(1,0,filters),unpolarized=P.polarize(1,null,filters);
+    filters.forEach((angle,i)=>{
+      const before=(power[0]+power[1])/2;
+      for(let k=0;k<2;k++){fields[k]=project(fields[k],angle);power[k]=norm(fields[k]);}
+      near(linear.stages[i].after,power[0],'linear Cartesian projection');
+      near(unpolarized.stages[i].after,(power[0]+power[1])/2,'unpolarized mixture');
+      near(unpolarized.stages[i].absorbed,before-(power[0]+power[1])/2,'each plate absorption');
+    });
+    checked++;
+  }
+  assert.equal(checked,20736);
+  near(P.polarize(1,null,[0,30,60,90]).power,27/128,'final authentication 21.09375%');
+  near(P.polarize(1,0,[90,45,0]).power,0,'later plates cannot recover already absorbed light');
+  for(const input of [.01,.25,2,7.3])near(P.polarize(input,0,[45,90]).power,input/4,'power units scale linearly');
+});
 test('Interferometer agrees with independent complex field propagation at every phase and shutter combination',()=>{
   const mul=(a,b)=>[a[0]*b[0]-a[1]*b[1],a[0]*b[1]+a[1]*b[0]],add=(a,b)=>[a[0]+b[0],a[1]+b[1]],power=a=>a[0]**2+a[1]**2;
   const t=[Math.SQRT1_2,0],r=[0,Math.SQRT1_2];
