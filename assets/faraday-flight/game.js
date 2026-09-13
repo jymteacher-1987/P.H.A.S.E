@@ -19,6 +19,7 @@
   const SAVE_KEY = "phase-faraday-flight-v1",
     IMAGES = {},
     imageLoads = new Map(),
+    worldTiles = new Map(),
     keys = new Set(),
     reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   let save = {
@@ -27,7 +28,8 @@
       stars: Array(L.length).fill(0),
       checkpoint: null,
       sound: true,
-      volume: 0.45,
+      volume: 0.7,
+      volumeCustomized: false,
       mode: "normal",
       notes: [],
     },
@@ -51,11 +53,14 @@
         clamp(Math.floor(Number(data.stars?.[i]) || 0), 0, 3),
       );
       save.sound = data.sound !== false;
-      save.volume = clamp(
-        Number.isFinite(Number(data.volume)) ? Number(data.volume) : 0.45,
-        0,
-        1,
-      );
+      const storedVolume = Number(data.volume),
+        hasVolume = data.volume != null && Number.isFinite(storedVolume);
+      save.volumeCustomized =
+        typeof data.volumeCustomized === "boolean"
+          ? data.volumeCustomized
+          : hasVolume && storedVolume !== 0.45;
+      save.volume =
+        save.volumeCustomized && hasVolume ? clamp(storedVolume, 0, 1) : 0.7;
       save.mode = data.mode === "easy" ? "easy" : "normal";
       save.notes = Array.isArray(data.notes)
         ? data.notes.filter((n) => ["coil", "magnet", "capacitor"].includes(n))
@@ -1564,6 +1569,12 @@
     ctx.translate(x, y);
     ctx.rotate(angle);
     ctx.globalAlpha = alpha;
+    if (mode !== "title" && mode !== "loading") {
+      // Separate moving silhouettes from the detailed scenery, especially at the edges.
+      ctx.shadowColor = name === "hero" ? "#a4fff3" : "#020913";
+      ctx.shadowBlur = (name === "hero" ? 2.8 : 4) * scale;
+      ctx.shadowOffsetY = name === "hero" ? 0 : 1.5 * scale;
+    }
     ctx.drawImage(
       image,
       f.x,
@@ -1618,34 +1629,44 @@
   function drawWorld() {
     ctx.fillStyle = "#0b4b60";
     ctx.fillRect(0, 0, W, H);
-    const world = IMAGES.world;
+    const image = IMAGES[worldKey()] || IMAGES.world;
+    if (image && !worldTiles.has(image)) {
+      const tile = document.createElement("canvas"),
+        c = tile.getContext("2d");
+      tile.width = image.width;
+      tile.height = image.height;
+      c.drawImage(image, 0, 0);
+      // Overlap the next upright tile through a soft top edge instead of flipping buildings upside down.
+      c.globalCompositeOperation = "destination-in";
+      const fade = c.createLinearGradient(0, 0, 0, tile.height * 0.14);
+      fade.addColorStop(0, "#0000");
+      fade.addColorStop(1, "#000");
+      c.fillStyle = fade;
+      c.fillRect(0, 0, tile.width, tile.height);
+      worldTiles.set(image, tile);
+    }
+    const world = worldTiles.get(image);
     if (world) {
       const iw = W,
         ih = (world.height / world.width) * iw,
-        offset = worldDistance % (ih * 2),
-        segments = Math.ceil(H / ih) + 3;
+        step = ih * 0.86,
+        offset = worldDistance % step,
+        segments = Math.ceil(H / step) + 2;
       for (let i = -1; i < segments; i++) {
-        const y = i * ih + (offset % ih);
-        ctx.save();
-        if ((i + Math.floor(offset / ih)) % 2 !== 0) {
-          ctx.translate(0, y + ih);
-          ctx.scale(1, -1);
-          ctx.drawImage(world, 0, 0, iw, ih);
-        } else ctx.drawImage(world, 0, y, iw, ih);
-        ctx.restore();
+        ctx.drawImage(world, 0, i * step + offset, iw, ih);
       }
     }
     const shades = [
       "#062e4428",
       "#33465e3a",
-      "#8d43224c",
-      "#132d675b",
+      "#19244924",
+      "#092b302a",
       "#354a4730",
     ];
     ctx.fillStyle = shades[level?.palette || 0];
     ctx.fillRect(0, 0, W, H);
     if (mode === "play") {
-      ctx.fillStyle = "#03253220";
+      ctx.fillStyle = "#020d1f45";
       ctx.fillRect(0, 0, W, H);
       if (stage === 4) {
         for (let j = 0; j < 3; j++) {
@@ -1683,6 +1704,11 @@
       }
       ctx.globalAlpha = 1;
     }
+  }
+  function worldKey() {
+    return mode === "title" || mode === "loading"
+      ? "world"
+      : level.background || "world";
   }
   function drawGenerator() {
     if (!player || H < 370) return;
@@ -2860,6 +2886,7 @@
   document.addEventListener("input", (e) => {
     if (e.target.id === "volume") {
       save.volume = Number(e.target.value) / 100;
+      save.volumeCustomized = true;
       audio.setVolume(save.volume);
       persist();
     }
@@ -2914,7 +2941,7 @@
   function stageImageNames(index) {
     return [
       "hero",
-      "world",
+      L[index].background || "world",
       L[index].enemyArt,
       L[index].bossArt,
       ...(build.friend ? ["enemies"] : []),
@@ -3010,6 +3037,7 @@
           save: clone(save),
           sprites: atlas,
           loadedImages: Object.keys(IMAGES),
+          background: worldKey(),
           fever,
           feverTime,
           magnetLevel,

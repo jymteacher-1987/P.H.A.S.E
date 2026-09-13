@@ -4,7 +4,7 @@
     constructor() {
       this.context = null;
       this.enabled = true;
-      this.volume = 0.45;
+      this.volume = 0.7;
       this.stage = 0;
       this.boss = false;
       this.running = false;
@@ -24,10 +24,10 @@
           this.master.gain.value = this.volume * 0.34;
           this.master.connect(this.context.destination);
           this.music = this.context.createGain();
-          this.music.gain.value = 0.66;
+          this.music.gain.value = 0.92;
           this.music.connect(this.master);
           this.fx = this.context.createGain();
-          this.fx.gain.value = 0.75;
+          this.fx.gain.value = 0.65;
           this.fx.connect(this.master);
           this.noiseBuffer = this.context.createBuffer(
             1,

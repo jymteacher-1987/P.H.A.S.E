@@ -1,5 +1,71 @@
 const { test } = require("node:test"),
   assert = require("node:assert/strict");
+test(
+  "Faraday: louder defaults preserve chosen volume and mute across reloads",
+  { timeout: 45000 },
+  async () => {
+    const s = await server(),
+      origin = "http://127.0.0.1:" + s.address().port;
+    const browser = await chromium.launch({
+      headless: true,
+      ...(process.platform === "win32" ? { channel: "msedge" } : {}),
+    });
+    try {
+      for (const [saved, expected] of [
+        [{}, 0.7],
+        [{ volume: 0.45 }, 0.7],
+        [{ volume: 0.2 }, 0.2],
+        [{ volume: 0 }, 0],
+        [{ volume: 0.45, volumeCustomized: true }, 0.45],
+        [{ volume: 0.9, sound: false }, 0.9],
+      ]) {
+        const page = await browser.newPage();
+        await page.route(/googleapis|gstatic/, (r) => r.abort());
+        await page.addInitScript(
+          (data) =>
+            localStorage.setItem(
+              "phase-faraday-flight-v1",
+              JSON.stringify(data),
+            ),
+          saved,
+        );
+        await ready(page, origin + "/plays/faraday-flight.html?qa");
+        const state = await page.evaluate(() => __faraday.state.save);
+        assert.equal(state.volume, expected);
+        if (saved.sound === false) assert.equal(state.sound, false);
+        await page.click("#startBtn");
+        await page.click("#briefingLaunch");
+        await page.click("#pauseBtn");
+        assert.equal(
+          await page.locator("#volume").inputValue(),
+          String(expected * 100),
+        );
+        await page.close();
+      }
+      const page = await browser.newPage();
+      await page.route(/googleapis|gstatic/, (r) => r.abort());
+      await ready(page, origin + "/plays/faraday-flight.html?qa");
+      await page.click("#startBtn");
+      await page.click("#briefingLaunch");
+      await page.click("#pauseBtn");
+      await page.locator("#volume").fill("45");
+      const saved = await page.evaluate(() =>
+        JSON.parse(localStorage.getItem("phase-faraday-flight-v1")),
+      );
+      assert.equal(saved.volume, 0.45);
+      assert.equal(saved.volumeCustomized, true);
+      await ready(page, origin + "/plays/faraday-flight.html?qa");
+      assert.equal(
+        await page.evaluate(() => __faraday.state.save.volume),
+        0.45,
+      );
+      await page.close();
+    } finally {
+      await browser.close();
+      await new Promise((r) => s.close(r));
+    }
+  },
+);
 const { chromium, webkit } = require("playwright"),
   fs = require("node:fs"),
   path = require("node:path"),
@@ -438,6 +504,24 @@ test(
             await page.keyboard.press("Escape");
             // These are explicit transition fixtures, not a difficulty/completion claim.
             for (let i = 0; i < 5; i++) {
+              const scenery = await page.evaluate(() => ({
+                key: __faraday.state.background,
+                loaded: __faraday.state.loadedImages,
+              }));
+              assert.equal(
+                scenery.key,
+                [
+                  "world-books",
+                  "world-gates",
+                  "world-geometry",
+                  "world-lab",
+                  "world",
+                ][i],
+              );
+              assert.ok(
+                scenery.loaded.includes(scenery.key),
+                "The current chapter background is loaded before combat",
+              );
               await page.evaluate(() => {
                 __faraday.setPlayerHP(30);
                 __faraday.finishWaves();
@@ -701,7 +785,10 @@ test(
       }
       await page.setViewportSize({ width: 320, height: 460 });
       await page.click("[data-action=help]");
-      assert.match(await page.locator("#modalContent").innerText(), /과열/);
+      assert.match(
+        await page.locator("#modalContent").innerText(),
+        /위험 아이콘.*7초간 발사가 멈춰요/,
+      );
       await page.click("[data-action=close]");
       await page.click("[data-action=journal]");
       await page.locator("#speedControl").fill("0");

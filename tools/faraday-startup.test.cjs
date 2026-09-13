@@ -43,7 +43,8 @@ test(
         if (!file.startsWith(root + path.sep) || !fs.existsSync(file))
           return route.abort();
         requests.push(path.basename(file));
-        if (file.endsWith("poverty.webp")) await bossHeld;
+        if (file.endsWith("poverty.webp") || file.endsWith("world-books.webp"))
+          await bossHeld;
         if (file.endsWith("foes-lab.webp") && !failedLab) {
           failedLab = true;
           return route.abort();
@@ -76,6 +77,9 @@ test(
             "ending.webp",
             "enemies.webp",
             "foes-records.webp",
+            "world-gates.webp",
+            "world-geometry.webp",
+            "world-lab.webp",
           ].includes(n),
         ),
         false,
@@ -93,6 +97,10 @@ test(
         __faraday.step(1);
       });
       const hud = await page.locator("#hud").boundingBox();
+      assert.equal(
+        await page.evaluate(() => __faraday.state.background),
+        "world-books",
+      );
       assert.ok(hud.height <= 76, "Compact HUD leaves more room to fly");
       assert.equal(
         await page.locator("#bossPattern").count(),
@@ -159,6 +167,8 @@ test(
       const state = await page.evaluate(() => __faraday.state);
       assert.equal(state.mode, "play");
       assert.equal(state.stage, 3);
+      assert.equal(state.background, "world-lab");
+      assert.ok(state.loadedImages.includes("world-lab"));
       assert.ok(
         state.loadedImages.includes("boss") &&
           state.loadedImages.includes("foes-lab"),

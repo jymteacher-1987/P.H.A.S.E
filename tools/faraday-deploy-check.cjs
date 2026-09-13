@@ -10,7 +10,9 @@ const base = (
   origin = new URL(base).origin;
 const root = path.resolve(__dirname, ".."),
   out = path.join(root, ".preview-tmp/faraday");
-const catalog = JSON.parse(fs.readFileSync(path.join(root, "data/experiments.json"), "utf8"));
+const catalog = JSON.parse(
+  fs.readFileSync(path.join(root, "data/experiments.json"), "utf8"),
+);
 fs.mkdirSync(out, { recursive: true });
 const digest = (b) => crypto.createHash("sha256").update(b).digest("hex");
 (async () => {
@@ -101,6 +103,10 @@ const digest = (b) => crypto.createHash("sha256").update(b).digest("hex");
       "assets/faraday-flight/levels.js",
       "assets/faraday-flight/sprites.js",
       "assets/faraday-flight/hero.webp",
+      "assets/faraday-flight/world-books.webp",
+      "assets/faraday-flight/world-gates.webp",
+      "assets/faraday-flight/world-geometry.webp",
+      "assets/faraday-flight/world-lab.webp",
       "assets/faraday-flight/fog.webp",
       ...[
         "ending",
