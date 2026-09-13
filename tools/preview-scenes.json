@@ -264,5 +264,19 @@
         "wait": 9000
       }
     ]
+  },
+  "photoelectric-effect": {
+    "viewport": {
+      "width": 1100,
+      "height": 825
+    },
+    "steps": [
+      {
+        "wait": 2700
+      },
+      {
+        "click": "#pauseBtn"
+      }
+    ]
   }
 }

@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<script src="../assets/js/browser-compat.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#eef3f7">
+<title>광전효과 원리 이해하기 · P.H.A.S.E</title>
+<meta name="description" content="빛의 파장·광자 유입량·전압을 바꾸며 광전자의 운동, 정상상태 상대 광전류와 정지 전압을 관찰하는 교육용 광전효과 시뮬레이션.">
+<style>
+:root{--bg:#eef3f7;--ink:#172c43;--muted:#667b90;--line:#dbe5ee;--paper:#fff;--blue:#136bc1;--orange:#b25b0b;--bulk:#697c8d;--green:#1f765d}
+*{box-sizing:border-box}
+html,body{width:100%;height:100%;margin:0;background:var(--bg)}
+body{font-family:system-ui,-apple-system,"Segoe UI","Noto Sans KR","Malgun Gothic",sans-serif;color:var(--ink);word-break:keep-all;-webkit-text-size-adjust:100%}
+button,input,select{font:inherit;color:inherit}
+button,select,input[type=range]{cursor:pointer}
+button{border:1px solid var(--line);border-radius:9px;background:#fff;padding:6px 10px;font-size:12px;font-weight:700;min-height:34px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button:hover{background:#edf5fc}button:active{background:#dfedf9}
+button[aria-pressed=true]{background:#e7f2fd;border-color:#9dbde1;color:#145995}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #3891d2;outline-offset:2px}
+button:disabled{opacity:.4;cursor:default}
+[hidden]{display:none!important}
+.app{height:100vh;height:100dvh;max-width:1800px;margin:auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px}
+header{display:flex;justify-content:space-between;align-items:center;gap:8px;flex:none;min-height:38px}
+h1{font-size:25px;letter-spacing:-.8px;margin:0;white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.brand{font-size:10px;letter-spacing:1.7px;color:var(--muted);margin-left:13px;font-weight:600}
+.actions{display:flex;gap:5px}.icon{min-width:35px;font-size:16px;padding:5px 9px}
+/* pause / play drawn as shapes — the Roman numeral Ⅱ reads as the number two */
+#pauseBtn{display:inline-flex;align-items:center;justify-content:center;color:#1c4c78}
+#pauseBtn .ic{position:relative;display:block;width:13px;height:15px}
+#pauseBtn .ic::before,#pauseBtn .ic::after{content:"";position:absolute;top:0;width:4.5px;height:15px;
+ border-radius:1.5px;background:currentColor}
+#pauseBtn .ic::before{left:0}#pauseBtn .ic::after{right:0}
+#pauseBtn.play .ic::before{left:2px;top:0;width:0;height:0;border-radius:0;background:none;
+ border-left:13px solid currentColor;border-top:7.5px solid transparent;border-bottom:7.5px solid transparent}
+#pauseBtn.play .ic::after{display:none}
+.workspace{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) clamp(300px,27vw,360px);gap:12px}
+.experiment,.controls{background:var(--paper);border:1px solid var(--line);border-radius:16px;min-width:0}
+.experiment{display:flex;flex-direction:column;overflow:hidden;min-height:0}
+.scene-top{flex:none;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:11px 15px 5px;min-height:36px}
+.status{font-size:12px;font-weight:750;color:var(--green);background:#eaf5ef;padding:5px 9px;border-radius:14px;white-space:nowrap}
+.status.off{color:#64798b;background:#eff3f6}.status.reverse{color:#a05c17;background:#fff1df}
+.watch-note{font-size:11px;color:var(--muted);white-space:nowrap}
+.scene{flex:1;min-height:0;position:relative;overflow:hidden;background:linear-gradient(#fff,#f7fafd)}
+canvas{display:block;width:100%;height:100%;touch-action:manipulation}
+.caption{margin:0 12px 9px;padding:8px 11px;flex:none;border:1px solid #dbe7f0;border-radius:9px;min-height:36px;background:#f4f8fc;font-size:13px;line-height:1.4;display:flex;justify-content:center;align-items:center;text-align:center}
+.caption.turn{border-color:#eccda9;background:#fff7ec;color:#925313}
+.readouts{flex:none;display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid var(--line);background:#fbfdff}
+.readout{padding:10px 14px;min-width:0}
+.readout+.readout{border-left:1px solid var(--line)}
+.readout label{display:block;font-size:11.5px;color:#526b85;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.readout strong[data-empty]{font-size:17px;color:#a8b5c1;font-weight:700}
+.readout strong{font-size:25px;font-variant-numeric:tabular-nums;font-weight:800;letter-spacing:-.55px;white-space:nowrap}
+.readout small{font-size:12px;color:var(--muted);font-weight:600}
+#birthEnergy{color:var(--blue)}#current{color:#1f765d}
+.controls{padding:16px 18px;display:flex;flex-direction:column;justify-content:space-around;gap:13px;min-height:0}
+.control{min-width:0}
+.control-head{display:flex;align-items:center;justify-content:space-between;gap:5px;font-size:14px;font-weight:750;min-height:22px}
+.control-head output{font-size:16px;white-space:nowrap;font-variant-numeric:tabular-nums}
+select{width:100%;border:1px solid #ccdbe8;border-radius:8px;background:#f5f9fc;padding:7px;margin-top:6px;min-height:37px;font-size:14px}
+.foot{font-size:11px;color:var(--muted);display:flex;justify-content:space-between;gap:6px;line-height:1.45;margin-top:4px}
+.foot span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.control-metal .foot{font-size:10.5px}
+.foot b{font-weight:650;color:#45617e}
+.slider-wrap{position:relative;margin-top:7px}
+.range{display:block;width:100%;height:27px;margin:0;appearance:none;-webkit-appearance:none;background:transparent;touch-action:pan-y}
+.range::-webkit-slider-runnable-track{height:7px;border-radius:9px;background:#dce7f1}
+.range::-moz-range-track{height:7px;border-radius:9px;background:#dce7f1}
+/* THUMB_W = 10px — the tick/marker maths below must use 5px inset and 10px span */
+.range::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:10px;height:22px;margin-top:-7.5px;
+ border:none;border-radius:2px;box-shadow:0 1px 3px #1b3b5833;
+ background:linear-gradient(90deg,#27699f 0 4px,#fff 4px 6px,#27699f 6px 10px)}
+.range::-moz-range-thumb{width:10px;height:22px;border:none;border-radius:2px;
+ background:linear-gradient(90deg,#27699f 0 4px,#fff 4px 6px,#27699f 6px 10px)}
+.spectrum::-webkit-slider-runnable-track{background:linear-gradient(90deg,#b4b2c8 0%,#b4b2c8 36%,#794ec5 36.1%,#3463d6 48%,#28a0b9 57%,#69af51 70%,#e0be31 78%,#dd843a 86%,#c64652 100%)}
+.spectrum::-moz-range-track{background:linear-gradient(90deg,#b4b2c8 0%,#b4b2c8 36%,#794ec5 36.1%,#3463d6 48%,#28a0b9 57%,#69af51 70%,#e0be31 78%,#dd843a 86%,#c64652 100%)}
+.slider-wrap.marked{padding-top:9px}
+.mark{position:absolute;top:0;margin-left:-4.5px;font-size:11px;line-height:1;pointer-events:none;color:#31506e}
+.mark::before{content:"\25BC"}
+.mark::after{content:attr(data-label);position:absolute;left:10px;top:1px;font-size:9.5px;font-weight:800;white-space:nowrap;color:inherit}
+.mark.zero{color:#a2b4c3}.mark.zero::after{font-weight:700}
+.mark.stop{color:#c9761a}
+.mark.stop::after{left:auto;right:9px}
+.slider-wrap.dual .mark{top:12px}
+/* one slider, two scales: wavelength above, frequency below */
+.slider-wrap.dual{padding-top:23px;padding-bottom:13px}
+.ticks{position:absolute;left:0;right:0;height:11px;pointer-events:none;font-size:8.5px;font-weight:750;line-height:1}
+.ticks.lam{top:0;color:#6b4fa8}
+.ticks.fre{bottom:0;color:#1c7a5e}
+.ticks span{position:absolute;transform:translateX(-50%);white-space:nowrap;top:0}
+.ticks span::after{content:"";position:absolute;left:50%;width:1px;height:4px;background:currentColor;opacity:.55}
+.ticks.lam span::after{top:11px}
+.ticks.fre span::after{bottom:11px}
+.foot .fre{color:#1c7a5e}.foot .fre b{color:#186a51}
+#lambdaValue{color:#6b4fa8}
+.control-bias{padding-top:11px;border-top:1px solid var(--line)}
+.voltage-label{font-size:10px;color:var(--muted);font-weight:500}
+.stepper{display:grid;grid-template-columns:40px 76px 40px minmax(0,1fr) 46px;gap:5px;margin-top:7px;align-items:center}
+#zeroBtn{white-space:nowrap;font-size:11.5px;padding:4px 2px}
+.stepper button{padding:4px;min-height:36px}
+#minusBtn,#plusBtn{font-size:20px}
+#step{margin:0;min-height:36px;padding:4px;font-size:12.5px;text-align:center;width:100%}
+#voltage{width:100%;min-width:0;border:1px solid #b7cfe4;background:#f5faff;border-radius:9px;padding:5px 8px;min-height:36px;font-size:17px;font-weight:800;text-align:center;font-variant-numeric:tabular-nums;color:#205b98}
+#voltage[aria-invalid=true]{border-color:#c45251;background:#fff4f2}
+.voltage-hint{font-size:10px;color:#698096;margin-top:5px;min-height:13px;line-height:1.35}
+.note{border-top:1px solid var(--line);padding-top:11px;font-size:11px;line-height:1.7;color:var(--muted)}
+.note strong{color:#486680;font-weight:650}
+.dot{display:inline-block;position:relative;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:middle}.dot::after{content:"";position:absolute;left:25%;right:25%;top:calc(50% - .75px);height:1.5px;background:#fff}
+.dot.surface{background:var(--blue);box-shadow:0 0 0 2px #bdddf5}.dot.bulk{background:var(--bulk)}
+.modal{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:18px;background:#122c4666;backdrop-filter:blur(3px)}
+.help-card{width:min(620px,100%);max-height:88vh;max-height:88dvh;overflow:auto;background:#fff;border-radius:16px;padding:21px;box-shadow:0 15px 60px #17314a30}
+.help-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.help-head h2{font-size:19px;margin:0}
+.help-card p{font-size:13px;line-height:1.75;margin:13px 0 0}
+.help-card .details{font-size:12px;color:#60758b;border-top:1px solid var(--line);padding-top:12px}
+.help-card a{color:#176bb0}
+.help-card table{width:100%;border-collapse:collapse;font-size:12px;margin:8px 0}
+.help-card th,.help-card td{padding:5px 9px;border-bottom:1px solid var(--line);text-align:left}
+@media(min-width:1300px) and (min-height:830px){
+ .app{padding:18px 23px;gap:14px}.workspace{gap:16px}.controls{padding:22px}
+ h1{font-size:28px}.control-head{font-size:16px}.control-head output{font-size:18px}
+ .readout{padding:15px 19px}.readout label{font-size:13px}.readout strong{font-size:30px}
+ .caption{font-size:15px;padding:10px}.note{font-size:12px}
+}
+@media(max-width:900px) and (orientation:portrait), (max-width:620px){
+ .app{padding:7px 8px max(7px,env(safe-area-inset-bottom));gap:7px}
+ header{min-height:34px}h1{font-size:16px;letter-spacing:-.6px}.brand{display:none}.actions{gap:4px}
+ .actions button{min-height:32px;padding:5px 7px;font-size:11px}.actions .icon{font-size:15px;min-width:30px}
+ .workspace{grid-template-columns:1fr;grid-template-rows:minmax(210px,1fr) auto;gap:7px}
+ .experiment,.controls{border-radius:12px}
+ .scene-top{min-height:28px;padding:6px 9px 2px}.status{font-size:10px;padding:4px 7px}.watch-note{font-size:10px}
+ .caption{font-size:11px;min-height:29px;padding:5px 7px;margin:0 7px 6px}
+ .readout{padding:6px 8px}.readout label{font-size:9.5px;margin-bottom:2px}.readout strong{font-size:19px}.readout small{font-size:9.5px}
+ .controls{display:grid;grid-template-columns:1fr 1fr;grid-template-areas:"metal power" "wave wave" "bias bias";gap:7px 14px;padding:9px 12px}
+ .control-metal{grid-area:metal}.control-power{grid-area:power}.control-wave{grid-area:wave}.control-bias{grid-area:bias}
+ .control-wave,.control-bias{padding-top:6px;border-top:1px solid var(--line)}
+ .control-head{font-size:12px;min-height:18px}.control-head output{font-size:13px}
+ select{font-size:16px;min-height:33px;padding:4px 6px;margin-top:4px}
+ .foot{font-size:9.5px;margin-top:2px}.control-metal .foot{flex-direction:column;gap:0;font-size:9.5px}
+ .slider-wrap{margin-top:6px}.range{height:24px}
+ .stepper{grid-template-columns:36px 74px 36px minmax(0,1fr) 44px;margin-top:6px;gap:4px}
+ .stepper button,#step,#voltage{min-height:34px}#step{font-size:12px}
+ .voltage-hint{font-size:9px;margin-top:3px;min-height:11px}
+ .voltage-label{font-size:9px}.note{display:none}
+}
+@media(max-height:670px) and (orientation:portrait){
+ .app{padding:5px 6px;gap:5px}header{min-height:30px}h1{font-size:15px}
+ .actions button{min-height:29px;padding:4px 6px}
+ .workspace{gap:5px}.controls{padding:6px 9px;gap:5px 12px}
+ .control-head{min-height:16px;font-size:11px}.control-head output{font-size:12px}
+ select{min-height:29px;padding:2px 5px;margin-top:3px}
+ .foot{font-size:9px;margin-top:1px}
+ .slider-wrap{margin-top:4px}.range{height:21px}
+ .control-wave,.control-bias{padding-top:4px}
+ .stepper{margin-top:4px}.stepper button,#step,#voltage{min-height:30px}
+ .voltage-hint{font-size:8.5px;margin-top:2px}
+ .scene-top{min-height:26px;padding-top:4px}.watch-note{font-size:9px}
+ .readout{padding:5px 7px}.readout label{font-size:9px}.readout strong{font-size:18px}
+ .caption{font-size:10px;min-height:27px;padding:4px 6px;margin-bottom:4px}
+}
+@media(max-height:700px) and (orientation:landscape){
+ .controls{padding:10px 14px;gap:8px}.note{display:none}
+ .control-head{font-size:12px;min-height:18px}.control-head output{font-size:14px}
+ select{min-height:32px;margin-top:4px;padding:4px}
+ .slider-wrap{margin-top:5px}.range{height:25px}
+ .foot{font-size:10px;margin-top:3px}
+ .control-bias{padding-top:7px}
+ .stepper{margin-top:5px}.stepper button,#step,#voltage{min-height:32px}.voltage-hint{font-size:9px}
+}
+@media(max-height:520px) and (orientation:landscape){
+ .app{padding:5px 7px;gap:5px}header{min-height:29px}h1{font-size:17px}.brand{display:none}
+ .actions button{min-height:28px;padding:3px 7px;font-size:11px}
+ .workspace{grid-template-columns:minmax(0,1fr) 272px;grid-template-rows:minmax(0,1fr);gap:7px}
+ .controls{display:grid;grid-template-columns:1fr 1fr;grid-template-areas:"metal power" "wave wave" "bias bias";gap:5px 9px;padding:7px 9px;align-content:space-around}
+ .control-metal{grid-area:metal}.control-power{grid-area:power}.control-wave{grid-area:wave}.control-bias{grid-area:bias}
+ .control-head{font-size:10.5px;min-height:15px}.control-head output{font-size:11.5px}
+ select{font-size:12px;padding:3px;min-height:28px;margin-top:3px}
+ .slider-wrap{margin-top:5px}.range{height:22px}.mark::after{font-size:8px}
+ .foot{font-size:8.5px;margin-top:2px}.control-metal .foot{flex-direction:column;gap:0}
+ .stepper{grid-template-columns:30px 68px 30px minmax(0,1fr) 40px;gap:3px;margin-top:4px}
+ .stepper #step{font-size:11px;padding:2px 0}
+ .stepper button,#step,#voltage{min-height:29px;font-size:12px}#minusBtn,#plusBtn{font-size:17px}
+ #voltage{font-size:15px}
+ .voltage-hint{font-size:8px}.voltage-label{font-size:8px}
+ .scene-top{padding:5px 8px 2px;min-height:25px}.status,.watch-note{font-size:9px}
+ .caption{font-size:10px;min-height:26px;padding:4px 6px;margin:0 6px 4px}
+ .readout{padding:4px 7px}.readout label{font-size:8.5px;margin-bottom:1px}.readout strong{font-size:17px}.readout small{font-size:8.5px}
+ .experiment,.controls{border-radius:11px}
+}
+@media(max-width:700px) and (orientation:landscape){
+ .workspace{grid-template-columns:minmax(0,1fr) 250px}
+ .watch-note{display:none}.readout strong{font-size:16px}.readout label{font-size:8px}
+}
+@media(max-height:480px) and (orientation:portrait){
+ .app{height:auto;min-height:100dvh}.workspace{flex:none;grid-template-rows:240px auto}
+}
+@media(max-height:320px) and (orientation:landscape){
+ .app{height:auto;min-height:100dvh}.workspace{min-height:270px;flex:none}
+}
+/* Scientific revision: retain readable assumptions and values on small screens. */
+.scene-top{flex-wrap:wrap}.watch-note{white-space:normal;font-size:11px}
+.readout label{white-space:normal;overflow:visible;line-height:1.35;min-height:30px}
+.readout small{display:block;margin-top:2px}.readout strong{font-size:clamp(17px,2vw,25px)}
+.model-note{margin:0;padding:7px 12px;background:#f4f8fc;border-top:1px solid var(--line);font-size:10.5px;line-height:1.5;color:#526b85}
+.control-power .foot,.control-bias .foot{flex-direction:column;gap:2px}
+.foot span{white-space:normal;overflow:visible}.control-metal .foot{flex-wrap:wrap}
+.stop-bracket{font-size:10px;color:#926016;line-height:1.5;margin-top:4px}
+.controls{overflow-y:auto;justify-content:flex-start;gap:17px}
+@media(max-width:900px) and (orientation:portrait),(max-width:620px){
+ .app{height:auto;min-height:100dvh}.workspace{flex:none;grid-template-rows:330px auto}
+ .controls{overflow:visible;gap:10px 14px}.watch-note{font-size:9px}.readout label{min-height:26px}
+ .readout strong{font-size:17px}.model-note{font-size:9px;padding:5px 8px}
+ .stop-bracket{font-size:9px}.control-power .foot{font-size:9px}
+}
+@media(max-height:520px) and (orientation:landscape){
+ .app{height:auto;min-height:100dvh}.workspace{min-height:430px}.controls{gap:9px}
+ .readout strong{font-size:16px}.model-note{font-size:9px}.watch-note{display:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+ <h1>광전효과 원리 이해하기<span class="brand">P.H.A.S.E</span></h1>
+ <div class="actions">
+  <button id="slowBtn" aria-pressed="true">느리게</button>
+  <button id="pauseBtn" aria-label="애니메이션 멈춤" aria-pressed="false" class="icon"><span class="ic"></span></button>
+  <button id="restartBtn" aria-label="입자 비우고 처음부터" title="입자 비우고 처음부터" class="icon">↻</button>
+  <button id="helpBtn" aria-label="표시와 물리 모형 설명" class="icon">?</button>
+ </div>
+</header>
+<main class="workspace">
+ <section class="experiment" aria-label="광전효과 실험">
+  <div class="scene-top">
+   <span class="status" id="status">관찰 중</span>
+   <span class="watch-note"><span id="photonKey">● 광자</span> · <span style="color:#136bc1"><span class="dot surface" aria-hidden="true"></span>비교용 전자</span> · <span style="color:#697c8d"><span class="dot bulk" aria-hidden="true"></span>광전자</span></span>
+  </div>
+  <div class="scene" id="scene">
+   <canvas id="lab" role="img" aria-label="빛을 받는 왼쪽 금속과 오른쪽 수집판 사이를 움직이는 광전자"></canvas>
+  </div>
+  <div class="caption" id="caption">고리 친 전자를 따라가 보세요.</div>
+  <div class="readouts">
+   <div class="readout"><label>최대 운동 에너지 K<sub>max</sub></label><strong id="birthEnergy">—</strong> <small>eV</small></div>
+   <div class="readout"><label>선택한 전자 · 운동 에너지 K</label><strong id="liveEnergy">—</strong> <small>eV</small></div>
+   <div class="readout"><label>예상 광전류 I</label><strong id="current">0.0</strong> <small>상대값</small></div>
+     </div>
+   <p class="model-note">전류는 현재 조건을 유지한 뒤의 예상값입니다. 파란 전자는 최대 에너지의 비교용 전자입니다.</p>
+  </section>
+  <section class="controls" aria-label="빛과 전압 조절">
+  <div class="control control-metal">
+   <div class="control-head"><label for="metal">금속</label></div>
+   <select id="metal"><option value="Na">나트륨 Na</option><option value="Al">알루미늄 Al</option><option value="Zn">아연 Zn</option><option value="Cu">구리 Cu</option></select>
+   <div class="foot"><span>일함수 <b id="phiValue">2.46 eV</b></span><span>한계 <b id="lambda0Value">≈ 504.001 nm</b> · f₀ <b id="f0Value">5.95 ×10¹⁴ Hz</b></span></div>
+  </div>
+  <div class="control control-wave">
+   <div class="control-head"><label for="lambda">빛의 파장</label><output id="lambdaValue" for="lambda">400 nm</output></div>
+   <div class="slider-wrap marked dual">
+    <div class="ticks lam" id="lamTicks" aria-hidden="true"></div>
+    <div class="ticks fre" id="freTicks" aria-hidden="true"></div>
+    <input class="range spectrum" id="lambda" type="range" min="200" max="700" step="1" value="400" aria-label="빛의 파장, 나노미터">
+    <span class="mark" id="lambdaMark" data-label="f₀"></span>
+   </div>
+   <div class="foot"><span class="fre">f <b id="freqValue">7.49</b> ×10¹⁴ Hz</span><span>hf <b id="photonValue">3.10 eV</b></span></div>
+  </div>
+  <div class="control control-power">
+   <div class="control-head"><label for="power">들어오는 광자 수</label><output id="powerValue" for="power">60 %</output></div>
+   <div class="slider-wrap"><input class="range" id="power" type="range" min="0" max="100" step="1" value="60" aria-label="광자 유입량, 최대 유입률에 대한 퍼센트"></div>
+   <div class="foot"><span>같은 파장에서는 빛의 세기에 비례</span><span>표시 광자 <b id="fluxValue">4.8 개/s</b></span></div>
+  </div>
+  <div class="control control-bias">
+   <div class="control-head"><label for="bias">전압 V</label><span class="voltage-label">오른쪽 − 왼쪽 전위</span></div>
+   <div class="slider-wrap marked">
+    <input class="range" id="bias" type="range" min="-4" max="2" step="0.01" value="0" aria-label="전압 V, 볼트">
+    <span class="mark zero" id="biasZero" data-label="0"></span>
+    <span class="mark stop" id="biasStop" data-label="정지"></span>
+   </div>
+   <div class="foot"><span>정지 전압의 크기 <b id="stopValue">≈ 0.639605 V</b></span></div>
+    <div class="stop-bracket" id="stopBracket"></div>
+   <div class="stepper">
+    <button id="minusBtn" aria-label="전압 낮추기">−</button>
+    <select id="step" aria-label="전압 조절 간격">
+     <option value="1">1 V</option><option value="0.1">0.1 V</option><option value="0.01" selected>0.01 V</option>
+    </select>
+    <button id="plusBtn" aria-label="전압 높이기">+</button>
+    <input id="voltage" type="text" inputmode="decimal" value="0.00" aria-label="전압 직접 입력, 볼트" autocomplete="off" spellcheck="false" maxlength="8">
+    <button id="zeroBtn" title="전압을 0 V로">0 V</button>
+   </div>
+   <div class="voltage-hint" id="voltageHint" role="status">슬라이더로 크게, − / + 로 미세 조절 · ← → 키도 가능</div>
+  </div>
+
+   <div class="note">
+    <span class="dot surface"></span><strong>파란색 · 최대 에너지 비교용</strong><br>
+    <span class="dot bulk"></span><strong>회색 · 금속에서 나온 광전자</strong><br>
+    비교용 전자는 전류 계산에서 제외합니다.<br>
+    파란 화살표: 이동 방향 · 주황 화살표: 전기력<br>
+    이해를 돕기 위해 단순화한 모형입니다.
+   </div>
+
+</section>
+</main>
+</div>
+<div class="modal" id="help" hidden>
+ <section class="help-card" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+  <div class="help-head"><h2 id="helpTitle">이 실험을 읽는 법</h2><button id="closeHelp">닫기</button></div>
+
+
+  <p><b>광전효과란?</b> 금속에 빛을 비추었을 때 전자가 튀어나오는 현상입니다. 이때 나온 전자를 <b>광전자</b>라고 합니다. 먼저 나트륨, 400 nm, 0 V에서 회색 전자가 수집판으로 가는 모습을 관찰해 보세요.</p>
+  <p><b>파장과 최대 운동 에너지.</b> 빛은 에너지를 가진 광자로 설명할 수 있습니다. 광자 하나의 에너지는 hf = hc/λ이므로 파장이 짧을수록 큽니다. <b>일함수 φ</b>는 금속에서 전자를 꺼내는 데 필요한 최소 에너지입니다. 광전자의 최대 운동 에너지는 <b>K<sub>max</sub> = hf − φ</b>입니다. 전자마다 운동 에너지가 다를 수 있으므로 ‘최대’라는 말이 붙습니다. 에너지 단위 eV는 전자볼트입니다.</p>
+  <p><b>빛을 비춰도 전자가 나오지 않을 때.</b> 광자 하나의 에너지가 일함수보다 작으면 이 모형에서는 광자 수를 늘려도 전자가 나오지 않습니다. 방출의 경계가 되는 진동수를 <b>한계 진동수 f₀ = φ/h</b>, 이에 해당하는 파장을 <b>한계 파장 λ₀ = hc/φ</b>라고 합니다. 슬라이더의 <b>f₀ 표시</b>가 방출의 경계입니다. 광자가 금속에 도착한 순간의 상호작용으로 방출하므로, 전자가 빛 에너지를 조금씩 모아 기다리는 것은 아닙니다. 이미 출발한 광자는 파장 설정을 바꿔도 원래 에너지를 유지합니다.</p>
+  <p><b>광자 수와 빛의 세기.</b> ‘들어오는 광자 수’는 <b>1초 동안 들어오는 광자 수</b>를 조절한다는 뜻입니다. 애니메이션은 움직임을 관찰할 수 있도록 느리게 재생됩니다. <b>같은 파장과 같은 면적에서는</b> 광자 수가 많을수록 빛의 세기가 큽니다. 광자 수를 늘려도 광자 하나의 에너지는 그대로여서 K<sub>max</sub>는 바뀌지 않습니다. 파장을 바꾸면 광자 하나의 에너지도 바뀌므로, 광자 수가 같다고 빛의 세기까지 같은 것은 아닙니다.</p>
+  <p><b>전압을 바꾸면?</b> 전압 V는 오른쪽 수집판의 전위에서 왼쪽 금속의 전위를 뺀 값입니다. V가 양수이면 전기력은 오른쪽, 음수이면 왼쪽입니다. 전자가 움직이는 방향과 힘의 방향이 같으면 속력이 커지고, 반대이면 작아집니다. 전압을 바꾼 순간 속도가 갑자기 바뀌지는 않습니다. 힘이 0이면 움직이던 방향으로 등속 운동합니다.</p>
+  <p><b>정지 전압을 찾아보세요.</b> 전자를 되돌리는 방향으로 전압을 걸어 광전류가 0이 되게 할 수 있습니다. 그 전압의 <b>크기 V<sub>s</sub></b>를 정지 전압이라고 하며, <b>eV<sub>s</sub> = K<sub>max</sub></b>입니다. e는 전자의 전하량의 크기입니다. 예를 들어 K<sub>max</sub> = 0.64 eV이면 V<sub>s</sub> = 0.64 V이고, 이 화면의 슬라이더에서는 −0.64 V에 해당합니다. 계산값은 근삿값으로 표시하고, 0.01 V 눈금으로 찾을 수 있는 경계 범위도 함께 보여 줍니다.</p>
+  <p><b>예상 광전류를 읽는 법.</b> 광전류는 광전자의 이동으로 생기는 전류입니다. 표시값은 <b>현재 조건을 충분히 오래 유지했을 때의 예상값</b>이며, 최대 광자 수에서 모두 수집될 때를 100으로 정한 상대값입니다. 빛을 끈 직후에도 이미 출발한 입자는 계속 이동할 수 있습니다. 이 모형에서는 0 V 이상일 때 나온 광전자가 모두 도달하여 <b>포화 전류</b>가 됩니다. 광자 수가 많을수록 포화 전류가 크지만, 정지 전압은 바뀌지 않습니다. 역전압에서는 에너지가 작은 전자부터 되돌아갑니다.</p>
+  <p><b>파란 전자는 비교용입니다.</b> 회색은 여러 운동 에너지로 방출된 광전자이고, 파란 전자는 <b>최대 운동 에너지를 가진 경우</b>를 보여 주는 비교용 전자입니다. 비교용 전자는 전류 계산과 전자 수에 포함하지 않습니다. 큰 고리로 선택한 전자의 에너지는 아래에 표시됩니다. 다른 전자를 누르면 선택을 바꿀 수 있습니다. 화면의 전자가 많아지면 일부만 그리지만 나머지도 계속 계산합니다.</p>
+  <p><b>조작.</b> 전압은 −4 ~ +2 V 범위에서 0.01 V 단위로 설정합니다. 슬라이더, − / + 버튼, ← → 키 또는 직접 입력 후 Enter를 사용하세요. 직접 입력한 값도 0.01 V 단위로 반올림됩니다. Space는 멈춤/계속, R은 다시 시작입니다. ‘느리게’는 화면에서 시간이 흐르는 속도만 바꿉니다.</p>
+
+<div class="details">일함수의 대표 문헌값: OpenStax, <i>University Physics Volume 3</i>, 표 6.1.
+   <table><thead><tr><th>금속</th><th>φ</th><th>λ₀ (약)</th><th>f₀ (×10¹⁴ Hz)</th></tr></thead><tbody>
+    <tr><td>Na</td><td>2.46 eV</td><td>504.001 nm</td><td>5.95</td></tr>
+    <tr><td>Al</td><td>4.08 eV</td><td>303.883 nm</td><td>9.87</td></tr>
+    <tr><td>Zn</td><td>4.31 eV</td><td>287.666 nm</td><td>10.42</td></tr>
+    <tr><td>Cu</td><td>4.70 eV</td><td>263.796 nm</td><td>11.36</td></tr>
+   </tbody></table>
+   실제 일함수는 결정면·산화·오염 등 표면 상태에 따라 달라집니다. 소수 자릿수는 모형의 계산값을 구분하기 위한 것이며 실물 시료의 측정 정확도를 뜻하지 않습니다.
+  </div>
+  <details class="details"><summary>이 모형에서 단순화한 내용</summary>
+   <p>광전자는 수집판 방향으로 나란히 출발하고 전기장은 일정하다고 가정합니다. 문턱보다 높은 에너지의 광자 하나가 광전자 하나를 방출한다고 가정합니다. 실제로는 모든 광자가 방출을 일으키지는 않으며 그 비율은 금속과 파장에 따라 달라집니다. 실제 장치의 0 V 수집률과 포화 전압도 이 모형과 다를 수 있습니다.</p>
+   <p>회색 전자의 방출 에너지는 0과 K<sub>max</sub> 사이에 고르게 분포하도록 단순화했습니다. 실제 금속의 에너지 분포를 측정한 값은 아닙니다. 흡수 전의 전자 상태와 금속 안에서의 에너지 손실 등으로 광전자의 에너지가 달라질 수 있습니다. hf = φ는 최대 운동 에너지가 0인 경계이며, 이 모형에서는 이동하는 전자를 생성하지 않습니다.</p>
+   <p>빛의 세기는 단위 면적에 단위 시간 동안 전달되는 에너지입니다. 이 실험은 파장을 바꿀 때 광자 수를 유지합니다. 빛의 세기를 일정하게 유지하는 다른 실험과 구분해야 합니다. 같은 방출률에서 모든 전자가 수집되는 안정된 상태라면, 빠른 전자는 먼저 도착하고 간격 안에 더 짧게 머물지만 단위 시간당 수집되는 수는 같습니다.</p>
+   <p>진공에서 단색광을 비추는 단일광자 광전효과를 다룹니다. 접촉 전위, 전자 사이의 힘, 열에 의한 방출, 여러 광자가 함께 일으키는 방출 등은 제외합니다. 에너지·전압의 관계에는 SI 상수를 사용하며, 시간·길이·입자 수·크기는 관찰하기 쉽게 조절했습니다. 자외선을 보라색으로 그린 것은 눈으로 구분하기 위해서입니다.</p>
+  </details>
+  <p class="details">참고: <a href="https://openstax.org/books/university-physics-volume-3/pages/6-2-photoelectric-effect" target="_blank" rel="noopener noreferrer">광전효과·일함수</a> · <a href="https://openstax.org/books/university-physics-volume-1/pages/16-4-energy-and-power-of-a-wave" target="_blank" rel="noopener noreferrer">빛의 세기 정의</a> · <a href="https://arpes.stanford.edu/research/tool-development/angle-resolved-photoemission-spectroscopy" target="_blank" rel="noopener noreferrer">광전자 에너지</a> · <a href="https://www.hamamatsu.com/content/dam/hamamatsu-photonics/sites/documents/99_SALES_LIBRARY/etd/PMT_TPMZ1036E.pdf" target="_blank" rel="noopener noreferrer">양자 효율</a> · <a href="https://physics.nist.gov/cuu/Constants/" target="_blank" rel="noopener noreferrer">NIST 상수</a> · P.H.A.S.E v10 · 기록·저장·외부 전송은 없습니다.</p>
+
+</section>
+</div>
+<script>
+"use strict";
+(() => {
+ /* ---------- constants (SI, CODATA exact) ---------- */
+ const PLANCK=6.62607015e-34, CHARGE=1.602176634e-19, LIGHT=299792458;
+ const HC=PLANCK*LIGHT/CHARGE*1e9;            // eV·nm
+ const H_EV=PLANCK/CHARGE;                    // eV·s
+ const NU_UNIT=LIGHT*1e9/1e14;                // lambda[nm] -> nu in 10^14 Hz
+ const METAL_COLOR=Object.freeze({Na:"#1f6fb8",Al:"#1f8a63",Zn:"#c07a12",Cu:"#b8474f"});
+ const SPEED=1.1, A_FACTOR=SPEED*SPEED/2;     // v = SPEED·√K  →  K[eV] = (v/SPEED)²
+ const PHOTON_TIME=.5, V_LO=-4, V_HI=2, EPS=1e-12;
+ const THUMB_W=10;                            // must match .range thumb width in the CSS above   // fixed voltage range: the slider never rescales
+ const BASE_RATE=8, CURRENT_SCALE=100/BASE_RATE;   // visual photon rate, kept low so single events stay readable
+
+ const MAX_DRAW=190; // Rendering limit only; every model electron remains in the physics.
+
+// OpenStax University Physics Vol.3, Table 6.1
+ const METALS=Object.freeze({
+  Na:Object.freeze({name:"나트륨",symbol:"Na",phi:2.46}),
+  Al:Object.freeze({name:"알루미늄",symbol:"Al",phi:4.08}),
+  Zn:Object.freeze({name:"아연",symbol:"Zn",phi:4.31}),
+  Cu:Object.freeze({name:"구리",symbol:"Cu",phi:4.70})
+ });
+
+ const state={metal:"Na",lambda:400,power:60,U:0,slow:true,paused:false};
+ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+ const $=id=>document.getElementById(id);
+ const ui={};
+ ["lab","scene","metal","lambda","power","bias","voltage","step","status","caption",
+  "photonKey","phiValue","lambda0Value","f0Value","lamTicks","freTicks","lambdaValue","lambdaMark","biasZero","freqValue","photonValue","powerValue",
+  "biasStop","stopValue","stopBracket","fluxValue","birthEnergy","liveEnergy","current","slowBtn","pauseBtn","restartBtn","helpBtn",
+  "help","closeHelp","minusBtn","plusBtn","zeroBtn","voltageHint",
+  ].forEach(id=>ui[id]=$(id));
+ const ctx=ui.lab.getContext("2d");
+
+ let model, particles=[], photons=[], flashes=[], selectedId=null;
+ let clock=0, emitPhase=0, photonSerial=0, serial=0, lastFrame=0, lastOutcome=null;
+ let W=1,H=1,dpr=1,helpPaused=false,lastText="";
+ let counters={photons:0,emitted:0,references:0,absorbedNoEmission:0,collected:0,returned:0,turns:0};
+
+ /* ---------- physics ---------- */
+
+ // Uniform continuous emission-energy distribution; reference trajectories carry no weight.
+ function collectedFraction(U,K){
+  if(!(K>EPS))return 0;
+  return clamp(1+U/K,0,1);
+ }
+
+function calc(s){
+  const material=METALS[s.metal]||METALS.Na;
+  const lambda=clamp(Number(s.lambda)||400,200,700);
+  const power=clamp(Number(s.power)||0,0,100);
+  const U=clamp(Number(s.U)||0,V_LO,V_HI);
+  const photon=HC/lambda, excess=photon-material.phi;
+  const K=Math.max(0,excess), canEmit=excess>EPS;
+  const rate=BASE_RATE*(power/100);   // Fixed photon arrival rate; optical intensity also depends on photon energy.
+  const fraction=canEmit?collectedFraction(U,K):0;
+  return {material,lambda,lambda0:HC/material.phi,nu:NU_UNIT/lambda,power,U,photon,K,canEmit,
+   a:A_FACTOR*U,rate,fraction,current:rate*fraction*CURRENT_SCALE,
+   leftSign:U<0?"+":U>0?"−":"0",rightSign:U<0?"−":U>0?"+":"0"};
+ }
+ function lightStyle(n){
+  if(n<380)return {name:"자외선 · 가시화",color:"#795faf",rgb:"121,95,175",uv:true};
+  if(n<450)return {name:"보라빛",color:"#7553b9",rgb:"117,83,185"};
+  if(n<495)return {name:"파란빛",color:"#287dbf",rgb:"40,125,191"};
+  if(n<570)return {name:"초록빛",color:"#318b57",rgb:"49,139,87"};
+  if(n<590)return {name:"노란빛",color:"#a68e14",rgb:"166,142,20"};
+  if(n<620)return {name:"주황빛",color:"#c36e25",rgb:"195,110,37"};
+  return {name:"빨간빛",color:"#c24e58",rgb:"194,78,88"};
+ }
+
+ /* ---------- formatting: preserve small nonzero quantities ---------- */
+ const fixed=(v,d)=>{const x=Number(v);return Number.isFinite(x)?(Math.abs(x)<Math.pow(10,-d)/2?(0).toFixed(d):x.toFixed(d)):"—"};
+ const signedV=u=>(u<-5e-3?"−":u>5e-3?"+":"")+fixed(Math.abs(u),2);
+ const scientific=v=>{
+  const [m,e]=v.toExponential(2).split("e");
+  const superscript={"-":"⁻","+":"","0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹"};
+  return m+"×10"+[...String(Number(e))].map(c=>superscript[c]).join("");
+ };
+ const energyText=k=>!Number.isFinite(k)?"—":k>0&&k<.01?scientific(k):fixed(Math.max(0,k),2);
+ const precise=v=>Math.abs(v)>0&&Math.abs(v)<.001?scientific(Math.abs(v)):Math.abs(v).toFixed(6).replace(/0+$/,"").replace(/\.$/,"");
+ const currentText=i=>i>0&&i<.1?"< 0.1":fixed(i,1);
+ const voltageBracket=k=>{
+  const scaled=-k*100,near=Math.round(scaled);
+  if(Math.abs(scaled-near)<1e-10)return "0.01 V 눈금의 경계: "+signedV(near/100)+" V";
+  return "전류가 0이 되는 경계: "+signedV(Math.floor(scaled)/100)+" ↔ "+signedV(Math.ceil(scaled)/100)+" V 사이";
+ };
+ const setReadout=(el,v)=>{el.textContent=v;if(v==="—")el.setAttribute("data-empty","");else el.removeAttribute("data-empty")};
+
+ /* ---------- UI sync ---------- */
+ function syncControls(){
+  model=calc(state);
+  const light=lightStyle(state.lambda);
+  ui.phiValue.textContent=model.material.phi.toFixed(2)+" eV";
+  ui.lambda0Value.textContent="≈ "+model.lambda0.toFixed(3)+" nm";
+  ui.f0Value.textContent=(model.material.phi/(H_EV*1e14)).toFixed(2)+" ×10¹⁴ Hz";
+  ui.lambdaValue.textContent=state.lambda+" nm";ui.lambdaValue.style.color=light.color;
+  ui.photonKey.style.color=state.power>0?light.color:"#9aa8b5";
+  ui.freqValue.textContent=model.nu.toFixed(2);
+  ui.photonValue.textContent=model.photon.toFixed(2)+" eV";
+  ui.powerValue.textContent=state.power+" %";
+  ui.fluxValue.textContent=(model.rate<10?model.rate.toFixed(1):Math.round(model.rate))+" 개/s";
+  setReadout(ui.birthEnergy,(model.canEmit&&state.power>0)?energyText(model.K):"—");
+  ui.birthEnergy.title=(model.canEmit&&state.power>0)?"모형 계산값 "+model.K.toPrecision(8)+" eV · 이론 정지 전압 −"+precise(model.K)+" V":"방출되지 않는 조건";
+  ui.current.textContent=currentText(model.current);
+  ui.slowBtn.setAttribute("aria-pressed",String(state.slow));
+  ui.pauseBtn.classList.toggle("play",state.paused);
+  ui.pauseBtn.setAttribute("aria-pressed",String(state.paused));
+  ui.pauseBtn.setAttribute("aria-label",state.paused?"애니메이션 계속":"애니메이션 멈춤");
+  // λ0 marker on the wavelength slider
+  const place=(el,frac)=>{
+   if(!(frac>=0&&frac<=1)){el.hidden=true;return}
+   el.hidden=false;el.style.left=`calc(${THUMB_W/2}px + ${(frac*100).toFixed(2)}% - ${(frac*THUMB_W).toFixed(1)}px)`;
+  };
+  place(ui.lambdaMark,(model.lambda0-200)/500);
+  // the bias slider spans only the window worth exploring, so one pixel ≈ one fine step
+  const stopU=-model.K;
+  ui.bias.value=state.U;
+  place(ui.biasZero,(0-V_LO)/(V_HI-V_LO));
+  if(model.canEmit){
+   place(ui.biasStop,(stopU-V_LO)/(V_HI-V_LO));ui.stopValue.textContent="≈ "+precise(model.K)+" V";
+   ui.stopBracket.textContent=voltageBracket(model.K);
+  }else{ui.biasStop.hidden=true;ui.stopValue.textContent="—";ui.stopBracket.textContent="현재 파장에서는 이동하는 광전자 방출 없음"}
+  if(state.paused)draw();
+  ui.lab.setAttribute("aria-label",
+   `왼쪽 ${model.material.symbol} 금속 ${model.leftSign}극, 오른쪽 수집판 ${model.rightSign}극. 전압 V ${signedV(state.U)} 볼트, 정상상태 상대 광전류 예상 ${currentText(model.current)}, 임의 단위.`);
+ }
+ function setVoltage(u,{fromSlider=false,fromField=false}={}){
+  const v=clamp(Number(u)||0,V_LO,V_HI);
+  state.U=Math.abs(v)<1e-9?0:Math.round(v*100)/100;
+  if(!fromField)ui.voltage.value=state.U.toFixed(2);
+  ui.voltage.removeAttribute("aria-invalid");
+  syncControls();refreshObservation();
+ }
+ function commitField(){
+  const s=ui.voltage.value.trim().replace(/[−–﹣－]/g,"-").replace(/,/g,".");
+  const n=Number(s);
+  if(!/^[+-]?(?:\d+\.?\d*|\.\d+)$/.test(s)||!Number.isFinite(n)||n<V_LO||n>V_HI){
+   ui.voltage.setAttribute("aria-invalid","true");
+   ui.voltageHint.textContent=`${V_LO} ~ +${V_HI} V 범위의 숫자를 입력해 주세요.`;
+   return false;
+  }
+  setVoltage(n);
+  ui.voltageHint.textContent="0.01 V 단위로 적용: "+signedV(state.U)+" V";
+  return true;
+ }
+ function nudge(dir){
+  setVoltage(Number((state.U+dir*Number(ui.step.value)).toFixed(4)));
+  ui.voltageHint.textContent="− / + 는 "+ui.step.value+" V 씩 · ← → 키도 같습니다.";
+ }
+
+
+ /* ---------- observation strip ---------- */
+ function choose(){
+  let e=particles.find(p=>p.id===selectedId);
+  if(!e){e=particles.find(p=>p.kind==="reference")||particles[0]||null;selectedId=e?e.id:null}
+  return e;
+ }
+ function refreshObservation(){
+  const e=choose();
+  let status="관찰 중",css="status";
+  if(state.power===0){status="빛 꺼짐 · 이전 입자는 계속 이동";css+=" off"}
+  else if(!model.canEmit){status="현재 조건 · 새 방출 없음";css+=" off"}
+  else if(model.fraction<=0){status="현재 조건 · 예상 전류 0";css+=" reverse"}
+  else if(model.U<0){status="현재 조건 · 일부만 도달";css+=" reverse"}
+  else status="현재 조건 · 포화 전류";
+  ui.status.textContent=status;ui.status.className=css;
+  setReadout(ui.liveEnergy,e?energyText(e.v*e.v/(SPEED*SPEED)):"—");
+  let caption,turn=false;
+  if(e){
+   const moving=Math.abs(e.v)<1e-10?0:Math.sign(e.v),force=Math.sign(model.a);
+   const direction=moving>0?"→":moving<0?"←":"0";
+   const forceText=force>0?"→":force<0?"←":"0";
+   const motion=!force?(moving?"등속 운동":"정지") : !moving?"순간 속력 0":moving===force?"속력 증가":"속력 감소";
+   caption=(e.kind==="reference"?"비교용 전자":"선택 전자")+": 이동 "+direction+" · 전기력 "+forceText+" · "+motion;
+   turn=moving<0;
+  }else if(state.power===0)caption=photons.length?"빛 꺼짐 · 이미 출발한 광자는 계속 이동합니다.":"광자 유입량이 0입니다.";
+  else if(!model.canEmit)caption=Math.abs(model.photon-model.material.phi)<=EPS?"hf = φ · 최대 운동 에너지 0의 문턱 경계입니다.":"현재 광자의 hf < φ · 단일광자 모형에서 새 방출이 없습니다.";
+  else caption="파란 전자는 최대 에너지의 비교용 전자 · 회색은 광전자입니다.";
+  if(state.paused)caption="멈춤 · "+caption;
+  if(caption!==lastText){ui.caption.textContent=caption;lastText=caption}
+  ui.caption.className="caption"+(turn?" turn":"");
+ }
+
+ /* ---------- simulation ---------- */
+ function emitPhoton(born){
+  const n=photonSerial++,u=((n+1)*.6180339887498949)%1;
+  const lane=.50+.43*u,ls=lightStyle(state.lambda);
+  photons.push({born,lane,n,lambda:state.lambda,energy:HC/state.lambda,color:ls.color,rgb:ls.rgb,uv:state.lambda<380});
+  counters.photons++;
+ }
+ function addElectron(energy,kind="electron",lane=.7,at=clock){
+  if(!(energy>0)||!Number.isFinite(energy))return null;
+  const e={id:++serial,kind,lane,E0:energy,x:0,v:SPEED*Math.sqrt(energy),at,turned:false,screenX:NaN,screenY:NaN};
+  particles.push(e);
+  if(kind==="reference"){counters.references++;if(selectedId===null)selectedId=e.id}else counters.emitted++;
+  return e;
+ }
+ function finish(e,type,x,at){
+  if(e.kind!=="reference"){if(type==="collect")counters.collected++;else counters.returned++}
+  if(type==="collect")flashes.push({x:1,lane:e.lane,time:at,type:"collect"});
+  if(e.kind==="reference")lastOutcome={type,x,time:at};
+ }
+ // Locate plate crossings analytically, including a crossing followed by a reversal
+ // within one time step. A zero-speed touch at the stopping potential is not collected.
+ function boundaryTime(e,b,a,dt){
+  const c=e.x-b,roots=[];
+  if(Math.abs(a)<1e-15){if(e.v!==0)roots.push(-c/e.v)}
+  else{
+   const d=e.v*e.v-2*a*c;
+   if(d>=0){
+    const q=-.5*(e.v+(e.v>=0?1:-1)*Math.sqrt(d));
+    if(q!==0){roots.push(q/(.5*a),c/q)}else roots.push(-e.v/a);
+   }
+  }
+  let first=Infinity;
+  for(const t of roots){
+   const v=e.v+a*t;
+   if(t>1e-12&&t<=dt+1e-12&&(b===1?v>1e-10:v<0))first=Math.min(first,t);
+  }
+  return first;
+ }
+ function step(dt){
+  clock+=dt;
+  const a=model.a;
+  if(model.rate>0){
+   emitPhase+=dt*model.rate;
+   while(emitPhase>=1){emitPhase-=1;emitPhoton(clock-emitPhase/model.rate)}
+  }
+  const keep=[];
+  for(const p of photons){
+   const impact=p.born+PHOTON_TIME;
+   if(clock+1e-12>=impact){
+    const K=p.energy-model.material.phi;
+    if(K>EPS){
+     const f=((p.n+1)*.7548776662466927)%1;
+     addElectron(K*f,"electron",p.lane,impact);
+     if(p.n%4===0)addElectron(K,"reference",.18+.16*((p.n+1)*.6180339887498949%1),impact);
+    }else{counters.absorbedNoEmission++;flashes.push({x:0,lane:p.lane,time:impact,type:"none"})}
+   }else keep.push(p);
+  }
+  photons=keep;
+  const live=[];
+  for(const e of particles){
+   const h=Math.max(0,clock-e.at);
+   const tc=boundaryTime(e,1,a,h),tr=boundaryTime(e,0,a,h),hit=Math.min(tc,tr);
+   if(Number.isFinite(hit)){finish(e,tc<tr?"collect":"return",tc<tr?1:0,e.at+hit);continue}
+   if(a!==0&&e.v*a<0){
+    const t=-e.v/a;
+    if(t>0&&t<=h){
+     const xt=clamp(e.x+e.v*t+.5*a*t*t,0,1);
+     e.turned=true;if(e.kind!=="reference")counters.turns++;
+     flashes.push({x:xt,lane:e.lane,time:e.at+t,type:"turn"});
+    }
+   }
+   e.x=clamp(e.x+e.v*h+.5*a*h*h,0,1);e.v+=a*h;e.at=clock;
+   live.push(e);
+  }
+  particles=live;flashes=flashes.filter(f=>clock-f.time<.7);choose();
+ }
+ function advance(dt){
+  if(!(dt>0)||!Number.isFinite(dt))return;
+  let left=dt;
+  while(left>1e-9){const h=Math.min(.05,left);step(h);left-=h}
+ }
+ function restart(resume=false){
+  particles=[];photons=[];flashes=[];selectedId=null;lastOutcome=null;
+  clock=0;emitPhase=0;photonSerial=0;serial=0;lastFrame=0;
+  counters={photons:0,emitted:0,references:0,absorbedNoEmission:0,collected:0,returned:0,turns:0};
+  if(resume)state.paused=false;
+  syncControls();
+  if(state.power>0)emitPhoton(-PHOTON_TIME*.45);
+  refreshObservation();draw();
+ }
+ function visibleParticles(){
+  const picked=[],seen=new Set(),chosen=choose();
+  const add=e=>{if(e&&!seen.has(e.id)&&picked.length<MAX_DRAW){seen.add(e.id);picked.push(e)}};
+  add(chosen);
+  const refs=particles.filter(e=>e.kind==="reference"),regular=particles.filter(e=>e.kind!=="reference");
+  const sample=(list,n)=>{for(let i=0;i<Math.min(n,list.length);i++)add(list[Math.floor(i*list.length/Math.min(n,list.length))])};
+  sample(refs,Math.min(10,refs.length));sample(regular,MAX_DRAW-picked.length);
+  return picked;
+ }
+
+
+/* ---------- canvas helpers ---------- */
+ function roundRect(g,x,y,w,h,r,fill,stroke,width=1){
+  if(w<=0||h<=0)return;
+  r=clamp(r,0,Math.min(w,h)/2);
+  g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);
+  g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();
+  if(fill){g.fillStyle=fill;g.fill()}
+  if(stroke){g.strokeStyle=stroke;g.lineWidth=width;g.stroke()}
+ }
+ function line(g,x1,y1,x2,y2,color,width=1,dash=[]){
+  g.beginPath();g.strokeStyle=color;g.lineWidth=width;g.setLineDash(dash);
+  g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();g.setLineDash([]);
+ }
+ function text(g,s,x,y,size,color="#24425f",align="center",weight=600){
+  g.font=`${weight} ${size}px system-ui,-apple-system,"Segoe UI","Malgun Gothic",sans-serif`;
+  g.fillStyle=color;g.textAlign=align;g.textBaseline="middle";g.fillText(s,x,y);
+ }
+ function dot(g,x,y,r,fill,stroke,width=1){
+  g.beginPath();g.arc(x,y,r,0,Math.PI*2);
+  if(fill){g.fillStyle=fill;g.fill()}
+  if(stroke){g.lineWidth=width;g.strokeStyle=stroke;g.stroke()}
+ }
+ function arrow(x,y,length,dir,color,width=2.3){
+  if(!dir){text(ctx,"0",x,y,12,color);return}
+  const start=x-dir*length/2,end=x+dir*length/2;
+  line(ctx,start,y,end,y,color,width);
+  ctx.beginPath();ctx.moveTo(end,y);ctx.lineTo(end-dir*6,y-3.5);ctx.lineTo(end-dir*6,y+3.5);
+  ctx.closePath();ctx.fillStyle=color;ctx.fill();
+ }
+ function pole(x,y,sign,r){
+  const color=sign==="+"?"#bf3b52":sign==="−"?"#225daf":"#728499";
+  dot(ctx,x,y,r,sign==="+"?"#fff0f1":sign==="−"?"#edf4ff":"#f0f4f7",color,1.4);
+  text(ctx,sign,x,y,r*1.55,color,"center",800);
+ }
+
+ /* ---------- main scene ---------- */
+ function draw(){
+  if(!model||!ctx)return;
+  ctx.clearRect(0,0,W,H);
+  const compact=W<620,tiny=H<170,short=H<250;
+  const fs=compact?(W<330?10:11):clamp(W/63,13,17);
+  const L=compact?Math.max(42,W*.13):Math.max(72,W*.13);
+  const R=compact?W-Math.max(40,W*.12):W-Math.max(76,W*.13);
+  const pw=compact?16:clamp(W*.019,17,23),gap=R-L;
+  const top=tiny?34:short?52:clamp(H*.19,70,105);
+  const bottom=H-(tiny?28:short?39:62),wireY=bottom+(tiny?18:short?26:43);
+  const X0=L+pw/2,X1=R-pw/2;
+  const panelH=tiny?28:short?42:60;
+  const panelW=Math.min(gap-pw-20,compact?170:262);
+  const panelX=(L+R-panelW)/2,panelY=top+4;
+  const laneMin=top+panelH+(tiny?8:14),laneMax=Math.max(laneMin+2,bottom-(tiny?5:12));
+  const yOf=lane=>laneMin+(laneMax-laneMin)*lane;
+
+  // external circuit; source terminal signs match the electrodes
+  const boxW=compact?106:148,boxH=tiny?20:26,boxX=(L+R-boxW)/2;
+  line(ctx,L,bottom,L,wireY,"#9fb0c0",1.8);line(ctx,R,bottom,R,wireY,"#9fb0c0",1.8);
+  line(ctx,L,wireY,boxX,wireY,"#9fb0c0",1.8);line(ctx,boxX+boxW,wireY,R,wireY,"#9fb0c0",1.8);
+  roundRect(ctx,boxX,wireY-boxH/2,boxW,boxH,5,"#f1f6fa","#c6d7e5");
+  text(ctx,"V = "+signedV(state.U)+" V",(L+R)/2,wireY,compact?9.5:12,"#3c5874","center",750);
+  text(ctx,model.leftSign,boxX+9,wireY,13,model.leftSign==="+"?"#bf3b52":"#225daf","center",800);
+  text(ctx,model.rightSign,boxX+boxW-9,wireY,13,model.rightSign==="+"?"#bf3b52":"#225daf","center",800);
+  const meterX=(L+boxX)/2;
+  if(boxX-L>34){
+   dot(ctx,meterX,wireY,tiny?8:11,"#fff","#96aabd",1.2);
+   text(ctx,"I",meterX,wireY-(tiny?0:3),tiny?9:10,"#4e6b87");
+   if(!tiny)text(ctx,currentText(model.current),meterX,wireY+5,8,"#1f765d","center",750);
+  }
+  roundRect(ctx,L-pw,top-3,gap+2*pw,bottom-top+7,compact?13:22,"#f1f7fc9c","#d9e5ef",1.2);
+
+  // lamp and photons
+  const lampX=L+gap*.32,lampY=tiny?9:short?17:Math.max(24,top-44);
+  const light=lightStyle(state.lambda);
+  if(state.power>0){
+   ctx.beginPath();ctx.moveTo(lampX-2,lampY+8);ctx.lineTo(X0,yOf(.1));ctx.lineTo(X0,yOf(.96));ctx.closePath();
+   ctx.fillStyle=`rgba(${light.rgb},${.025+state.power*.0007})`;ctx.fill();
+  }
+  ctx.save();ctx.translate(lampX,lampY);ctx.rotate(.44);
+  roundRect(ctx,-14,-6,28,12,4,"#425975","#32465e");
+  roundRect(ctx,-15,3,30,5,2,state.power>0?light.color:"#96a4b4");
+  ctx.restore();
+  text(ctx,state.power===0?"빛 꺼짐":light.name,lampX+23,lampY,tiny?9:fs-1,state.power?light.color:"#8090a1","left",650);
+  for(const p of photons){
+   const t=clamp((clock-p.born)/PHOTON_TIME,0,1),ty=yOf(p.lane);
+   const vx=X0-lampX,vy=ty-lampY-8,len=Math.hypot(vx,vy)||1;
+   const cx=lampX+vx*t,cy=lampY+8+vy*t,ux=vx/len,uy=vy/len;
+   const tl=tiny?10:18, rgb=p.rgb||"120,120,160";
+   const grad=ctx.createLinearGradient(cx-ux*tl,cy-uy*tl,cx,cy);
+   grad.addColorStop(0,`rgba(${rgb},0)`);grad.addColorStop(1,`rgba(${rgb},.72)`);
+   ctx.beginPath();ctx.strokeStyle=grad;ctx.lineWidth=tiny?2.2:3.2;ctx.lineCap="round";
+   ctx.moveTo(cx-ux*tl,cy-uy*tl);ctx.lineTo(cx,cy);ctx.stroke();ctx.lineCap="butt";
+   dot(ctx,cx,cy,tiny?5.5:8,`rgba(${rgb},.26)`,null);
+   dot(ctx,cx,cy,tiny?2.7:4,p.color,"#ffffffe0",1.4);
+  }
+
+  // electrodes
+  for(const left of [true,false]){
+   const x=left?L:R,sign=left?model.leftSign:model.rightSign;
+   const grad=ctx.createLinearGradient(x-pw/2,0,x+pw/2,0);
+   grad.addColorStop(0,"#899daf");grad.addColorStop(.45,"#d7e2eb");grad.addColorStop(1,"#9bb0c2");
+   roundRect(ctx,x-pw/2,top,pw,bottom-top,4,grad,"#849bad");
+   for(let j=1;j<=3;j++)text(ctx,sign==="0"?"·":sign,x,top+(bottom-top)*j/4,pw*.75,
+     sign==="+"?"#ae3249":sign==="−"?"#245eac":"#75899e","center",800);
+   pole(x,top-(tiny?10:16),sign,tiny?9:compact?12:16);
+   text(ctx,left?model.material.symbol+" 금속":"수집판",x,top-(tiny?26:36),fs,"#2a4764","center",750);
+  }
+  line(ctx,X0,top+3,X0,bottom-3,"#2977b2",2);   // exposed emitting surface
+
+  // v / F panel for the ringed electron
+  const chosen=choose();
+  roundRect(ctx,panelX,panelY,panelW,panelH,7,"#ffffffed","#d6e3ed");
+  const font=tiny?9:compact?10.5:13.5,ay1=panelY+panelH*.29,ay2=panelY+panelH*.73;
+  const ax=panelX+panelW-25;
+  text(ctx,"이동 방향 v",panelX+8,ay1,font,"#126bc1","left",700);
+  text(ctx,"전기력 F",panelX+8,ay2,font,"#b25b0b","left",700);
+  if(chosen){
+   arrow(ax,ay1,tiny?24:32,Math.abs(chosen.v)<1e-9?0:Math.sign(chosen.v),"#126bc1");
+   arrow(ax,ay2,tiny?24:32,Math.sign(model.a),"#b25b0b");
+  }else{
+   text(ctx,"—",ax,ay1,font,"#7f90a0");text(ctx,"—",ax,ay2,font,"#b25b0b");
+  }
+
+     // Render a representative subset; hidden particles continue to move and be counted.
+   for(const e of particles){e.screenX=NaN;e.screenY=NaN}
+   const shown=visibleParticles();
+   for(const e of shown){
+   const x=X0+e.x*(X1-X0),y=yOf(e.lane),sel=e===chosen;
+   e.screenX=x;e.screenY=y;
+
+   // The blue reference and grey photoelectrons share the same circle-and-minus shape.
+   const r=tiny?4.5:compact?5.5:6.5;
+   dot(ctx,x,y,r,e.kind==="reference"?"#136bc1":"#6b7d8e",null);
+   line(ctx,x-r*.48,y,x+r*.48,y,"#fff",tiny?1.5:1.8);
+
+if(sel)dot(ctx,x,y,r+4.5,null,"#2b7fc0",2);
+  }
+  for(const f of flashes){
+   const age=clock-f.time;if(age<0)continue;
+   const x=X0+f.x*(X1-X0),y=yOf(f.lane);
+   ctx.globalAlpha=clamp(1-age/.7,0,1)*.5;
+   dot(ctx,x,y,11+age*22,null,f.type==="turn"?"#bd730e":f.type==="none"?"#a7b3be":"#42a084",1.8);
+   ctx.globalAlpha=1;
+  }
+     if(!tiny&&W>440)text(ctx,"진공",R-pw-19,bottom-9,fs-2,"#9bb0c1","center",500);
+   if(!tiny){
+    const count=particles.filter(p=>p.kind!=="reference").length,visible=shown.filter(p=>p.kind!=="reference").length;
+    text(ctx,"모형 전자 "+count+"개 · "+visible+"개 표시",(L+R)/2,bottom-8,compact?8:10,"#687f95","center",500);
+   }
+  refreshObservation();
+ }
+
+ /* ---------- layout ---------- */
+ function resize(){
+  const r=ui.scene.getBoundingClientRect();
+  W=Math.max(1,r.width);H=Math.max(1,r.height);
+  dpr=Math.min(window.devicePixelRatio||1,2.5);
+  ui.lab.width=Math.round(W*dpr);ui.lab.height=Math.round(H*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  draw();
+ }
+
+ /* ---------- events ---------- */
+ ui.metal.addEventListener("change",()=>{
+  state.metal=METALS[ui.metal.value]?ui.metal.value:"Na";
+  syncControls();refreshObservation();
+ });
+ ui.lambda.addEventListener("input",()=>{
+  state.lambda=clamp(Number(ui.lambda.value),200,700);
+  syncControls();refreshObservation();
+ });
+ ui.power.addEventListener("input",()=>{
+  state.power=clamp(Number(ui.power.value),0,100);
+  if(state.power===0)emitPhase=0;
+  syncControls();refreshObservation();
+ });
+ ui.bias.addEventListener("input",()=>setVoltage(Number(ui.bias.value),{fromSlider:true}));
+ ui.voltage.addEventListener("input",()=>{
+  ui.voltage.removeAttribute("aria-invalid");
+  ui.voltageHint.textContent="입력 후 Enter 를 누르세요.";
+ });
+ ui.voltage.addEventListener("keydown",e=>{
+  if(e.key==="Enter"){e.preventDefault();commitField();ui.voltage.blur()}
+  if(e.key==="Escape"){ui.voltage.value=state.U.toFixed(2);ui.voltage.removeAttribute("aria-invalid");ui.voltage.blur()}
+ });
+ ui.voltage.addEventListener("blur",()=>{if(!commitField())ui.voltage.value=state.U.toFixed(2)});
+ ui.minusBtn.addEventListener("click",()=>nudge(-1));
+ ui.plusBtn.addEventListener("click",()=>nudge(1));
+ ui.zeroBtn.addEventListener("click",()=>setVoltage(0));
+ ui.slowBtn.addEventListener("click",()=>{state.slow=!state.slow;syncControls();draw()});
+ ui.pauseBtn.addEventListener("click",togglePause);
+ ui.restartBtn.addEventListener("click",()=>restart(true));
+ function togglePause(){
+  state.paused=!state.paused;lastFrame=0;
+  if(!ui.voltage.hasAttribute("aria-invalid"))
+   ui.voltageHint.textContent=state.paused?"멈춤 상태 · ▶ 버튼으로 계속":"슬라이더로 크게, − / + 로 미세 조절 · ← → 키도 가능";
+  syncControls();refreshObservation();draw();
+ }
+ ui.helpBtn.addEventListener("click",()=>{
+  helpPaused=state.paused;state.paused=true;syncControls();draw();
+  ui.help.hidden=false;ui.closeHelp.focus();
+ });
+ function closeHelp(){
+  ui.help.hidden=true;state.paused=helpPaused;lastFrame=0;syncControls();draw();ui.helpBtn.focus();
+ }
+ ui.closeHelp.addEventListener("click",closeHelp);
+ ui.help.addEventListener("click",e=>{if(e.target===ui.help)closeHelp()});
+ document.addEventListener("keydown",e=>{
+  if(!ui.help.hidden){
+   if(e.key==="Escape"){e.preventDefault();closeHelp()}
+   if(e.key==="Tab"){
+    const nodes=ui.help.querySelectorAll("button,a[href]"),first=nodes[0],last=nodes[nodes.length-1];
+    if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}
+    else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}
+   }
+   return;
+  }
+  const tag=document.activeElement&&document.activeElement.tagName||"";
+  if(/^(INPUT|SELECT|TEXTAREA|A)$/.test(tag))return;
+  if(e.key==="ArrowLeft"){e.preventDefault();nudge(-1);return}
+  if(e.key==="ArrowRight"){e.preventDefault();nudge(1);return}
+  if(tag==="BUTTON")return;
+  if(e.code==="Space"){e.preventDefault();togglePause()}
+  if(typeof e.key==="string"&&e.key.toLowerCase()==="r")restart(true);
+ });
+ ui.lab.addEventListener("pointerdown",ev=>{
+  const r=ui.lab.getBoundingClientRect(),x=ev.clientX-r.left,y=ev.clientY-r.top;
+  let pick=null,dist=26;
+  for(const e of particles){
+   const d=Math.hypot(x-e.screenX,y-e.screenY);
+   if(d<dist){dist=d;pick=e}
+  }
+  if(pick){selectedId=pick.id;draw()}
+ });
+ document.addEventListener("visibilitychange",()=>{lastFrame=0});
+ function frame(t){
+  const dt=lastFrame?clamp((t-lastFrame)/1000,0,.05):0;lastFrame=t;
+  if(!state.paused&&!document.hidden){
+   if(dt>0)advance(dt*(state.slow?.55:1));
+   draw();
+  }
+  requestAnimationFrame(frame);
+ }
+ if(window.ResizeObserver)new ResizeObserver(resize).observe(ui.scene);
+ window.addEventListener("resize",resize,{passive:true});
+ if(window.visualViewport)window.visualViewport.addEventListener("resize",resize,{passive:true});
+
+ // Local test hooks only. No storage, no network, no telemetry.
+ Object.defineProperty(window,"PHASE_TEST",{value:Object.freeze({
+  constants:Object.freeze({HC,SPEED,A_FACTOR,V_HI,MAX_DRAW,BASE_RATE,PHOTON_TIME}),
+  metals:METALS,calc,collectedFraction,
+  snapshot:()=>({state:{...state},model:{...model},clock,counters:{...counters},
+   particles:particles.map(p=>({...p})),photons:photons.map(p=>({...p})),
+   selectedId,lastOutcome:lastOutcome?{...lastOutcome}:null,
+   caption:ui.caption.textContent,status:ui.status.textContent,
+   readouts:{Kmax:ui.birthEnergy.textContent,live:ui.liveEnergy.textContent,I:ui.current.textContent}}),
+  advance:t=>{advance(clamp(Number(t)||0,0,300));draw()},
+  configure:s=>{
+   if(s.metal&&METALS[s.metal]){state.metal=s.metal;ui.metal.value=s.metal}
+   if(Number.isFinite(s.lambda)){state.lambda=clamp(s.lambda,200,700);ui.lambda.value=state.lambda}
+   if(Number.isFinite(s.power)){state.power=clamp(s.power,0,100);ui.power.value=state.power}
+   state.paused=true;
+   if(Number.isFinite(s.U))setVoltage(s.U);else{syncControls();refreshObservation()}
+   restart();
+  },
+  setU:u=>setVoltage(u),
+  visible:()=>visibleParticles().map(p=>p.id),
+   inject:(energy,kind="electron",lane=.25)=>{const e=addElectron(energy,kind,lane);draw();return e?e.id:null}
+ }),writable:false});
+
+ ui.bias.value=state.U;ui.voltage.value=state.U.toFixed(2);
+ // show both panels by default wherever there is room for both (desktop, tablet portrait)
+ // wavelength ticks are evenly spaced; the same slider's frequency ticks are not,
+ // which is the point — equal steps in f crowd together at short wavelengths.
+ (function buildScales(){
+  const at=pct=>`calc(${THUMB_W/2}px + ${(pct*100).toFixed(3)}% - ${(pct*THUMB_W).toFixed(2)}px)`;
+  const row=(el,items)=>{
+   el.innerHTML="";
+   for(const it of items){
+    const pct=(it.lambda-200)/500;
+    if(pct<-0.001||pct>1.001)continue;
+    const sp=document.createElement("span");
+    sp.textContent=it.text;sp.style.left=at(clamp(pct,0,1));
+    el.appendChild(sp);
+   }
+  };
+  row(ui.lamTicks,[200,300,400,500,600,700].map(L=>({lambda:L,text:String(L)})));
+  row(ui.freTicks,[12,10,8,6,4.5].map(F=>({lambda:NU_UNIT/F,text:F%1?F.toFixed(1):String(F)})));
+ })();
+ syncControls();restart();resize();requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

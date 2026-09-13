@@ -103,6 +103,11 @@ window.PHASE_PREVIEWS = {
       "sourceHash": "36621574027288d5fbbf0998af450fdb625f57e6fe19b346b28e619731c31668",
       "bytes": 18696
     },
+    "photoelectric-effect": {
+      "src": "assets/previews/photoelectric-effect-066c463892.webp",
+      "sourceHash": "85ef1eefb197d2b28130546791667fd99642f6282866ae82e4b841551e2cf434",
+      "bytes": 21682
+    },
     "hero-maker": {
       "src": "assets/previews/hero-maker-601ae541c8.webp",
       "sourceHash": "0e23dfb8be38c77f4bace85e66fa0f91abee1a8fbbf129ccf890f2d7725e24ec",
