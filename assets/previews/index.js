@@ -69,9 +69,9 @@ window.PHASE_PREVIEWS = {
       "bytes": 25268
     },
     "pn-junction": {
-      "src": "assets/previews/pn-junction-8921ee0d16.webp",
-      "sourceHash": "bf055a1055b8d935414d09c23374dc3921d23d915c08e9cdffaedbbce36152de",
-      "bytes": 32304
+      "src": "assets/previews/pn-junction-8d3beaea51.webp",
+      "sourceHash": "a7e695d4a6dbb24aca3b21faf44adae4f19c92f3c214543bd6f21bb191f75c8f",
+      "bytes": 33292
     },
     "proper-time-length": {
       "src": "assets/previews/proper-time-length-8047f88014.webp",
