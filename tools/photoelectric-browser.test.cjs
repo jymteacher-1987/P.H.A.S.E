@@ -61,6 +61,22 @@ test('Photoelectric: catalog launch, retarding voltage, energy, controls and res
      assert.ok(await frame.locator('.help-card').evaluate(e=>e.scrollWidth<=e.clientWidth+1),'help overflow');
      await frame.locator('#closeHelp').click();assert.equal(await frame.locator('#help').isVisible(),false);
      await frame.locator('#restartBtn').click();
+     const readings=await frame.evaluate(()=>{
+      const g=document.querySelector('#lab').getContext('2d'),original=g.fillText;
+      let labels=[];
+      g.fillText=function(value,x,y,...rest){labels.push({value:String(value),x,y});return original.call(this,value,x,y,...rest)};
+      try{
+       return [100,60,30,0].map(power=>{
+        labels=[];PHASE_TEST.configure({metal:'Na',lambda:400,power,U:0});
+        const meter=labels.find(item=>item.value==='A');
+        const reading=meter&&labels.find(item=>item.x===meter.x&&item.y>meter.y);
+        return {meter:reading?.value,readout:document.querySelector('#current').textContent,
+         roles:labels.some(item=>item.value==='빛을 받는 판')&&labels.some(item=>item.value==='전자를 받는 판')};
+       });
+      }finally{g.fillText=original}
+     });
+     assert.deepEqual(readings,[100,60,30,0].map(value=>({meter:value.toFixed(1),readout:value.toFixed(1),roles:true})),
+      'circuit ammeter must show the changing current at '+width+'x'+height);
      await frame.evaluate(()=>{
       PHASE_TEST.configure({metal:'Na',lambda:400,power:60,U:0});
       PHASE_TEST.advance(1.55);

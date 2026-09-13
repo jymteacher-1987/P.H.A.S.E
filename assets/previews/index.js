@@ -104,9 +104,9 @@ window.PHASE_PREVIEWS = {
       "bytes": 18696
     },
     "photoelectric-effect": {
-      "src": "assets/previews/photoelectric-effect-d61d8a0251.webp",
-      "sourceHash": "42dbdd77f905d6235382f2cc33469fd880041b12a30889afd183d7e1335203ec",
-      "bytes": 21978
+      "src": "assets/previews/photoelectric-effect-6990785384.webp",
+      "sourceHash": "e69e0c4b5e2114cc9eceb74c8d4cf4810392889fbb88d620b3c6eeb425e6951a",
+      "bytes": 21798
     },
     "hero-maker": {
       "src": "assets/previews/hero-maker-601ae541c8.webp",
