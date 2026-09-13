@@ -382,12 +382,15 @@ test(
               ) < 1e-8,
             );
             assert.equal(equipment.cool.heatTime, 0);
-            assert.equal(equipment.maxed.wing, 8);
             assert.ok(
-              equipment.maxed.shots.some((s) => s.heavy),
-              "Final coil unlocks a heavy center missile",
+              equipment.maxed.wing >= 9,
+              "Coils keep growing beyond the old cap",
             );
-            assert.ok(equipment.maxed.shots.some((s) => s.side));
+            assert.ok(
+              equipment.maxed.playerLasers.length > 0,
+              "Accumulated coils and magnets evolve missiles into a laser",
+            );
+            assert.ok(equipment.maxed.weapon.tier >= 2);
             assert.ok(equipment.maxed.shots.every((s) => !s.homing));
             // The beam is aimed through the real player's collider; no call to hurt is used here.
             const beam = await page.evaluate(() => {

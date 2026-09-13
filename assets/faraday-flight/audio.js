@@ -172,6 +172,26 @@
       const t = this.context.currentTime,
         d = this.fx;
       switch (name) {
+        case "laser":
+        case "cannon":
+          if (t - this.lastShot < 0.14) return;
+          this.lastShot = t;
+          this.note(
+            name === "cannon" ? 220 : 950,
+            t,
+            0.12,
+            0.035,
+            "triangle",
+            d,
+            name === "cannon" ? -110 : -620,
+          );
+          this.note(1500, t, 0.06, 0.017, "sine", d, -950);
+          break;
+        case "evolve":
+          [392, 587, 784, 1175].forEach((hz, i) =>
+            this.note(hz, t + i * 0.06, 0.22, 0.1, "triangle", d),
+          );
+          break;
         case "shot":
           if (t - this.lastShot < 0.14) return;
           this.lastShot = t;

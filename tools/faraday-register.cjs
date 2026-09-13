@@ -23,6 +23,7 @@ const files = [
   "game.js",
   "combat.js",
   "scoring.js",
+  "weapons.js",
   "hero.webp",
   "enemies.webp",
   "boss.webp",

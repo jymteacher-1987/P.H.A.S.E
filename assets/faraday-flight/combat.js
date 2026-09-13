@@ -221,35 +221,56 @@
               player.x - bx,
             );
           ray(bx, sy, angle);
-          for (let n = 0; n < (easy ? 4 : 8 + phase); n++)
+          for (let n = 0; n < (easy ? 4 : 9 + phase); n++)
             for (const offset of easy ? [0] : [-0.19, 0, 0.19])
-              shot(warning + n * 0.28, bx, sy, angle + offset, 160, "echo", {
-                hold: 0.38,
-              });
+              shot(
+                warning + n * 0.25,
+                bx,
+                sy,
+                angle + offset,
+                easy ? 160 : 166 + phase * 4,
+                "echo",
+                {
+                  hold: 0.38,
+                },
+              );
         }
+        if (!easy && phase > 0)
+          for (let n = 0; n < 8; n++)
+            shot(
+              warning + 1.15,
+              x,
+              sy,
+              0.4 + (n * (PI - 0.8)) / 7,
+              146 + phase * 4,
+              "shard",
+            );
       } else {
         id = "clock-release";
         name = "멈춘 시계";
-        const count = easy ? 18 : 26 + phase * 3,
+        const count = easy ? 18 : 28 + phase * 3,
           gapAngle = PI / 2 + (Math.floor(volley / 2) % 2 ? 0.6 : -0.6),
           ring = r * 0.2;
         markers.push({ kind: "clock", x, y: sy, start: 0, end: warning });
         for (let row = 0; row < (easy ? 2 : 3); row++)
           for (let n = 0; n < count; n++) {
-            const angle = (2 * PI * n) / count,
+            const turn = easy
+                ? 0
+                : row * 0.16 * (Math.floor(volley / 2) % 2 ? -1 : 1),
+              angle = (2 * PI * n) / count + turn,
               distance = Math.abs(
                 Math.atan2(
-                  Math.sin(angle - gapAngle),
-                  Math.cos(angle - gapAngle),
+                  Math.sin(angle - gapAngle - turn),
+                  Math.cos(angle - gapAngle - turn),
                 ),
               );
             if (distance < (easy ? 0.55 : 0.32)) continue;
             shot(
-              warning + row * 1.1,
+              warning + row * (easy ? 1.1 : 1),
               x + Math.cos(angle) * ring,
               sy + Math.sin(angle) * ring,
               angle,
-              120 + phase * 10,
+              (easy ? 120 : 128) + phase * 10,
               "echo",
               { hold: easy ? 0.95 : 0.7 },
             );
