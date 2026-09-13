@@ -67,18 +67,32 @@
     // Monotone display mapping preserves differences beyond the old clipped maximum.
     const light = power > 0 ? Math.pow(power / (power + 4), 0.6) : 0;
     if (light > 0.001) {
-      const radius=r*(1.5+light*1.7);
-      const g = c.createRadialGradient(x, y, r*.35, x, y, radius);
+      const radius = r * (1.5 + light * 1.7);
+      const g = c.createRadialGradient(x, y, r * 0.35, x, y, radius);
       g.addColorStop(0, "rgba(255,233,132," + light * 0.95 + ")");
-      g.addColorStop(.35,"rgba(255,211,99," + light * 0.6 + ")");
+      g.addColorStop(0.35, "rgba(255,211,99," + light * 0.6 + ")");
       g.addColorStop(1, "transparent");
       c.fillStyle = g;
-      c.fillRect(x-radius,y-radius,radius*2,radius*2);
-      c.fillStyle='rgba(255,249,194,'+(light*.95)+')';c.beginPath();c.arc(x,y,r-2,0,TAU);c.fill();
-      if(light>.35)for(let i=0;i<8;i++){
-        const a=(i+.5)*TAU/8,inner=r+7,outer=inner+light*18;
-        wire(c,[[x+Math.cos(a)*inner,y+Math.sin(a)*inner],[x+Math.cos(a)*outer,y+Math.sin(a)*outer]],'rgba(255,225,132,'+light+')',1+light);
-      }
+      c.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+      c.fillStyle = "rgba(255,249,194," + light * 0.95 + ")";
+      c.beginPath();
+      c.arc(x, y, r - 2, 0, TAU);
+      c.fill();
+      if (light > 0.35)
+        for (let i = 0; i < 8; i++) {
+          const a = ((i + 0.5) * TAU) / 8,
+            inner = r + 7,
+            outer = inner + light * 18;
+          wire(
+            c,
+            [
+              [x + Math.cos(a) * inner, y + Math.sin(a) * inner],
+              [x + Math.cos(a) * outer, y + Math.sin(a) * outer],
+            ],
+            "rgba(255,225,132," + light + ")",
+            1 + light,
+          );
+        }
     }
     c.strokeStyle = light > 0.01 ? "#fff1a2" : "#5b858b";
     c.lineWidth = 2;
@@ -92,7 +106,7 @@
         [x - d, y - d],
         [x + d, y + d],
       ],
-      light>.35?"#8d6429":c.strokeStyle,
+      light > 0.35 ? "#8d6429" : c.strokeStyle,
       2,
     );
     wire(
@@ -101,7 +115,7 @@
         [x - d, y + d],
         [x + d, y - d],
       ],
-      light>.35?"#8d6429":c.strokeStyle,
+      light > 0.35 ? "#8d6429" : c.strokeStyle,
       2,
     );
   }

@@ -142,12 +142,7 @@
     host.querySelector("#faradayRankRefresh").onclick = () =>
       mount(host, mode, result);
     for (const b of host.querySelectorAll("[data-rank-mode]"))
-      b.onclick = () =>
-        mount(
-          host,
-          b.dataset.rankMode,
-          result,
-        );
+      b.onclick = () => mount(host, b.dataset.rankMode, result);
     const form = host.querySelector("#faradayRankForm");
     if (form) {
       try {

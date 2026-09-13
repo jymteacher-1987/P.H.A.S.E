@@ -18,6 +18,7 @@ const { chromium } = require("playwright"),
     await page.evaluate(() => __faraday.manual());
     await page.click("#titleSound");
     await page.click("#startBtn");
+    await page.click("#briefingLaunch");
     const report = [];
     for (let stage = 0; stage < 5; stage++) {
       const result = await page.evaluate(() => {
@@ -139,7 +140,8 @@ const { chromium } = require("playwright"),
           }
         }
         await page.locator("[data-upgrade=" + upgrade + "]").click();
-        await page.locator('#nextStageBtn').click();
+        await page.locator("#nextStageBtn").click();
+        await page.click("#briefingLaunch");
       }
     }
     fs.writeFileSync(

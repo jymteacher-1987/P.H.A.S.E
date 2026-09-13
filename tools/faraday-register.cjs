@@ -29,6 +29,12 @@ const files = [
   "gate.webp",
   "symbols.webp",
   "fog.webp",
+  "ending.webp",
+  "foes-books.webp",
+  "foes-gates.webp",
+  "foes-symbols.webp",
+  "foes-lab.webp",
+  "foes-records.webp",
 ];
 const imageVersions = Object.fromEntries(
   files

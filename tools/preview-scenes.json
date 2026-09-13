@@ -258,6 +258,9 @@
         "click": "#startBtn"
       },
       {
+        "click": "#briefingLaunch"
+      },
+      {
         "wait": 9000
       }
     ]

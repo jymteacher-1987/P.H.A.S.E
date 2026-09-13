@@ -61,6 +61,137 @@ async function ready(page, url) {
   await page.evaluate(() => __faraday.ready());
   await page.evaluate(() => __faraday.manual());
 }
+async function chapter(page, index) {
+  assert.equal(
+    await page.locator("body").getAttribute("data-mode"),
+    "briefing",
+  );
+  const levels = require("../assets/faraday-flight/levels.js").levels;
+  assert.equal(
+    await page.locator("#modalTitle").textContent(),
+    levels[index].zone,
+  );
+  assert.equal(await page.locator(".chapter-crawl p").count(), 3);
+  const frozen = await page.evaluate(() => {
+    const q = __faraday,
+      before = q.state;
+    q.step(24);
+    return { before, after: q.state };
+  });
+  assert.equal(frozen.after.stageTime, 0, "Story must not spend combat time");
+  assert.equal(frozen.after.player.hp, frozen.before.player.hp);
+  assert.equal(frozen.after.shots.length, 0);
+  assert.equal(frozen.after.enemies.length, 0);
+  await page.keyboard.press("Escape");
+  assert.equal(await page.locator("#modal").isVisible(), true);
+  await reachable(page.locator("#briefingLaunch"));
+}
+test(
+  "Faraday: fixed missiles, entrance volleys and body damage during overdrive",
+  { timeout: 60000 },
+  async () => {
+    const s = await server(),
+      origin = "http://127.0.0.1:" + s.address().port;
+    const browser = await chromium.launch({
+      headless: true,
+      ...(process.platform === "win32" ? { channel: "msedge" } : {}),
+    });
+    try {
+      const page = await browser.newPage({
+        viewport: { width: 390, height: 844 },
+      });
+      await ready(page, origin + "/plays/faraday-flight.html?qa");
+      await page.click("#startBtn");
+      await page.click("#briefingLaunch");
+      const trajectory = await page.evaluate(() => {
+        const q = __faraday;
+        q.move(50, q.state.H * 0.76);
+        for (let i = 0; i < 8; i++) q.collect("power");
+        q.spawnBeam(430);
+        q.step(0.2);
+        const before = q.state.shots.find((s) => s.side && s.vx > 0);
+        q.move(100, q.state.H * 0.76);
+        q.step(0.1);
+        const after = q.state.shots.find(
+          (s) =>
+            Math.abs(s.life - (before.life - 0.1)) < 1e-8 && s.vx === before.vx,
+        );
+        return { before, after };
+      });
+      assert.ok(
+        trajectory.after,
+        "Side missiles keep velocity while targets are off their flight paths",
+      );
+      assert.ok(
+        Math.abs(
+          trajectory.after.x - trajectory.before.x - trajectory.before.vx * 0.1,
+        ) < 1e-7,
+      );
+      assert.ok(
+        Math.abs(
+          trajectory.after.y - trajectory.before.y - trajectory.before.vy * 0.1,
+        ) < 1e-7,
+      );
+      await page.reload();
+      await page.evaluate(() => __faraday.ready());
+      await page.evaluate(() => __faraday.manual());
+      await page.click("#startBtn");
+      await page.click("#briefingLaunch");
+      const entrance = await page.evaluate(() => {
+        const q = __faraday;
+        for (let i = 0; i < 8; i++) q.collect("power");
+        let prematureDamage = false,
+          maxEnemies = 0;
+        for (let i = 0; i < 12 * 60; i++) {
+          q.step(1 / 60);
+          const s = q.state;
+          maxEnemies = Math.max(maxEnemies, s.enemies.length);
+          prematureDamage ||= s.enemies.some(
+            (e) => !e.entryVolley && e.hp < e.maxHP,
+          );
+        }
+        return { prematureDamage, maxEnemies, stats: q.state.stats };
+      });
+      assert.equal(entrance.prematureDamage, false);
+      assert.ok(entrance.stats.kills > 0);
+      assert.ok(
+        entrance.stats.enemyShots >= entrance.stats.kills,
+        "Enemies fire before maxed equipment destroys them",
+      );
+      assert.ok(
+        entrance.maxEnemies < 10,
+        "First-stage waves leave room instead of accumulating a crowd",
+      );
+      await page.reload();
+      await page.evaluate(() => __faraday.ready());
+      await page.evaluate(() => __faraday.manual());
+      await page.click("#startBtn");
+      await page.click("#briefingLaunch");
+      const collision = await page.evaluate(() => {
+        const q = __faraday;
+        q.step(2.1);
+        for (let i = 0; i < 5; i++) q.collect("star");
+        q.step(0.02);
+        const before = q.state.player.hp;
+        const id = q.spawnBeam(120);
+        const enemy = q.state.enemies.find((e) => e.id === id);
+        q.move(enemy.x, enemy.y);
+        q.step(0.02);
+        return { before, after: q.state.player.hp, fever: q.state.feverTime };
+      });
+      assert.ok(collision.fever > 0);
+      assert.equal(
+        collision.after,
+        collision.before - 1,
+        "Actual body collision hurts during overdrive",
+      );
+    } finally {
+      await browser.close();
+      await new Promise((resolve) => s.close(resolve));
+    }
+  },
+);
+
 test(
   "Faraday: equipment, real beam collisions, special, five boss transitions and ending in Chromium and WebKit",
   { timeout: 180000 },
@@ -94,6 +225,8 @@ test(
               path: path.join(out, name + "-title.png"),
             });
             await page.click("#startBtn");
+            await chapter(page, 0);
+            await page.click("#briefingLaunch");
             const equipment = await page.evaluate(() => {
               const q = __faraday;
               q.step(2.1);
@@ -130,7 +263,8 @@ test(
               equipment.maxed.shots.some((s) => s.heavy),
               "Final coil unlocks a heavy center missile",
             );
-            assert.ok(equipment.maxed.shots.some((s) => s.homing));
+            assert.ok(equipment.maxed.shots.some((s) => s.side));
+            assert.ok(equipment.maxed.shots.every((s) => !s.homing));
             // The beam is aimed through the real player's collider; no call to hurt is used here.
             const beam = await page.evaluate(() => {
               const q = __faraday;
@@ -183,7 +317,35 @@ test(
                 entry.after,
                 "Boss cannot die during entrance",
               );
-              await page.evaluate(() => __faraday.step(5));
+              const motion = await page.evaluate(() => {
+                const q = __faraday;
+                q.setPlayerHP(100);
+                q.setBossHP(100000);
+                let previous = q.state.enemies.find((e) => e.boss).x,
+                  maxStep = 0,
+                  maxEscorts = 0;
+                for (let frame = 0; frame < 18 * 60; frame++) {
+                  q.step(1 / 60, false);
+                  const s = q.state,
+                    boss = s.enemies.find((e) => e.boss);
+                  maxStep = Math.max(maxStep, Math.abs(boss.x - previous));
+                  previous = boss.x;
+                  maxEscorts = Math.max(
+                    maxEscorts,
+                    s.enemies.filter((e) => e.escort).length,
+                  );
+                }
+                q.draw();
+                return { maxStep, maxEscorts };
+              });
+              assert.ok(
+                motion.maxStep <= 1.501,
+                "Boss resumes from its paused position without teleporting",
+              );
+              assert.ok(
+                motion.maxEscorts >= 1 && motion.maxEscorts <= 2,
+                "Boss escorts appear without accumulating",
+              );
               if (i === 1) {
                 await page.evaluate(() => {
                   __faraday.collect("capacitor");
@@ -211,6 +373,11 @@ test(
                 "clear",
               );
               if (i < 4) await page.locator(".clear-record summary").click();
+              assert.equal(
+                await page.evaluate(() => __faraday.state.enemies.length),
+                0,
+                "Defeating the boss also clears its escorts",
+              );
               assert.ok(await page.locator(".history-card").isVisible());
               assert.ok(
                 (await page.locator(".history-card p").innerText()).length > 40,
@@ -223,6 +390,8 @@ test(
                 await reachable(b);
                 await b.click();
                 await page.locator("#nextStageBtn").click();
+                await chapter(page, i + 1);
+                await page.click("#briefingLaunch");
                 assert.equal(
                   await page.evaluate(() => __faraday.state.stage),
                   i + 1,
@@ -231,6 +400,25 @@ test(
               }
             }
             await page.click("[data-action=ending]");
+            await page
+              .locator(".ending-scene img")
+              .evaluate((img) => img.decode());
+            assert.match(
+              await page.locator(".ending-story").innerText(),
+              /왕립학회 회장직을 두 번/,
+            );
+            assert.match(
+              await page.locator(".ending-story").innerText(),
+              /왕립연구소의 크리스마스 강연/,
+            );
+            assert.match(
+              await page.locator(".ending-story").innerText(),
+              /말년에는.*햄프턴 코트/,
+            );
+            assert.match(
+              await page.locator(".ending-story").innerText(),
+              /1867년/,
+            );
             assert.match(
               await page.locator("#modalContent").innerText(),
               /5 \/ 5/,
@@ -249,9 +437,11 @@ test(
             await page.click("[data-action=map]");
             assert.equal(await page.locator(".map-stage:disabled").count(), 0);
             await page.click('[data-stage="3"]');
+            await page.click("#briefingLaunch");
             await page.reload();
             await page.evaluate(() => __faraday.ready());
             await page.click("#continueBtn");
+            await page.click("#briefingLaunch");
             assert.equal(await page.evaluate(() => __faraday.state.stage), 3);
             assert.deepEqual(errors, []);
           } finally {
@@ -349,6 +539,22 @@ test(
       await page.screenshot({ path: path.join(out, "journal-discharge.png") });
       await page.click("#modalClose");
       await page.click("#startBtn");
+      for (const viewport of [
+        { width: 320, height: 460 },
+        { width: 568, height: 210 },
+      ]) {
+        await page.setViewportSize(viewport);
+        await reachable(page.locator("#briefingLaunch"));
+      }
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      assert.equal(
+        await page
+          .locator(".chapter-crawl")
+          .evaluate((el) => getComputedStyle(el).animationName),
+        "none",
+      );
+      await page.setViewportSize({ width: 320, height: 460 });
+      await page.click("#briefingLaunch");
       const before = await page.evaluate(() => __faraday.state.player.x);
       await page.keyboard.down("ArrowRight");
       await page.evaluate(() => __faraday.step(0.2));

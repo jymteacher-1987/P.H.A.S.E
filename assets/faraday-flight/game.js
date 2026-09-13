@@ -66,6 +66,7 @@
           mode: c.mode === "easy" ? "easy" : "normal",
           magnetLevel: clamp(Number(c.magnetLevel) || 0, 0, 6),
           pulseCharges: clamp(Number(c.pulseCharges) || 0, 0, 3),
+          charge: clamp(Number(c.charge) || 0, 0, 99.99),
         };
     }
   } catch {
@@ -103,6 +104,7 @@
     waveClock = 1,
     waveIndex = 0,
     pickupClock = 4,
+    capacitorDropped = false,
     bossStarted = false,
     finishClock = 0;
   let enemies = [],
@@ -138,6 +140,7 @@
       pulses: 0,
       perfect: 0,
       stars: 0,
+      enemyShots: 0,
     },
     runStats = { pulses: 0, perfect: 0 },
     pointer = {
@@ -282,6 +285,7 @@
       mode: difficulty,
       magnetLevel,
       pulseCharges,
+      charge,
     };
     entry = clone(save.checkpoint);
     persist();
@@ -295,6 +299,7 @@
     wing = restore?.wing || 1;
     magnetLevel = restore?.magnetLevel || 0;
     pulseCharges = restore ? clamp(restore.pulseCharges ?? 1, 0, 3) : 1;
+    charge = clamp(Number(restore?.charge) || 0, 0, 99.99);
     runStats = { pulses: 0, perfect: 0 };
     startStage(index);
   }
@@ -303,7 +308,7 @@
     stage = index;
     level = L[index];
     stageTime = 0;
-    charge = 0;
+    capacitorDropped = false;
     heatTime = 0;
     pulseLinks = [];
     rotorAngle = 0;
@@ -337,6 +342,7 @@
       pulses: 0,
       perfect: 0,
       stars: 0,
+      enemyShots: 0,
     };
     player = {
       x: W / 2,
@@ -363,19 +369,52 @@
     setupSurfaces();
     checkpoint();
     $("startScreen").hidden = true;
-    $("hud").hidden = false;
-    $("playControls").hidden = false;
+    $("hud").hidden = true;
+    $("playControls").hidden = true;
     $("bossHud").hidden = true;
     $("stageNumber").textContent =
       "STAGE " + String(stage + 1).padStart(2, "0") + " / " + L.length;
     $("stageName").textContent = level.name;
-    setMode("play");
+    setMode("briefing");
     audio.stage = stage;
     audio.boss = false;
-    audio.start();
-    say(level.intro, 3.2, true);
+    audio.pause();
+    $("message").classList.remove("visible");
     updateHUD();
     updateSide();
+    showChapter();
+  }
+  function showChapter() {
+    showModal(
+      '<section class="chapter-intro"><header><span class="eyebrow">패러데이의 삶 · ' +
+        String(stage + 1).padStart(2, "0") +
+        ' / 05</span><h2 id="modalTitle">' +
+        level.zone +
+        '</h2><span class="chapter-location">' +
+        level.name +
+        '</span></header><div class="chapter-window"><article class="chapter-crawl">' +
+        level.chapter.map((text) => "<p>" + text + "</p>").join("") +
+        '</article></div><footer><button id="chapterMotion" class="text-btn" data-action="chapter-motion" aria-pressed="false">글 멈추기 Ⅱ</button>' +
+        '<button id="briefingLaunch" class="primary" data-action="launch">' +
+        (stage + 1) +
+        "장 출발 →</button></footer></section>",
+      "briefing",
+    );
+    $("modalClose").hidden = true;
+    $("chapterMotion").hidden = matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+  }
+  function launchChapter() {
+    if (mode !== "briefing") return;
+    closeModal(false);
+    keys.clear();
+    pointer.active = false;
+    setMode("play");
+    $("hud").hidden = false;
+    $("playControls").hidden = false;
+    audio.start();
+    say(level.intro, 3.2, true);
     canvas.focus?.();
   }
   function setupSurfaces() {
@@ -442,7 +481,8 @@
     return true;
   }
   function addEnemy(kind, x, y, pattern = "straight", extra = {}) {
-    const baseHP = [2, 7, 4][kind] * (1 + stage * 0.15);
+    // Small craft take one hit, including a weakened shot; armored craft retain health.
+    const baseHP = kind === 1 ? [13, 30, 55, 85, 125][stage] : 0.4;
     const e = {
       id: ++beamId,
       kind,
@@ -461,6 +501,8 @@
       flash: 0,
       beamClock: 3 + random() * 2,
       boss: false,
+      entryVolley: false,
+      volleys: 0,
       ...extra,
     };
     enemies.push(e);
@@ -468,33 +510,43 @@
     return e;
   }
   function spawnWave() {
+    // Leave room to dodge even when several enemies survive the previous wave.
+    const limit = [8, 9, 10, 11, 12][stage];
+    const alive = enemies.filter((e) => e.hp > 0 && !e.boss).length;
+    if (alive > limit - 3) return;
     const pattern = level.patterns[waveIndex % level.patterns.length],
-      n = stage === 0 ? 4 : 5;
+      n = Math.min(stage < 3 ? 4 : 5, limit - alive);
     waveIndex++;
     if (pattern === "turret") {
-      const x = [120, 360, 240][waveIndex % 3];
-      addEnemy(1, x, -40, "turret", { targetY: H * 0.22, vy: 80 * scale });
-      if (stage > 2) {
-        addEnemy(0, x - 65, -85, "sine");
-        addEnemy(0, x + 65, -85, "sine");
-      }
+      addEnemy(1, waveIndex % 2 ? 145 : 335, -35, "turret", {
+        targetY: H * 0.22,
+        vy: 85 * scale,
+      });
+      for (const [i, x] of [95, 385].entries())
+        addEnemy(i === 1 ? 2 : 0, x, -95 - i * 35, "sine");
       return;
     }
     if (pattern === "gate") {
-      const gap = waveIndex % 2 ? 150 : 330;
-      for (let i = 0; i < 6; i++) {
-        const x = 45 + i * 78;
-        if (Math.abs(x - gap) < 60) continue;
+      const gap = waveIndex % 2 ? 1 : 3;
+      for (let i = 0; i < 4; i++) {
+        const x = 65 + i * 116;
+        if (i === gap) continue;
         addEnemy(i % 3 === 0 ? 1 : 0, x, -30 - i * 8, "straight");
       }
       return;
     }
     if (pattern === "spiral") {
-      for (let i = 0; i < 5; i++)
-        addEnemy(i % 2 ? 2 : 0, 80 + i * 80, -35 - i * 30, "sine", {
-          phase: i * 0.8,
-          vy: 63 * scale,
-        });
+      for (let i = 0; i < n; i++)
+        addEnemy(
+          i % 2 ? 2 : 0,
+          75 + (i * 330) / (n - 1),
+          -35 - i * 40,
+          "sine",
+          {
+            phase: i * 0.8,
+            vy: 63 * scale,
+          },
+        );
       return;
     }
     if (pattern === "swarm") {
@@ -508,10 +560,9 @@
       return;
     }
     for (let i = 0; i < n; i++) {
-      const x =
-        pattern === "sine" ? 75 + i * 78 : W / 2 + (i - (n - 1) / 2) * 65;
+      const x = 58 + (i * (W - 116)) / (n - 1);
       addEnemy(
-        stage > 2 && i === 2 ? 2 : 0,
+        (i + waveIndex) % 5 === 0 ? 1 : (i + waveIndex) % 3 === 0 ? 2 : 0,
         x,
         -35 - (pattern === "vee" ? Math.abs(i - (n - 1) / 2) * 40 : i * 18),
         pattern,
@@ -540,8 +591,11 @@
       baseX: W / 2,
       phase: 0,
       entered: false,
-      supply: 7,
+      supply: 14,
       supplyCount: 0,
+      escortClock: 3,
+      escortWave: 0,
+      motionTime: 0,
     });
     $("bossHud").hidden = false;
     $("bossName").textContent = level.boss;
@@ -581,7 +635,7 @@
         r: 3.5 * scale,
         damage,
         life: 2,
-        homing: wing >= 6 && Math.abs(offset) > 0,
+        side: Math.abs(offset) > 0,
         heavy: wing >= 8 && offset === 0,
       });
     }
@@ -599,7 +653,8 @@
     }
     audio.effect("shot");
   }
-  function enemyBullet(e, angle, speed = 95) {
+  function enemyBullet(e, angle, speed = 95, kind = "orb") {
+    stats.enemyShots++;
     const slow = difficulty === "easy" ? 0.72 : 1;
     bullets.push({
       x: e.x,
@@ -609,7 +664,40 @@
       r: (e.boss ? 5.5 : 4.8) * scale,
       color: e.kind === 2 ? "#ffad89" : "#fa92c3",
       life: 10,
+      age: 0,
+      kind,
     });
+  }
+  function enemyVolley(e) {
+    const aim = Math.atan2(player.y - e.y, player.x - e.x);
+    const slow = difficulty === "easy";
+    const count =
+      e.kind === 1
+        ? !slow && stage >= 3
+          ? 5
+          : 3
+        : e.kind === 2 && !slow && stage >= 2
+          ? 2
+          : 1;
+    for (let i = 0; i < count; i++) {
+      const angle = aim + (i - (count - 1) / 2) * (e.kind === 1 ? 0.24 : 0.15);
+      const kind =
+        stage >= 3 && e.kind === 2 && e.volleys % 3 === 1 && i === 0
+          ? "split"
+          : e.kind === 2
+            ? "needle"
+            : "orb";
+      enemyBullet(
+        e,
+        angle,
+        e.kind === 2 ? 110 + stage * 7 : 90 + stage * 7,
+        kind,
+      );
+    }
+    e.volleys++;
+    e.shoot =
+      (slow ? 3.8 : 3.3 - stage * (e.kind === 1 ? 0.22 : 0.15)) +
+      (e.kind === 1 ? 0.35 : 0);
   }
   function launchBeam(e, offset = 0) {
     const origin = { x: e.x, y: e.y + e.r + 3 },
@@ -643,7 +731,8 @@
     if (b.path.hit?.kind === "player") hurt();
   }
   function damageEnemy(e, damage, counter = false) {
-    if (e.hp <= 0 || (e.boss && !e.entered)) return;
+    if (e.hp <= 0 || e.y < 24 * scale || (e.boss ? !e.entered : !e.entryVolley))
+      return;
     if (e.boss && e.armorClosed && !counter) damage *= 0.22;
     if (counter) {
       e.openUntil = e.age + 2;
@@ -667,20 +756,20 @@
       audio.effect(e.boss ? "clear" : "kill");
       if (e.boss) {
         finishClock = 1.8;
+        for (const other of enemies) if (other !== e) other.hp = 0;
         for (let i = 0; i < 4; i++)
           addToken(e.x + (i - 1.5) * 36, e.y - (i % 2) * 35, 70 * scale);
         beams = [];
         bullets = [];
         shake = reduced ? 0 : 9;
       } else {
-        if (e.kind === 1 || stats.kills % 4 === 0)
-          addToken(e.x, e.y, 85 * scale);
-        if (stats.kills % 6 === 0)
+        if (stats.kills % 8 === 0) addToken(e.x, e.y, 85 * scale);
+        if (stats.kills % 10 === 0)
           pickups.push({
             x: e.x,
             y: e.y - 20,
-            kind: ["power", "magnet", "power", "capacitor", "power", "heart"][
-              (Math.floor(stats.kills / 6) - 1) % 6
+            kind: ["power", "magnet", "power", "heart"][
+              (Math.floor(stats.kills / 10) - 1) % 4
             ],
             age: 0,
             vy: 63 * scale,
@@ -691,11 +780,11 @@
     }
   }
   function addToken(x, y, vy) {
-    if (pickups.filter((p) => !p.dead && p.kind === "star").length >= 6) return;
+    if (pickups.filter((p) => !p.dead && p.kind === "star").length >= 4) return;
     pickups.push({ x, y, vy, kind: "star", age: 0 });
   }
   function hurt() {
-    if (mode !== "play" || player.inv > 0 || feverTime > 0) return;
+    if (mode !== "play" || player.inv > 0) return;
     player.hp--;
     player.inv = 1.3;
     stats.damage++;
@@ -733,7 +822,7 @@
         combo++;
         comboTimer = 3.8;
         collected++;
-        fever = Math.min(100, fever + 10);
+        fever = Math.min(100, fever + 20);
         score += Math.round(
           60 *
             (1 + Math.min(4, Math.floor(combo / 8)) * 0.5) *
@@ -757,7 +846,7 @@
           wing >= 8
             ? "최대 코일!"
             : wing === 6
-              ? "추적 미사일 장착!"
+              ? "직선 연장포 장착!"
               : wing === 4
                 ? "확산 미사일 장착!"
                 : "코일 +1 · 미사일 강화",
@@ -866,7 +955,7 @@
     heatTime = Math.max(0, heatTime - dt);
     const g = generator();
     if (pulseCharges < 3) {
-      charge += Math.abs(g.emf) * 3.45 * (1 + build.cooldown * 0.2) * dt;
+      charge += Math.abs(g.emf) * 0.22 * (1 + build.cooldown * 0.2) * dt;
       if (charge >= 100) {
         charge -= 100;
         pulseCharges++;
@@ -955,13 +1044,18 @@
       waveClock -= dt;
       if (waveClock <= 0) {
         spawnWave();
-        waveClock = level.rate * (difficulty === "easy" ? 1.1 : 1);
+        waveClock =
+          (level.rate + (waveIndex % 3 === 0 ? 1.1 : 0)) *
+          (difficulty === "easy" ? 1.15 : 1);
       }
       pickupClock -= dt;
       if (pickupClock <= 0) {
-        const x = 75 + random() * 330;
-        addToken(x, -20, 90 * scale);
-        if (stageTime > 7 && stageTime < 12)
+        if (
+          (stage === 1 || stage === 3) &&
+          !capacitorDropped &&
+          stageTime > level.duration * 0.55
+        ) {
+          capacitorDropped = true;
           pickups.push({
             x: W / 2,
             y: -10,
@@ -969,6 +1063,7 @@
             age: 0,
             vy: 75 * scale,
           });
+        }
         if (stage >= 2 && waveIndex % 2 === 0)
           pickups.push({
             x: 55 + random() * 370,
@@ -985,7 +1080,7 @@
             age: 0,
             vy: 65 * scale,
           });
-        pickupClock = 7.5;
+        pickupClock = 12;
       }
     } else if (level.boss && !bossStarted) spawnBoss();
     for (const e of enemies) {
@@ -1000,26 +1095,43 @@
         if (e.y < targetY) e.y = Math.min(targetY, e.y + e.vy * dt);
         else {
           e.entered = true;
+          e.escortClock -= dt;
+          if (
+            e.escortClock <= 0 &&
+            !charging &&
+            !enemies.some((other) => !other.boss && other.hp > 0)
+          ) {
+            const positions =
+              stage === 0 ? [e.escortWave % 2 ? 390 : 90] : [80, 400];
+            for (const [i, x] of positions.entries()) {
+              addEnemy(
+                stage >= 2 && i === 1 ? 2 : 0,
+                x,
+                -35 - i * 45,
+                "straight",
+                { escort: true, vy: 70 * scale },
+              );
+            }
+            e.escortWave++;
+            e.escortClock = stage < 2 ? 22 : 19;
+          }
           e.supply -= dt;
           if (e.supply <= 0) {
             e.supplyCount++;
             pickups.push({
               x: clamp(e.x + (e.supplyCount % 2 ? 75 : -75), 45, W - 45),
               y: e.y + e.r + 20,
-              kind:
-                player.hp <= 2
-                  ? "heart"
-                  : wing < 8
-                    ? "power"
-                    : e.supplyCount % 2
-                      ? "magnet"
-                      : "capacitor",
+              kind: player.hp <= 2 ? "heart" : wing < 8 ? "power" : "magnet",
               age: 0,
               vy: 95 * scale,
             });
-            e.supply = 8;
+            e.supply = 14;
           }
-          if (!charging) e.x = W / 2 + Math.sin(e.age * 0.62) * 135;
+          if (!charging) {
+            e.motionTime += dt;
+            const targetX = W / 2 + Math.sin(e.motionTime * 0.62) * 135;
+            e.x += clamp(targetX - e.x, -90 * dt, 90 * dt);
+          }
           e.phase = e.hp / e.maxHP < 0.34 ? 2 : e.hp / e.maxHP < 0.67 ? 1 : 0;
           e.armorClosed =
             stage === 1 && e.age % 5 < 2.7 && !(e.openUntil > e.age);
@@ -1027,24 +1139,47 @@
           e.beamClock -= dt;
           if (e.shoot <= 0 && !charging) {
             const count =
-              (difficulty === "normal" ? 2 : 0) +
+              (difficulty === "normal" ? 1 : 0) +
               (stage === 0
                 ? 4
                 : stage === 2
-                  ? 7 + e.phase
+                  ? 6 + e.phase
                   : stage === L.length - 1
-                    ? 8 + e.phase * 2
+                    ? 7 + e.phase
                     : 5 + e.phase);
-            for (let i = 0; i < count; i++) {
-              const angle =
-                Math.PI / 2 +
-                (i - (count - 1) / 2) * (stage === 2 ? 0.23 : 0.19) +
-                Math.sin(e.age) * (stage === 2 ? 0.38 : 0.12);
-              enemyBullet(e, angle, 85 + e.phase * 14);
+            // Alternate patterns so later bosses add variety without stacking every attack.
+            e.volleys++;
+            const aimed = stage >= 1 && e.volleys % 3 === 0;
+            const crossing = stage >= 3 && e.phase > 0 && e.volleys % 4 === 0;
+            if (!aimed && !crossing)
+              for (let i = 0; i < count; i++) {
+                const angle =
+                  Math.PI / 2 +
+                  (i - (count - 1) / 2) * (stage === 2 ? 0.23 : 0.19) +
+                  Math.sin(e.age) * (stage === 2 ? 0.38 : 0.12);
+                enemyBullet(e, angle, 85 + e.phase * 14);
+              }
+            if (aimed) {
+              const aim = Math.atan2(player.y - e.y, player.x - e.x);
+              for (let j = -1; j <= 1; j++)
+                enemyBullet(
+                  e,
+                  aim + j * 0.23,
+                  125 + stage * 8,
+                  stage >= 2 && j === 0 ? "split" : "needle",
+                );
+            } else if (crossing) {
+              for (let j = 0; j < 4; j++)
+                enemyBullet(
+                  { ...e, x: e.x + (e.phase === 1 ? -30 : 30) },
+                  Math.PI / 2 + (j - 1.5) * 0.32 + Math.sin(e.age * 0.7) * 0.3,
+                  120 + stage * 8,
+                  "needle",
+                );
             }
             e.shoot =
-              ((stage === L.length - 1 ? 1.55 : 2.15) - e.phase * 0.2) *
-              (difficulty === "normal" ? 0.72 : 1);
+              ((stage === L.length - 1 ? 1.9 : 2.4) - e.phase * 0.18) *
+              (difficulty === "normal" ? 1 : 1.2);
           }
           if (e.beamClock <= 0 && !charging) {
             launchBeam(e);
@@ -1074,20 +1209,15 @@
         else if (e.pattern === "vee")
           e.x = e.baseX + Math.sin(e.age * 0.7) * 12;
       }
+      // Entrance movement happens before this volley and before friendly-shot collisions.
+      if (!e.boss && !e.entryVolley && e.y >= 24 * scale) {
+        e.entryVolley = true;
+        enemyVolley(e);
+      }
       if (!e.boss && e.y > 50 * scale && e.y < player.y - 90 * scale) {
         e.shoot -= dt;
         if (e.shoot <= 0 && !charging && !(stage === 0 && stageTime < 5)) {
-          const a = Math.atan2(player.y - e.y, player.x - e.x);
-          enemyBullet(e, a, stage === 0 ? 75 : 88);
-          if (
-            (difficulty === "normal" && (e.kind === 1 || stage >= 1)) ||
-            (e.kind === 2 && stage > 3)
-          ) {
-            enemyBullet(e, a - 0.25, 84);
-            enemyBullet(e, a + 0.25, 84);
-          }
-          e.shoot =
-            difficulty === "normal" ? 1.8 + random() * 0.6 : 3.6 + random();
+          enemyVolley(e);
         }
       }
       if (
@@ -1098,20 +1228,6 @@
       if (e.y > H + 100) e.hp = 0;
     }
     for (const s of shots) {
-      if (s.homing) {
-        const target = enemies
-          .filter((e) => e.hp > 0 && e.y < s.y)
-          .sort(
-            (a, b) =>
-              Math.hypot(a.x - s.x, a.y - s.y) -
-              Math.hypot(b.x - s.x, b.y - s.y),
-          )[0];
-        if (target) {
-          const n = P.normalize({ x: target.x - s.x, y: target.y - s.y });
-          s.vx = lerp(s.vx, n.x * 480 * scale, 0.06);
-          s.vy = lerp(s.vy, n.y * 480 * scale, 0.06);
-        }
-      }
       s.x += s.vx * dt;
       s.y += s.vy * dt;
       s.life -= dt;
@@ -1127,7 +1243,11 @@
         continue;
       }
       for (const e of enemies) {
-        if (e.hp > 0 && Math.hypot(s.x - e.x, s.y - e.y) < e.r + s.r) {
+        if (
+          e.hp > 0 &&
+          (e.boss ? e.entered : e.entryVolley) &&
+          Math.hypot(s.x - e.x, s.y - e.y) < e.r + s.r
+        ) {
           damageEnemy(e, s.damage * (s.heavy ? 1.7 : 1));
           if (s.heavy) {
             effectRing(s.x, s.y, "#ffd492", 48 * scale);
@@ -1143,7 +1263,21 @@
         }
       }
     }
-    for (const b of bullets) {
+    for (const b of [...bullets]) {
+      b.age = (b.age || 0) + dt;
+      if (b.kind === "split" && b.age > 1.15 && b.y < player.y - 100 * scale) {
+        b.life = 0;
+        const angle = Math.atan2(b.vy, b.vx);
+        for (const offset of [-0.3, 0, 0.3])
+          enemyBullet(
+            { x: b.x, y: b.y, r: 0, kind: 2 },
+            angle + offset,
+            125 + stage * 7,
+            "needle",
+          );
+        effectRing(b.x, b.y, "#ffbbdb", 22 * scale);
+        continue;
+      }
       b.x += b.vx * dt;
       b.y += b.vy * dt;
       b.life -= dt;
@@ -1537,13 +1671,25 @@
         ctx.fillStyle = "#fff";
         ctx.fillText("N", -5.5 * scale, 0);
         ctx.fillText("S", 5.5 * scale, 0);
+      } else if (item.kind === "capacitor") {
+        ctx.strokeStyle = "#b4f7ff";
+        ctx.lineWidth = 2.5 * scale;
+        ctx.beginPath();
+        ctx.moveTo(-4 * scale, -10 * scale);
+        ctx.lineTo(-4 * scale, 10 * scale);
+        ctx.moveTo(4 * scale, -10 * scale);
+        ctx.lineTo(4 * scale, 10 * scale);
+        ctx.moveTo(-12 * scale, 0);
+        ctx.lineTo(-4 * scale, 0);
+        ctx.moveTo(4 * scale, 0);
+        ctx.lineTo(12 * scale, 0);
+        ctx.stroke();
       } else {
         ctx.font = "bold " + (token ? 22 : 23) * scale + "px sans-serif";
         ctx.fillText(
           {
             star: "ϟ",
             power: "◎",
-            capacitor: "ϟ",
             heart: "♥",
             coolant: "❄",
             heat: "!",
@@ -1576,9 +1722,9 @@
       ctx.save();
       ctx.translate(s.x, s.y);
       ctx.rotate(Math.atan2(s.vy, s.vx) + Math.PI / 2);
-      const r = (s.heavy ? 5 : s.homing ? 3.8 : 3.2) * scale,
+      const r = (s.heavy ? 5 : s.side ? 3.8 : 3.2) * scale,
         len = (s.heavy ? 20 : 15) * scale;
-      ctx.fillStyle = s.heavy ? "#ffbb82" : s.homing ? "#bdc8ff" : "#b6fff0";
+      ctx.fillStyle = s.heavy ? "#ffbb82" : s.side ? "#bdc8ff" : "#b6fff0";
       ctx.beginPath();
       ctx.moveTo(0, -len / 2 - 3 * scale);
       ctx.lineTo(r, -len / 2 + 3 * scale);
@@ -1589,7 +1735,7 @@
       ctx.fill();
       ctx.fillStyle = "#496272";
       ctx.fillRect(-r * 0.42, -len * 0.1, r * 0.84, len * 0.4);
-      ctx.fillStyle = s.homing ? "#92aaf0" : "#e4b17a";
+      ctx.fillStyle = s.side ? "#92aaf0" : "#e4b17a";
       ctx.beginPath();
       ctx.moveTo(-r, len * 0.12);
       ctx.lineTo(-r * 1.8, len * 0.55);
@@ -1635,7 +1781,7 @@
         }
       } else {
         drawSprite(
-          "enemies",
+          level.enemyArt,
           e.kind * 4 + [0, 2, 3, 2, 1, 2][Math.floor(e.age * 10) % 6],
           e.x,
           e.y,
@@ -1644,24 +1790,49 @@
           e.flash > 0 ? 0.65 : 1,
         );
         if (e.kind === 1) {
+          const barX = e.x - 25 * scale,
+            barY = e.y + 31 * scale;
           ctx.fillStyle = "#07293b";
+          ctx.fillRect(barX - scale, barY - scale, 52 * scale, 8 * scale);
+          ctx.strokeStyle = "#e7c68d";
+          ctx.lineWidth = scale;
+          ctx.strokeRect(barX - scale, barY - scale, 52 * scale, 8 * scale);
+          ctx.fillStyle = e.hp / e.maxHP < 0.3 ? "#ff987b" : "#efca7e";
           ctx.fillRect(
-            e.x - 18 * scale,
-            e.y + 28 * scale,
-            36 * scale,
-            3 * scale,
-          );
-          ctx.fillStyle = "#7fe7e6";
-          ctx.fillRect(
-            e.x - 18 * scale,
-            e.y + 28 * scale,
-            (36 * scale * e.hp) / e.maxHP,
-            3 * scale,
+            barX,
+            barY,
+            50 * scale * Math.max(0, e.hp / e.maxHP),
+            6 * scale,
           );
         }
       }
     }
     for (const b of bullets) {
+      if (b.kind !== "orb" && b.kind) {
+        ctx.save();
+        ctx.translate(b.x, b.y);
+        ctx.rotate(Math.atan2(b.vy, b.vx) + Math.PI / 2);
+        ctx.fillStyle = b.kind === "split" ? "#ed77db" : "#ffab84";
+        ctx.strokeStyle = "#572241";
+        ctx.lineWidth = 1.5 * scale;
+        const r = b.r * (b.kind === "split" ? 1.25 : 1);
+        ctx.beginPath();
+        ctx.moveTo(0, -r * 1.8);
+        ctx.lineTo(r, r * 0.35);
+        ctx.lineTo(0, r * 1.15);
+        ctx.lineTo(-r, r * 0.35);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.strokeStyle = "#fff1d2";
+        ctx.lineWidth = 1.5 * scale;
+        ctx.beginPath();
+        ctx.moveTo(0, -r * 0.7);
+        ctx.lineTo(0, r * 0.25);
+        ctx.stroke();
+        ctx.restore();
+        continue;
+      }
       glow(b.x, b.y, b.r * 2.3, b.color + "44");
       ctx.fillStyle = "#482b53";
       ctx.beginPath();
@@ -1902,7 +2073,7 @@
       persist();
       showModal(
         head +
-          '<button class="primary" data-action="ending">구름도시의 아침을 만나러 →</button>',
+          '<button class="primary" data-action="ending">양초 하나가 밝힌 세상 · 엔딩 보기 →</button>',
         "clear",
       );
     } else {
@@ -1916,6 +2087,7 @@
         mode: difficulty,
         magnetLevel,
         pulseCharges,
+        charge,
       };
       persist();
       showModal(
@@ -2016,7 +2188,9 @@
   function ending() {
     setMode("ending");
     showModal(
-      '<span class="eyebrow">THE CITY IS ALIGHT</span><div class="ending-badge">✧</div><h2 id="modalTitle">패러데이가 아침을 데려왔어요.</h2><p>다섯 개의 어려움 너머로, 기록은 남았어요.<br>이번에는 여러분이 발견을 이어갈 차례예요.</p><div class="result-stats"><div><span>최종 점수</span><b>' +
+      '<span class="eyebrow">EPILOGUE · THE LIGHT WE SHARE</span><h2 id="modalTitle">양초 하나가 밝힌 세상</h2><figure class="ending-scene"><img src="../assets/faraday-flight/ending.webp?v=' +
+        (window.FaradayImageVersions?.ending || "1") +
+        '" width="1536" height="1024" alt="나이 든 패러데이가 작은 양초를 앞에 두고 어린 청중에게 과학을 설명하는 창작 그림"><figcaption>패러데이의 양초 강연에서 영감을 받은 창작 그림</figcaption></figure><div class="ending-story"><p>책방에서 시작한 호기심은 세상을 바꾸는 발견으로 이어졌어요. 하지만 건강 때문에 연구를 쉬어야 하는 시간도 있었어요.</p><p>패러데이는 <strong>왕립학회 회장직을 두 번 제안받았지만 모두 사양했어요.</strong> 그는 연구와 함께 사람들에게 과학을 전하는 일에도 힘썼어요.</p><p>왕립연구소의 크리스마스 강연에서는 어린 청중에게 <strong>양초가 녹아 기체가 되고, 그 기체가 타는 과정</strong>을 들려주었어요. 이 강연은 <cite>양초의 화학사</cite>로 남았어요.</p><p>말년에는 <strong>햄프턴 코트의 집</strong>에서 지냈고, 1867년 그곳에서 세상을 떠났어요. 그가 남긴 기록과 강연은 다음 세대에도 과학을 만나는 문이 되었어요.</p><p class="ending-invitation">작은 것에서 질문을 찾고,<br>발견한 것을 함께 나누는 사람.<br>이제, 여러분의 발견을 시작해 보세요.</p></div><details class="ending-sources"><summary>엔딩 속 실제 이야기</summary><p>왕립학회(Royal Society)와 강연이 열린 왕립연구소(Royal Institution)는 다른 기관이에요. 회장직 사양과 과학 강연은 모두 실제 일이지만, 거절의 이유를 아이들 교육 하나로 단정하지 않았어요. 다섯 보스와 비행 모험은 삶에서 영감을 받은 창작이에요.</p><a href="https://www.rigb.org/explore-science/explore/person/michael-faraday-1791-1867" target="_blank" rel="noopener noreferrer">왕립연구소 · 패러데이의 생애 ↗</a><a href="https://royalsociety.org/blog/2020/12/shed-a-little-candlelight/" target="_blank" rel="noopener noreferrer">왕립학회 · 양초 강연 이야기 ↗</a></details><div class="result-stats"><div><span>최종 점수</span><b>' +
         fmt(score) +
         "</b></div><div><span>완주</span><b>5 / 5</b></div><div><span>모은 훈장</span><b>" +
         save.stars.reduce((a, b) => a + b, 0) +
@@ -2055,7 +2229,7 @@
   }
   function showHelp() {
     showModal(
-      '<span class="eyebrow">READY FOR TAKEOFF</span><h2 id="modalTitle">비행은 간단해요</h2><div class="help-row"><strong>① 움직이면, 패러데이도 함께</strong>마우스나 손가락을 누른 채 움직이세요.<br><small>키보드는 방향키 / W A S D. 공격은 자동이에요.</small></div><div class="help-row"><strong>② 원 안의 토큰과 부품을 모아요</strong>코일 ◎ 탄 수·미사일 강화 · 자석 N/S 피해 증가<br><small>♥ 체력 회복 · ϟ 축전기 충전 · 빨간 △ 과열 파편은 피하세요. 초록 원의 번개 토큰을 연속으로 모으면 오버드라이브!</small></div><div class="help-row"><strong>③ 충전된 전기로 돌파해요</strong>축전기가 있으면 ϟ 스파크 폭풍 / SPACE.<br><small>노란 예고선이 번쩍일 때 쓰면 PERFECT! 적 탄환을 지우고 큰 피해를 줘요. 축전기는 발전기로도 충전돼요.</small></div><div class="help-row"><strong>④ 날개 끝은 닿아도 괜찮아요</strong>몸체 가운데 흰 점에 적이나 탄환이 닿지 않게 피하세요.</div><button class="secondary" data-action="close">준비됐어요</button>',
+      '<span class="eyebrow">READY FOR TAKEOFF</span><h2 id="modalTitle">비행은 간단해요</h2><div class="help-row"><strong>① 움직이면, 패러데이도 함께</strong>마우스나 손가락을 누른 채 움직이세요.<br><small>키보드는 방향키 / W A S D. 공격은 자동이에요.</small></div><div class="help-row"><strong>② 원 안의 토큰과 부품을 모아요</strong>코일 ◎ 탄 수·미사일 강화 · 자석 N/S 피해 증가<br><small>♥ 체력 회복 · ‖ 축전기 충전 · 빨간 △ 과열 파편은 피하세요. 초록 원의 번개 토큰을 연속으로 모으면 오버드라이브!</small></div><div class="help-row"><strong>③ 충전된 전기로 돌파해요</strong>축전기가 있으면 ϟ 스파크 폭풍 / SPACE.<br><small>노란 예고선이 번쩍일 때 쓰면 PERFECT! 적 탄환을 지우고 큰 피해를 줘요. 축전기 아이템은 드물게 나와요. 발전기의 충전 게이지는 다음 스테이지에도 이어져요.</small></div><div class="help-row"><strong>④ 날개 끝은 닿아도 괜찮아요</strong>몸체 가운데 흰 점에 적이나 탄환이 닿지 않게 피하세요.</div><button class="secondary" data-action="close">준비됐어요</button>',
     );
   }
   let noteSpeed = 1,
@@ -2225,7 +2399,8 @@
     if (e.target instanceof HTMLInputElement && k !== "Escape") return;
     if (k === "Escape" || k === "p") {
       if (!$("modal").hidden) {
-        if (!["clear", "failed", "ending"].includes(mode)) closeModal();
+        if (!["clear", "failed", "ending", "briefing"].includes(mode))
+          closeModal();
       } else if (mode === "play") showPause();
       e.preventDefault();
       return;
@@ -2324,6 +2499,17 @@
     }
     if (b.dataset.note !== undefined) showJournal(Number(b.dataset.note));
     switch (b.dataset.action) {
+      case "launch":
+        launchChapter();
+        break;
+      case "chapter-motion": {
+        const crawl = $("modalContent").querySelector(".chapter-crawl");
+        if (!crawl) break;
+        const paused = crawl.classList.toggle("motion-paused");
+        b.setAttribute("aria-pressed", String(paused));
+        b.textContent = paused ? "글 계속 보기 ▶" : "글 멈추기 Ⅱ";
+        break;
+      }
       case "ranking":
         showRanking();
         break;
@@ -2407,6 +2593,12 @@
         "gate",
         "symbols",
         "fog",
+        "ending",
+        "foes-books",
+        "foes-gates",
+        "foes-symbols",
+        "foes-lab",
+        "foes-records",
       ].map(
         (name) =>
           new Promise((resolve, reject) => {
@@ -2492,9 +2684,9 @@
           generator: generator(),
         };
       },
-      step(seconds) {
+      step(seconds, render = true) {
         for (let i = 0; i < seconds * 60; i++) update(1 / 60);
-        draw();
+        if (render) draw();
       },
       move(x, y) {
         if (player) {

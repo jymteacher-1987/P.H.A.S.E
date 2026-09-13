@@ -172,6 +172,8 @@ test('WebKit: all activities on small iPhone screens, older APIs, game start and
             }
             await page.setViewportSize({width:320,height:460});
             await frame.locator('#startBtn').click();
+            await reachable(frame.locator('#briefingLaunch'), 'Faraday chapter launch');
+            await frame.locator('#briefingLaunch').click();
             await frame.waitForFunction(() => document.body.dataset.mode === 'play');
             await reachable(frame.locator('#pulseBtn'), 'Faraday special');
             await frame.locator('#pulseBtn').click();
