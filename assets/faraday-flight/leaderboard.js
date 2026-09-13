@@ -9,7 +9,9 @@
     appId: "1:227220123718:web:1b462168add16f6ea75a47",
   };
   const ROOT = "faradayScores",
-    VERSION = 2;
+    VERSION = 2,
+    OUTSIDE_TOP_TEN =
+      "아쉽게도 이번에는 랭킹에 들지 못했어요. 다음 비행에서 더 높은 점수에 도전해 주세요!";
   let ready,
     unsubscribe,
     serial = 0;
@@ -102,7 +104,7 @@
       (mode === "easy" ? "selected" : "") +
       '">여유롭게</button></div>' +
       (result
-        ? '<form id="faradayRankForm"><label for="faradayNickname">이번 기록 ' +
+        ? '<p id="faradayRankEntry" class="rank-entry-result" role="status">TOP 10 등록 가능 여부를 확인하고 있어요…</p><form id="faradayRankForm" hidden><label for="faradayNickname">이번 기록 ' +
           Math.floor(result.score).toLocaleString("ko-KR") +
           '점 · 별명으로 등록</label><div><input id="faradayNickname" maxlength="12" autocomplete="nickname" placeholder="별명 1~12글자" aria-label="순위표 별명" required><button class="secondary" id="faradayRankSave">등록</button></div><p id="faradaySaveStatus" role="status"></p></form>'
         : "") +
@@ -143,7 +145,21 @@
       mount(host, mode, result);
     for (const b of host.querySelectorAll("[data-rank-mode]"))
       b.onclick = () => mount(host, b.dataset.rankMode, result);
-    const form = host.querySelector("#faradayRankForm");
+    const form = host.querySelector("#faradayRankForm"),
+      entryMessage = host.querySelector("#faradayRankEntry");
+    let saving = false,
+      submitted = false;
+    const showEntryMessage = (text) => {
+      if (!form || !alive()) return;
+      form.hidden = !!text;
+      entryMessage.hidden = !text;
+      entryMessage.textContent = text
+        ? "이번 기록 " +
+          Math.floor(result.score).toLocaleString("ko-KR") +
+          "점\n" +
+          text
+        : "";
+    };
     if (form) {
       try {
         host.querySelector("#faradayNickname").value =
@@ -165,6 +181,7 @@
           return;
         }
         button.disabled = true;
+        saving = true;
         feedback.textContent = "기록을 확인하고 있어요…";
         try {
           await deadline(
@@ -179,10 +196,7 @@
               const ahead = board.docs.filter(
                 (d) => d.id !== user.uid && d.data().score >= result.score,
               ).length;
-              if (ahead >= 10)
-                throw Error(
-                  "지금은 TOP 10 밖의 기록이에요. 다음 비행에 도전해 보세요.",
-                );
+              if (ahead >= 10) throw Error(OUTSIDE_TOP_TEN);
               await fb.runTransaction(fb.db, async (tx) => {
                 const previous = await tx.get(ref);
                 if (
@@ -210,6 +224,8 @@
             localStorage.setItem("faraday-nickname", nickname);
           } catch {}
           if (alive()) {
+            submitted = true;
+            showEntryMessage("");
             feedback.textContent =
               nickname +
               " · " +
@@ -221,25 +237,46 @@
           if (alive()) {
             feedback.textContent = message(error);
             button.disabled = false;
+            if (error.message === OUTSIDE_TOP_TEN)
+              showEntryMessage(OUTSIDE_TOP_TEN);
           }
+        } finally {
+          saving = false;
         }
       };
     }
     if (qa) {
+      if (form) showEntryMessage("");
       status("검사 화면 · 공유 기록을 변경하지 않아요.");
       return;
     }
     try {
       const fb = await deadline(connect());
+      await deadline(fb.auth.authStateReady());
       if (!alive()) return;
       unsubscribe = fb.onSnapshot(
         topQuery(fb, mode),
+        { includeMetadataChanges: true },
         (snapshot) => {
           if (alive()) {
             render(
               host,
               snapshot.docs.map((d) => d.data()),
             );
+            if (form && !saving && !submitted && !snapshot.metadata.fromCache) {
+              const uid = fb.auth.currentUser?.uid,
+                previous = snapshot.docs.find((d) => d.id === uid),
+                ahead = snapshot.docs.filter(
+                  (d) => d.id !== uid && d.data().score >= result.score,
+                ).length;
+              showEntryMessage(
+                previous && previous.data().score >= result.score
+                  ? "더 높은 내 최고 기록이 이미 등록돼 있어요. 다음 비행에서 최고 기록을 넘어보세요!"
+                  : ahead >= 10
+                    ? OUTSIDE_TOP_TEN
+                    : "",
+              );
+            }
             status(
               snapshot.metadata.fromCache
                 ? "공유 기록 연결 중…"

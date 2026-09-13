@@ -21,6 +21,8 @@ const files = [
   "audio.js",
   "sprites.js",
   "game.js",
+  "combat.js",
+  "scoring.js",
   "hero.webp",
   "enemies.webp",
   "boss.webp",

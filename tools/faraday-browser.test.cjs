@@ -247,6 +247,76 @@ test(
 );
 
 test(
+  "Faraday: clock shots wait, keep their locked heading, and a pulse cancels queued boss shots",
+  { timeout: 40000 },
+  async () => {
+    const s = await server(),
+      origin = "http://127.0.0.1:" + s.address().port;
+    const browser = await chromium.launch({
+      headless: true,
+      ...(process.platform === "win32" ? { channel: "msedge" } : {}),
+    });
+    try {
+      const page = await browser.newPage({
+        viewport: { width: 390, height: 844 },
+      });
+      await page.addInitScript(() =>
+        localStorage.setItem(
+          "phase-faraday-flight-v1",
+          JSON.stringify({ unlocked: 4, sound: false }),
+        ),
+      );
+      await ready(page, origin + "/plays/faraday-flight.html?qa");
+      await page.click("[data-action=map]");
+      await page.click('[data-stage="4"]');
+      await page.click("#briefingLaunch");
+      const result = await page.evaluate(() => {
+        const q = __faraday;
+        q.setPlayerHP(100);
+        q.finishWaves();
+        q.step(0.1);
+        q.setBossHP(100000);
+        let before;
+        for (let i = 0; i < 12 * 60; i++) {
+          q.step(1 / 60, false);
+          before = q.state.bullets.find((b) => b.boss && b.hold > 0.3);
+          if (before) break;
+        }
+        if (!before) throw Error("Clock boss must emit a delayed projectile");
+        const find = (elapsed) =>
+          q.state.bullets.find(
+            (b) =>
+              b.sourceId === before.sourceId &&
+              b.vx === before.vx &&
+              Math.abs(b.age - before.age - elapsed) < 1e-7,
+          );
+        q.move(28, q.state.H * 0.8);
+        q.step(0.1);
+        const waiting = find(0.1);
+        q.step(0.5);
+        const moving = find(0.6);
+        const hadQueuedShots = !!q.state.enemies.find((e) => e.boss).attack;
+        q.collect("capacitor");
+        q.pulse();
+        q.step(0.9);
+        return { before, waiting, moving, hadQueuedShots, after: q.state };
+      });
+      assert.equal(result.waiting.x, result.before.x);
+      assert.equal(result.waiting.y, result.before.y);
+      assert.equal(result.moving.vx, result.before.vx);
+      assert.equal(result.moving.vy, result.before.vy);
+      assert.ok(result.moving.y > result.waiting.y);
+      assert.ok(result.hadQueuedShots);
+      assert.equal(result.after.enemies.find((e) => e.boss).attack, null);
+      assert.equal(result.after.bullets.filter((b) => b.boss).length, 0);
+    } finally {
+      await browser.close();
+      await new Promise((resolve) => s.close(resolve));
+    }
+  },
+);
+
+test(
   "Faraday: equipment, real beam collisions, special, five boss transitions and ending in Chromium and WebKit",
   { timeout: 180000 },
   async (t) => {
@@ -390,7 +460,11 @@ test(
                   );
                 }
                 q.draw();
-                return { maxStep, maxEscorts };
+                return {
+                  maxStep,
+                  maxEscorts,
+                  patterns: q.state.stats.bossPatterns,
+                };
               });
               assert.ok(
                 motion.maxStep <= 1.501,
@@ -399,6 +473,10 @@ test(
               assert.ok(
                 motion.maxEscorts >= 1 && motion.maxEscorts <= 2,
                 "Boss escorts appear without accumulating",
+              );
+              assert.ok(
+                motion.patterns.length >= 2,
+                "Every boss performs distinct themed sequences",
               );
               if (i === 1) {
                 await page.evaluate(() => {
@@ -427,6 +505,33 @@ test(
                 "clear",
               );
               if (i < 4) await page.locator(".clear-record summary").click();
+              const accounting = await page.evaluate(() => {
+                const before = __faraday.state;
+                __faraday.step(3);
+                return { before, after: __faraday.state };
+              });
+              assert.equal(
+                accounting.after.score,
+                accounting.before.score,
+                "Clear bonuses cannot repeat while waiting",
+              );
+              assert.equal(
+                accounting.before.stats.settlement.total,
+                accounting.before.score,
+              );
+              assert.equal(
+                accounting.before.stats.settlement.stageTotal,
+                accounting.before.stats.settlement.rows.reduce(
+                  (sum, row) => sum + row.points,
+                  0,
+                ),
+              );
+              assert.equal(await page.locator("[data-score-row]").count(), 6);
+              if (i < 4)
+                assert.equal(
+                  accounting.before.save.checkpoint.score,
+                  accounting.before.score,
+                );
               assert.equal(
                 await page.evaluate(() => __faraday.state.enemies.length),
                 0,
@@ -454,6 +559,14 @@ test(
               }
             }
             await page.click("[data-action=ending]");
+            const finalScore = await page.evaluate(() =>
+              Math.floor(__faraday.state.score).toLocaleString("ko-KR"),
+            );
+            assert.ok(
+              (
+                await page.locator("#faradayRankForm label").innerText()
+              ).includes(finalScore + "점"),
+            );
             await page
               .locator(".ending-scene img")
               .evaluate((img) => img.decode());

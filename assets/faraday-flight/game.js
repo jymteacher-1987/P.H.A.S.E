@@ -2,6 +2,8 @@
   "use strict";
   const $ = (id) => document.getElementById(id),
     P = window.FaradayPhysics,
+    C = window.FaradayCombat,
+    S = window.FaradayScoring,
     L = window.FaradayLevels.levels,
     U = window.FaradayLevels,
     atlas = window.FaradaySprites;
@@ -140,6 +142,9 @@
       perfect: 0,
       parts: 0,
       enemyShots: 0,
+      bossPatterns: [],
+      points: { defeat: 0, parts: 0, perfect: 0 },
+      defeats: { light: 0, armored: 0, boss: 0 },
     },
     runStats = { pulses: 0, perfect: 0 },
     pointer = {
@@ -191,6 +196,7 @@
       pointer.y *= ratio;
       for (const list of [enemies, shots, bullets, pickups, particles, texts])
         for (const e of list) e.y *= ratio;
+      for (const e of enemies) if (e.attack) C.resizeAttack(e.attack, ratio);
       for (const b of beams) {
         b.origin.y *= ratio;
         b.target.y *= ratio;
@@ -341,6 +347,9 @@
       perfect: 0,
       parts: 0,
       enemyShots: 0,
+      bossPatterns: [],
+      points: { defeat: 0, parts: 0, perfect: 0 },
+      defeats: { light: 0, armored: 0, boss: 0 },
     };
     player = {
       x: W / 2,
@@ -434,7 +443,7 @@
     if (perfect) {
       stats.perfect++;
       runStats.perfect++;
-      score += 350;
+      award(350, "perfect");
     }
     player.shield = 0.7;
     player.inv = Math.max(player.inv, 0.8);
@@ -447,6 +456,8 @@
         (1 + build.resonance * 0.35) *
         (1 + magnetLevel * 0.09);
     for (const e of targets) {
+      e.attack = null;
+      e.shoot = Math.max(e.shoot, 1.2);
       pulseLinks.push({
         a: { x: player.x, y: player.y - 20 * scale },
         b: { x: e.x, y: e.y },
@@ -582,7 +593,7 @@
       r: 42 * scale,
       hp,
       maxHP: hp,
-      shoot: 2.4,
+      shoot: 1.35,
       beamClock: 2.8,
       vy: 155 * scale,
       baseX: W / 2,
@@ -600,11 +611,11 @@
       level.boss +
         "\n" +
         [
-          "주먹탄 사이로 날아요!",
-          "문이 열릴 때 집중 공격!",
-          "넓어지는 틈으로 날아요!",
-          "충전 공격을 폭풍으로 끊어요!",
-          "마지막 기록을 지켜라!",
+          "활자 줄의 빈틈으로 날아요!",
+          "닫히는 탄을 피하고 열린 문을 노려요!",
+          "회전하는 기호와 X자 탄줄을 읽어요!",
+          "방전 예고선을 피하거나 폭풍으로 끊어요!",
+          "멈췄다 출발하는 탄 · 기록된 위치를 벗어나요!",
         ][stage],
       2.4,
       true,
@@ -650,7 +661,7 @@
     }
     audio.effect("shot");
   }
-  function enemyBullet(e, angle, speed = 95, kind = "orb") {
+  function enemyBullet(e, angle, speed = 95, kind = "orb", extra = {}) {
     stats.enemyShots++;
     const slow = difficulty === "easy" ? 0.72 : 1;
     bullets.push({
@@ -663,42 +674,65 @@
       life: 10,
       age: 0,
       kind,
+      sourceId: e.id,
+      boss: !!e.boss,
+      ...extra,
     });
   }
   function enemyVolley(e) {
-    const aim = Math.atan2(player.y - e.y, player.x - e.x);
-    const slow = difficulty === "easy";
-    const count =
-      e.kind === 1
-        ? !slow && stage >= 3
-          ? 5
-          : 3
-        : e.kind === 2 && !slow && stage >= 2
-          ? 2
-          : 1;
-    for (let i = 0; i < count; i++) {
-      const angle = aim + (i - (count - 1) / 2) * (e.kind === 1 ? 0.24 : 0.15);
-      const kind =
-        stage >= 3 && e.kind === 2 && e.volleys % 3 === 1 && i === 0
-          ? "split"
-          : e.kind === 2
-            ? "needle"
-            : "orb";
+    for (const shot of C.smallVolley({
+      ...e,
+      stage,
+      volley: e.volleys,
+      player,
+      easy: difficulty === "easy",
+      scale,
+    }))
       enemyBullet(
-        e,
-        angle,
-        e.kind === 2 ? 110 + stage * 7 : 90 + stage * 7,
-        kind,
+        { ...e, x: shot.x, y: shot.y, r: 0 },
+        shot.angle,
+        shot.speed,
+        shot.kind,
+        { hold: shot.hold || 0 },
       );
-    }
     e.volleys++;
     e.shoot =
-      (slow ? 3.8 : 3.3 - stage * (e.kind === 1 ? 0.22 : 0.15)) +
+      (difficulty === "easy"
+        ? 3.8
+        : 3.3 - stage * (e.kind === 1 ? 0.22 : 0.15)) +
       (e.kind === 1 ? 0.35 : 0);
   }
-  function launchBeam(e, offset = 0) {
-    const origin = { x: e.x, y: e.y + e.r + 3 },
-      target = { x: clamp(player.x + offset, 15, W - 15), y: player.y },
+  function advanceBossAttack(e, dt) {
+    const attack = e.attack;
+    if (!attack) return;
+    attack.elapsed += dt;
+    while (
+      attack.cursor < attack.events.length &&
+      attack.events[attack.cursor].at <= attack.elapsed
+    ) {
+      const event = attack.events[attack.cursor++];
+      if (event.type === "beam") launchBeam(e, 0, event);
+      else
+        enemyBullet(
+          { ...e, x: event.x, y: event.y, r: 0 },
+          event.angle,
+          event.speed,
+          event.kind,
+          { hold: event.hold || 0, attackId: attack.id },
+        );
+    }
+    if (attack.elapsed >= attack.duration) {
+      e.attack = null;
+      e.shoot = attack.recovery;
+    }
+  }
+  function launchBeam(e, offset = 0, event = null) {
+    const origin = event
+        ? { x: event.x, y: event.y }
+        : { x: e.x, y: e.y + e.r + 3 },
+      target = event
+        ? { ...event.target }
+        : { x: clamp(player.x + offset, 15, W - 15), y: player.y },
       direction = P.normalize({
         x: target.x - origin.x,
         y: target.y - origin.y,
@@ -739,7 +773,8 @@
     e.flash = 0.075;
     if (e.hp <= 0) {
       stats.kills++;
-      score += e.boss ? 2500 : e.kind === 1 ? 90 : 35;
+      stats.defeats[e.boss ? "boss" : e.kind === 1 ? "armored" : "light"]++;
+      award(e.boss ? 2500 : e.kind === 1 ? 90 : 35, "defeat");
       burst(
         e.x,
         e.y,
@@ -819,7 +854,7 @@
     switch (item.kind) {
       case "power":
         wing = Math.min(8, wing + 1);
-        score += Math.round(100 * (1 + build.magnet * 0.1));
+        award(Math.round(100 * (1 + build.magnet * 0.1)), "parts");
         floatText(
           player.x,
           player.y - 50 * scale,
@@ -842,7 +877,7 @@
         break;
       case "magnet":
         magnetLevel = Math.min(6, magnetLevel + 1);
-        score += Math.round(100 * (1 + build.magnet * 0.1));
+        award(Math.round(100 * (1 + build.magnet * 0.1)), "parts");
         floatText(
           player.x,
           player.y - 50 * scale,
@@ -858,7 +893,7 @@
         break;
       case "capacitor":
         pulseCharges = Math.min(3, pulseCharges + 1);
-        score += 80;
+        award(80, "parts");
         floatText(
           player.x,
           player.y - 50 * scale,
@@ -1104,71 +1139,40 @@
             e.supply = 14;
             lastPartDrop = stageTime;
           }
-          if (!charging) {
+          if (!charging && !e.attack) {
             e.motionTime += dt;
-            const targetX = W / 2 + Math.sin(e.motionTime * 0.62) * 135;
+            const amplitude = [105, 55, 135, 125, 145][stage],
+              frequency = [0.5, 0.38, 0.72, 0.55, 0.8][stage],
+              targetX = W / 2 + Math.sin(e.motionTime * frequency) * amplitude;
             e.x += clamp(targetX - e.x, -90 * dt, 90 * dt);
           }
           e.phase = e.hp / e.maxHP < 0.34 ? 2 : e.hp / e.maxHP < 0.67 ? 1 : 0;
           e.armorClosed =
             stage === 1 && e.age % 5 < 2.7 && !(e.openUntil > e.age);
-          e.shoot -= dt;
-          e.beamClock -= dt;
-          if (e.shoot <= 0 && !charging) {
-            const count =
-              (difficulty === "normal" ? 1 : 0) +
-              (stage === 0
-                ? 4
-                : stage === 2
-                  ? 6 + e.phase
-                  : stage === L.length - 1
-                    ? 7 + e.phase
-                    : 5 + e.phase);
-            // Alternate patterns so later bosses add variety without stacking every attack.
-            e.volleys++;
-            const aimed = stage >= 1 && e.volleys % 3 === 0;
-            const crossing = stage >= 3 && e.phase > 0 && e.volleys % 4 === 0;
-            if (!aimed && !crossing)
-              for (let i = 0; i < count; i++) {
-                const angle =
-                  Math.PI / 2 +
-                  (i - (count - 1) / 2) * (stage === 2 ? 0.23 : 0.19) +
-                  Math.sin(e.age) * (stage === 2 ? 0.38 : 0.12);
-                enemyBullet(e, angle, 85 + e.phase * 14);
-              }
-            if (aimed) {
-              const aim = Math.atan2(player.y - e.y, player.x - e.x);
-              for (let j = -1; j <= 1; j++)
-                enemyBullet(
-                  e,
-                  aim + j * 0.23,
-                  125 + stage * 8,
-                  stage >= 2 && j === 0 ? "split" : "needle",
-                );
-            } else if (crossing) {
-              for (let j = 0; j < 4; j++)
-                enemyBullet(
-                  { ...e, x: e.x + (e.phase === 1 ? -30 : 30) },
-                  Math.PI / 2 + (j - 1.5) * 0.32 + Math.sin(e.age * 0.7) * 0.3,
-                  120 + stage * 8,
-                  "needle",
-                );
-            }
-            e.shoot =
-              ((stage === L.length - 1 ? 1.9 : 2.4) - e.phase * 0.18) *
-              (difficulty === "normal" ? 1 : 1.2);
+          if (!e.attack) e.shoot -= dt;
+          if (e.shoot <= 0 && !e.attack && !charging) {
+            e.attack = C.bossAttack({
+              stage,
+              phase: e.phase,
+              volley: e.volleys++,
+              x: e.x,
+              y: e.y,
+              r: e.r,
+              W,
+              H,
+              scale,
+              player,
+              easy: difficulty === "easy",
+            });
+            if (!stats.bossPatterns.includes(e.attack.id))
+              stats.bossPatterns.push(e.attack.id);
           }
-          if (e.beamClock <= 0 && !charging) {
-            launchBeam(e);
-            if (stage === 3 && e.phase > 0)
-              launchBeam(e, e.phase === 1 ? 95 : -95);
-            e.beamClock = stage === 0 ? 7 : stage === L.length - 1 ? 3.9 : 4.8;
-          }
+          advanceBossAttack(e, dt);
         }
       } else if (e.pattern === "turret") {
         if (e.y < e.targetY) e.y += e.vy * dt;
         else if (e.age > 9) e.y += 50 * scale * dt;
-        if (level.beams && e.y >= e.targetY && e.age > 1 && !charging) {
+        if (stage === 3 && e.y >= e.targetY && e.age > 1 && !charging) {
           e.beamClock -= dt;
           if (e.beamClock <= 0) {
             launchBeam(e);
@@ -1255,8 +1259,10 @@
         effectRing(b.x, b.y, "#ffbbdb", 22 * scale);
         continue;
       }
-      b.x += b.vx * dt;
-      b.y += b.vy * dt;
+      const movingDt = Math.max(0, dt - (b.hold || 0));
+      b.hold = Math.max(0, (b.hold || 0) - dt);
+      b.x += b.vx * movingDt;
+      b.y += b.vy * movingDt;
       b.life -= dt;
       if (Math.hypot(b.x - player.x, b.y - player.y) < b.r + player.r) {
         if (player.shield > 0) {
@@ -1293,7 +1299,8 @@
       (s) => s.life > 0 && s.y > -40 && s.x > -30 && s.x < W + 30,
     );
     bullets = bullets.filter(
-      (b) => b.life > 0 && b.y < H + 30 && b.x > -30 && b.x < W + 30,
+      (b) =>
+        b.life > 0 && b.y > -80 && b.y < H + 30 && b.x > -30 && b.x < W + 30,
     );
     beams = beams.filter((b) => b.age < b.delay + b.duration);
     pickups = pickups.filter((p) => !p.dead && p.y < H + 40);
@@ -1352,6 +1359,11 @@
     if (boss)
       $("bossHealth").style.width =
         Math.max(0, (boss.hp / boss.maxHP) * 100) + "%";
+    $("bossPattern").textContent = boss?.attack
+      ? boss.attack.name + " · " + boss.attack.hint
+      : boss?.entered
+        ? "숨 고르기 · 공격 기회!"
+        : "";
     $("weaponLevel").textContent = "GEAR " + String(wing).padStart(2, "0");
     $("feverBar").style.width =
       (feverTime > 0 ? (feverTime / 7) * 100 : fever) + "%";
@@ -1564,6 +1576,59 @@
       return;
     }
 
+    for (const e of enemies) {
+      if (!e.attack) continue;
+      for (const marker of e.attack.markers) {
+        if (e.attack.elapsed < marker.start || e.attack.elapsed >= marker.end)
+          continue;
+        ctx.save();
+        ctx.strokeStyle = "#ff9bafaa";
+        ctx.fillStyle = "#ffd1d9";
+        ctx.lineWidth = 1.4 * scale;
+        ctx.setLineDash([4 * scale, 6 * scale]);
+        ctx.beginPath();
+        if (marker.kind === "ray") {
+          const len = 105 * scale;
+          ctx.moveTo(marker.x, marker.y);
+          ctx.lineTo(
+            marker.x + Math.cos(marker.angle) * len,
+            marker.y + Math.sin(marker.angle) * len,
+          );
+        } else if (marker.kind === "gap") {
+          ctx.setLineDash([]);
+          ctx.strokeStyle = "#b4f6e3bb";
+          ctx.moveTo(marker.x, marker.y + 14 * scale);
+          ctx.lineTo(marker.x, marker.y);
+          ctx.lineTo(marker.x + marker.width, marker.y);
+          ctx.lineTo(marker.x + marker.width, marker.y + 14 * scale);
+          ctx.fillStyle = "#d0fff0";
+          ctx.font = "bold " + 11 * scale + "px sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText(
+            "빈틈",
+            marker.x + marker.width / 2,
+            marker.y + 29 * scale,
+          );
+        } else {
+          const radius = 58 * scale,
+            ticks = marker.kind === "clock" ? 12 : 8;
+          ctx.arc(marker.x, marker.y, radius, 0, Math.PI * 2);
+          for (let n = 0; n < ticks; n++) {
+            const a = (n * Math.PI * 2) / ticks;
+            ctx.moveTo(
+              marker.x + Math.cos(a) * radius * 0.85,
+              marker.y + Math.sin(a) * radius * 0.85,
+            );
+            ctx.lineTo(
+              marker.x + Math.cos(a) * radius,
+              marker.y + Math.sin(a) * radius,
+            );
+          }
+        }
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
     for (const b of beams) {
       if (b.source.hp <= 0 && !b.fired) continue;
       if (!b.fired) {
@@ -1778,11 +1843,45 @@
       }
     }
     for (const b of bullets) {
+      if (b.kind === "ink" || b.kind === "glyph") {
+        ctx.save();
+        ctx.translate(b.x, b.y);
+        const r = b.r * 1.08;
+        ctx.fillStyle = "#fd849f";
+        ctx.strokeStyle = "#56223a";
+        ctx.lineWidth = 1.5 * scale;
+        if (b.kind === "ink") {
+          ctx.fillRect(-r, -r, r * 2, r * 2);
+          ctx.strokeRect(-r, -r, r * 2, r * 2);
+          ctx.fillStyle = "#ffe6ec";
+          ctx.fillRect(-r * 0.55, -r * 0.35, r * 1.1, 1.7 * scale);
+        } else {
+          ctx.rotate(Math.atan2(b.vy, b.vx));
+          ctx.strokeStyle = "#682743";
+          ctx.lineWidth = 5 * scale;
+          ctx.beginPath();
+          ctx.moveTo(-r, 0);
+          ctx.lineTo(r, 0);
+          ctx.moveTo(0, -r);
+          ctx.lineTo(0, r);
+          ctx.stroke();
+          ctx.strokeStyle = "#ffa5d4";
+          ctx.lineWidth = 2.5 * scale;
+          ctx.stroke();
+        }
+        ctx.restore();
+        continue;
+      }
       if (b.kind !== "orb" && b.kind) {
         ctx.save();
         ctx.translate(b.x, b.y);
         ctx.rotate(Math.atan2(b.vy, b.vx) + Math.PI / 2);
-        ctx.fillStyle = b.kind === "split" ? "#ed77db" : "#ffab84";
+        ctx.fillStyle =
+          b.kind === "split"
+            ? "#ed77db"
+            : b.kind === "echo"
+              ? "#ffa2d7"
+              : "#ffab84";
         ctx.strokeStyle = "#572241";
         ctx.lineWidth = 1.5 * scale;
         const r = b.r * (b.kind === "split" ? 1.25 : 1);
@@ -1800,6 +1899,15 @@
         ctx.moveTo(0, -r * 0.7);
         ctx.lineTo(0, r * 0.25);
         ctx.stroke();
+        if (b.hold > 0) {
+          ctx.strokeStyle = "#fff0d3";
+          ctx.beginPath();
+          ctx.moveTo(-r * 1.8, -r * 0.5);
+          ctx.lineTo(-r * 1.8, r * 0.5);
+          ctx.moveTo(r * 1.8, -r * 0.5);
+          ctx.lineTo(r * 1.8, r * 0.5);
+          ctx.stroke();
+        }
         ctx.restore();
         continue;
       }
@@ -1997,14 +2105,51 @@
   function grade() {
     return stats.damage === 0 ? 3 : stats.damage <= 2 ? 2 : 1;
   }
+  function award(points, category) {
+    stats.points[category] += points;
+    score += points;
+  }
+  function scoreCard(result) {
+    return (
+      '<section class="score-card" aria-label="이번 장 점수 정산"><h3>이번 장 점수 정산</h3><dl>' +
+      result.rows
+        .map(
+          (row) =>
+            '<div data-score-row="' +
+            row.id +
+            '"><dt>' +
+            row.label +
+            "<small>" +
+            row.detail +
+            "</small></dt><dd>+" +
+            fmt(row.points) +
+            "</dd></div>",
+        )
+        .join("") +
+      '</dl><div class="score-stage-total"><span>이번 장 획득</span><strong>+' +
+      fmt(result.stageTotal) +
+      '</strong></div><div class="score-running-total"><span>이전 ' +
+      fmt(result.previous) +
+      " + 이번 장</span><strong>누적 " +
+      fmt(result.total) +
+      "점</strong></div></section>"
+    );
+  }
   function clearStage() {
     if (mode !== "play") return;
     setMode("clear");
     audio.pause();
     audio.effect("clear");
     const stars = grade(),
-      bonus = 500 + stars * 250;
-    score += bonus;
+      result = S.settle({
+        stage,
+        hp: player.hp,
+        maxHP: maxHP(),
+        stats,
+        previous: entry.score,
+      });
+    stats.settlement = result;
+    score = result.total;
     save.best = Math.max(save.best, Math.floor(score));
     save.stars[stage] = Math.max(save.stars[stage], stars);
     save.unlocked = Math.max(save.unlocked, Math.min(L.length - 1, stage + 1));
@@ -2047,6 +2192,7 @@
       persist();
       showModal(
         head +
+          scoreCard(result) +
           '<button class="primary" data-action="ending">양초 하나가 밝힌 세상 · 엔딩 보기 →</button>',
         "clear",
       );
@@ -2069,7 +2215,9 @@
           (stage + 1) +
           ' CLEAR</span><h2 id="modalTitle">' +
           level.name +
-          ' 통과!</h2><p>발명 하나를 고르고 다음 하늘로 출발하세요.</p></div><div class="upgrades">' +
+          " 통과!</h2><p>점수를 확인하고, 발명 하나를 골라 다음 하늘로 출발하세요.</p></div>" +
+          scoreCard(result) +
+          '<div class="upgrades">' +
           choices
             .map(
               (u, i) =>

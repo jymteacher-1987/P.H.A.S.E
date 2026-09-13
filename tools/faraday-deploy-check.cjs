@@ -88,6 +88,8 @@ const digest = (b) => crypto.createHash("sha256").update(b).digest("hex");
     const files = [
       "plays/faraday-flight.html",
       "assets/faraday-flight/game.js",
+      "assets/faraday-flight/combat.js",
+      "assets/faraday-flight/scoring.js",
       "assets/faraday-flight/physics.js",
       "assets/faraday-flight/induction-diagram.js",
       "assets/faraday-flight/leaderboard.js",

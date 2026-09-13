@@ -322,6 +322,35 @@ body.page-home .hero > .wrap{ width:100%; }
 }
 .side-item.active .count{ background: rgba(255,255,255,.25); color:#fff; }
 
+.side-menu-toggle{ display:none; }
+@media (min-width:861px){
+  /* Keep the page, rather than body overflow, as the sticky scroll container. */
+  body.page-lab{ overflow-x:clip; }
+  .side-filter-heading > .side-box-title{ display:none; }
+  .side-menu-toggle{
+    display:flex; align-items:center; gap:7px; width:100%; padding:9px 8px;
+    border:0; background:transparent; color:var(--text-dim); text-align:left;
+    font-size:13px; font-weight:700; border-radius:9px;
+  }
+  .side-menu-toggle > span:first-child{ flex:1; min-width:0; }
+  .side-filter-box.is-selected{ border-color:#b9c8ee; }
+  .side-menu-toggle:hover{ background:var(--surface-2); }
+  .side-menu-toggle:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .side-menu-count{ color:var(--text-faint); background:var(--surface-2); border-radius:20px; padding:2px 7px; font-size:11px; }
+  .side-menu-action{ font-size:10px; color:var(--text-faint); white-space:nowrap; }
+  .side-menu-chevron{ font-size:17px; transition:transform .18s; }
+  .side-filter-box.is-open .side-menu-chevron{ transform:rotate(180deg); }
+  .side-menu-current{ display:block; font-size:10px; font-weight:500; color:var(--accent-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .side-menu-current:empty{ display:none; }
+  .side-filter-box .side-row{
+    max-height:var(--side-list-height,400px); overflow-y:auto; overflow-x:hidden;
+    overscroll-behavior:contain; scrollbar-width:thin; scrollbar-color:#b7c5dc transparent;
+    margin-top:6px; padding-right:3px;
+  }
+  .side-filter-box .side-row[hidden]{ display:none; }
+  .lab-sidebar.side-menu-tall{ position:static; }
+}
+
 /* ---------- Experiment cards ---------- */
 .exp-grid{
   display:grid; grid-template-columns: repeat(auto-fill, minmax(270px,1fr));

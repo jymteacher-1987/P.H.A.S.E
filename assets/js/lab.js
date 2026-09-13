@@ -7,8 +7,8 @@
 // 두 축을 한 목록에 섞으면 "과학 놀이"가 열·전자기학과 같은 급으로 보여서
 // 박스를 따로 뒀다. 선택 상태(active)는 두 박스를 통틀어 항상 하나뿐이다
 // — state.section이 어느 박스인지, state.activeCategory가 그 안의 어느
-// 줄인지를 가리킨다. 과학 놀이 항목이 5~6개를 넘어가면 그때 박스 안을
-// 다시 소분류로 나눌 것(지금은 개수가 적어 항목을 바로 나열한다).
+// 줄인지를 가리킨다. PC의 두 목록은 접거나 내부 스크롤로 고를 수 있고,
+// 휴대폰에서는 기존의 가로 스크롤 띠를 유지한다.
 // ================================================================
 (async function () {
   const state = {
@@ -30,7 +30,7 @@
   };
 
   // 메인 페이지에서 검색어/카테고리를 들고 넘어온 경우 반영.
-  // ?play=<id> 로 들어오면 과학 놀이 박스가 선택된 상태로 열린다.
+  // ?play=<id> 로 들어오면 해당 놀이가 선택된다.
   const params = new URLSearchParams(location.search);
   const initialQuery = params.get("q") || "";
   const initialPlay = params.get("play") || "";
@@ -49,6 +49,8 @@
     state.activeCategory = initialCat;
   }
   if (initialQuery) els.searchInput.value = initialQuery;
+  const desktopMenu = window.matchMedia("(min-width: 861px)");
+  let openMenu = null;
 
   const LAB_SECTION = { id: "lab", name: "물리 가상실험" };
   const PLAY_SECTION = { id: "play", name: "과학 놀이", icon: "🎈" };
@@ -97,7 +99,45 @@
     // .side-row로 한 번 더 감싸는 것은 좁은 화면 때문이다. 거기서는 제목이
     // 윗줄에 서고 항목만 가로로 넘어가야 하는데, 제목과 항목이 같은 상자에
     // 있으면 항목이 제목 옆을 지나가며 글자가 잘려 보인다.
-    return `<div class="side-box"><div class="side-box-title">${title}</div><div class="side-row">${body}</div></div>`;
+    const count = section === "play" ? state.plays.length : state.experiments.length;
+    return `<div class="side-box side-filter-box" data-menu="${section}"><div class="side-filter-heading"><div class="side-box-title">${title}</div><button class="side-menu-toggle" type="button" aria-expanded="false" aria-controls="${section}MenuRows"><span>${title}<small class="side-menu-current"></small></span><span class="side-menu-count">${count}</span><span class="side-menu-action">펼치기</span><span class="side-menu-chevron" aria-hidden="true">⌄</span></button></div><div class="side-row" id="${section}MenuRows">${body}</div></div>`;
+  }
+
+  function syncMenus() {
+    const boxes = Array.from(els.sideMenu.querySelectorAll(".side-filter-box"));
+    if (!boxes.length) return;
+    boxes.forEach(box => {
+      const section = box.dataset.menu,
+        open = !desktopMenu.matches || openMenu === section,
+        button = box.querySelector(".side-menu-toggle");
+      box.classList.toggle("is-open", open);
+      box.classList.toggle("is-selected", state.section === section);
+      box.querySelector(".side-row").hidden = !open;
+      button.setAttribute("aria-expanded", String(open));
+      button.querySelector(".side-menu-action").textContent = open ? "접기" : "펼치기";
+      button.querySelector(".side-menu-current").textContent = state.section === section && state.activeCategory !== "all"
+        ? (section === "play" ? playInfo(state.activeCategory).title : catInfo(state.activeCategory).name) : "전체";
+    });
+    if (desktopMenu.matches) {
+      const headerHeight = boxes.reduce((sum, box) => sum + box.querySelector(".side-filter-heading").getBoundingClientRect().height, 0),
+        navHeight = document.querySelector(".site-nav").getBoundingClientRect().height,
+        available = innerHeight - navHeight - headerHeight - boxes.length * 26 - (boxes.length - 1) * 14 - 48;
+      els.sideMenu.style.setProperty("--side-list-height", Math.max(112, Math.min(400, available)) + "px");
+      els.sideMenu.classList.toggle("side-menu-tall", openMenu !== null && available < 112);
+    } else els.sideMenu.classList.remove("side-menu-tall");
+  }
+
+  function revealDesktopPreview(force = false) {
+    if (!desktopMenu.matches) return;
+    requestAnimationFrame(() => {
+      const section = document.getElementById("expSection"),
+        preview = els.expGrid.querySelector(".exp-preview") || section,
+        bounds = preview.getBoundingClientRect(),
+        top = Math.max(0, document.querySelector(".site-nav").getBoundingClientRect().bottom) + 18;
+      if (force || bounds.top < top || bounds.bottom > innerHeight - 18)
+        window.scrollTo({ top: Math.max(0, scrollY + section.getBoundingClientRect().top - top),
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+    });
   }
 
   function updateSidebarSelection(reveal) {
@@ -129,6 +169,7 @@
     // Keep the existing scroll containers when changing filters or searching.
     if (els.sideMenu.childElementCount) {
       updateSidebarSelection(reveal);
+      syncMenus();
       return;
     }
     const catRows = [{ id: "all", name: "전체", icon: "🗂️" }, ...state.categories].map((c) => ({
@@ -150,12 +191,20 @@
     let html = sideBox("lab", "물리 가상실험", catRows);
     if (playRows.length) html += sideBox("play", PLAY_SECTION.name, playRows);
     els.sideMenu.innerHTML = html;
+    els.sideMenu.querySelectorAll(".side-menu-toggle").forEach(button => button.addEventListener("click", () => {
+      const section = button.closest("[data-menu]").dataset.menu;
+      openMenu = openMenu === section ? null : section;
+      syncMenus();
+      if (openMenu) revealDesktopPreview(true);
+    }));
 
     els.sideMenu.querySelectorAll("[data-cat]").forEach((el) => {
       el.addEventListener("click", () => {
         state.section = el.dataset.section;
         state.activeCategory = el.dataset.cat;
+        if (desktopMenu.matches) openMenu = null;
         render(true);
+        if (desktopMenu.matches) el.closest(".side-filter-box").querySelector(".side-menu-toggle").focus({ preventScroll: true });
       });
       el.setAttribute("role", "button");
       el.tabIndex = 0;
@@ -167,6 +216,7 @@
       });
     });
     updateSidebarSelection(true);
+    syncMenus();
   }
 
   // Pre-rendered scene images: browsing the catalog never runs activities.
@@ -259,9 +309,13 @@
   function render(reveal = false) {
     renderSidebar(reveal);
     renderExperiments();
+    if (reveal) revealDesktopPreview();
   }
 
   render();
+  if (desktopMenu.addEventListener) desktopMenu.addEventListener("change", syncMenus);
+  else desktopMenu.addListener(syncMenus);
+  window.addEventListener("resize", syncMenus);
 
   // ---------- 검색 ----------
   function doSearch() {
