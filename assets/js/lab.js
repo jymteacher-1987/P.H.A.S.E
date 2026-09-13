@@ -100,7 +100,7 @@
     // 윗줄에 서고 항목만 가로로 넘어가야 하는데, 제목과 항목이 같은 상자에
     // 있으면 항목이 제목 옆을 지나가며 글자가 잘려 보인다.
     const count = section === "play" ? state.plays.length : state.experiments.length;
-    return `<div class="side-box side-filter-box" data-menu="${section}"><div class="side-filter-heading"><div class="side-box-title">${title}</div><button class="side-menu-toggle" type="button" aria-expanded="false" aria-controls="${section}MenuRows"><span>${title}<small class="side-menu-current"></small></span><span class="side-menu-count">${count}</span><span class="side-menu-action">펼치기</span><span class="side-menu-chevron" aria-hidden="true">⌄</span></button></div><div class="side-row" id="${section}MenuRows">${body}</div></div>`;
+    return `<div class="side-box side-filter-box" data-menu="${section}"><div class="side-filter-heading"><div class="side-box-title">${title}</div><button class="side-menu-toggle" type="button" aria-expanded="false" aria-controls="${section}MenuRows"><span class="side-menu-label"><span class="side-menu-title">${title}</span><span class="side-menu-count">${count}</span></span><span class="side-menu-chevron" aria-hidden="true"></span><small class="side-menu-current"></small><span class="side-menu-action">펼치기</span></button></div><div class="side-row" id="${section}MenuRows">${body}</div></div>`;
   }
 
   function syncMenus() {
