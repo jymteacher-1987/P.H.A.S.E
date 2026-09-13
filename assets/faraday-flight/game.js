@@ -17,6 +17,7 @@
     fmt = (v) => Math.floor(v).toLocaleString("ko-KR");
   const SAVE_KEY = "phase-faraday-flight-v1",
     IMAGES = {},
+    imageLoads = new Map(),
     keys = new Set(),
     reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   let save = {
@@ -379,6 +380,7 @@
     $("hud").hidden = true;
     $("playControls").hidden = true;
     $("bossHud").hidden = true;
+    $("stageProgress").parentElement.hidden = false;
     $("stageNumber").textContent =
       "STAGE " + String(stage + 1).padStart(2, "0") + " / " + L.length;
     $("stageName").textContent = level.name;
@@ -411,9 +413,14 @@
     $("chapterMotion").hidden = matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
+    prepareChapterAssets();
   }
   function launchChapter() {
     if (mode !== "briefing") return;
+    if (!stageImagesReady(stage)) {
+      prepareChapterAssets();
+      return;
+    }
     closeModal(false);
     keys.clear();
     pointer.active = false;
@@ -421,8 +428,19 @@
     $("hud").hidden = false;
     $("playControls").hidden = false;
     audio.start();
-    say(level.intro, 3.2, true);
+    say(level.name, 1.2);
     canvas.focus?.();
+    const launchedStage = stage;
+    setTimeout(() => {
+      if (
+        stage !== launchedStage ||
+        !["play", "paused", "clear"].includes(mode)
+      )
+        return;
+      if (stage + 1 < L.length)
+        prepareStageImages(stage + 1, "low").catch(() => {});
+      else loadImages(["ending"], "low").catch(() => {});
+    }, 5000);
   }
   function setupSurfaces() {
     surfaces = [];
@@ -590,7 +608,7 @@
     const hp = level.bossHP * (difficulty === "easy" ? 0.82 : 1);
     const e = addEnemy(2, W / 2, -110, "boss", {
       boss: true,
-      r: 42 * scale,
+      r: 52 * scale,
       hp,
       maxHP: hp,
       shoot: 1.35,
@@ -606,20 +624,9 @@
       motionTime: 0,
     });
     $("bossHud").hidden = false;
+    $("stageProgress").parentElement.hidden = true;
     $("bossName").textContent = level.boss;
-    say(
-      level.boss +
-        "\n" +
-        [
-          "활자 줄의 빈틈으로 날아요!",
-          "닫히는 탄을 피하고 열린 문을 노려요!",
-          "회전하는 기호와 X자 탄줄을 읽어요!",
-          "방전 예고선을 피하거나 폭풍으로 끊어요!",
-          "멈췄다 출발하는 탄 · 기록된 위치를 벗어나요!",
-        ][stage],
-      2.4,
-      true,
-    );
+    say(level.boss, 1.8, true);
     audio.effect("warning");
     return e;
   }
@@ -711,10 +718,14 @@
       attack.events[attack.cursor].at <= attack.elapsed
     ) {
       const event = attack.events[attack.cursor++];
-      if (event.type === "beam") launchBeam(e, 0, event);
+      e.muzzleFlash = 0.1;
+      const muzzleX = e.x + event.x - attack.origin.x,
+        muzzleY = e.y + event.y - attack.origin.y;
+      if (event.type === "beam")
+        launchBeam(e, 0, { ...event, x: muzzleX, y: muzzleY });
       else
         enemyBullet(
-          { ...e, x: event.x, y: event.y, r: 0 },
+          { ...e, x: muzzleX, y: muzzleY, r: 0 },
           event.angle,
           event.speed,
           event.kind,
@@ -1098,6 +1109,7 @@
       if (e.hp <= 0) continue;
       e.age += dt;
       e.flash = Math.max(0, e.flash - dt);
+      e.muzzleFlash = Math.max(0, (e.muzzleFlash || 0) - dt);
       const charging = beams.some(
         (b) => b.source === e && b.age < b.delay + b.duration,
       );
@@ -1105,6 +1117,10 @@
         const targetY = Math.max(110 * scale, H * 0.265);
         if (e.y < targetY) e.y = Math.min(targetY, e.y + e.vy * dt);
         else {
+          if (!e.entered) {
+            effectRing(e.x, e.y, "#ffbb8855", 115 * scale);
+            shake = reduced ? 0 : 1.8;
+          }
           e.entered = true;
           e.escortClock -= dt;
           if (
@@ -1143,10 +1159,24 @@
             e.motionTime += dt;
             const amplitude = [105, 55, 135, 125, 145][stage],
               frequency = [0.5, 0.38, 0.72, 0.55, 0.8][stage],
-              targetX = W / 2 + Math.sin(e.motionTime * frequency) * amplitude;
+              margin =
+                Math.min((250 + stage * 7) * scale, H * 0.54) * 0.54 +
+                10 * scale,
+              targetX = clamp(
+                W / 2 + Math.sin(e.motionTime * frequency) * amplitude,
+                margin,
+                W - margin,
+              );
             e.x += clamp(targetX - e.x, -90 * dt, 90 * dt);
           }
+          const oldPhase = e.phase;
           e.phase = e.hp / e.maxHP < 0.34 ? 2 : e.hp / e.maxHP < 0.67 ? 1 : 0;
+          $("bossHud").dataset.phase = String(e.phase);
+          if (e.phase > oldPhase) {
+            effectRing(e.x, e.y, "#ff876faa", (125 + e.phase * 12) * scale);
+            audio.effect("warning");
+            shake = reduced ? 0 : 2;
+          }
           e.armorClosed =
             stage === 1 && e.age % 5 < 2.7 && !(e.openUntil > e.age);
           if (!e.attack) e.shoot -= dt;
@@ -1359,11 +1389,6 @@
     if (boss)
       $("bossHealth").style.width =
         Math.max(0, (boss.hp / boss.maxHP) * 100) + "%";
-    $("bossPattern").textContent = boss?.attack
-      ? boss.attack.name + " · " + boss.attack.hint
-      : boss?.entered
-        ? "숨 고르기 · 공격 기회!"
-        : "";
     $("weaponLevel").textContent = "GEAR " + String(wing).padStart(2, "0");
     $("feverBar").style.width =
       (feverTime > 0 ? (feverTime / 7) * 100 : fever) + "%";
@@ -1521,7 +1546,7 @@
   function drawGenerator() {
     if (!player || H < 370) return;
     ctx.save();
-    ctx.translate(45, H - 190 * scale);
+    ctx.translate(W / 2 - 7 * scale, H - 65 * scale);
     ctx.scale(scale, scale);
     window.FaradayInductionDiagram.miniature(
       ctx,
@@ -1582,6 +1607,7 @@
         if (e.attack.elapsed < marker.start || e.attack.elapsed >= marker.end)
           continue;
         ctx.save();
+        ctx.translate(e.x - e.attack.origin.x, e.y - e.attack.origin.y);
         ctx.strokeStyle = "#ff9bafaa";
         ctx.fillStyle = "#ffd1d9";
         ctx.lineWidth = 1.4 * scale;
@@ -1593,21 +1619,6 @@
           ctx.lineTo(
             marker.x + Math.cos(marker.angle) * len,
             marker.y + Math.sin(marker.angle) * len,
-          );
-        } else if (marker.kind === "gap") {
-          ctx.setLineDash([]);
-          ctx.strokeStyle = "#b4f6e3bb";
-          ctx.moveTo(marker.x, marker.y + 14 * scale);
-          ctx.lineTo(marker.x, marker.y);
-          ctx.lineTo(marker.x + marker.width, marker.y);
-          ctx.lineTo(marker.x + marker.width, marker.y + 14 * scale);
-          ctx.fillStyle = "#d0fff0";
-          ctx.font = "bold " + 11 * scale + "px sans-serif";
-          ctx.textAlign = "center";
-          ctx.fillText(
-            "빈틈",
-            marker.x + marker.width / 2,
-            marker.y + 29 * scale,
           );
         } else {
           const radius = 58 * scale,
@@ -1803,16 +1814,31 @@
               : Math.floor(e.age * 7) % 4,
           e.x,
           e.y,
-          Math.min(205 * scale, H * 0.49),
+          Math.min((250 + stage * 7) * scale, H * 0.54),
           Math.sin(e.age * 0.5) * 0.025,
           e.flash > 0 ? 0.7 : 1,
         );
         glow(e.x, e.y, 18 * scale, e.armorClosed ? "#ff7e5544" : "#83ffdf55");
-        if (e.armorClosed) {
-          ctx.font = "bold 10px sans-serif";
-          ctx.textAlign = "center";
-          ctx.fillStyle = "#ffc09a";
-          ctx.fillText("장갑 닫힘", e.x, e.y + e.r + 20 * scale);
+        for (const side of [-1, 0, 1]) {
+          const px = e.x + side * e.r * 0.7,
+            py = e.y + e.r * 0.65;
+          glow(
+            px,
+            py,
+            (e.muzzleFlash > 0 ? 24 : 9 + e.phase * 3) * scale,
+            e.muzzleFlash > 0
+              ? "#ffb590bb"
+              : e.phase > 0
+                ? "#ff71615a"
+                : "#ffce8b22",
+          );
+          ctx.fillStyle = "#211d26";
+          ctx.strokeStyle = e.phase > 0 ? "#ec9471" : "#c39a67";
+          ctx.lineWidth = 1.3 * scale;
+          ctx.beginPath();
+          ctx.arc(px, py, 4.5 * scale, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
         }
       } else {
         drawSprite(
@@ -2236,13 +2262,13 @@
                 '</small></span><span class="upgrade-arrow">→</span></button>',
             )
             .join("") +
-          '</div><button id="nextStageBtn" class="primary next-stage" data-action="next-stage">' +
+          '</div><details class="clear-record"><summary>패러데이의 발견 기록</summary>' +
+          head.replace('id="modalTitle"', 'class="record-title"') +
+          '</details><button id="nextStageBtn" class="primary next-stage" data-action="next-stage">' +
           (stage + 2) +
           "스테이지 출발 · " +
           (choices[0]?.name || "준비 완료") +
-          ' →</button><details class="clear-record"><summary>점수와 패러데이의 발견 기록</summary>' +
-          head.replace('id="modalTitle"', 'class="record-title"') +
-          "</details>",
+          " →</button>",
         "clear",
       );
     }
@@ -2293,11 +2319,7 @@
         stats.pulses +
         "</b></div><div><span>현재 하늘</span><b>" +
         String(stage + 1).padStart(2, "0") +
-        '</b></div></div><p class="result-fact">' +
-        (stage < 2
-          ? "비행기 몸체 가운데 작은 점이 피격 위치예요. 날개 끝은 닿아도 괜찮아요."
-          : level.tip) +
-        '</p><button class="primary" data-action="retry">한 번 더 비행 →</button>' +
+        '</b></div></div><button class="primary" data-action="retry">한 번 더 비행 →</button>' +
         (difficulty === "normal"
           ? '<button class="secondary" data-action="retry-easy">이번에는 여유롭게 · 느린 공격</button>'
           : "") +
@@ -2709,47 +2731,86 @@
       b.setAttribute("aria-pressed", String(selected));
     }
   }
-  function loadImages() {
+  function loadImages(names, priority = "auto") {
     return Promise.all(
-      [
-        "hero",
-        "enemies",
-        "boss",
-        "world",
-        "poverty",
-        "gate",
-        "symbols",
-        "fog",
-        "ending",
-        "foes-books",
-        "foes-gates",
-        "foes-symbols",
-        "foes-lab",
-        "foes-records",
-      ].map(
-        (name) =>
-          new Promise((resolve, reject) => {
-            const image = new Image();
-            image.onload = () => {
+      names.map((name) => {
+        if (IMAGES[name]) return Promise.resolve();
+        if (imageLoads.has(name)) return imageLoads.get(name);
+        const promise = new Promise((resolve, reject) => {
+          const image = new Image();
+          let settled = false;
+          const finish = (error) => {
+            if (settled) return;
+            settled = true;
+            clearTimeout(timer);
+            image.onload = image.onerror = null;
+            if (error) {
+              imageLoads.delete(name);
+              reject(error);
+            } else {
               IMAGES[name] = image;
               resolve();
-            };
-            image.onerror = () => reject(new Error(name));
-            image.src =
-              "../assets/faraday-flight/" +
-              name +
-              ".webp?v=" +
-              (window.FaradayImageVersions?.[name] || "1");
-          }),
-      ),
+            }
+          };
+          const timer = setTimeout(() => finish(new Error(name)), 25000);
+          image.decoding = "async";
+          image.fetchPriority = priority;
+          image.onload = () => finish();
+          image.onerror = () => finish(new Error(name));
+          image.src =
+            "../assets/faraday-flight/" +
+            name +
+            ".webp?v=" +
+            (window.FaradayImageVersions?.[name] || "1");
+        });
+        imageLoads.set(name, promise);
+        return promise;
+      }),
     );
+  }
+  function stageImageNames(index) {
+    return [
+      "hero",
+      "world",
+      L[index].enemyArt,
+      L[index].bossArt,
+      ...(build.friend ? ["enemies"] : []),
+    ];
+  }
+  function stageImagesReady(index) {
+    return stageImageNames(index).every((name) => IMAGES[name]);
+  }
+  function prepareStageImages(index, priority = "auto") {
+    return loadImages(stageImageNames(index), priority);
+  }
+  function prepareChapterAssets() {
+    const button = $("briefingLaunch"),
+      index = stage;
+    if (!button) return;
+    const ready = stageImagesReady(index);
+    button.disabled = !ready;
+    button.textContent = ready
+      ? index + 1 + "장 출발 →"
+      : "이 하늘을 준비하고 있어요…";
+    if (ready) return;
+    prepareStageImages(index, "high")
+      .then(() => {
+        if (stage !== index || $("briefingLaunch") !== button) return;
+        button.disabled = false;
+        button.textContent = index + 1 + "장 출발 →";
+      })
+      .catch(() => {
+        if (stage !== index || $("briefingLaunch") !== button) return;
+        button.disabled = false;
+        button.textContent = "연결을 확인하고 다시 준비 ↻";
+      });
   }
   updateSide();
   updateModeChoice();
   updateSoundUI();
-  loadPromise = loadImages()
+  loadPromise = loadImages(["hero", "world"], "high")
     .then(() => {
-      setMode("title");
+      if (mode === "loading") setMode("title");
       draw();
       $("startBtn").disabled = false;
       $("startText").textContent = "첫 비행 시작";
@@ -2760,6 +2821,7 @@
       if (!storageOK)
         $("loadStatus").textContent =
           "이 환경에서는 진행 기록이 이번 실행 동안만 유지돼요.";
+      prepareStageImages(save.checkpoint?.stage || 0).catch(() => {});
     })
     .catch(() => {
       $("loadStatus").innerHTML =
@@ -2802,6 +2864,7 @@
           H,
           save: clone(save),
           sprites: atlas,
+          loadedImages: Object.keys(IMAGES),
           fever,
           feverTime,
           magnetLevel,

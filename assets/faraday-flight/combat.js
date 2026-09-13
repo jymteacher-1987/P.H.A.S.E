@@ -22,19 +22,16 @@
   }) {
     const events = [],
       markers = [],
-      sy = y + r + 8 * scale,
+      sy = y + r * 0.65,
       warning = easy ? 1 : 0.75,
       aim = Math.atan2(player.y - sy, player.x - x);
-    let id,
-      name,
-      hint,
-      recovery = 2.1;
+    let id, name;
     const shot = (at, bx, by, angle, speed, kind = "orb", extra = {}) =>
       events.push({
         type: "bullet",
         at,
-        x: bx,
-        y: by,
+        x: clamp(bx, x - r * 0.75, x + r * 0.75),
+        y: clamp(by, y - r * 0.8, y + r * 0.9),
         angle,
         speed,
         kind,
@@ -43,7 +40,7 @@
     const ray = (bx, by, angle, at = warning) =>
       markers.push({
         kind: "ray",
-        x: bx,
+        x: clamp(bx, x - r * 0.75, x + r * 0.75),
         y: by,
         angle,
         start: Math.max(0, at - warning),
@@ -53,7 +50,7 @@
       events.push({
         type: "beam",
         at,
-        x: bx,
+        x: clamp(bx, x - r * 0.75, x + r * 0.75),
         y: sy,
         target: {
           x: clamp(targetX, 25, W - 25),
@@ -64,30 +61,24 @@
       if (volley % 2 === 0) {
         id = "type-lines";
         name = "활자 찍기";
-        hint = "활자 줄의 빈틈으로 이동";
         const gap = [1, 4, 2][Math.floor(volley / 2) % 3],
-          spacing = (W - 80) / 7,
-          rows = phase === 2 && !easy ? 3 : 2;
-        markers.push({
-          kind: "gap",
-          x: 40 + (gap - 0.5) * spacing,
-          width: spacing * 2,
-          y: sy + 30 * scale,
-          start: 0,
-          end: warning + (rows - 1) * 0.65,
-        });
+          columns = easy ? 9 : 12 + phase * 2,
+          spacing = (W - 80) / (columns - 1),
+          rows = easy ? 2 : phase === 2 ? 4 : 3;
         for (let row = 0; row < rows; row++)
-          for (let col = 0; col < 8; col++) {
+          for (let col = 0; col < columns; col++) {
             if (col === gap || col === gap + 1) continue;
-            const bx = 40 + col * spacing,
+            const bx = x + (col < columns / 2 ? -1 : 1) * r * 0.65,
+              angle = Math.atan2(
+                Math.max(180 * scale, H * 0.72 - sy),
+                40 + col * spacing - bx,
+              ),
               at = warning + row * 0.65;
-            if (row === 0) ray(bx, sy, PI / 2, at);
-            shot(at, bx, sy, PI / 2, 118 + phase * 8, "ink");
+            shot(at, bx, sy, angle, 125 + phase * 8, "ink");
           }
       } else {
         id = "binding-staples";
         name = "제본못 두 줄";
-        hint = "조준한 두 줄 사이로 피하기";
         const targetX = clamp(player.x, 95, W - 95);
         for (const side of [-1, 1]) {
           const bx = x + side * 28 * scale,
@@ -96,40 +87,45 @@
               targetX + side * 42 - bx,
             );
           ray(bx, sy, angle);
-          for (let n = 0; n < (phase > 0 ? 3 : 2); n++)
-            shot(warning + n * 0.22, bx, sy, angle, 153, "needle");
+          for (let n = 0; n < (easy ? 3 : 5 + phase); n++)
+            for (const offset of easy ? [0] : [-0.22, 0, 0.22])
+              shot(warning + n * 0.22, bx, sy, angle + offset, 153, "needle");
         }
       }
-      recovery = 2.25 - phase * 0.1;
     } else if (stage === 1) {
       if (volley % 2 === 0) {
         id = "closing-gates";
         name = "닫혀 오는 문";
-        hint = "모이는 탄을 보고 바깥쪽으로";
         const targetY = Math.max(sy + 160 * scale, H * 0.72),
-          count = easy ? 3 : 3 + phase;
+          count = easy ? 4 : 5 + phase;
         for (const side of [-1, 1]) {
-          const bx = side < 0 ? 38 : W - 38,
-            angle = Math.atan2(targetY - sy, W / 2 - bx);
+          const bx = x + side * r * 0.7,
+            angle = Math.atan2(targetY - sy, x - side * W * 0.32 - bx);
           ray(bx, sy, angle);
           for (let n = 0; n < count; n++)
-            shot(warning + n * 0.27, bx, sy, angle, 143 + phase * 5, "shard");
+            for (const offset of easy ? [-0.12, 0.12] : [-0.2, 0, 0.2])
+              shot(
+                warning + n * 0.24,
+                bx,
+                sy,
+                angle + offset,
+                143 + phase * 5,
+                "shard",
+              );
         }
       } else {
         id = "keyhole-burst";
         name = "열쇠구멍 속사";
-        hint = "한 번 조준한 위치로 연속 사격";
         ray(x, sy, aim);
-        for (let n = 0; n < (easy ? 3 : 4 + phase); n++)
-          shot(warning + n * 0.19, x, sy, aim, 171, "needle");
+        for (let n = 0; n < (easy ? 5 : 8 + phase * 2); n++)
+          for (const offset of easy ? [-0.17, 0.17] : [-0.24, 0, 0.24])
+            shot(warning + n * 0.16, x, sy, aim + offset, 171, "needle");
       }
-      recovery = 1.95 - phase * 0.1;
     } else if (stage === 2) {
       if (volley % 2 === 0) {
         id = "compass-spiral";
         name = "회전하는 기호";
-        hint = "회전 방향을 읽고 틈을 따라가기";
-        const count = easy ? 8 : 10 + phase * 2,
+        const count = easy ? 10 : 16 + phase * 3,
           direction = Math.floor(volley / 2) % 2 ? -1 : 1;
         markers.push({ kind: "compass", x, y: sy, start: 0, end: warning });
         for (let n = 0; n < count; n++) {
@@ -143,78 +139,102 @@
             126,
             "glyph",
           );
+          if (!easy)
+            shot(
+              warning + n * 0.14,
+              x,
+              sy,
+              PI / 2 + Math.sin(n * 0.5) * 0.65,
+              118,
+              "glyph",
+            );
         }
       } else {
         id = "coordinate-cross";
         name = "교차하는 좌표";
-        hint = "X자로 만나는 탄줄의 바깥을 보기";
-        const left = W * 0.25,
-          right = W * 0.75,
+        const left = x - r * 0.7,
+          right = x + r * 0.7,
           dy = Math.max(140 * scale, H * 0.6 - sy);
         for (const [bx, tx] of [
-          [left, right],
-          [right, left],
+          [left, W * 0.86],
+          [right, W * 0.14],
         ]) {
           const angle = Math.atan2(dy, tx - bx);
           ray(bx, sy, angle);
-          for (let n = 0; n < (easy ? 4 : 5 + phase); n++)
-            shot(warning + n * 0.2, bx, sy, angle, 150, "glyph");
+          for (let n = 0; n < (easy ? 5 : 7 + phase * 2); n++)
+            for (const offset of easy ? [0] : [-0.18, 0, 0.18])
+              shot(warning + n * 0.2, bx, sy, angle + offset, 150, "glyph");
         }
       }
-      recovery = 1.75 - phase * 0.1;
     } else if (stage === 3) {
       const turn = volley % 3;
       if (turn === 0) {
         id = "induction-discharge";
         name = "유도 방전";
-        hint = "노란 예고선을 피하거나 폭풍으로 끊기";
         beam(0, x, player.x);
         if (phase > 0 && !easy)
           beam(0, x, player.x < W / 2 ? W * 0.75 : W * 0.25);
       } else if (turn === 1) {
         id = "split-sparks";
         name = "갈라지는 불꽃";
-        hint = "큰 불꽃이 갈라지기 전에 거리 벌리기";
-        const count = easy ? 2 : 3;
+        const count = easy ? 3 : 5 + phase;
         for (let i = 0; i < count; i++) {
-          const angle = PI / 2 + (i - (count - 1) / 2) * 0.55;
+          const angle = PI / 2 + (i - (count - 1) / 2) * 0.3;
           ray(x, sy, angle);
-          shot(warning, x, sy, angle, 112 + phase * 8, "split");
+          for (let row = 0; row < (easy ? 1 : 2); row++)
+            shot(
+              warning + row * 0.8,
+              x,
+              sy,
+              angle + row * 0.1,
+              112 + phase * 8,
+              "split",
+            );
         }
       } else {
         id = "alternating-terminals";
         name = "양쪽 단자 방전";
-        hint = "먼저 켜지는 예고선부터 피하기";
         beam(0, x - 40 * scale, W * 0.3);
         beam(easy ? 2.15 : 1.8, x + 40 * scale, W * 0.7);
       }
-      recovery = 1.9 - phase * 0.1;
+      if (turn !== 1) {
+        const count = easy ? 5 : 9 + phase * 2;
+        for (let row = 0; row < (easy ? 1 : 2); row++)
+          for (let i = 0; i < count; i++)
+            shot(
+              warning + row * 0.75,
+              x,
+              sy,
+              0.35 + (i * (PI - 0.7)) / (count - 1),
+              122,
+              "orb",
+            );
+      }
     } else {
       if (volley % 2 === 0) {
         id = "record-echo";
         name = "기록의 메아리";
-        hint = "기록된 위치를 벗어나면 같은 길로 다시 날아와요";
         for (const side of [-1, 1]) {
-          const bx = x + side * 45 * scale,
+          const bx = x + side * r * 0.7,
             angle = Math.atan2(
               Math.max(140 * scale, player.y - sy),
               player.x - bx,
             );
           ray(bx, sy, angle);
-          for (let n = 0; n < (easy ? 3 : 4 + phase); n++)
-            shot(warning + n * 0.38, bx, sy, angle, 160, "echo", {
-              hold: 0.38,
-            });
+          for (let n = 0; n < (easy ? 4 : 8 + phase); n++)
+            for (const offset of easy ? [0] : [-0.19, 0, 0.19])
+              shot(warning + n * 0.28, bx, sy, angle + offset, 160, "echo", {
+                hold: 0.38,
+              });
         }
       } else {
         id = "clock-release";
         name = "멈춘 시계";
-        hint = "잠시 멈춘 탄이 퍼져 나가요 · 빈 방향 찾기";
-        const count = easy ? 12 : 16,
+        const count = easy ? 18 : 26 + phase * 3,
           gapAngle = PI / 2 + (Math.floor(volley / 2) % 2 ? 0.6 : -0.6),
-          ring = 34 * scale;
+          ring = r * 0.2;
         markers.push({ kind: "clock", x, y: sy, start: 0, end: warning });
-        for (let row = 0; row < (phase > 0 && !easy ? 2 : 1); row++)
+        for (let row = 0; row < (easy ? 2 : 3); row++)
           for (let n = 0; n < count; n++) {
             const angle = (2 * PI * n) / count,
               distance = Math.abs(
@@ -223,7 +243,7 @@
                   Math.cos(angle - gapAngle),
                 ),
               );
-            if (distance < 0.62) continue;
+            if (distance < (easy ? 0.55 : 0.32)) continue;
             shot(
               warning + row * 1.1,
               x + Math.cos(angle) * ring,
@@ -235,7 +255,6 @@
             );
           }
       }
-      recovery = 1.65 - phase * 0.12;
     }
     events.sort((a, b) => a.at - b.at);
     const duration = Math.max(
@@ -246,11 +265,12 @@
     return {
       id,
       name,
-      hint,
+      origin: { x, y },
       events,
       markers,
       duration,
-      recovery: recovery * (easy ? 1.25 : 1),
+      recovery:
+        ([1.2, 1.15, 1.1, 1, 0.95][stage] - phase * 0.1) * (easy ? 1.4 : 1),
       elapsed: 0,
       cursor: 0,
     };
@@ -300,6 +320,7 @@
     return shots;
   }
   function resizeAttack(attack, ratio) {
+    attack.origin.y *= ratio;
     for (const point of [...attack.events, ...attack.markers]) {
       point.y *= ratio;
       if (point.target) point.target.y *= ratio;

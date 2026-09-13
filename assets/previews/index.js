@@ -124,9 +124,9 @@ window.PHASE_PREVIEWS = {
       "bytes": 31796
     },
     "faraday-flight": {
-      "src": "assets/previews/faraday-flight-8db46a2b42.webp",
-      "sourceHash": "5d44156535bebfaea3d0315b7793be531c1838d23f78c4f85d2479355b081de8",
-      "bytes": 34212
+      "src": "assets/previews/faraday-flight-aaa7396009.webp",
+      "sourceHash": "a54cab9b5aa4085dd5a800f9ed0535e9edb6067415076aba3f7d7b51964cfed6",
+      "bytes": 36130
     },
     "afterlight": {
       "src": "assets/previews/afterlight-4c4a1f5d33.webp",

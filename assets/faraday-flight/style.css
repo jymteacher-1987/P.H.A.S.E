@@ -1,4 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;600;700;800;900&display=swap");
 :root {
   color-scheme: dark;
   --bg: #061925;
@@ -1795,20 +1794,16 @@ body[data-mode="briefing"] #modalContent {
   }
 }
 
-/* Clear actions are visible before optional history, including on phones. */
+/* Read rewards and history before reaching the departure button. */
 .upgrades .upgrade.selected {
   border-color: #b0ffd3;
   background: #21554e;
   box-shadow: inset 3px 0 #a9ffca;
 }
 .next-stage {
-  position: sticky;
-  bottom: 0;
-  z-index: 2;
+  position: static;
   margin-top: 15px;
-  box-shadow:
-    0 0 0 8px #0c2b38,
-    0 6px 20px #001b2a;
+  box-shadow: 0 6px 20px #001b2a;
 }
 .clear-heading p {
   margin: 8px 0 13px;
@@ -2005,4 +2000,107 @@ body[data-mode="briefing"] #modalContent {
 }
 .rank-shell button:disabled {
   opacity: 0.55;
+}
+
+/* Keep the flight HUD to two short rows, with controls alongside both. */
+#hud {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 10px;
+  row-gap: 3px;
+  padding: max(6px, env(safe-area-inset-top)) 12px 10px;
+  background: linear-gradient(#031b2cc9, #04293950, transparent);
+}
+#hud .hud-top {
+  display: contents;
+}
+#hud .hud-top > div:first-child {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  grid-column: 1;
+  grid-row: 1;
+}
+#hud .hud-top .eyebrow {
+  flex-shrink: 0;
+  font-size: 8px;
+  letter-spacing: 0.7px;
+  line-height: 20px;
+}
+#hud .hud-top strong {
+  margin: 0;
+  font-size: 13px;
+  line-height: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#hud .hud-actions {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  gap: 5px;
+}
+#hud .icon-btn {
+  width: 32px;
+  height: 32px;
+  font-size: 17px;
+}
+#hud .hud-stats {
+  grid-column: 1;
+  grid-row: 2;
+  margin: 0;
+  gap: 8px;
+  line-height: 20px;
+}
+#hud #health {
+  font-size: 12px;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+#hud .score {
+  font-size: 15px;
+}
+#hud .score-label {
+  font-size: 9px;
+}
+#hud .progress-track {
+  grid-column: 1 / -1;
+  width: 100%;
+  height: 2px;
+}
+#hud .boss-hud {
+  grid-column: 1 / -1;
+  position: static;
+  margin: 3px 0 0;
+  font-size: 10px;
+  line-height: 14px;
+  letter-spacing: 0.3px;
+}
+#hud .boss-hud > div {
+  height: 4px;
+  margin-top: 3px;
+}
+#hud .boss-hud[data-phase="1"] i {
+  background: linear-gradient(90deg, #ff775f, #ffbc72);
+}
+#hud .boss-hud[data-phase="2"] i {
+  background: linear-gradient(90deg, #ef4562, #ff866c);
+}
+@media (max-height: 500px) {
+  #hud {
+    padding: 4px 10px 6px;
+    row-gap: 1px;
+  }
+  #hud .hud-top strong,
+  #hud .hud-top .eyebrow,
+  #hud .hud-stats {
+    line-height: 17px;
+  }
+  #hud .icon-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 15px;
+  }
 }

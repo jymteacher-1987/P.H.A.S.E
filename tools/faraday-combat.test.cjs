@@ -23,13 +23,21 @@ test("Each boss has its own attack vocabulary, bounded sequences and a readable 
         for (let volley = 0; volley < 6; volley++) {
           const p = C.bossAttack({ ...context, stage, phase, volley, easy });
           ids.add(p.id);
-          assert.ok(p.events.length > 0 && p.events.length <= 32);
+          assert.ok(p.events.length > 0 && p.events.length <= 100);
           assert.ok(
-            p.recovery >= 1.3,
+            p.recovery >= 0.74,
             "Every sequence leaves a breathing interval",
           );
           for (const e of p.events) {
             assert.ok(Number.isFinite(e.x) && Number.isFinite(e.y));
+            assert.ok(
+              Math.abs(e.x - context.x) <= context.r * 0.76,
+              "Every primary missile starts on a boss hardpoint",
+            );
+            assert.ok(
+              Math.abs(e.y - context.y) <= context.r,
+              "Missiles cannot materialize below or outside the boss",
+            );
             assert.ok(e.at >= 0 && e.at < p.duration);
             if (e.type === "bullet") {
               assert.ok(
@@ -55,18 +63,21 @@ test("Each boss has its own attack vocabulary, bounded sequences and a readable 
     identities.push(ids);
   }
 });
-test("Printing rows leave a wide corridor; closing gates converge and leave the outer lanes", () => {
+test("Dense printing rows spread from the boss, and the two gate cannons cross their streams", () => {
   const p = C.bossAttack({ ...context, stage: 0 });
   const xs = p.events
     .filter((e) => e.at === p.events[0].at)
-    .map((e) => e.x)
+    .map((e) => e.x + (context.H * 0.72 - e.y) / Math.tan(e.angle))
     .sort((a, b) => a - b);
-  assert.ok(xs.some((x, i) => i && x - xs[i - 1] > 150));
-  assert.ok(p.events.every((e) => Math.abs(Math.cos(e.angle)) < 1e-9));
+  assert.ok(
+    xs.some((x, i) => i && x - xs[i - 1] > 90),
+    "A navigable gap remains in each dense row",
+  );
+  assert.ok(p.events.length >= 30);
   const gate = C.bossAttack({ ...context, stage: 1 });
   for (const e of gate.events) {
     const hitX = e.x + (context.H * 0.72 - e.y) / Math.tan(e.angle);
-    assert.ok(Math.abs(hitX - context.W / 2) < 1e-8);
+    assert.ok(e.x < context.x ? hitX > context.x : hitX < context.x);
   }
 });
 test("Recorded aim is immutable, while clock bullets wait before spreading through a gap", () => {
@@ -76,9 +87,14 @@ test("Recorded aim is immutable, while clock bullets wait before spreading throu
   player.x = 430;
   assert.deepEqual(p.events, first);
   for (const e of p.events) {
-    assert.ok(Math.abs(e.x + (590 - e.y) / Math.tan(e.angle) - 120) < 1e-8);
     assert.ok(e.hold > 0);
   }
+  assert.ok(
+    p.events.some(
+      (e) => Math.abs(e.x + (590 - e.y) / Math.tan(e.angle) - 120) < 1e-8,
+    ),
+  );
+  assert.ok(p.events.length >= 48);
   const ring = C.bossAttack({ ...context, stage: 4, volley: 1 });
   assert.ok(ring.events.every((e) => e.hold >= 0.7));
   assert.ok(ring.events.some((e) => Math.sin(e.angle) < 0));
@@ -103,10 +119,12 @@ test("Rotating the screen preserves the pending attack's aiming point and timing
     original = structuredClone(attack);
   C.resizeAttack(attack, 0.45);
   assert.equal(attack.duration, original.duration);
+  assert.equal(attack.origin.y, context.y * 0.45);
   for (const e of attack.events) {
-    const projectedX =
-      e.x + (context.player.y * 0.45 - e.y) / Math.tan(e.angle);
-    assert.ok(Math.abs(projectedX - context.player.x) < 1e-8);
+    const old = original.events[attack.events.indexOf(e)],
+      projectedX = e.x + (context.player.y * 0.45 - e.y) / Math.tan(e.angle),
+      originalX = old.x + (context.player.y - old.y) / Math.tan(old.angle);
+    assert.ok(Math.abs(projectedX - originalX) < 1e-8);
   }
 });
 test("Stage settlement adds remaining hearts and clear bonuses once, without counting combat twice", () => {
