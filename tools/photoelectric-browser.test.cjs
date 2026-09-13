@@ -62,21 +62,29 @@ test('Photoelectric: catalog launch, retarding voltage, energy, controls and res
      await frame.locator('#closeHelp').click();assert.equal(await frame.locator('#help').isVisible(),false);
      await frame.locator('#restartBtn').click();
      const readings=await frame.evaluate(()=>{
-      const g=document.querySelector('#lab').getContext('2d'),original=g.fillText;
-      let labels=[];
-      g.fillText=function(value,x,y,...rest){labels.push({value:String(value),x,y});return original.call(this,value,x,y,...rest)};
+      const g=document.querySelector('#lab').getContext('2d');
+      const original={fillText:g.fillText,moveTo:g.moveTo,lineTo:g.lineTo};
+      let labels=[],segments=[],pen=null;
+      g.fillText=function(value,x,y,...rest){labels.push({value:String(value),x,y});return original.fillText.call(this,value,x,y,...rest)};
+      g.moveTo=function(x,y){pen={x,y};return original.moveTo.call(this,x,y)};
+      g.lineTo=function(x,y){if(pen)segments.push({from:pen,to:{x,y}});pen={x,y};return original.lineTo.call(this,x,y)};
       try{
-       return [100,60,30,0].map(power=>{
-        labels=[];PHASE_TEST.configure({metal:'Na',lambda:400,power,U:0});
+       return [[0,0],[30,0],[60,0],[100,0],[60,-1]].map(([power,U])=>{
+        labels=[];segments=[];PHASE_TEST.configure({metal:'Na',lambda:400,power,U});
         const meter=labels.find(item=>item.value==='A');
-        const reading=meter&&labels.find(item=>item.x===meter.x&&item.y>meter.y);
-        return {meter:reading?.value,readout:document.querySelector('#current').textContent,
+        const needle=meter&&segments.find(item=>Math.abs(item.from.x-meter.x)<.01&&item.from.y<meter.y&&item.from.y>meter.y-16
+         &&Math.hypot(item.to.x-item.from.x,item.to.y-item.from.y)>4&&item.to.y<item.from.y);
+        const numbers=meter&&labels.filter(item=>Math.abs(item.x-meter.x)<18&&Math.abs(item.y-meter.y)<25&&/^\d/.test(item.value));
+        return {deflection:needle?needle.to.x-needle.from.x:null,numbers:numbers?.length,readout:document.querySelector('#current').textContent,
          roles:labels.some(item=>item.value==='빛을 받는 판')&&labels.some(item=>item.value==='전자를 받는 판')};
        });
-      }finally{g.fillText=original}
+      }finally{g.fillText=original.fillText;g.moveTo=original.moveTo;g.lineTo=original.lineTo}
      });
-     assert.deepEqual(readings,[100,60,30,0].map(value=>({meter:value.toFixed(1),readout:value.toFixed(1),roles:true})),
-      'circuit ammeter must show the changing current at '+width+'x'+height);
+     assert.ok(readings.every(item=>Number.isFinite(item.deflection)&&item.numbers===0&&item.roles),'unnumbered ammeter and plate roles');
+     assert.deepEqual(readings.map(item=>item.readout),['0.0','30.0','60.0','100.0','0.0']);
+     assert.ok(readings[0].deflection<readings[1].deflection&&readings[1].deflection<readings[2].deflection&&readings[2].deflection<readings[3].deflection,
+      'ammeter needle must deflect further as current increases at '+width+'x'+height);
+     assert.equal(readings[4].deflection,readings[0].deflection,'retarding voltage returns needle to its zero position');
      await frame.evaluate(()=>{
       PHASE_TEST.configure({metal:'Na',lambda:400,power:60,U:0});
       PHASE_TEST.advance(1.55);
