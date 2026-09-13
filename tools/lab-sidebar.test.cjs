@@ -7,7 +7,7 @@ const { chromium } = require('playwright');
 const root = path.resolve(__dirname, '..');
 const catalog = JSON.parse(fs.readFileSync(path.join(root, 'data/experiments.json'), 'utf8'));
 
-test('Desktop category and game choosers collapse after selection; mobile keeps horizontal menus', { timeout: 60000 }, async () => {
+test('Desktop menus stay open after selection until explicitly closed; mobile keeps horizontal menus', { timeout: 60000 }, async () => {
   const server = http.createServer((req, res) => {
     const file = path.resolve(root, decodeURIComponent(new URL(req.url, 'http://localhost').pathname).replace(/^\/+/, '') || 'index.html');
     if (!file.startsWith(root + path.sep) || !fs.existsSync(file) || !fs.statSync(file).isFile()) { res.writeHead(404); res.end(); return; }
@@ -40,16 +40,17 @@ test('Desktop category and game choosers collapse after selection; mobile keeps 
     await labToggle.click();
     assert.equal(await labRow.isVisible(), true);
     await page.locator('[data-section="lab"][data-cat="electromagnetism"]').click();
-    assert.equal(await labRow.isVisible(), false);
+    assert.equal(await labRow.isVisible(), true, 'Choosing a category keeps its list open');
     assert.equal(await page.locator('[data-menu="lab"] .side-menu-current').textContent(), '전자기학');
     assert.equal(await page.locator('.exp-card').count(), catalog.experiments.filter(e => e.category === 'electromagnetism').length);
     await toggle.focus();
     await page.keyboard.press('Enter');
     await page.waitForFunction(() => scrollY > 100);
     assert.equal(await toggle.getAttribute('aria-expanded'), 'true');
+    assert.equal(await labRow.isVisible(), true, 'Opening games does not close the physics list');
     const metrics = await row.evaluate(el => ({ client: el.clientHeight, scroll: el.scrollHeight, bottom: el.getBoundingClientRect().bottom, viewport: innerHeight }));
     assert.ok(metrics.scroll > metrics.client, 'Desktop list scrolls within its own box');
-    assert.ok(metrics.bottom <= metrics.viewport, 'The expanded list fits below the collapsed physics chooser');
+    assert.ok(metrics.bottom <= metrics.viewport, 'Both expanded lists fit in the desktop viewport');
     await row.evaluate(el => el.scrollTop = el.scrollHeight);
     const last = catalog.plays.at(-1), lastButton = page.locator('[data-section="play"][data-cat="' + last.id + '"]');
     await lastButton.click();
@@ -60,23 +61,26 @@ test('Desktop category and game choosers collapse after selection; mobile keeps 
     });
     assert.equal(await page.locator('.exp-card h3').textContent(), last.title);
     assert.equal(await page.locator('[data-menu="play"] .side-menu-current').textContent(), last.title);
-    assert.equal(await row.isVisible(), false, 'A selected game closes the desktop list');
+    assert.equal(await row.isVisible(), true, 'A selected game keeps the desktop list open');
+    assert.equal(await labRow.isVisible(), true, 'Selecting a game preserves the other list too');
     assert.equal(await lastButton.getAttribute('aria-pressed'), 'true');
     assert.ok(await page.locator('.site-nav').evaluate(el => Math.abs(el.getBoundingClientRect().top) < 1), 'Desktop header stays visible while choosing a game');
     const out = path.join(root, '.preview-tmp', 'sidebar');
     fs.mkdirSync(out, { recursive: true });
     await page.locator('.exp-preview img').evaluate(img => img.decode());
     await page.screenshot({ path: path.join(out, 'desktop-last-game.png'), animations: 'disabled' });
-    await toggle.click();
     await row.evaluate(el => el.scrollTop = el.scrollHeight);
     await page.screenshot({ path: path.join(out, 'desktop-expanded.png'), animations: 'disabled' });
+    await toggle.click();
+    assert.equal(await row.isVisible(), false, 'Only an explicit toggle click closes the game list');
+    assert.equal(await labRow.isVisible(), true);
+    await toggle.click();
 
     // A shorter window still exposes the last entry and returns to the preview.
     await page.setViewportSize({ width: 1024, height: 600 });
     await row.evaluate(el => el.scrollTop = 0);
     await page.locator('[data-section="play"][data-cat="all"]').click();
     await page.waitForFunction(count => document.querySelectorAll('.exp-card').length === count, catalog.plays.length);
-    await toggle.click();
     await row.evaluate(el => el.scrollTop = el.scrollHeight);
     await lastButton.click();
     await page.waitForFunction(() => document.querySelector('.exp-preview').getBoundingClientRect().top >= Math.max(0, document.querySelector('.site-nav').getBoundingClientRect().bottom));

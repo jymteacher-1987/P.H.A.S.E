@@ -50,7 +50,7 @@
   }
   if (initialQuery) els.searchInput.value = initialQuery;
   const desktopMenu = window.matchMedia("(min-width: 861px)");
-  let openMenu = null;
+  const openMenus = new Set();
 
   const LAB_SECTION = { id: "lab", name: "물리 가상실험" };
   const PLAY_SECTION = { id: "play", name: "과학 놀이", icon: "🎈" };
@@ -108,7 +108,7 @@
     if (!boxes.length) return;
     boxes.forEach(box => {
       const section = box.dataset.menu,
-        open = !desktopMenu.matches || openMenu === section,
+        open = !desktopMenu.matches || openMenus.has(section),
         button = box.querySelector(".side-menu-toggle");
       box.classList.toggle("is-open", open);
       box.classList.toggle("is-selected", state.section === section);
@@ -122,8 +122,9 @@
       const headerHeight = boxes.reduce((sum, box) => sum + box.querySelector(".side-filter-heading").getBoundingClientRect().height, 0),
         navHeight = document.querySelector(".site-nav").getBoundingClientRect().height,
         available = innerHeight - navHeight - headerHeight - boxes.length * 26 - (boxes.length - 1) * 14 - 48;
-      els.sideMenu.style.setProperty("--side-list-height", Math.max(112, Math.min(400, available)) + "px");
-      els.sideMenu.classList.toggle("side-menu-tall", openMenu !== null && available < 112);
+      const listHeight = available / Math.max(1, openMenus.size);
+      els.sideMenu.style.setProperty("--side-list-height", Math.max(112, Math.min(400, listHeight)) + "px");
+      els.sideMenu.classList.toggle("side-menu-tall", openMenus.size > 0 && listHeight < 112);
     } else els.sideMenu.classList.remove("side-menu-tall");
   }
 
@@ -193,18 +194,17 @@
     els.sideMenu.innerHTML = html;
     els.sideMenu.querySelectorAll(".side-menu-toggle").forEach(button => button.addEventListener("click", () => {
       const section = button.closest("[data-menu]").dataset.menu;
-      openMenu = openMenu === section ? null : section;
+      if (openMenus.has(section)) openMenus.delete(section);
+      else openMenus.add(section);
       syncMenus();
-      if (openMenu) revealDesktopPreview(true);
+      if (openMenus.has(section)) revealDesktopPreview(true);
     }));
 
     els.sideMenu.querySelectorAll("[data-cat]").forEach((el) => {
       el.addEventListener("click", () => {
         state.section = el.dataset.section;
         state.activeCategory = el.dataset.cat;
-        if (desktopMenu.matches) openMenu = null;
         render(true);
-        if (desktopMenu.matches) el.closest(".side-filter-box").querySelector(".side-menu-toggle").focus({ preventScroll: true });
       });
       el.setAttribute("role", "button");
       el.tabIndex = 0;
