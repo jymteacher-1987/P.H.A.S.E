@@ -2,6 +2,13 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     function owns(uid) { return request.auth != null && request.auth.uid == uid; }
+    // New records are immutable and keyed by the authenticated player plus a run UUID.
+    function ownsRun(id) {
+      return request.auth != null && id.matches(request.auth.uid + '_[0-9a-f-]{36}');
+    }
+    function createsRun(id, d) {
+      return ownsRun(id) && id == request.auth.uid + '_' + d.runToken;
+    }
     function valid(d) {
       return d.keys().hasAll(['nickname','score','gems','distance','worlds','startWorld','finished','duration','runToken','updatedAt'])
         && d.keys().hasOnly(['nickname','score','gems','distance','worlds','startWorld','finished','duration','runToken','updatedAt'])
@@ -29,8 +36,8 @@ service cloud.firestore {
     }
     match /newtonScores/{uid} {
       allow list: if request.query.limit != null && request.query.limit <= 10;
-      allow get: if owns(uid);
-      allow create: if owns(uid) && valid(request.resource.data);
+      allow get: if owns(uid) || ownsRun(uid);
+      allow create: if (owns(uid) || createsRun(uid, request.resource.data)) && valid(request.resource.data);
       allow update: if owns(uid) && valid(request.resource.data) && improves(request.resource.data);
       allow delete: if false;
     }
@@ -46,10 +53,10 @@ service cloud.firestore {
     }
     match /faradayScores/{difficulty}/players/{uid} {
       allow list: if difficulty in ['normal','easy'] && request.query.limit != null && request.query.limit <= 10;
-      allow get: if owns(uid);
-      allow create: if difficulty in ['normal','easy'] && owns(uid) && validFaraday(request.resource.data);
+      allow get: if owns(uid) || ownsRun(uid);
+      allow create: if difficulty in ['normal','easy'] && (owns(uid) || createsRun(uid, request.resource.data)) && validFaraday(request.resource.data);
       allow update: if difficulty in ['normal','easy'] && owns(uid) && validFaraday(request.resource.data) && request.resource.data.score > resource.data.score;
-      allow delete: if owns(uid);
+      allow delete: if owns(uid) || ownsRun(uid);
     }
   }
 }

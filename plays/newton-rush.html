@@ -242,7 +242,7 @@ html,body{height:100%;overscroll-behavior:none}.shell{height:100dvh;min-height:5
 </main>
 <div class="modal-overlay quiz-overlay" id="quiz" hidden><form class="modal-card quiz-card" id="quiz-form"><span class="tag" id="quiz-tag">배경 속 발견 퀴즈</span><h2 id="quiz-title">기억나는 답을 골라 봐!</h2><p id="quiz-question"></p><div id="quiz-choices" role="radiogroup" aria-labelledby="quiz-question"></div><div id="quiz-feedback" role="status"></div><button class="primary" id="quiz-submit" type="submit" disabled>정답 확인 <span>→</span></button><button class="primary" id="quiz-retry" type="button" hidden>같은 챕터 다시 달리기 <span>↻</span></button><small class="quiz-rule">맞히면 다음 챕터 · 틀리면 이번 챕터부터 다시!</small></form></div>
 <div class="modal-overlay" id="result" hidden><div class="modal-card"><span class="tag" id="result-tag">WHAT A LITTLE ADVENTURE!</span><h2 id="result-title">오늘의 프리즘 탐험</h2><div class="result-score" id="result-score">0</div><div class="result-stats"><span>보석<b id="result-gems">0개</b></span><span>거리<b id="result-distance">0 m</b></span><span>세계 탐험<b id="result-worlds">1곳</b></span></div><p id="record-eligibility" role="status"></p><button id="record-check" class="text-btn" type="button" hidden>랭킹 다시 확인</button><form id="record-form" class="record-form" hidden><label for="record-name">랭킹에 남길 별명</label><div><input id="record-name" maxlength="12" autocomplete="nickname" placeholder="별명 1~12글자" required><button id="record-save" type="submit">기록 등록</button></div><p id="record-status" role="status"></p></form><p id="result-note">조금 더 멀리 가 볼까?</p><button class="primary" id="retry">한 번 더 달리기 <span>↗</span></button><button class="text-btn" id="result-map">다른 세계 고르기</button></div></div>
-<dialog id="ranking-dialog"><div class="dialog-head"><h2>공유 랭킹 TOP 10</h2><button id="rank-close" class="icon-btn" aria-label="랭킹 닫기">×</button></div><ol id="ranking-detail"></ol><p id="ranking-detail-status"></p><p class="ranking-note">일찍 탈락해도 TOP 10에 들면 이름과 점수를 등록할 수 있어요. 점수순, 동점이면 보석 수, 그다음 거리순이에요. 모두 같으면 먼저 등록한 기록이 앞서요.</p></dialog>
+<dialog id="ranking-dialog"><div class="dialog-head"><h2>공유 랭킹 TOP 10</h2><button id="rank-close" class="icon-btn" aria-label="랭킹 닫기">×</button></div><ol id="ranking-detail"></ol><p id="ranking-detail-status"></p><p class="ranking-note">점수순 TOP 10 · 동점이면 먼저 등록한 기록순. 같은 이름도 매 판 새 기록으로 등록할 수 있어.</p></dialog>
 <dialog id="guide" aria-labelledby="guide-title">
 <div class="dialog-head"><span class="eyebrow">NEWTON'S POCKET NOTE</span><button id="close-guide" class="icon-btn" aria-label="노트 닫기">×</button></div><h2 id="guide-title">딱 이것만 알면 돼!</h2><p class="guide-lead">프리즘은 많이, 특별 아이템은 원하는 만큼.</p>
 <div class="guide-controls"><span><kbd>SPACE</kbd> / <kbd>↑</kbd> / 화면 터치: 점프 · 공중에서 한 번 더!</span><span><kbd>↓</kbd> / <kbd>S</kbd> 누르고 있기: 슬라이드 · 공중에서는 빠른 착지</span><span><kbd>P</kbd> / <kbd>ESC</kbd> 쉬기</span></div>
@@ -266,7 +266,6 @@ globalThis.NEWTON_FIREBASE_CONFIG = {
   let playerId,run=null,refreshing=false;
   try{playerId=localStorage.getItem('newton-player-id');}catch{}
   if(!/^[a-f0-9-]{36}$/i.test(playerId||'')){playerId=crypto.randomUUID();try{localStorage.setItem('newton-player-id',playerId);}catch{}}
-  try{$('record-name').value=localStorage.getItem('newton-nickname')||'';}catch{}
   let firebaseReady=null,stopListening=null;
   async function deadline(promise){let timer;try{return await Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('연결이 지연되고 있어. 잠시 후 다시 눌러 줘.')),12000);})]);}finally{clearTimeout(timer);}}
   function firebaseError(error){
@@ -287,36 +286,34 @@ globalThis.NEWTON_FIREBASE_CONFIG = {
         import('https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js')
       ]);
       const app=appSDK.initializeApp(config),auth=authSDK.getAuth(app),db=dbSDK.getFirestore(app);
-      const top=dbSDK.query(dbSDK.collection(db,'newtonScores'),dbSDK.orderBy('score','desc'),dbSDK.orderBy('gems','desc'),dbSDK.orderBy('distance','desc'),dbSDK.orderBy('updatedAt','asc'),dbSDK.limit(10));
+      const top=dbSDK.query(dbSDK.collection(db,'newtonScores'),dbSDK.orderBy('score','desc'),dbSDK.orderBy('updatedAt','asc'),dbSDK.limit(10));
       const rows=snapshot=>snapshot.docs.map(doc=>({...doc.data(),id:doc.id}));
       stopListening=dbSDK.onSnapshot(top,snapshot=>{render(rows(snapshot));status(snapshot.metadata.fromCache?'공유 기록 연결 중…':'공유 기록 · 새 기록이 나오면 자동 갱신');},error=>{stopListening=null;firebaseReady=null;status(firebaseError(error).message);});
       return {auth,db,top,rows,...authSDK,...dbSDK};
     })().catch(error=>{firebaseReady=null;throw firebaseError(error);});
     return firebaseReady;
   }
-  const improves=(stats,best)=>!best||stats.score>best.score||(stats.score===best.score&&stats.gems>best.gems)||(stats.score===best.score&&stats.gems===best.gems&&stats.distance>best.distance);
   async function request(data){
     try{return await deadline((async()=>{
       const fb=await firebase();
       if(!data){const snapshot=await fb.getDocsFromServer(fb.top);return {entries:fb.rows(snapshot)};}
       await fb.auth.authStateReady();
       const user=fb.auth.currentUser||(await fb.signInAnonymously(fb.auth)).user;
-      const ref=fb.doc(fb.db,'newtonScores',user.uid);
-      const [own,board]=await Promise.all([fb.getDocFromServer(ref),fb.getDocsFromServer(fb.top)]);
-      const best=own.exists()?own.data():null;
-      if(data.action==='finish'&&best?.runToken===data.token)return {saved:true,best:best.score};
-      const better=improves(data,best),ahead=fb.rows(board).filter(row=>row.id!==user.uid&&(row.score>data.score||(row.score===data.score&&row.gems>data.gems)||(row.score===data.score&&row.gems===data.gems&&row.distance>=data.distance))).length;
-      const rank=ahead+1,qualifies=better&&rank<=10;
-      if(data.action==='qualify')return {qualifies,rank,improves:better,best:best?.score??null};
-      if(!qualifies){const error=Error(better?'새 기록이 들어와 지금은 TOP 10 밖이야. 다시 도전해 봐!':'내 최고 기록이 이미 남아 있어!');error.qualifies=false;throw error;}
+      const ref=fb.doc(fb.db,'newtonScores',user.uid+'_'+data.token);
+      const own=await fb.getDocFromServer(ref);
+      if(data.action==='finish'&&own.exists())return {saved:true,best:own.data().score};
+      const board=await fb.getDocsFromServer(fb.top);
+      const ahead=fb.rows(board).filter(row=>row.score>=data.score).length;
+      const rank=ahead+1,qualifies=rank<=10;
+      if(data.action==='qualify')return {qualifies,rank};
+      if(!qualifies){const error=Error('새 기록이 들어와 지금은 TOP 10 밖이야. 다시 도전해 봐!');error.qualifies=false;throw error;}
       const saved=await fb.runTransaction(fb.db,async tx=>{
         const snapshot=await tx.get(ref),previous=snapshot.exists()?snapshot.data():null;
-        if(previous?.runToken===data.token)return previous.score;
-        if(!improves(data,previous)){const error=Error('내 최고 기록이 이미 남아 있어!');error.qualifies=false;throw error;}
+        if(previous)return previous.score;
         tx.set(ref,{nickname:data.nickname,score:data.score,gems:data.gems,distance:data.distance,worlds:data.worlds,startWorld:data.startWorld,finished:data.finished,duration:data.duration,runToken:data.token,updatedAt:fb.serverTimestamp()});
         return data.score;
       });
-      return {saved:true,improved:true,best:saved,rank};
+      return {saved:true,best:saved,rank};
     })());}catch(error){throw firebaseError(error);}
   }
   function render(entries){
@@ -337,26 +334,25 @@ globalThis.NEWTON_FIREBASE_CONFIG = {
     try{
       const result=await request(payload(current,'qualify'));if(run!==current)return;
       current.qualifies=result.qualifies;$('record-form').hidden=!result.qualifies;
-      $('record-eligibility').textContent=result.qualifies?'현재 '+result.rank+'위에 들어갈 기록! 이름과 '+current.stats.score.toLocaleString()+'점을 남겨 봐.':!result.improves?'내 최고 기록 '+Number(result.best).toLocaleString()+'점이 이미 남아 있어!':'현재 TOP 10 밖이야. 다음 기록에 도전해 봐!';
+      $('record-eligibility').textContent=result.qualifies?'현재 '+result.rank+'위에 들어갈 기록! 이름과 '+current.stats.score.toLocaleString()+'점을 남겨 봐.':'아쉽게도 이번에는 TOP 10 밖이야. 다음 기록에 도전해 봐!';
       $('record-status').textContent='';
     }catch(error){if(run===current){$('record-eligibility').textContent=error.message||'연결이 잠깐 끊겼어. 이 결과창에서 다시 확인하면 돼.';$('record-check').hidden=false;}}
     finally{current.checking=false;}
   }
   globalThis.NewtonRanking={
-    begin(startWorld){run={stats:null,token:crypto.randomUUID(),startWorld,saved:false,qualifies:false};$('record-form').hidden=true;$('record-save').disabled=false;$('record-name').disabled=false;$('record-status').textContent='';$('record-eligibility').textContent='';$('record-check').hidden=true;},
+    begin(startWorld){run={stats:null,token:crypto.randomUUID(),startWorld,saved:false,qualifies:false};$('record-form').hidden=true;$('record-save').disabled=false;$('record-name').disabled=false;$('record-name').value='';$('record-status').textContent='';$('record-eligibility').textContent='';$('record-check').hidden=true;},
     finish(stats){if(!run)this.begin(stats.startWorld??0);run.stats={...stats,startWorld:stats.startWorld??run.startWorld};qualify();}
   };
   $('record-form').addEventListener('submit',async event=>{
-    event.preventDefault();const current=run;if(!current?.stats||!current.qualifies||current.saved)return;
+    event.preventDefault();const current=run;if(!current?.stats||!current.qualifies||current.saved||current.saving)return;
     const nickname=$('record-name').value.normalize('NFKC').trim();
     if(!/^[\p{L}\p{N} _.-]{1,12}$/u.test(nickname)){$('record-status').textContent='별명은 한글·영문·숫자로 1~12글자 적어 줘.';return;}
-    $('record-save').disabled=true;$('record-status').textContent='이름과 점수를 저장하는 중…';
+    current.saving=true;$('record-save').disabled=true;$('record-status').textContent='이름과 점수를 저장하는 중…';
     try{
       const result=await request({...payload(current,'finish'),nickname});current.saved=true;
-      try{localStorage.setItem('newton-nickname',nickname);}catch{}
       if(run===current){$('record-name').disabled=true;$('record-eligibility').textContent='공유 랭킹에 기록했어!';$('record-status').textContent=nickname+' · '+Number(result.best).toLocaleString()+'점 저장 완료';}
       await refresh();
-    }catch(error){if(run===current){$('record-status').textContent=error.message||'저장하지 못했어. 다시 눌러 줘.';$('record-save').disabled=false;if(error.qualifies===false){current.qualifies=false;$('record-form').hidden=true;$('record-eligibility').textContent=error.message;$('record-check').hidden=false;}await refresh();}}
+    }catch(error){if(run===current){$('record-status').textContent=error.message||'저장하지 못했어. 다시 눌러 줘.';$('record-save').disabled=false;if(error.qualifies===false){current.qualifies=false;$('record-form').hidden=true;$('record-eligibility').textContent=error.message;$('record-check').hidden=false;}await refresh();}}finally{current.saving=false;}
   });
   $('record-check').addEventListener('click',qualify);
   $('rank-refresh').addEventListener('click',refresh);

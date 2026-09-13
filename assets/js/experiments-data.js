@@ -349,7 +349,7 @@ window.EXPERIMENTS_DATA = {
       "title": "뉴턴 러시",
       "icon": "💎",
       "description": "뉴턴과 함께 다섯 세계를 달리며 프리즘 보석을 모아보세요. 점프와 슬라이드로 장애물을 피하고, 배경 속 과학 이야기를 만나며 모두의 TOP10 기록에 도전하는 게임입니다.",
-      "path": "plays/newton-rush.html?v=df43bb10da",
+      "path": "plays/newton-rush.html?v=07c82a7179",
       "date": "2026-09-08",
       "tags": [
         "뉴턴",
@@ -396,7 +396,7 @@ window.EXPERIMENTS_DATA = {
       "title": "패러데이: 스파크 항해",
       "icon": "⚡",
       "description": "코일과 자석으로 비행기를 강화하고, 축전기의 스파크 폭풍으로 돌파하세요. 패러데이의 삶에서 만난 다섯 어려움이 다섯 보스로 등장하는 비행 슈팅. 자동 공격, 모바일 드래그 조작, 이어하기와 작은 발명 노트를 지원합니다.",
-      "path": "plays/faraday-flight.html?v=506888e331",
+      "path": "plays/faraday-flight.html?v=4d36319a44",
       "date": "2026-09-13",
       "tags": [
         "전자기 유도",

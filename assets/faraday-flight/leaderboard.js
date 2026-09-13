@@ -108,7 +108,7 @@
           Math.floor(result.score).toLocaleString("ko-KR") +
           '점 · 별명으로 등록</label><div><input id="faradayNickname" maxlength="12" autocomplete="nickname" placeholder="별명 1~12글자" aria-label="순위표 별명" required><button class="secondary" id="faradayRankSave">등록</button></div><p id="faradaySaveStatus" role="status"></p></form>'
         : "") +
-      '<ol id="faradayRankList"></ol><p id="faradayRankStatus" role="status">공유 순위를 불러오는 중…</p><p class="rank-note">난이도별 상위 10명 · 점수순, 동점이면 먼저 등록한 기록순. 이 기기의 최고 기록 하나를 남겨요. 뉴턴 러시 순위와 별개예요.</p></div>'
+      '<ol id="faradayRankList"></ol><p id="faradayRankStatus" role="status">공유 순위를 불러오는 중…</p><p class="rank-note">난이도별 상위 10개 기록 · 점수순, 동점이면 먼저 등록한 기록순. 같은 이름도 매 판 새 기록으로 등록할 수 있어요. 뉴턴 러시 순위와 별개예요.</p></div>'
     );
   }
   function render(host, rows) {
@@ -161,12 +161,9 @@
         : "";
     };
     if (form) {
-      try {
-        host.querySelector("#faradayNickname").value =
-          localStorage.getItem("faraday-nickname") || "";
-      } catch {}
       form.onsubmit = async (e) => {
         e.preventDefault();
+        if (saving || submitted) return;
         const input = host.querySelector("#faradayNickname"),
           button = host.querySelector("#faradayRankSave"),
           feedback = host.querySelector("#faradaySaveStatus"),
@@ -191,24 +188,20 @@
               const user =
                 fb.auth.currentUser ||
                 (await fb.signInAnonymously(fb.auth)).user;
-              const ref = fb.doc(scoreCollection(fb, mode), user.uid),
-                board = await fb.getDocsFromServer(topQuery(fb, mode));
+              const ref = fb.doc(
+                  scoreCollection(fb, mode),
+                  user.uid + "_" + result.token,
+                ),
+                existing = await fb.getDocFromServer(ref);
+              if (existing.exists()) return;
+              const board = await fb.getDocsFromServer(topQuery(fb, mode));
               const ahead = board.docs.filter(
-                (d) => d.id !== user.uid && d.data().score >= result.score,
+                (d) => d.data().score >= Math.floor(result.score),
               ).length;
               if (ahead >= 10) throw Error(OUTSIDE_TOP_TEN);
               await fb.runTransaction(fb.db, async (tx) => {
                 const previous = await tx.get(ref);
-                if (
-                  previous.exists() &&
-                  previous.data().runToken === result.token
-                )
-                  return;
-                if (
-                  previous.exists() &&
-                  previous.data().score >= Math.floor(result.score)
-                )
-                  throw Error("더 높은 내 최고 기록이 이미 등록돼 있어요.");
+                if (previous.exists()) return;
                 tx.set(ref, {
                   nickname,
                   score: Math.floor(result.score),
@@ -220,9 +213,6 @@
               });
             })(),
           );
-          try {
-            localStorage.setItem("faraday-nickname", nickname);
-          } catch {}
           if (alive()) {
             submitted = true;
             showEntryMessage("");
@@ -264,14 +254,15 @@
               snapshot.docs.map((d) => d.data()),
             );
             if (form && !saving && !submitted && !snapshot.metadata.fromCache) {
-              const uid = fb.auth.currentUser?.uid,
-                previous = snapshot.docs.find((d) => d.id === uid),
+              const saved = snapshot.docs.some(
+                  (d) => d.id === fb.auth.currentUser?.uid + "_" + result.token,
+                ),
                 ahead = snapshot.docs.filter(
-                  (d) => d.id !== uid && d.data().score >= result.score,
+                  (d) => d.data().score >= Math.floor(result.score),
                 ).length;
               showEntryMessage(
-                previous && previous.data().score >= result.score
-                  ? "더 높은 내 최고 기록이 이미 등록돼 있어요. 다음 비행에서 최고 기록을 넘어보세요!"
+                saved
+                  ? "이번 비행 기록은 이미 등록됐어요. 다음 비행에서도 새 이름과 점수를 등록할 수 있어요."
                   : ahead >= 10
                     ? OUTSIDE_TOP_TEN
                     : "",

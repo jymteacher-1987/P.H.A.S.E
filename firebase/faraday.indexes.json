@@ -1,11 +1,31 @@
 {
-  "indexes": [{
-    "collectionGroup": "players",
-    "queryScope": "COLLECTION",
-    "fields": [
-      {"fieldPath": "score", "order": "DESCENDING"},
-      {"fieldPath": "updatedAt", "order": "ASCENDING"}
-    ]
-  }],
+  "indexes": [
+    {
+      "collectionGroup": "players",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "score", "order": "DESCENDING" },
+        { "fieldPath": "updatedAt", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "newtonScores",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "score", "order": "DESCENDING" },
+        { "fieldPath": "updatedAt", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "newtonScores",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "score", "order": "DESCENDING" },
+        { "fieldPath": "gems", "order": "DESCENDING" },
+        { "fieldPath": "distance", "order": "DESCENDING" },
+        { "fieldPath": "updatedAt", "order": "ASCENDING" }
+      ]
+    }
+  ],
   "fieldOverrides": []
 }
