@@ -10,6 +10,7 @@ const base = (
   origin = new URL(base).origin;
 const root = path.resolve(__dirname, ".."),
   out = path.join(root, ".preview-tmp/faraday");
+const catalog = JSON.parse(fs.readFileSync(path.join(root, "data/experiments.json"), "utf8"));
 fs.mkdirSync(out, { recursive: true });
 const digest = (b) => crypto.createHash("sha256").update(b).digest("hex");
 (async () => {
@@ -47,10 +48,11 @@ const digest = (b) => crypto.createHash("sha256").update(b).digest("hex");
     );
     await page.goto(base + "/index.html");
     await page.waitForFunction(
-      () =>
+      (expected) =>
         document
           .querySelector("#expTotalCount")
-          ?.textContent.replace(/\s/g, "") === "20+9",
+          ?.textContent.replace(/\s/g, "") === expected,
+      catalog.experiments.length + "+" + catalog.plays.length,
     );
     report.count = await page.locator("#expTotalCount").innerText();
     await page.screenshot({ path: path.join(out, "site-home.png") });

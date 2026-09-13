@@ -53,12 +53,15 @@
   // Diminishing returns keep late collection useful without runaway special-attack charging.
   const strength = (value, knee) =>
     Math.min(value, knee) + Math.log2(1 + Math.max(0, value - knee));
-  function profile(wing, magnetLevel, build = {}) {
+  function profile(wing, magnetLevel, build = {}, unlockedProgress = 0) {
     const coils = Math.max(1, count(wing)),
       magnets = count(magnetLevel),
       spread = count(build.spread),
       power = count(build.power),
-      progress = coils - 1 + magnets + spread * 2 + power * 2;
+      progress = Math.max(
+        count(unlockedProgress),
+        coils - 1 + magnets + spread * 2 + power * 2,
+      );
     let tier = forms.length - 1;
     while (forms[tier].at > progress) tier--;
     const form = forms[tier],

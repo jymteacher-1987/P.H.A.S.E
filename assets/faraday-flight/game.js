@@ -67,6 +67,7 @@
           build: validBuild(c.build),
           score: clamp(Number(c.score) || 0, 0, 99999999),
           wing: Math.max(1, G.count(c.wing)),
+          weaponProgress: G.count(c.weaponProgress),
           mode: c.mode === "easy" ? "easy" : "normal",
           magnetLevel: G.count(c.magnetLevel),
           pulseCharges: clamp(Number(c.pulseCharges) || 0, 0, 3),
@@ -99,6 +100,7 @@
     entry = null,
     score = 0,
     wing = 1,
+    weaponProgress = 0,
     fever = 0,
     feverTime = 0,
     stageTime = 0,
@@ -172,6 +174,11 @@
   }
   function maxHP() {
     return (difficulty === "easy" ? 7 : 5) + build.heart;
+  }
+  function weaponProfile() {
+    const weapon = G.profile(wing, magnetLevel, build, weaponProgress);
+    weaponProgress = weapon.progress;
+    return weapon;
   }
   function generator() {
     return P.movingInductionSample(
@@ -292,6 +299,7 @@
       build: clone(build),
       score,
       wing,
+      weaponProgress: weaponProfile().progress,
       mode: difficulty,
       magnetLevel,
       pulseCharges,
@@ -308,6 +316,8 @@
     score = restore?.score || 0;
     wing = Math.max(1, G.count(restore?.wing));
     magnetLevel = G.count(restore?.magnetLevel);
+    weaponProgress = G.count(restore?.weaponProgress);
+    weaponProfile();
     pulseCharges = restore ? clamp(restore.pulseCharges ?? 1, 0, 3) : 1;
     charge = clamp(Number(restore?.charge) || 0, 0, 99.99);
     runStats = { pulses: 0, perfect: 0 };
@@ -636,16 +646,19 @@
     return e;
   }
   function shoot() {
-    if (!player) return;
-    const weapon = G.profile(wing, magnetLevel, build),
+    if (!player || heatTime > 0) return;
+    const weapon = weaponProfile(),
       damage =
         weapon.damage * (heatTime > 0 ? 0.7 : 1) * (feverTime > 0 ? 1.35 : 1);
     if (weapon.tier >= 2) {
+      playerLasers = [];
       for (let i = 0; i < weapon.beams; i++)
-        firePlayerLaser(
-          weapon,
-          player.x + (i - (weapon.beams - 1) / 2) * 30 * scale,
-          damage * weapon.beamPower,
+        playerLasers.push(
+          tracePlayerLaser(
+            weapon,
+            (i - (weapon.beams - 1) / 2) * 30 * scale,
+            damage * weapon.beamPower,
+          ),
         );
       audio.effect(weapon.tier >= 4 ? "cannon" : "laser");
       return;
@@ -665,22 +678,15 @@
         heavy: false,
       });
     }
-    if (feverTime > 0) {
-      for (const s of [-1, 1])
-        shots.push({
-          x: player.x + s * 14,
-          y: player.y - 20,
-          vx: s * 115,
-          vy: -550 * scale,
-          r: 4 * scale,
-          damage: damage * 0.7,
-          life: 2,
-        });
-    }
     audio.effect("shot");
   }
-  function firePlayerLaser(weapon, x, damage) {
-    const origin = { x, y: player.y - 30 * scale },
+  function tracePlayerLaser(weapon, offsetX, damage = 0) {
+    const angle = player.tilt,
+      offsetY = -30 * scale,
+      origin = {
+        x: player.x + offsetX * Math.cos(angle) - offsetY * Math.sin(angle),
+        y: player.y + offsetX * Math.sin(angle) + offsetY * Math.cos(angle),
+      },
       direction = { x: 0, y: -1 },
       width = weapon.width * scale;
     let length = Math.max(0, origin.y + 20),
@@ -698,9 +704,9 @@
       .filter((t) => t.hit && t.hit.t < length)
       .sort((a, b) => a.hit.t - b.hit.t);
     for (const { e, hit } of targets) {
-      // A pulse deals damage once; the fading beam below is only its visual afterglow.
+      // Damage is applied only on scheduled ticks. Rendering never damages targets.
       if (e.boss ? e.entered : e.entryVolley) {
-        damageEnemy(e, damage);
+        if (damage > 0) damageEnemy(e, damage);
         hits++;
       }
       if (e.boss || !e.entryVolley || hits >= weapon.pierce) {
@@ -708,17 +714,26 @@
         break;
       }
     }
-    playerLasers.push({
-      x,
+    return {
+      x: origin.x,
       y: origin.y,
       endY: origin.y - length,
       width,
       color: weapon.color,
       tier: weapon.tier,
       mastery: weapon.mastery,
-      life: 0.13,
-      max: 0.13,
-    });
+      offsetX,
+    };
+  }
+  function refreshPlayerLasers() {
+    if (!player || mode !== "play") return;
+    const weapon = weaponProfile();
+    playerLasers =
+      heatTime > 0 || weapon.tier < 2
+        ? []
+        : Array.from({ length: weapon.beams }, (_, i) =>
+            tracePlayerLaser(weapon, (i - (weapon.beams - 1) / 2) * 30 * scale),
+          );
   }
   function enemyBullet(e, angle, speed = 95, kind = "orb", extra = {}) {
     stats.enemyShots++;
@@ -909,7 +924,7 @@
     if (player.hp <= 0) failStage();
   }
   function collect(item) {
-    const oldWeapon = G.profile(wing, magnetLevel, build);
+    const oldWeapon = weaponProfile();
     item.dead = true;
     if (["power", "magnet", "capacitor"].includes(item.kind)) stats.parts++;
     if (item.kind === "power" || item.kind === "magnet")
@@ -967,23 +982,27 @@
         break;
       case "heat":
         heatTime = 7;
+        playerLasers = [];
         audio.effect("hit");
         floatText(
           player.x,
           player.y - 50 * scale,
-          "자석 과열! 7초간 출력 감소",
+          "과열! 7초간 발사 중지",
           "#ffad99",
           19,
         );
-        say("뜨거운 파편을 피해요 · 열은 자석을 약하게 할 수 있어요", 2.5);
+        say("과열 · 발사 장치 냉각 중", 2);
         break;
       case "coolant":
         heatTime = 0;
+        shootTimer = 0;
+        friendTimer = 0;
         floatText(player.x, player.y - 50 * scale, "냉각 완료!", "#b0f1ff", 19);
         break;
     }
-    const weapon = G.profile(wing, magnetLevel, build);
+    const weapon = weaponProfile();
     if (weapon.tier > oldWeapon.tier) {
+      shots = [];
       effectRing(player.x, player.y, weapon.color, 92 * scale);
       say(weapon.name + " 가동!", 1.6);
       audio.effect("evolve");
@@ -1031,8 +1050,6 @@
       return;
     }
     stageTime += dt;
-    for (const laser of playerLasers) laser.life -= dt;
-    playerLasers = playerLasers.filter((laser) => laser.life > 0);
     rotorAngle += (3 + build.rapid * 0.45) * dt;
     heatTime = Math.max(0, heatTime - dt);
     const g = generator();
@@ -1099,14 +1116,12 @@
       0.17,
     );
     shootTimer -= dt;
-    if (shootTimer <= 0) {
+    if (heatTime <= 0 && shootTimer <= 0) {
       shoot();
-      shootTimer =
-        G.profile(wing, magnetLevel, build).interval *
-        (feverTime > 0 ? 0.6 : 1);
+      shootTimer = weaponProfile().interval * (feverTime > 0 ? 0.6 : 1);
     }
     friendTimer -= dt;
-    if (build.friend && friendTimer <= 0) {
+    if (heatTime <= 0 && build.friend && friendTimer <= 0) {
       for (let i = 0; i < build.friend; i++)
         shots.push({
           x: player.x + (i === 0 ? -52 : 52) * scale,
@@ -1396,6 +1411,7 @@
     );
     beams = beams.filter((b) => b.age < b.delay + b.duration);
     pickups = pickups.filter((p) => !p.dead && p.y < H + 40);
+    refreshPlayerLasers();
     animateEffects(dt);
     if (finishClock > 0) {
       finishClock -= dt;
@@ -1451,10 +1467,13 @@
     if (boss)
       $("bossHealth").style.width =
         Math.max(0, (boss.hp / boss.maxHP) * 100) + "%";
-    const weapon = G.profile(wing, magnetLevel, build);
+    const weapon = weaponProfile();
     $("weaponLevel").textContent =
       weapon.name + (weapon.mastery ? " +" + weapon.mastery : "");
     $("weaponLevel").style.color = weapon.color;
+    $("heatStatus").hidden = heatTime <= 0;
+    $("heatStatus").textContent =
+      heatTime > 0 ? "⚠ 과열 · 발사 중지 " + heatTime.toFixed(1) + "초" : "";
     $("feverBar").style.width =
       (feverTime > 0 ? (feverTime / 7) * 100 : fever) + "%";
     $("feverLabel").textContent =
@@ -1476,12 +1495,13 @@
       wing +
       " · 자석 " +
       (magnetLevel + 1) +
-      (heatTime > 0 ? " · 과열 " + heatTime.toFixed(0) + "s" : "");
+      (heatTime > 0 ? " · 냉각 중" : "");
   }
 
   function drawPlayerLasers() {
+    refreshPlayerLasers();
     for (const b of playerLasers) {
-      const alpha = Math.min(1, (b.life / b.max) * 1.5),
+      const alpha = 1,
         w = b.width;
       ctx.save();
       ctx.lineCap = "round";
@@ -1812,11 +1832,11 @@
     }
     for (const item of pickups) {
       const hazard = item.kind === "heat",
-        r = 18 * scale;
+        r = (hazard ? 21 : 18) * scale;
       ctx.save();
       ctx.translate(item.x, item.y);
-      ctx.fillStyle = hazard ? "#752b31" : "#103e40";
-      ctx.strokeStyle = hazard ? "#ff9779" : "#a5f5d0";
+      ctx.fillStyle = hazard ? "#a52029" : "#103e40";
+      ctx.strokeStyle = hazard ? "#ffe0aa" : "#a5f5d0";
       ctx.lineWidth = 2 * scale;
       ctx.beginPath();
       if (hazard) {
@@ -2352,6 +2372,7 @@
         build: clone(build),
         score,
         wing,
+        weaponProgress: weaponProfile().progress,
         mode: difficulty,
         magnetLevel,
         pulseCharges,
@@ -2495,7 +2516,7 @@
   }
   function showHelp() {
     showModal(
-      '<span class="eyebrow">READY FOR TAKEOFF</span><h2 id="modalTitle">비행은 간단해요</h2><div class="help-row"><strong>① 움직이면, 패러데이도 함께</strong>마우스나 손가락을 누른 채 움직이세요.<br><small>키보드는 방향키 / W A S D. 공격은 자동이에요.</small></div><div class="help-row"><strong>② 원 안의 코일·자석으로 강화해요</strong>코일 ◎ · 자석 N/S를 모으면 미사일 → 펄스 레이저 → 쌍열 레이저 → 캐논으로 진화해요.<br><small>♥ 체력 회복 · ‖ 충전된 축전기 · 빨간 △ 과열 파편은 피하세요. 코일·자석을 모아 강화 게이지를 채우면 오버드라이브!</small></div><div class="help-row"><strong>③ 충전된 전기로 돌파해요</strong>자석이 왕복하는 발전기로 충전해요.<br>충전된 축전기의 전기로 스파크 폭풍 / SPACE.<br><small>노란 예고선이 번쩍일 때 쓰면 PERFECT! 적 탄환을 지우고 큰 피해를 줘요. 축전기 아이템은 드물게 나와요. 발전기의 충전 게이지는 다음 스테이지에도 이어져요.</small></div><div class="help-row"><strong>④ 날개 끝은 닿아도 괜찮아요</strong>몸체 가운데 흰 점에 적이나 탄환이 닿지 않게 피하세요.</div><button class="secondary" data-action="close">준비됐어요</button>',
+      '<span class="eyebrow">READY FOR TAKEOFF</span><h2 id="modalTitle">비행은 간단해요</h2><div class="help-row"><strong>① 움직이면, 패러데이도 함께</strong>마우스나 손가락을 누른 채 움직이세요.<br><small>키보드는 방향키 / W A S D. 공격은 자동이에요.</small></div><div class="help-row"><strong>② 원 안의 코일·자석으로 강화해요</strong>코일 ◎ · 자석 N/S를 모으면 미사일 → 펄스 레이저 → 쌍열 레이저 → 캐논으로 진화해요.<br><small>♥ 체력 회복 · ‖ 충전된 축전기 · 빨간 △ 위험 아이콘에 닿으면 7초간 발사가 멈춰요. 코일·자석을 모아 강화 게이지를 채우면 오버드라이브!</small></div><div class="help-row"><strong>③ 충전된 전기로 돌파해요</strong>자석이 왕복하는 발전기로 충전해요.<br>충전된 축전기의 전기로 스파크 폭풍 / SPACE.<br><small>노란 예고선이 번쩍일 때 쓰면 PERFECT! 적 탄환을 지우고 큰 피해를 줘요. 축전기 아이템은 드물게 나와요. 발전기의 충전 게이지는 다음 스테이지에도 이어져요.</small></div><div class="help-row"><strong>④ 날개 끝은 닿아도 괜찮아요</strong>몸체 가운데 흰 점에 적이나 탄환이 닿지 않게 피하세요.</div><button class="secondary" data-action="close">준비됐어요</button>',
     );
   }
   let noteSpeed = 1,
@@ -2570,7 +2591,7 @@
         (tab === 0
           ? "전구는 코일의 두 끝과 연결된 닫힌 회로에 있어요. 정확히는 자기선속이 변할 때 유도 전압이 생기며, 회로에 전류가 흐르면 전구가 켜져요. 여기서는 코일의 자체 유도와 전구의 열 관성은 생략했어요."
           : tab === 1
-            ? "간격만 촘촘해진다고 전압이 무조건 커지지는 않아요. 게임의 충돌은 코일 일부가 풀려 유효한 감은 수가 줄어드는 설정이에요. 자석의 열에 의한 약화와 회복은 재료·온도에 따라 달라요. 7초 뒤 회복과 냉각 아이템은 게임 규칙이에요."
+            ? "간격만 촘촘해진다고 전압이 무조건 커지지는 않아요. 게임의 충돌은 코일 일부가 풀려 유효한 감은 수가 줄어드는 설정이에요. 자석의 열에 의한 약화와 회복은 재료·온도에 따라 달라요. 과열 시 7초간 발사 장치를 멈추는 보호 기능과 냉각 아이템은 게임 규칙이에요."
             : "정류된 전압이 축전기 전압보다 높을 때만 충전 전류가 흘러요. 멈춰도 다이오드가 역방향 방전을 막아요. 사용 버튼은 자석을 멈추고 스위치를 닫아 전구로 에너지를 보내요. 판 사이의 절연층으로 전하가 건너가는 것은 아니에요. 이 모형은 다이오드 전압 강하·누설을 생략했으며, 실제 축전기는 서서히 방전될 수 있어요.") +
         '</p><p class="science-detail">발전 에너지는 자석을 움직이는 외부의 일에서 와요. 자석이 에너지를 무한히 만들지는 않아요. 비행기·미사일·레이저·캐논·스파크 폭풍은 전자기 유도에서 상상한 게임 장비이며 패러데이가 만든 실제 무기가 아니에요.</p><a class="science-source" href="https://openstax.org/books/physics/pages/20-3-electromagnetic-induction" target="_blank" rel="noopener noreferrer">OpenStax · 전자기 유도 ↗</a><a class="science-source" href="https://wiki.analog.com/university/courses/electronics/text/chapter-6" target="_blank" rel="noopener noreferrer">Analog Devices · 정류기와 축전기 회로 ↗</a>',
     );
@@ -2982,7 +3003,7 @@
           bullets: bullets.map((b) => ({ ...b })),
           shots: shots.map((b) => ({ ...b })),
           playerLasers: playerLasers.map((b) => ({ ...b })),
-          weapon: G.profile(wing, magnetLevel, build),
+          weapon: weaponProfile(),
           pickups: pickups.map((p) => ({ ...p })),
           W,
           H,

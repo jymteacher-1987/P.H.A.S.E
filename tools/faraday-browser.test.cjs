@@ -197,6 +197,19 @@ test(
         let prematureDamage = false,
           maxEnemies = 0;
         for (let i = 0; i < 12 * 60; i++) {
+          const state = q.state;
+          const target = state.enemies
+            .filter((e) => e.y > 0)
+            .sort((a, b) => b.y - a.y)[0];
+          if (target)
+            q.move(
+              state.player.x +
+                Math.max(
+                  -310 / 60,
+                  Math.min(310 / 60, target.x - state.player.x),
+                ),
+              state.player.y,
+            );
           q.step(1 / 60);
           const s = q.state;
           maxEnemies = Math.max(maxEnemies, s.enemies.length);

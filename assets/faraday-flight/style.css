@@ -447,6 +447,22 @@ kbd {
   z-index: 3;
   text-shadow: 0 2px 5px #002538;
 }
+.heat-status {
+  position: absolute;
+  left: 50%;
+  bottom: 116px;
+  transform: translateX(-50%);
+  z-index: 4;
+  white-space: nowrap;
+  padding: 7px 12px;
+  border: 1px solid #ffb091;
+  border-radius: 9px;
+  background: #721f25ed;
+  color: #fff0d6;
+  font-size: 12px;
+  font-weight: 800;
+  pointer-events: none;
+}
 .weapon-label > span {
   font-size: 11px;
   letter-spacing: 0.2px;
