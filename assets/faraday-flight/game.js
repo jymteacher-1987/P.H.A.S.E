@@ -1980,6 +1980,10 @@
     $("modal").querySelector(".modal-card").focus({ preventScroll: true });
   }
   function closeModal(resume = true) {
+    if (resume && mode === "ending") {
+      ending();
+      return;
+    }
     window.FaradayRanking?.stop();
     $("modal").hidden = true;
     $("modalContent").innerHTML = "";
@@ -2398,6 +2402,11 @@
     const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
     if (e.target instanceof HTMLInputElement && k !== "Escape") return;
     if (k === "Escape" || k === "p") {
+      if (mode === "ending" && $("modalContent").querySelector(".stage-grid")) {
+        closeModal();
+        e.preventDefault();
+        return;
+      }
       if (!$("modal").hidden) {
         if (!["clear", "failed", "ending", "briefing"].includes(mode))
           closeModal();

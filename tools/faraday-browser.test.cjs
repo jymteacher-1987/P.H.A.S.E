@@ -430,6 +430,19 @@ test(
             await page.screenshot({
               path: path.join(out, name + "-ending.png"),
             });
+            await page.click("#modalContent [data-action=map]");
+            await page.click("#modalClose");
+            assert.equal(
+              await page.locator("#modalTitle").innerText(),
+              "양초 하나가 밝힌 세상",
+            );
+            assert.equal(await page.locator("#modal").isVisible(), true);
+            await page.click("#modalContent [data-action=map]");
+            await page.keyboard.press("Escape");
+            assert.equal(
+              await page.locator("#modalTitle").innerText(),
+              "양초 하나가 밝힌 세상",
+            );
             await page.click("[data-action=title]");
             await page.reload();
             await page.evaluate(() => __faraday.ready());
