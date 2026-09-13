@@ -1,5 +1,6 @@
 // A movement-limited pilot exercises the real simulation without granting equipment or health.
 const { chromium } = require("playwright"),
+  assert = require("node:assert/strict"),
   fs = require("node:fs"),
   path = require("node:path");
 (async () => {
@@ -25,11 +26,22 @@ const { chromium } = require("playwright"),
         const api = __faraday,
           dt = 0.1;
         let ticks = 0,
-          closest = 999;
+          maxPickups = 0,
+          maxParts = 0;
+        const pickupKinds = new Set();
         while (api.state.mode === "play" && ticks++ < 1800) {
           const s = api.state,
             p = s.player,
             sc = Math.min(1, Math.max(0.64, s.H / 760));
+          const livePickups = s.pickups.filter((item) => !item.dead);
+          maxPickups = Math.max(maxPickups, livePickups.length);
+          maxParts = Math.max(
+            maxParts,
+            livePickups.filter((item) =>
+              ["power", "magnet", "heart"].includes(item.kind),
+            ).length,
+          );
+          for (const item of livePickups) pickupKinds.add(item.kind);
           const boss = s.enemies.find((e) => e.boss),
             goods = s.pickups.filter(
               (e) =>
@@ -118,6 +130,10 @@ const { chromium } = require("playwright"),
           kills: s.stats.kills,
           pulses: s.stats.pulses,
           perfect: s.stats.perfect,
+          collectedParts: s.stats.parts,
+          maxPickups,
+          maxParts,
+          pickupKinds: [...pickupKinds].sort(),
           bossHP: s.enemies.find((e) => e.boss)?.hp,
         };
       });
@@ -148,6 +164,22 @@ const { chromium } = require("playwright"),
       path.resolve(__dirname, "../.preview-tmp/faraday/playtest.json"),
       JSON.stringify({ report, errors }, null, 2),
     );
+    assert.deepEqual(errors, []);
+    assert.equal(report.length, 5, "Pilot reaches all five stages");
+    for (const result of report) {
+      assert.equal(result.mode, "clear", "Pilot clears stage " + result.stage);
+      assert.equal(
+        result.pickupKinds.includes("star"),
+        false,
+        "No electricity tokens appear",
+      );
+      assert.ok(result.pickupKinds.includes("power"));
+      assert.ok(result.pickupKinds.includes("magnet"));
+      assert.ok(
+        result.maxParts <= 3,
+        "At most two supplies plus a dropped coil after damage",
+      );
+    }
   } finally {
     await browser.close();
   }

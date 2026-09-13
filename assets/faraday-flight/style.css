@@ -365,9 +365,9 @@ kbd {
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
-.star-icon {
+.score-label {
   color: var(--gold);
-  font-size: 22px;
+  font-size: 12px;
 }
 .progress-track {
   height: 3px;

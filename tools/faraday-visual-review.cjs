@@ -30,7 +30,7 @@ const out = path.resolve(__dirname, "../.preview-tmp/faraday");
     });
     await page.screenshot({ path: path.join(out, "review-flight.png") });
     await page.evaluate(() => {
-      for (let i = 0; i < 20; i++) __faraday.collect("star");
+      for (let i = 0; i < 4; i++) __faraday.collect(i % 2 ? "magnet" : "power");
       __faraday.step(1);
     });
     await page.screenshot({ path: path.join(out, "review-boost.png") });

@@ -87,6 +87,60 @@ async function chapter(page, index) {
   await reachable(page.locator("#briefingLaunch"));
 }
 test(
+  "Faraday: equipment collection earns overdrive without electricity tokens",
+  { timeout: 30000 },
+  async () => {
+    const s = await server(),
+      origin = "http://127.0.0.1:" + s.address().port;
+    const browser = await chromium.launch({
+      headless: true,
+      ...(process.platform === "win32" ? { channel: "msedge" } : {}),
+    });
+    try {
+      const page = await browser.newPage({
+        viewport: { width: 390, height: 844 },
+      });
+      const errors = [];
+      page.on("pageerror", (e) => errors.push(e.message));
+      await ready(page, origin + "/plays/faraday-flight.html?qa");
+      await page.click("#startBtn");
+      await page.click("#briefingLaunch");
+      const result = await page.evaluate(() => {
+        const q = __faraday;
+        q.collect("capacitor");
+        q.collect("heart");
+        q.collect("coolant");
+        q.pulse();
+        q.step(0.25); // Let the special attack's short hit pause finish.
+        const otherItems = q.state;
+        q.collect("power");
+        q.collect("magnet");
+        q.collect("power");
+        q.step(0.02);
+        const partial = q.state;
+        q.collect("magnet");
+        q.step(0.02);
+        return { otherItems, partial, boosted: q.state };
+      });
+      assert.equal(result.otherItems.fever, 0);
+      assert.equal(result.otherItems.stats.parts, 1);
+      assert.equal(result.otherItems.stats.pulses, 1);
+      assert.equal(result.partial.fever, 75);
+      assert.equal(result.partial.feverTime, 0);
+      assert.ok(result.boosted.feverTime > 6.9);
+      assert.equal(result.boosted.wing, 3);
+      assert.equal(result.boosted.magnetLevel, 2);
+      assert.equal(result.boosted.stats.parts, 5);
+      assert.equal(await page.locator(".score-label").textContent(), "점수");
+      assert.deepEqual(errors, []);
+    } finally {
+      await browser.close();
+      await new Promise((resolve) => s.close(resolve));
+    }
+  },
+);
+
+test(
   "Faraday: fixed missiles, entrance volleys and body damage during overdrive",
   { timeout: 60000 },
   async () => {
@@ -170,7 +224,7 @@ test(
       const collision = await page.evaluate(() => {
         const q = __faraday;
         q.step(2.1);
-        for (let i = 0; i < 5; i++) q.collect("star");
+        for (let i = 0; i < 4; i++) q.collect(i % 2 ? "magnet" : "power");
         q.step(0.02);
         const before = q.state.player.hp;
         const id = q.spawnBeam(120);

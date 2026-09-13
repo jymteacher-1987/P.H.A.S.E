@@ -95,15 +95,14 @@
     entry = null,
     score = 0,
     wing = 1,
-    collected = 0,
-    combo = 0,
-    comboTimer = 0,
     fever = 0,
     feverTime = 0,
     stageTime = 0,
     waveClock = 1,
     waveIndex = 0,
     pickupClock = 4,
+    partsUntilDrop = 7,
+    lastPartDrop = -6,
     capacitorDropped = false,
     bossStarted = false,
     finishClock = 0;
@@ -139,7 +138,7 @@
       damage: 0,
       pulses: 0,
       perfect: 0,
-      stars: 0,
+      parts: 0,
       enemyShots: 0,
     },
     runStats = { pulses: 0, perfect: 0 },
@@ -325,23 +324,22 @@
     effects = [];
     particles = [];
     texts = [];
-    combo = 0;
-    comboTimer = 0;
     fever = 0;
     feverTime = 0;
-    collected = 0;
     shake = 0;
     hitStop = 0;
     shootTimer = 0;
     friendTimer = 0;
     seed = 4421 + stage * 1987;
+    partsUntilDrop = 6 + Math.floor(random() * 4);
+    lastPartDrop = -6;
     stats = {
       kills: 0,
       spawned: 0,
       damage: 0,
       pulses: 0,
       perfect: 0,
-      stars: 0,
+      parts: 0,
       enemyShots: 0,
     };
     player = {
@@ -459,7 +457,6 @@
     for (const b of bullets) burst(b.x, b.y, "#ffe4a6", 3, 65);
     bullets = [];
     beams = [];
-    fever = Math.min(100, fever + (perfect ? 20 : 10));
     audio.effect(perfect ? "perfect" : "counter");
     effectRing(player.x, player.y, "#ffdbae", Math.max(W, H));
     burst(player.x, player.y, "#c3ffff", 36, 260);
@@ -742,9 +739,7 @@
     e.flash = 0.075;
     if (e.hp <= 0) {
       stats.kills++;
-      score +=
-        (e.boss ? 2500 : e.kind === 1 ? 90 : 35) *
-        (1 + Math.min(3, Math.floor(combo / 10)) * 0.5);
+      score += e.boss ? 2500 : e.kind === 1 ? 90 : 35;
       burst(
         e.x,
         e.y,
@@ -757,39 +752,41 @@
       if (e.boss) {
         finishClock = 1.8;
         for (const other of enemies) if (other !== e) other.hp = 0;
-        for (let i = 0; i < 4; i++)
-          addToken(e.x + (i - 1.5) * 36, e.y - (i % 2) * 35, 70 * scale);
         beams = [];
         bullets = [];
         shake = reduced ? 0 : 9;
       } else {
-        if (stats.kills % 8 === 0) addToken(e.x, e.y, 85 * scale);
-        if (stats.kills % 10 === 0)
+        partsUntilDrop--;
+        if (partsUntilDrop <= 0 && canDropPart()) {
+          const roll = random();
           pickups.push({
             x: e.x,
             y: e.y - 20,
-            kind: ["power", "magnet", "power", "heart"][
-              (Math.floor(stats.kills / 10) - 1) % 4
-            ],
+            kind: roll < 0.45 ? "power" : roll < 0.9 ? "magnet" : "heart",
             age: 0,
             vy: 63 * scale,
           });
+          lastPartDrop = stageTime;
+          partsUntilDrop = 6 + Math.floor(random() * 4);
+        }
       }
       if (counter)
         floatText(e.x, e.y - 25, "+" + Math.floor(damage), "#ffe5a8", 22);
     }
   }
-  function addToken(x, y, vy) {
-    if (pickups.filter((p) => !p.dead && p.kind === "star").length >= 4) return;
-    pickups.push({ x, y, vy, kind: "star", age: 0 });
+  function canDropPart() {
+    return (
+      stageTime - lastPartDrop >= 6 &&
+      pickups.filter(
+        (p) => !p.dead && ["power", "magnet", "heart"].includes(p.kind),
+      ).length < 2
+    );
   }
   function hurt() {
     if (mode !== "play" || player.inv > 0) return;
     player.hp--;
     player.inv = 1.3;
     stats.damage++;
-    combo = 0;
-    comboTimer = 0;
     fever = Math.max(0, fever - 10);
     if (wing > 1) {
       wing--;
@@ -815,31 +812,14 @@
   }
   function collect(item) {
     item.dead = true;
-    stats.stars += item.kind === "star" ? 1 : 0;
+    if (["power", "magnet", "capacitor"].includes(item.kind)) stats.parts++;
+    if (item.kind === "power" || item.kind === "magnet")
+      fever = Math.min(100, fever + 25);
     if (item.kind !== "heat") audio.effect("collect");
     switch (item.kind) {
-      case "star":
-        combo++;
-        comboTimer = 3.8;
-        collected++;
-        fever = Math.min(100, fever + 20);
-        score += Math.round(
-          60 *
-            (1 + Math.min(4, Math.floor(combo / 8)) * 0.5) *
-            (1 + build.magnet * 0.1),
-        );
-        if (combo % 10 === 0)
-          floatText(
-            player.x,
-            player.y - 48 * scale,
-            combo + " COMBO",
-            "#ffe4ac",
-            21,
-          );
-        break;
       case "power":
         wing = Math.min(8, wing + 1);
-        score += 100;
+        score += Math.round(100 * (1 + build.magnet * 0.1));
         floatText(
           player.x,
           player.y - 50 * scale,
@@ -862,7 +842,7 @@
         break;
       case "magnet":
         magnetLevel = Math.min(6, magnetLevel + 1);
-        score += 100;
+        score += Math.round(100 * (1 + build.magnet * 0.1));
         floatText(
           player.x,
           player.y - 50 * scale,
@@ -978,10 +958,6 @@
     if (messageTime > 0) {
       messageTime -= dt;
       if (messageTime <= 0) $("message").classList.remove("visible");
-    }
-    if (comboTimer > 0) {
-      comboTimer -= dt;
-      if (comboTimer <= 0) combo = 0;
     }
     if (feverTime > 0) {
       feverTime = Math.max(0, feverTime - dt);
@@ -1116,7 +1092,7 @@
             e.escortClock = stage < 2 ? 22 : 19;
           }
           e.supply -= dt;
-          if (e.supply <= 0) {
+          if (e.supply <= 0 && canDropPart()) {
             e.supplyCount++;
             pickups.push({
               x: clamp(e.x + (e.supplyCount % 2 ? 75 : -75), 45, W - 45),
@@ -1126,6 +1102,7 @@
               vy: 95 * scale,
             });
             e.supply = 14;
+            lastPartDrop = stageTime;
           }
           if (!charging) {
             e.motionTime += dt;
@@ -1375,18 +1352,13 @@
     if (boss)
       $("bossHealth").style.width =
         Math.max(0, (boss.hp / boss.maxHP) * 100) + "%";
-    $("weaponLevel").textContent =
-      "GEAR " +
-      String(wing).padStart(2, "0") +
-      (combo >= 8
-        ? "  ×" + (1 + Math.min(4, Math.floor(combo / 8)) * 0.5).toFixed(1)
-        : "");
+    $("weaponLevel").textContent = "GEAR " + String(wing).padStart(2, "0");
     $("feverBar").style.width =
       (feverTime > 0 ? (feverTime / 7) * 100 : fever) + "%";
     $("feverLabel").textContent =
       feverTime > 0
         ? "OVERDRIVE  " + feverTime.toFixed(1) + "s"
-        : "번개 토큰을 모아 오버드라이브!";
+        : "코일·자석 모아 오버드라이브!";
     const ready = pulseCharges > 0;
     $("pulseBtn").classList.toggle("ready", ready);
     $("pulseBtn").setAttribute("aria-disabled", String(!ready));
@@ -1643,8 +1615,7 @@
     }
     for (const item of pickups) {
       const hazard = item.kind === "heat",
-        token = item.kind === "star",
-        r = (token ? 13 : 18) * scale;
+        r = 18 * scale;
       ctx.save();
       ctx.translate(item.x, item.y);
       ctx.fillStyle = hazard ? "#752b31" : "#103e40";
@@ -1685,10 +1656,9 @@
         ctx.lineTo(12 * scale, 0);
         ctx.stroke();
       } else {
-        ctx.font = "bold " + (token ? 22 : 23) * scale + "px sans-serif";
+        ctx.font = "bold " + 23 * scale + "px sans-serif";
         ctx.fillText(
           {
-            star: "ϟ",
             power: "◎",
             heart: "♥",
             coolant: "❄",
@@ -1698,7 +1668,7 @@
           scale,
         );
       }
-      if (!token) {
+      {
         const name = {
           power: "코일",
           magnet: "자석",
@@ -2061,8 +2031,8 @@
         fmt(score) +
         "</b></div><div><span>펄스 사용</span><b>" +
         stats.pulses +
-        "</b></div><div><span>모은 토큰</span><b>" +
-        stats.stars +
+        "</b></div><div><span>모은 부품</span><b>" +
+        stats.parts +
         '</b></div></div><div class="history-card"><span>발견의 기록</span><strong>' +
         level.lesson +
         "</strong><p>" +
@@ -2233,7 +2203,7 @@
   }
   function showHelp() {
     showModal(
-      '<span class="eyebrow">READY FOR TAKEOFF</span><h2 id="modalTitle">비행은 간단해요</h2><div class="help-row"><strong>① 움직이면, 패러데이도 함께</strong>마우스나 손가락을 누른 채 움직이세요.<br><small>키보드는 방향키 / W A S D. 공격은 자동이에요.</small></div><div class="help-row"><strong>② 원 안의 토큰과 부품을 모아요</strong>코일 ◎ 탄 수·미사일 강화 · 자석 N/S 피해 증가<br><small>♥ 체력 회복 · ‖ 축전기 충전 · 빨간 △ 과열 파편은 피하세요. 초록 원의 번개 토큰을 연속으로 모으면 오버드라이브!</small></div><div class="help-row"><strong>③ 충전된 전기로 돌파해요</strong>축전기가 있으면 ϟ 스파크 폭풍 / SPACE.<br><small>노란 예고선이 번쩍일 때 쓰면 PERFECT! 적 탄환을 지우고 큰 피해를 줘요. 축전기 아이템은 드물게 나와요. 발전기의 충전 게이지는 다음 스테이지에도 이어져요.</small></div><div class="help-row"><strong>④ 날개 끝은 닿아도 괜찮아요</strong>몸체 가운데 흰 점에 적이나 탄환이 닿지 않게 피하세요.</div><button class="secondary" data-action="close">준비됐어요</button>',
+      '<span class="eyebrow">READY FOR TAKEOFF</span><h2 id="modalTitle">비행은 간단해요</h2><div class="help-row"><strong>① 움직이면, 패러데이도 함께</strong>마우스나 손가락을 누른 채 움직이세요.<br><small>키보드는 방향키 / W A S D. 공격은 자동이에요.</small></div><div class="help-row"><strong>② 원 안의 코일·자석으로 강화해요</strong>코일 ◎ 탄 수·미사일 강화 · 자석 N/S 피해 증가<br><small>♥ 체력 회복 · ‖ 충전된 축전기 · 빨간 △ 과열 파편은 피하세요. 코일·자석을 모아 강화 게이지를 채우면 오버드라이브!</small></div><div class="help-row"><strong>③ 충전된 전기로 돌파해요</strong>자석이 왕복하는 발전기로 충전해요.<br>충전된 축전기의 전기로 스파크 폭풍 / SPACE.<br><small>노란 예고선이 번쩍일 때 쓰면 PERFECT! 적 탄환을 지우고 큰 피해를 줘요. 축전기 아이템은 드물게 나와요. 발전기의 충전 게이지는 다음 스테이지에도 이어져요.</small></div><div class="help-row"><strong>④ 날개 끝은 닿아도 괜찮아요</strong>몸체 가운데 흰 점에 적이나 탄환이 닿지 않게 피하세요.</div><button class="secondary" data-action="close">준비됐어요</button>',
     );
   }
   let noteSpeed = 1,
@@ -2684,6 +2654,7 @@
           H,
           save: clone(save),
           sprites: atlas,
+          fever,
           feverTime,
           magnetLevel,
           heatTime,
