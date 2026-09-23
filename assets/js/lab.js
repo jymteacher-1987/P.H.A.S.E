@@ -278,10 +278,18 @@
 
     els.sideMenu.querySelectorAll("[data-cat]").forEach((el) => {
       el.addEventListener("click", () => {
+        const menuTop = desktopMenu.matches ? null : el.getBoundingClientRect().top;
         state.section = el.dataset.section;
         state.activeCategory = el.dataset.cat;
         state.scope = "selection";
         render(true);
+        if (menuTop !== null) {
+          // Daily Pick can collapse or expand above the menu. Keep the tapped
+          // item at its viewport position, including without browser anchoring.
+          // Reading the new layout accounts for any native adjustment already made.
+          const offset = el.getBoundingClientRect().top - menuTop;
+          if (Math.abs(offset) > 1) window.scrollBy({ top: offset, behavior: "instant" });
+        }
       });
       el.setAttribute("role", "button");
       el.tabIndex = 0;

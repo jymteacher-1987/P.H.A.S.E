@@ -85,26 +85,46 @@ test('Desktop menus stay open after selection until explicitly closed; mobile ke
     await lastButton.click();
     await page.waitForFunction(() => document.querySelector('.exp-preview').getBoundingClientRect().top >= Math.max(0, document.querySelector('.site-nav').getBoundingClientRect().bottom));
 
-    await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto(origin + '/lab.html');
-    await row.waitFor();
-    assert.equal(await toggle.isVisible(), false);
-    assert.equal(await labToggle.isVisible(), false);
-    assert.equal(await labRow.isVisible(), true);
-    const mobile = await row.evaluate(el => ({ width: el.clientWidth, scroll: el.scrollWidth, height: el.clientHeight }));
-    assert.ok(mobile.scroll > mobile.width && mobile.height < 90, 'Phone remains a single horizontal strip');
-    await row.scrollIntoViewIfNeeded();
-    await row.evaluate(el => { window.originalPlayRow = el; el.scrollLeft = el.scrollWidth; });
-    await lastButton.scrollIntoViewIfNeeded();
-    const before = await page.evaluate(() => ({ y: scrollY, x: originalPlayRow.scrollLeft }));
-    await lastButton.click();
-    await page.waitForFunction(() => document.querySelectorAll('.exp-card').length === 1);
-    const after = await page.evaluate(() => ({ y: scrollY, x: originalPlayRow.scrollLeft, same: originalPlayRow === document.querySelector('#playMenuRows') }));
-    assert.equal(after.same, true, 'Filtering preserves the scroll container');
-    assert.ok(Math.abs(after.x - before.x) < 2, 'Phone horizontal selection stays in view');
-    assert.ok(Math.abs(after.y - before.y) < 2, 'Phone selection does not move the page');
-    await page.locator('.exp-preview img').evaluate(img => img.decode());
-    await page.screenshot({ path: path.join(out, 'mobile-last-game.png'), animations: 'disabled' });
+    for (const nativeAnchoring of [true, false]) {
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.goto(origin + '/lab.html');
+      await row.waitFor();
+      // Also cover browsers that cannot automatically anchor a changing page.
+      if (!nativeAnchoring) await page.addStyleTag({ content: '* { overflow-anchor: none !important; }' });
+      assert.equal(await toggle.isVisible(), false);
+      assert.equal(await labToggle.isVisible(), false);
+      assert.equal(await labRow.isVisible(), true);
+      const mobile = await row.evaluate(el => ({ width: el.clientWidth, scroll: el.scrollWidth, height: el.clientHeight }));
+      assert.ok(mobile.scroll > mobile.width && mobile.height < 90, 'Phone remains a single horizontal strip');
+      await row.scrollIntoViewIfNeeded();
+      await row.evaluate(el => { window.originalPlayRow = el; el.scrollLeft = el.scrollWidth; });
+      await lastButton.scrollIntoViewIfNeeded();
+      const before = await lastButton.evaluate(el => ({ top: el.getBoundingClientRect().top, x: originalPlayRow.scrollLeft }));
+      await lastButton.click();
+      await page.waitForFunction(() => document.querySelectorAll('.exp-card').length === 1);
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+      const after = await lastButton.evaluate(el => ({ top: el.getBoundingClientRect().top, x: originalPlayRow.scrollLeft, same: originalPlayRow === document.querySelector('#playMenuRows') }));
+      assert.equal(after.same, true, 'Filtering preserves the scroll container');
+      assert.ok(Math.abs(after.x - before.x) < 2, 'Phone horizontal selection stays in view');
+      // Daily Pick collapses above the menu, so document scrollY must change.
+      // The selected item should stay at the same position in the viewport.
+      assert.ok(Math.abs(after.top - before.top) < 2, `Phone selection stays in place (native anchoring: ${nativeAnchoring})`);
+      assert.equal(await page.locator('#dailyFeature').isVisible(), false);
+      assert.equal(await page.locator('.exp-card h3').textContent(), last.title);
+      await page.locator('.exp-preview img').evaluate(img => img.decode());
+      await page.screenshot({ path: path.join(out, `mobile-last-game-${nativeAnchoring ? 'native' : 'fallback'}.png`), animations: 'disabled' });
+
+      // Returning to all experiments expands Daily Pick again without moving
+      // the selected category away from the user's finger.
+      const allExperiments = page.locator('[data-section="lab"][data-cat="all"]');
+      await allExperiments.scrollIntoViewIfNeeded();
+      const allTop = await allExperiments.evaluate(el => el.getBoundingClientRect().top);
+      await allExperiments.click();
+      await page.waitForFunction(count => document.querySelectorAll('.exp-card').length === count, catalog.experiments.length);
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+      assert.ok(Math.abs(await allExperiments.evaluate(el => el.getBoundingClientRect().top) - allTop) < 2, 'Expanding Daily Pick preserves the selected category position');
+      assert.equal(await page.locator('#dailyFeature').isVisible(), true);
+    }
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.waitForFunction(() => document.querySelector('#playMenuRows').hidden);
     await page.setViewportSize({ width: 390, height: 844 });
