@@ -10,6 +10,8 @@
 const SITE = (function () {
   let firebaseReady = false;
   let db = null;
+  const CATALOG_READ_TIMEOUT = 2000;
+  const METADATA_LIMITS = Object.freeze({ title: 100, description: 600, tags: 8, tag: 24 });
 
   function isFirebaseConfigured() {
     const c = window.FIREBASE_CONFIG;
@@ -36,10 +38,29 @@ const SITE = (function () {
     return window.EXPERIMENTS_DATA || { categories: [], experiments: [] };
   }
 
-  async function loadFirestoreExperiments() {
-    if (!initFirebase()) return [];
-    try {
-      const snap = await db.collection("experiments").orderBy("createdAt", "desc").get();
+  // Firestore 오프라인 재시도가 계속되어도 정적 목록은 2초 뒤 표시한다.
+  // 늦게 끝난 읽기의 실패도 처리해 unhandled rejection이 생기지 않게 한다.
+  function readCatalog(makeRequest, fallback) {
+    if (!initFirebase()) return Promise.resolve({ value: fallback, status: "unconfigured" });
+    return new Promise((resolve) => {
+      let settled = false;
+      const finish = (value, status) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        resolve({ value, status });
+      };
+      const timer = setTimeout(() => finish(fallback, "timeout"), CATALOG_READ_TIMEOUT);
+      Promise.resolve().then(makeRequest).then(
+        (value) => finish(value, "ready"),
+        () => finish(fallback, "unavailable")
+      );
+    });
+  }
+
+  function loadFirestoreExperiments() {
+    return readCatalog(async () => {
+      const snap = await db.collection("experiments").orderBy("createdAt", "desc").get({ source: "server" });
       return snap.docs.map((d) => {
         const v = d.data();
         return {
@@ -53,26 +74,79 @@ const SITE = (function () {
           source: "firebase",
         };
       });
-    } catch (e) {
-      console.warn("Firestore 실험 목록 불러오기 실패:", e);
-      return [];
+    }, []);
+  }
+
+  // 표시 정보만 저장한다. 경로·분류·출처 변경 및 불완전한 레코드는 무시한다.
+  function validateCatalogMetadata(value) {
+    if (!value || typeof value !== "object" || Array.isArray(value)) return { error: "저장할 내용을 확인해주세요." };
+    const allowed = ["title", "description", "tags", "listed", "updatedAt"];
+    if (Object.keys(value).some((key) => !allowed.includes(key))) return { error: "제목·설명·태그·목록 표시만 수정할 수 있습니다." };
+    if (typeof value.title !== "string" || !value.title.trim() || value.title.length > METADATA_LIMITS.title) {
+      return { error: `제목은 1~${METADATA_LIMITS.title}자로 입력해주세요.` };
     }
+    if (typeof value.description !== "string" || value.description.length > METADATA_LIMITS.description) {
+      return { error: `설명은 ${METADATA_LIMITS.description}자 이내로 입력해주세요.` };
+    }
+    if (!Array.isArray(value.tags) || value.tags.length > METADATA_LIMITS.tags ||
+        value.tags.some((tag) => typeof tag !== "string" || !tag.trim() || tag.length > METADATA_LIMITS.tag)) {
+      return { error: `태그는 최대 ${METADATA_LIMITS.tags}개, 각 ${METADATA_LIMITS.tag}자 이내로 입력해주세요.` };
+    }
+    if (typeof value.listed !== "boolean") return { error: "목록 표시 여부를 확인해주세요." };
+    return { value: {
+      title: value.title.trim(), description: value.description.trim(),
+      tags: [...new Set(value.tags.map((tag) => tag.trim()))], listed: value.listed,
+    } };
+  }
+
+  function loadCatalogOverrides() {
+    return readCatalog(async () => {
+      const snap = await db.collection("catalogOverrides").get({ source: "server" });
+      const overrides = Object.create(null);
+      let invalidCount = 0;
+      snap.docs.forEach((doc) => {
+        const raw = doc.data();
+        const result = validateCatalogMetadata(raw);
+        if (result.error) { invalidCount++; return; }
+        overrides[doc.id] = { ...result.value, updatedAt: raw.updatedAt || null };
+      });
+      return { overrides, invalidCount };
+    }, { overrides: Object.create(null), invalidCount: 0 });
+  }
+
+  function applyCatalogOverride(item, overrides) {
+    const override = overrides[item.id];
+    if (!override) return { ...item, listed: true };
+    // 명시한 네 항목만 적용한다. 원래 이미지·ID·경로 등은 반드시 보존한다.
+    return { ...item, title: override.title, description: override.description,
+      tags: [...override.tags], listed: override.listed };
+  }
+
+  async function getCatalogEditorData() {
+    const [staticData, dynamicResult, overrideResult] = await Promise.all([
+      loadStaticExperiments(), loadFirestoreExperiments(), loadCatalogOverrides(),
+    ]);
+    return {
+      categories: staticData.categories || [],
+      experiments: [...dynamicResult.value, ...(staticData.experiments || []).map((item) => ({ ...item, source: "static" }))],
+      plays: (staticData.plays || []).map((item) => ({ ...item, source: "static", section: "play" })),
+      overrides: overrideResult.value.overrides,
+      invalidOverrideCount: overrideResult.value.invalidCount,
+      catalogStatus: { experiments: dynamicResult.status, overrides: overrideResult.status },
+    };
   }
 
   // 전체 실험 목록(정적 + Firebase) + 카테고리 목록 + 과학 놀이 목록 반환
   //
   // plays(과학 놀이)는 실험과 성격이 다른 활동물이라 experiments에 섞지 않고
   // 별도 배열로 돌려준다. 사이드바에서도 별도 박스로 나뉜다(lab.js 참고).
-  // 관리자 업로드(Firebase) 대상은 실험뿐이므로 plays는 정적 목록만 쓴다.
-  async function getAllData() {
-    const [staticData, dynamicExps] = await Promise.all([
-      loadStaticExperiments(),
-      loadFirestoreExperiments(),
-    ]);
-    const staticExps = (staticData.experiments || []).map((e) => ({ ...e, source: "static" }));
-    const all = [...dynamicExps, ...staticExps]; // 최신 업로드가 먼저 오도록
-    const plays = (staticData.plays || []).map((p) => ({ ...p, source: "static", section: "play" }));
-    return { categories: staticData.categories || [], experiments: all, plays };
+  // 실험·놀이 모두 원본을 보존하면서 Firebase의 표시 정보를 적용한다.
+  // listed=false는 목록에서만 숨긴다. 직접 링크를 막는 보안 기능은 아니다.
+  async function getAllData({ includeUnlisted = false } = {}) {
+    const data = await getCatalogEditorData();
+    const merge = (items) => items.map((item) => applyCatalogOverride(item, data.overrides))
+      .filter((item) => includeUnlisted || item.listed);
+    return { categories: data.categories, experiments: merge(data.experiments), plays: merge(data.plays), catalogStatus: data.catalogStatus };
   }
 
   // ---------------- 방문자 카운터 ----------------
@@ -143,6 +217,8 @@ const SITE = (function () {
     isFirebaseConfigured,
     initFirebase,
     getAllData,
+    getCatalogEditorData,
+    validateCatalogMetadata,
     recordVisit,
     recordVisitAndGetCounts,
     get db() {

@@ -7,6 +7,7 @@
 <title>실험실 — 가상 물리 실험실</title>
 <meta name="description" content="과학의 기초부터 현대물리까지 — 영역별로 실험을 찾아보고 검색해보세요." />
 <link rel="stylesheet" href="assets/css/style.css?v=4d7b6bd877" />
+<link rel="stylesheet" href="assets/css/catalog.css?v=20260923" />
 <link rel="manifest" href="manifest.webmanifest">
 <script defer src="assets/js/mobile-launch.js?v=fe9cc51e93"></script>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -14,6 +15,7 @@
 <meta name="theme-color" content="#152335">
 </head>
 <body class="page-lab">
+<a class="skip-link" href="#expSection">실험 목록으로 건너뛰기</a>
 
 <nav class="site-nav">
   <div class="wrap">
@@ -27,17 +29,28 @@
   </div>
 </nav>
 
-<header class="hero" style="padding: 44px 0 20px;">
-  <div class="wrap" style="display:block;">
-    <div class="hero-copy" style="max-width:none;">
+<header class="hero catalog-hero">
+  <div class="wrap">
+    <div class="hero-copy">
       <span class="eyebrow">🧪 실험실</span>
-      <h1 style="font-size: clamp(26px, 3.6vw, 38px);">궁금했던 물리, 지금 눈앞에서</h1>
-      <p class="sub" style="max-width:640px;">영역을 골라 천천히 둘러보거나,<br/>찾고 있는 실험을 바로 검색해보세요.</p>
-
-      <div class="search-box">
-        <span class="search-icon">🔍</span>
-        <input id="searchInput" type="text" placeholder="실험 이름, 키워드로 검색" />
-        <button id="searchBtn">검색</button>
+      <h1>궁금했던 물리,<br class="catalog-mobile-break"/> 지금 눈앞에서</h1>
+      <p class="sub">변수를 바꾸고, 움직임을 살펴보고.<br/>궁금한 개념을 가상 실험과 과학 놀이로 만나보세요.</p>
+    </div>
+    <div class="catalog-search">
+      <form id="searchForm" role="search">
+        <label for="searchInput" class="search-label">어떤 실험이 궁금한가요?</label>
+        <div class="search-box">
+          <span class="search-icon" aria-hidden="true">⌕</span>
+          <input id="searchInput" type="search" placeholder="예: 볼록렌즈, 전자기 유도" autocomplete="off" enterkeyhint="search" aria-controls="expGrid" />
+          <button id="clearSearch" class="search-clear" type="button" aria-label="검색어 지우기" hidden>×</button>
+          <button id="searchBtn" type="submit">검색</button>
+        </div>
+      </form>
+      <div class="search-suggestions" aria-label="추천 검색어">
+        <span>바로 찾아보기</span>
+        <button type="button" data-query="운동">운동</button>
+        <button type="button" data-query="빛">빛</button>
+        <button type="button" data-query="전자기">전자기</button>
       </div>
     </div>
   </div>
@@ -47,12 +60,19 @@
   <div class="lab-shell" id="catSection">
     <aside class="lab-sidebar" id="sideMenu"></aside>
 
-    <section id="expSection">
+    <section id="expSection" tabindex="-1" aria-labelledby="expSectionTitle">
       <div class="section-title">
         <h2 id="expSectionTitle">전체 실험</h2>
         <!-- 개수 표시(<span id="expCount">)는 뺐다 — 왼쪽 사이드바에 이미
              영역별 개수가 있어 중복이고, space-between 때문에 그리드 오른쪽
              끝으로 밀려 덩그러니 보였다(조T 요청). 다시 넣지 말 것. -->
+      </div>
+      <div class="search-results-tools" id="searchTools" hidden>
+        <p id="searchSummary" role="status" aria-live="polite" aria-atomic="true"></p>
+        <div class="search-scopes" role="group" aria-label="검색 범위">
+          <button type="button" data-scope="all" aria-pressed="true">전체 실험·놀이</button>
+          <button type="button" data-scope="selection" aria-pressed="false" id="selectionScope">선택한 영역</button>
+        </div>
       </div>
       <div class="exp-grid" id="expGrid"></div>
     </section>
@@ -70,9 +90,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="assets/js/experiments-data.js?v=6ee6c8efdf"></script>
 <script src="assets/js/firebase-config.js"></script>
-<script src="assets/js/data.js?v=visits-20260909"></script>
+<script src="assets/js/data.js?v=catalog-20260923"></script>
 <script src="assets/js/visit-entry.js?v=visits-20260909"></script>
 <script src="assets/previews/index.js?v=ba5f9a16fc"></script>
-<script src="assets/js/lab.js?v=34cada1d35"></script>
+<script src="assets/js/lab.js?v=20260923"></script>
 </body>
 </html>

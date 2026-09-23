@@ -66,7 +66,8 @@ test('Static catalog images, device-specific launch, direct entry and browser Ba
           assert.equal(await page.locator('.preview-unavailable').count(), 0);
         }
         await page.locator('.exp-card').filter({ has: page.locator('h3', { hasText: '한붓' }) }).click();
-        await page.waitForURL('**/view.html?id=hanbut&src=play');
+        await page.waitForURL(url => url.pathname.endsWith('/view.html') && url.searchParams.get('id') === 'hanbut' && url.searchParams.get('src') === 'play');
+        assert.equal(new URLSearchParams(new URL(page.url()).searchParams.get('from')).get('play'), 'all', 'Viewer preserves the catalog selection');
         if (immersive) {
           assert.equal(await page.locator('.mobile-activity-layer').count(), 1, name);
           assert.equal(await page.evaluate(() => window.fullscreenCalls), 1, name + ' requests fullscreen on card tap');

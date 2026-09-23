@@ -4,17 +4,50 @@
 // 그대로 붙여넣고 "게시(Publish)" 버튼을 누르세요.
 //
 // phase@phase.com 을 다른 관리자 이메일로 바꾸고 싶다면
-// 아래 두 곳의 이메일 주소를 함께 바꿔주세요.
+// isAdmin() 및 firebase-config.js / storage.rules도 함께 바꿔주세요.
 // ================================================================
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == 'phase@phase.com';
+    }
+
+    function validCatalogTag(tags, index) {
+      return tags.size() <= index || (tags[index] is string
+        && tags[index].size() > 0 && tags[index].size() <= 24);
+    }
+
+    function validCatalogMetadata() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['title', 'description', 'tags', 'listed', 'updatedAt'])
+        && data.keys().hasOnly(['title', 'description', 'tags', 'listed', 'updatedAt'])
+        && data.title is string && data.title.size() > 0 && data.title.size() <= 100
+        && data.description is string && data.description.size() <= 600
+        && data.tags is list && data.tags.size() <= 8
+        && validCatalogTag(data.tags, 0) && validCatalogTag(data.tags, 1)
+        && validCatalogTag(data.tags, 2) && validCatalogTag(data.tags, 3)
+        && validCatalogTag(data.tags, 4) && validCatalogTag(data.tags, 5)
+        && validCatalogTag(data.tags, 6) && validCatalogTag(data.tags, 7)
+        && data.listed is bool
+        && data.updatedAt is timestamp && data.updatedAt == request.time;
+    }
+
     // 실험 목록: 누구나 읽을 수 있고, 관리자만 쓰기 가능
     match /experiments/{docId} {
       allow read: if true;
-      allow write: if request.auth != null
-                   && request.auth.token.email == 'phase@phase.com';
+      allow write: if isAdmin();
+    }
+
+    // 실험 HTML은 GitHub에 두고 기존 ID의 표시 정보만 덮어쓴다.
+    // listed=false도 공개 읽기가 가능하다. 목록 숨김은 비밀 정보 보호 기능이 아니다.
+    match /catalogOverrides/{docId} {
+      allow read: if true;
+      allow create, update: if isAdmin()
+        && docId.size() <= 128 && docId.matches('[a-z0-9]+(-[a-z0-9]+)*')
+        && validCatalogMetadata();
+      allow delete: if isAdmin();
     }
 
     // 방문자 카운터: 누구나 읽을 수 있고, "1씩 증가"하는 요청만 허용

@@ -18,6 +18,7 @@
     section: "lab", // "lab" = 물리 가상실험 / "play" = 과학 놀이
     activeCategory: "all", // section이 "play"면 선택된 놀이의 id
     query: "",
+    scope: "all", // 검색은 전체 실험·놀이에서 시작하고, 원하면 선택 영역으로 좁힌다.
   };
 
   const els = {
@@ -27,6 +28,11 @@
     expSectionTitle: document.getElementById("expSectionTitle"),
     searchInput: document.getElementById("searchInput"),
     searchBtn: document.getElementById("searchBtn"),
+    searchForm: document.getElementById("searchForm"),
+    clearSearch: document.getElementById("clearSearch"),
+    searchTools: document.getElementById("searchTools"),
+    searchSummary: document.getElementById("searchSummary"),
+    selectionScope: document.getElementById("selectionScope"),
   };
 
   // 메인 페이지에서 검색어/카테고리를 들고 넘어온 경우 반영.
@@ -41,12 +47,13 @@
   state.experiments = experiments;
   state.plays = plays || [];
   state.query = initialQuery;
+  state.scope = params.get("scope") === "selection" || (!params.has("scope") && (params.has("cat") || params.has("play"))) ? "selection" : "all";
   if (initialPlay && (initialPlay === "all" || state.plays.some((p) => p.id === initialPlay))) {
     state.section = "play";
     state.activeCategory = initialPlay;
   } else {
     state.section = "lab";
-    state.activeCategory = initialCat;
+    state.activeCategory = state.categories.some(c => c.id === initialCat) ? initialCat : "all";
   }
   if (initialQuery) els.searchInput.value = initialQuery;
   const desktopMenu = window.matchMedia("(min-width: 861px)");
@@ -54,6 +61,46 @@
 
   const LAB_SECTION = { id: "lab", name: "물리 가상실험" };
   const PLAY_SECTION = { id: "play", name: "과학 놀이", icon: "🎈" };
+  const escapeHTML = value => String(value ?? "").replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+
+  // 주소에 탐색 상태를 남긴다. 공유·새로고침·실험실로 복귀가 같은 목록을 가리킨다.
+  function catalogParams() {
+    const query = new URLSearchParams();
+    if (state.section === "play") query.set("play", state.activeCategory);
+    else if (state.activeCategory !== "all") query.set("cat", state.activeCategory);
+    if (state.query) { query.set("q", state.query); query.set("scope", state.scope); }
+    return query;
+  }
+
+  function selectionLabel() {
+    return state.section === "play"
+      ? (state.activeCategory === "all" ? "과학 놀이" : playInfo(state.activeCategory).title)
+      : (state.activeCategory === "all" ? "물리 가상실험" : catInfo(state.activeCategory).name);
+  }
+
+  function savePosition(link) {
+    try {
+      sessionStorage.setItem("phase-catalog-position:" + catalogParams(), JSON.stringify({
+        y: scrollY, id: link.dataset.id, menus: [...openMenus],
+      }));
+    } catch (_) { /* 저장소가 제한된 환경에서도 탐색은 계속된다. */ }
+  }
+
+  function restorePosition() {
+    try {
+      const key = "phase-catalog-position:" + catalogParams();
+      const saved = JSON.parse(sessionStorage.getItem(key) || "null");
+      sessionStorage.removeItem(key);
+      if (!saved) return;
+      for (const section of saved.menus || []) if (["lab", "play"].includes(section)) openMenus.add(section);
+      syncMenus();
+      requestAnimationFrame(() => {
+        const card = [...els.expGrid.querySelectorAll(".exp-card")].find(el => el.dataset.id === saved.id);
+        card?.focus({ preventScroll: true });
+        if (Number.isFinite(saved.y)) window.scrollTo({ top: Math.max(0, saved.y), behavior: "instant" });
+      });
+    } catch (_) {}
+  }
 
   // 오른쪽 제목은 왼쪽 메뉴에서 고른 자리를 그대로 되읽어 준다 —
   // 윗줄에 묶음 이름, 아랫줄에 고른 줄. 왼쪽 박스가 "제목 + 항목들"인 것과
@@ -63,7 +110,7 @@
   // 전체인지가 빠졌다. 한 줄로 붙여 쓰는 것도 해 봤지만("물리 가상실험 ·
   // 역학과 에너지") 가운뎃점 없이는 한 덩어리로 읽히고, 넣으면 딱딱하다.
   function setSectionTitle(section, item) {
-    els.expSectionTitle.innerHTML = `<span class="group-name">${section}</span>${item}`;
+    els.expSectionTitle.innerHTML = `<span class="group-name">${escapeHTML(section)}</span>${escapeHTML(item)}`;
   }
 
   function catInfo(id) {
@@ -91,7 +138,7 @@
         return `
         <div class="side-item ${on ? "active" : ""}" data-section="${section}" data-cat="${r.id}">
           <span class="icon">${r.icon}</span>
-          <span class="name">${r.name}</span>
+          <span class="name">${escapeHTML(r.name)}</span>
           ${count}
         </div>`;
       })
@@ -204,6 +251,7 @@
       el.addEventListener("click", () => {
         state.section = el.dataset.section;
         state.activeCategory = el.dataset.cat;
+        state.scope = "selection";
         render(true);
       });
       el.setAttribute("role", "button");
@@ -230,18 +278,22 @@
   // ---------- 검색/필터 매칭 ----------
   function matches(exp, q) {
     if (!q) return true;
-    const hay = [exp.title, exp.description, ...(exp.tags || [])].join(" ").toLowerCase();
-    return hay.includes(q.toLowerCase());
+    const normalize = value => String(value).normalize("NFKC").toLowerCase().replace(/\s+/g, "");
+    const hay = normalize([exp.title, exp.description, ...(exp.tags || [])].join(" "));
+    return q.trim().split(/\s+/).every(word => hay.includes(normalize(word)));
   }
 
   function renderExperiments() {
     let filtered;
 
-    if (state.section === "play") {
+    if (state.query && state.scope === "all") {
+      filtered = [...state.experiments, ...state.plays].filter(e => matches(e, state.query));
+      setSectionTitle("검색 결과", "전체 실험·놀이");
+    } else if (state.section === "play") {
       // "전체"면 놀이를 전부, 활동 줄을 고르면 그 활동만.
-      // 검색어를 치면 고른 줄에 묶어 두지 않고 놀이 전체에서 찾는다 —
-      // 안 그러면 다른 놀이를 검색했을 때 결과가 늘 비어 버린다.
-      const all = state.activeCategory === "all" || state.query;
+      // 검색 범위를 선택 영역으로 좁힌 경우에는 고른 놀이를 유지한다.
+      // 전체 실험·놀이 검색은 위 분기에서 두 목록을 함께 찾는다.
+      const all = state.activeCategory === "all";
       filtered = state.plays.filter((p) => (all || p.id === state.activeCategory) && matches(p, state.query));
       setSectionTitle(PLAY_SECTION.name, all ? "전체" : playInfo(state.activeCategory).title);
     } else {
@@ -264,8 +316,20 @@
     // 개수 표시는 lab.html에서 제거됨(사이드바와 중복). 요소가 없어도 안전하게.
     if (els.expCount) els.expCount.textContent = `${filtered.length}개`;
 
+    els.clearSearch.hidden = !els.searchInput.value;
+    els.searchTools.hidden = !state.query;
+    els.searchSummary.textContent = state.query ? `“${state.query}” 검색 결과 ${filtered.length}개` : "";
+    els.selectionScope.textContent = selectionLabel();
+    document.querySelectorAll("[data-scope]").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.scope === state.scope)));
+
     if (filtered.length === 0) {
-      els.expGrid.innerHTML = `<div class="empty-state">검색 결과가 없습니다. 다른 키워드로 시도해보세요.</div>`;
+      els.expGrid.innerHTML = `<div class="catalog-empty"><span class="empty-icon" aria-hidden="true">⌕</span><h3>찾으시는 실험이 아직 보이지 않아요</h3><p>검색어를 짧게 바꾸거나 다른 영역에서도 찾아보세요.</p>${state.query && state.scope !== "all" ? '<button type="button" data-empty-action="all">전체에서 찾기</button>' : ''}<button type="button" data-empty-action="reset">전체 실험 보기</button></div>`;
+      els.expGrid.querySelectorAll("[data-empty-action]").forEach(button => button.addEventListener("click", () => {
+        if (button.dataset.emptyAction === "all") state.scope = "all";
+        else { state.query = ""; els.searchInput.value = ""; state.section = "lab"; state.activeCategory = "all"; state.scope = "all"; }
+        render();
+        els.searchInput.focus({ preventScroll: true });
+      }));
       return;
     }
 
@@ -280,16 +344,18 @@
         const tag = isPlay
           ? `${PLAY_SECTION.icon} ${PLAY_SECTION.name}`
           : `${catInfo(e.category).icon} ${catInfo(e.category).name}`;
-        const url = isPlay
+        let url = isPlay
           ? `view.html?id=${encodeURIComponent(e.id)}&src=play`
           : `view.html?id=${encodeURIComponent(e.id)}&src=${e.source}`;
+        const from = catalogParams().toString();
+        if (from) url += `&from=${encodeURIComponent(from)}`;
         return `
-        <a class="exp-card ${isNew(e) ? "new" : ""}" href="${url}">
+        <a class="exp-card ${isNew(e) ? "new" : ""}" data-id="${escapeHTML(e.id)}" href="${escapeHTML(url)}">
           <div class="exp-preview">${previewMarkup(e)}</div>
           <div class="body">
             <span class="tag" data-cat="${tagCat}">${tag}</span>
-            <h3>${e.title}</h3>
-            <p>${e.description || ""}</p>
+            <h3>${escapeHTML(e.title)}</h3>
+            <p>${escapeHTML(e.description)}</p>
             <div class="meta"><span>${e.date || ""}</span><span class="go">열어보기 →</span></div>
           </div>
         </a>`;
@@ -309,25 +375,47 @@
   function render(reveal = false) {
     renderSidebar(reveal);
     renderExperiments();
+    if (location.pathname.endsWith("/lab.html")) {
+      const query = catalogParams().toString();
+      try { history.replaceState(history.state, "", "lab.html" + (query ? "?" + query : "")); } catch (_) {}
+    }
     if (reveal) revealDesktopPreview();
   }
 
   render();
+  restorePosition();
+  // 모바일 레이어가 열리기 전에 목록 위치를 저장한다.
+  els.expGrid.addEventListener("click", event => {
+    const link = event.target.closest(".exp-card");
+    if (link) savePosition(link);
+  }, true);
   if (desktopMenu.addEventListener) desktopMenu.addEventListener("change", syncMenus);
   else desktopMenu.addListener(syncMenus);
   window.addEventListener("resize", syncMenus);
 
   // ---------- 검색 ----------
   function doSearch() {
-    state.query = els.searchInput.value.trim();
+    const nextQuery = els.searchInput.value.trim();
+    if (!state.query && nextQuery) state.scope = "all";
+    state.query = nextQuery;
     render();
   }
-  els.searchBtn.addEventListener("click", doSearch);
-  els.searchInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") doSearch();
+  els.searchForm.addEventListener("submit", event => {
+    event.preventDefault();
+    doSearch();
+    els.searchInput.blur();
+    document.getElementById("expSection").focus({ preventScroll: true });
+    document.getElementById("expSection").scrollIntoView({ block: "start", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
   });
-  els.searchInput.addEventListener("input", () => {
-    state.query = els.searchInput.value.trim();
-    render();
+  els.searchInput.addEventListener("input", event => { if (!event.isComposing) doSearch(); });
+  els.searchInput.addEventListener("compositionend", doSearch);
+  els.clearSearch.addEventListener("click", () => {
+    els.searchInput.value = ""; doSearch(); els.searchInput.focus();
   });
+  document.querySelectorAll("[data-query]").forEach(button => button.addEventListener("click", () => {
+    state.scope = "all"; els.searchInput.value = button.dataset.query; doSearch();
+  }));
+  document.querySelectorAll("[data-scope]").forEach(button => button.addEventListener("click", () => {
+    state.scope = button.dataset.scope; render();
+  }));
 })();
