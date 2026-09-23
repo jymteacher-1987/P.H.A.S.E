@@ -6,8 +6,6 @@
     todayCount: document.getElementById("todayCount"),
     totalCount: document.getElementById("totalCount"),
     expTotalCount: document.getElementById("expTotalCount"),
-    dailyPick: document.getElementById("homeDailyPick"),
-    dailyPickTitle: document.getElementById("homeDailyPickTitle"),
     searchInput: document.getElementById("searchInput"),
     searchBtn: document.getElementById("searchBtn"),
   };
@@ -29,14 +27,6 @@
     els.expTotalCount.innerHTML = playCount
       ? `${experiments.length}<span class="num-plus">+${playCount}</span>`
       : String(experiments.length);
-  }
-  const recommendation = SITE.getDailyRecommendation(experiments);
-  if (recommendation && els.dailyPick && els.dailyPickTitle) {
-    const item = recommendation.item;
-    els.dailyPick.href = `view.html?id=${encodeURIComponent(item.id)}&src=${encodeURIComponent(item.source)}`;
-    els.dailyPickTitle.textContent = item.title;
-    els.dailyPick.setAttribute("aria-label", `오늘의 추천 실험: ${item.title} 열기`);
-    els.dailyPick.hidden = false;
   }
 
   // ---------- 검색: 실험실 페이지로 검색어를 들고 이동 ----------

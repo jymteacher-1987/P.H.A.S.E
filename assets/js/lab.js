@@ -37,6 +37,7 @@
     dailyFeatureLink: document.getElementById("dailyFeatureLink"),
     dailyFeatureImage: document.getElementById("dailyFeatureImage"),
     dailyFeatureTitle: document.getElementById("dailyFeatureTitle"),
+    dailyFeatureCategory: document.getElementById("dailyFeatureCategory"),
     dailyFeatureDescription: document.getElementById("dailyFeatureDescription"),
     dailyFeatureDate: document.getElementById("dailyFeatureDate"),
   };
@@ -75,6 +76,7 @@
     const scene = item.source === "static" ? window.PHASE_PREVIEWS?.items?.[item.id] : null;
     els.dailyFeatureLink.href = `view.html?id=${encodeURIComponent(item.id)}&src=${encodeURIComponent(item.source)}`;
     els.dailyFeatureTitle.textContent = item.title;
+    els.dailyFeatureCategory.textContent = state.categories.find((category) => category.id === item.category)?.name || "물리 가상실험";
     els.dailyFeatureDescription.textContent = item.description || "직접 조작하며 물리 개념을 살펴보세요.";
     els.dailyFeatureDate.textContent = recommendation.dateLabel;
     const fallback = () => {
