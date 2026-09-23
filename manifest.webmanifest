@@ -5,6 +5,6 @@
   "start_url": "./lab.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f5f7fb",
-  "theme_color": "#152335"
+  "background_color": "#fffdfa",
+  "theme_color": "#a8877a"
 }
