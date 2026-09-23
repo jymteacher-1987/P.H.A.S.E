@@ -84,12 +84,12 @@
 
   document.title = `${exp.title} — 물리 실험실`;
   if (exp.section === "play") {
-    // 카드 태그와 같은 문구를 쓴다 — 활동 아이콘이 아니라 묶음 아이콘이다.
-    catEl.textContent = "🎈 과학 놀이";
+    // 카드 태그와 같은 영역명을 쓴다.
+    catEl.textContent = "과학 놀이";
     catEl.dataset.cat = "play";
   } else {
     const c = categories.find((c) => c.id === exp.category);
-    catEl.textContent = c ? `${c.icon} ${c.name}` : "";
+    catEl.textContent = c ? c.name : "";
     if (exp.category) catEl.dataset.cat = exp.category;
   }
   frame.title = exp.title;

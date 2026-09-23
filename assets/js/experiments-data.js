@@ -48,7 +48,7 @@ window.EXPERIMENTS_DATA = {
       "id": "si-prefixes",
       "title": "SI 단위 접두어 탐험",
       "category": "fundamentals",
-      "description": "통합과학의 기초, SI 단위와 접두어를 시각적으로 탐험합니다.",
+      "description": "SI 단위와 접두어의 크기를 비교하고 단위 변환을 연습합니다.",
       "lessonNote": {
         "question": "같은 양을 다른 SI 접두어로 나타내면 숫자는 어떻게 달라질까요?",
         "focus": "킬로와 밀리 등 크기가 다른 접두어로 단위를 변환하고, 나타내는 양은 그대로인지 확인해 보세요."
@@ -65,7 +65,7 @@ window.EXPERIMENTS_DATA = {
       "id": "newton-laws",
       "title": "뉴턴 운동 법칙 시뮬레이터",
       "category": "mechanics",
-      "description": "뉴턴의 운동 법칙을 직접 조작하며 확인하는 시뮬레이터.",
+      "description": "힘과 질량, 마찰 조건을 바꾸며 뉴턴의 세 운동 법칙을 확인합니다.",
       "lessonNote": {
         "question": "같은 힘으로 밀어도 물체의 질량이 다르면 움직임은 어떻게 달라질까요?",
         "focus": "제2법칙에서 힘은 그대로 두고 질량만 바꿔, 가속도의 변화를 살펴보세요."
@@ -116,7 +116,7 @@ window.EXPERIMENTS_DATA = {
       "id": "rocket-motion",
       "title": "로켓 운동 비교 — 질량 고정 vs 질량 변화",
       "category": "mechanics",
-      "description": "질량이 변하는 로켓 운동과 질량이 고정된 경우를 비교 시뮬레이션합니다.",
+      "description": "연료 소모로 가벼워지는 로켓과 질량이 일정한 로켓의 운동을 비교합니다.",
       "lessonNote": {
         "question": "같은 추력으로 날아갈 때, 연료를 쓰며 가벼워지는 로켓의 가속도는 어떻게 달라질까요?",
         "focus": "연료가 줄어드는 동안 두 로켓의 질량과 가속도, 속도 그래프를 함께 비교해 보세요."
@@ -133,7 +133,7 @@ window.EXPERIMENTS_DATA = {
       "id": "motion-analysis",
       "title": "물체 운동 분석 실험실",
       "category": "mechanics",
-      "description": "물체의 운동을 그래프와 데이터로 분석하는 실험실.",
+      "description": "물체의 위치를 기록하고 그래프로 속도와 가속도를 분석합니다.",
       "lessonNote": {
         "question": "같은 시간 간격으로 위치를 기록하면 운동의 차이가 어떻게 드러날까요?",
         "focus": "등속 운동과 자유 낙하를 추적하고, 두 운동의 위치-시간 그래프 모양을 비교해 보세요."
@@ -150,7 +150,7 @@ window.EXPERIMENTS_DATA = {
       "id": "generator-principle",
       "title": "발전기의 원리 — 교류 발전 시뮬레이션",
       "category": "electromagnetism",
-      "description": "코일과 자석의 상대 운동으로 교류가 발생하는 원리를 시뮬레이션합니다.",
+      "description": "코일의 회전 속도를 바꾸며 교류가 생기는 원리를 확인합니다.",
       "lessonNote": {
         "question": "코일을 더 빠르게 돌리면 전류의 모습은 어떻게 달라질까요?",
         "focus": "회전 속도를 바꾸며 전구의 밝기와 검류계의 움직임을 비교해 보세요."
@@ -167,7 +167,7 @@ window.EXPERIMENTS_DATA = {
       "id": "convex-lens-focus",
       "title": "볼록 렌즈 초점 거리 찾기 실험",
       "category": "waves-optics",
-      "description": "단계별로 볼록렌즈의 초점 거리를 찾아가는 가상 실험.",
+      "description": "광원과 스크린을 움직이며 볼록 렌즈의 초점 거리를 찾습니다.",
       "lessonNote": {
         "question": "볼록 렌즈의 초점 거리를 측정값만으로 알아낼 수 있을까요?",
         "focus": "광원과 스크린의 위치를 조절해 값을 기록하고, 그래프에서 초점 거리를 찾아보세요."
@@ -236,7 +236,7 @@ window.EXPERIMENTS_DATA = {
       "id": "resistor-series-parallel",
       "title": "저항의 직렬·병렬연결에서 전류와 전압 측정하기",
       "category": "electromagnetism",
-      "description": "저항의 직렬연결과 병렬연결에서 전류와 전압을 측정하는 가상실험.",
+      "description": "저항을 직렬·병렬로 연결하고 각 지점의 전류와 전압을 측정합니다.",
       "lessonNote": {
         "question": "저항을 직렬과 병렬로 연결할 때, 각 저항의 전류와 전압은 어떻게 달라질까요?",
         "focus": "직렬에서 전류가 어디서나 같은지, 병렬에서 각 가지에 걸리는 전압이 같은지 확인해 보세요."
@@ -271,7 +271,7 @@ window.EXPERIMENTS_DATA = {
       "id": "pn-junction",
       "title": "PN 접합 반도체 시뮬레이션",
       "category": "modern-physics",
-      "description": "p형과 n형 반도체가 만나 만들어지는 공핍층을 관찰하고, 순방향·역방향 바이어스에서 전자와 양공의 움직임, 에너지 띠와 전위 분포가 어떻게 달라지는지 확인합니다.",
+      "description": "전압 방향에 따라 PN 접합의 공핍층과 전자·양공의 움직임이 어떻게 달라지는지 확인합니다.",
       "lessonNote": {
         "question": "PN 접합에 거는 전압의 방향을 바꾸면 전류의 흐름은 어떻게 달라질까요?",
         "focus": "순방향과 역방향을 번갈아 살펴보며 공핍층과 전자·양공의 움직임을 비교해 보세요."
@@ -307,7 +307,7 @@ window.EXPERIMENTS_DATA = {
       "id": "ideal-gas-law",
       "title": "이상 기체 상태방정식",
       "category": "thermal",
-      "description": "보일·샤를·아보가드로 법칙을 단계별 가상실험으로 확인하고 PV=nRT로 종합하는 실험입니다.",
+      "description": "압력·부피·온도·기체의 양을 바꾸며 기체 법칙과 상태방정식을 확인합니다.",
       "lessonNote": {
         "question": "기체의 양과 온도를 그대로 두고 부피를 줄이면 압력은 어떻게 될까요?",
         "focus": "한 번에 한 조건만 바꾸며 압력과 부피의 관계를 확인해 보세요."
@@ -343,7 +343,7 @@ window.EXPERIMENTS_DATA = {
       "id": "pascal-hydraulic",
       "title": "유압 장치와 파스칼 법칙",
       "category": "mechanics",
-      "description": "작은 피스톤을 눌러 무거운 물체를 들어 올리며, 압력이 그대로 전달되어 힘은 커지지만 일은 그대로임을 확인합니다.",
+      "description": "작은 피스톤으로 무거운 물체를 들어 올리며 힘과 이동 거리의 관계를 확인합니다.",
       "lessonNote": {
         "question": "작은 피스톤을 눌러 무거운 물체를 들어 올릴 수 있는 까닭은 무엇일까요?",
         "focus": "피스톤의 지름을 바꾸며 필요한 힘과 두 피스톤이 움직인 거리를 함께 비교해 보세요."
@@ -361,7 +361,7 @@ window.EXPERIMENTS_DATA = {
       "id": "rutherford-scattering",
       "title": "러더퍼드 산란 실험 — 톰슨 모형과의 비교",
       "category": "modern-physics",
-      "description": "같은 알파입자를 톰슨 모형과 러더퍼드 모형에 동시에 쏘아 궤적을 비교합니다. 핵을 겨눠 되튕김을 만들어 보고, 대부분의 알파입자는 그대로 통과한다는 사실도 함께 확인합니다.",
+      "description": "톰슨 모형과 원자핵 모형에서 알파입자의 궤적을 비교하고 큰 각도 산란을 확인합니다.",
       "lessonNote": {
         "question": "알파입자 대부분은 지나가는데, 일부는 왜 크게 꺾일까요?",
         "focus": "같은 입자의 궤적을 톰슨 모형과 원자핵 모형에서 비교해 보세요."
@@ -397,7 +397,7 @@ window.EXPERIMENTS_DATA = {
       "id": "photoelectric-effect",
       "title": "광전효과 원리 이해하기",
       "category": "modern-physics",
-      "description": "빛의 파장, 들어오는 광자 수와 전압을 바꾸며 광전자의 운동을 관찰합니다. 일함수와 한계 진동수, 최대 운동 에너지, 광전류와 정지 전압의 관계를 탐구합니다.",
+      "description": "빛의 파장과 광자 수, 전압을 바꾸며 광전자의 방출과 에너지 변화를 관찰합니다.",
       "lessonNote": {
         "question": "빛을 더 강하게 하는 것과 파장을 짧게 하는 것은 광전자에 어떤 차이를 만들까요?",
         "focus": "전자 방출 여부를 먼저 확인한 뒤, 광전자의 수와 최대 운동 에너지를 따로 비교해 보세요."
@@ -418,7 +418,7 @@ window.EXPERIMENTS_DATA = {
       "id": "hero-maker",
       "title": "히어로 만들기",
       "icon": "🛡️",
-      "description": "실험실을 돌며 고른 물리 원리로 나만의 과학 히어로를 설계하고, 사진을 찍어 히어로 포스터까지 완성하는 활동입니다.",
+      "description": "물리 원리로 나만의 히어로를 만들고 포스터를 완성합니다.",
       "path": "plays/hero-maker.html?v=82b0122034",
       "date": "2026-09-02",
       "tags": [
@@ -432,7 +432,7 @@ window.EXPERIMENTS_DATA = {
       "id": "newton-rush",
       "title": "뉴턴 러시",
       "icon": "💎",
-      "description": "뉴턴과 함께 다섯 세계를 달리며 프리즘 보석을 모아보세요. 점프와 슬라이드로 장애물을 피하고, 배경 속 과학 이야기를 만나며 모두의 TOP10 기록에 도전하는 게임입니다.",
+      "description": "뉴턴과 다섯 세계를 달리며 과학 이야기를 만나고 기록에 도전합니다.",
       "path": "plays/newton-rush.html?v=07c82a7179",
       "date": "2026-09-08",
       "tags": [
@@ -447,7 +447,7 @@ window.EXPERIMENTS_DATA = {
       "id": "physics-fighter",
       "title": "물리학자 대전",
       "icon": "🥊",
-      "description": "뉴턴·아인슈타인·호킹·하위헌스 등 물리학자 8인의 공식 필살기 대전! 손발 콤보와 전용 기술로 평평 지구 교주를 이기고, 캐릭터별 논문 강의 엔딩을 만나보세요. 키보드와 모바일 조이스틱을 지원합니다.",
+      "description": "물리학자 8인의 기술로 대전하고 캐릭터별 이야기를 만납니다.",
       "path": "plays/physics-fighter.html?v=36c86d4102",
       "date": "2026-09-09",
       "tags": [
@@ -462,7 +462,7 @@ window.EXPERIMENTS_DATA = {
       "id": "giants-shoulders",
       "title": "거인의 어깨: 프린키피아의 탄생",
       "icon": "🍎",
-      "description": "뉴턴과 함께 탐험하고 보스를 상대하며 갈릴레오·데카르트·하위헌스의 연구를 만나보세요. 네 가지 실험을 관찰하고 기록을 모아 세 운동 법칙을 정리하는 횡스크롤 액션 게임입니다.",
+      "description": "과학자들의 연구를 만나고 네 가지 실험으로 운동 법칙을 탐험합니다.",
       "path": "plays/giants-shoulders.html?v=a11ed2bd6d",
       "date": "2026-09-11",
       "tags": [
@@ -479,7 +479,7 @@ window.EXPERIMENTS_DATA = {
       "id": "faraday-flight",
       "title": "패러데이: 스파크 항해",
       "icon": "⚡",
-      "description": "코일과 자석으로 비행기를 강화하고, 축전기의 스파크 폭풍으로 돌파하세요. 패러데이의 삶에서 만난 다섯 어려움이 다섯 보스로 등장하는 비행 슈팅. 자동 공격, 모바일 드래그 조작, 이어하기와 작은 발명 노트를 지원합니다.",
+      "description": "패러데이의 이야기를 따라 비행하며 코일·자석·축전기로 비행기를 강화합니다.",
       "path": "plays/faraday-flight.html?v=4d36319a44",
       "date": "2026-09-13",
       "tags": [
@@ -494,7 +494,7 @@ window.EXPERIMENTS_DATA = {
       "id": "afterlight",
       "title": "잔광: 마지막 신호",
       "icon": "🌌",
-      "description": "빛이 끊긴 도시의 마지막 신호를 복구하세요. 거울·편광판·간섭계를 직접 조작하는 4막 16개 구역의 SF 퍼즐 어드벤처. 자동 저장, 단계별 힌트, 별 기록과 오늘의 회선 도전을 지원합니다.",
+      "description": "거울·편광판·간섭계를 조작해 빛이 끊긴 도시의 신호를 복구합니다.",
       "path": "plays/afterlight.html?v=327baf9834",
       "date": "2026-09-12",
       "tags": [
@@ -511,7 +511,7 @@ window.EXPERIMENTS_DATA = {
       "id": "hanbut",
       "title": "한붓 실험실",
       "icon": "✏️",
-      "description": "도형을 직접 그리고 지우며 한붓그리기 가능 여부를 O/X로 예측하는 과학·수학 놀이입니다. 서로 다른 20문제를 마치면 채점과 홀수점 원리, 실제 한붓 경로를 확인할 수 있습니다.",
+      "description": "도형을 그려 한붓그리기 가능 여부를 예측하고 원리를 확인합니다.",
       "path": "plays/hanbut.html?v=5e0a29bcda",
       "date": "2026-09-09",
       "tags": [
@@ -526,7 +526,7 @@ window.EXPERIMENTS_DATA = {
       "id": "jjomuldak-factory",
       "title": "쪼물딱 공장",
       "icon": "🫧",
-      "description": "뽁뽁이, 말랑이, 팝잇처럼 손으로 조물조물 만지는 장난감을 모아 둔 놀이터입니다. 누르고 당기고 터뜨리며 색 도감을 채워보세요.",
+      "description": "말랑이와 팝잇을 누르고 당기며 색 도감을 채웁니다.",
       "path": "plays/jjomuldak-factory.html?v=379cb557ea",
       "date": "2026-09-05",
       "tags": [
@@ -541,7 +541,7 @@ window.EXPERIMENTS_DATA = {
       "id": "bamti-escape",
       "title": "밤티 방탈출 게임",
       "icon": "🔓",
-      "description": "학교·해적선·우주정거장·저택·신전·금지구역, 여섯 이야기 속 단서를 연결해 마지막 문을 여는 3D 방탈출 게임입니다. 테마별 힌트와 PC·모바일 조작을 지원합니다.",
+      "description": "여섯 이야기 속 단서를 연결해 마지막 문을 여는 3D 방탈출을 즐깁니다.",
       "path": "plays/bamti-escape.html?v=73ef4110bd",
       "date": "2026-09-12",
       "tags": [

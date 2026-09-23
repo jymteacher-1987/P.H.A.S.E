@@ -5,9 +5,10 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>실험 보기 — 가상 물리 실험실</title>
+<link rel="icon" href="assets/phase-mark.svg" type="image/svg+xml" />
 <link rel="stylesheet" href="assets/css/style.css?v=4d7b6bd877" />
-<link rel="stylesheet" href="assets/css/view-feedback.css?v=phone-20260924" />
-<link rel="stylesheet" href="assets/css/lesson-notes.css?v=20260924b" />
+<link rel="stylesheet" href="assets/css/view-feedback.css?v=20260924d" />
+<link rel="stylesheet" href="assets/css/lesson-notes.css?v=20260924c" />
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="P.H.A.S.E">
@@ -25,18 +26,28 @@
          혼자 떠 있으면 덩그러니 보인다는 조T 의견. 영역명 길이가 제각각이어도
          버튼이 좌우로 움직이지 않도록, 태그 너비를 고정해 둔다(style.css 참고). -->
     <div class="nav-right">
-      <a class="nav-btn" data-viewer-return href="lab.html">🚪 실험실로</a>
+      <a class="nav-btn" data-viewer-return href="lab.html">실험실로</a>
       <span class="cat-tag" id="expCat"></span>
     </div>
   </div>
 </nav>
 <div class="viewer-frame-wrap">
+  <button class="viewer-note-toggle" id="viewerNoteToggle" type="button" aria-controls="viewerNotePanel" aria-expanded="false" hidden>실험 길잡이</button>
+  <aside class="viewer-note-panel" id="viewerNotePanel" aria-labelledby="viewerNoteTitle" hidden>
+    <div class="viewer-note-heading">
+      <h2 id="viewerNoteTitle" tabindex="-1">실험 길잡이</h2>
+      <button id="viewerNoteClose" type="button" aria-label="길잡이 닫기">×</button>
+    </div>
+    <dl>
+      <div><dt>생각해 볼 질문</dt><dd id="viewerNoteQuestion"></dd></div>
+      <div><dt>관찰 포인트</dt><dd id="viewerNoteFocus"></dd></div>
+    </dl>
+  </aside>
   <!-- allow="camera": 과학 놀이(히어로 만들기)는 iframe 안에서 카메라를 연다.
        같은 출처라 기본값으로도 열리지만, 정책이 바뀌어도 막히지 않게 명시해 둔다. -->
   <iframe id="expFrame" class="viewer-frame" title="실험 화면" allow="camera; fullscreen" allowfullscreen></iframe>
   <section id="viewerFeedback" class="viewer-feedback" aria-labelledby="viewerFeedbackTitle" hidden>
     <div class="viewer-feedback-card">
-      <span class="viewer-feedback-icon" aria-hidden="true">🔎</span>
       <h1 id="viewerFeedbackTitle" tabindex="-1">실험을 찾을 수 없어요</h1>
       <p id="viewerFeedbackText">주소가 달라졌거나 더 이상 제공하지 않는 활동일 수 있어요. 실험실에서 다시 찾아보세요.</p>
       <a class="nav-btn" data-viewer-return href="lab.html">실험실로 돌아가기</a>
@@ -44,27 +55,13 @@
   </section>
 </div>
 
-<button class="viewer-note-toggle" id="viewerNoteToggle" type="button" aria-controls="viewerNotePanel" aria-expanded="false" hidden>실험 길잡이</button>
-<aside class="viewer-note-panel" id="viewerNotePanel" aria-labelledby="viewerNoteTitle" hidden>
-  <div class="viewer-note-heading">
-    <h2 id="viewerNoteTitle" tabindex="-1">실험 길잡이</h2>
-    <button id="viewerNoteClose" type="button" aria-label="길잡이 닫기">×</button>
-  </div>
-  <dl>
-    <dt>생각해 볼 질문</dt>
-    <dd id="viewerNoteQuestion"></dd>
-    <dt>관찰 포인트</dt>
-    <dd id="viewerNoteFocus"></dd>
-  </dl>
-</aside>
-<a class="viewer-app-back" data-viewer-return href="lab.html" aria-label="실험실로 돌아가기"><span aria-hidden="true">↩</span> 실험실로</a>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="assets/js/experiments-data.js?v=notes-20260924b"></script>
+<script src="assets/js/experiments-data.js?v=copy-20260924"></script>
 <script src="assets/js/firebase-config.js"></script>
 <script src="assets/js/data.js?v=notes-20260924b"></script>
 <script src="assets/js/visit-entry.js?v=visits-20260909"></script>
-<script src="assets/js/view.js?v=notes-20260924b"></script>
+<script src="assets/js/view.js?v=notes-20260924c"></script>
 </body>
 </html>

@@ -87,7 +87,7 @@ test('registered activities load normally and name their iframe', async () => {
   assert.equal(ids.expFrame.title, '볼록 렌즈');
   assert.equal(ids.expFrame.hidden, false);
   assert.equal(ids.viewerFeedback.hidden, true);
-  assert.equal(ids.expCat.textContent, '🌈 광학');
+  assert.equal(ids.expCat.textContent, '광학');
   assert.ok(document.title.includes('볼록 렌즈'));
 });
 

@@ -11,42 +11,47 @@
   overflow-wrap:break-word;word-break:keep-all;
 }
 .page-lab .exp-card .meta{justify-content:flex-end}
+.page-view .viewer-frame-wrap{display:flex;flex-direction:column}
+.page-view iframe.viewer-frame{flex:1 1 0;min-height:0;height:auto}
+.page-view .viewer-feedback{flex:1 1 0;min-height:0;height:auto}
 .page-view .viewer-note-toggle[hidden],.page-view .viewer-note-panel[hidden]{display:none!important}
 .page-view .viewer-note-toggle{
-  position:fixed;left:env(safe-area-inset-left,0px);top:50%;transform:translateY(-50%);
-  z-index:1000;display:inline-flex;align-items:center;justify-content:center;
-  width:35px;min-height:112px;padding:11px 7px;border:1px solid #d9bbb0;border-left:0;border-radius:0 3px 3px 0;
-  background:#fffaf6;color:#6f4d43;box-shadow:0 5px 18px #211b1833;
-  font:700 13px/1.3 "Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
-  writing-mode:vertical-rl;text-orientation:upright;letter-spacing:.05em;cursor:pointer;
+  flex:0 0 auto;display:flex;align-items:center;gap:8px;width:100%;min-height:36px;
+  padding:7px 22px;border:0;border-bottom:1px solid #e0d0c8;
+  background:#fffaf6;color:#6f4d43;text-align:left;
+  font:700 12px/1.4 "Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  letter-spacing:.02em;cursor:pointer;
 }
+.page-view .viewer-note-toggle::after{content:"⌄";margin-left:auto;font-size:18px;line-height:1}
+.page-view .viewer-note-toggle[aria-expanded="true"]::after{content:"⌃"}
 .page-view .viewer-note-toggle:hover,.page-view .viewer-note-toggle[aria-expanded="true"]{
-  background:#8b6a60;border-color:#8b6a60;color:#fffaf6;
+  background:#f4e8e1;color:#583e36;
 }
 .page-view .viewer-note-toggle:focus-visible,.page-view .viewer-note-panel button:focus-visible{
-  outline:3px solid #bf716a;outline-offset:3px;
+  outline:3px solid #bf716a;outline-offset:-3px;
 }
 .page-view .viewer-note-panel{
-  position:fixed;left:max(43px,calc(env(safe-area-inset-left) + 43px));top:50%;transform:translateY(-50%);
-  z-index:1001;width:min(360px,calc(100vw - 56px));max-height:calc(100dvh - 32px);overflow:auto;
-  padding:20px 22px 22px;border:1px solid #dcc9c0;border-top:3px solid #a8877a;
+  position:fixed;z-index:1001;left:16px;top:50%;transform:translateY(-50%);
+  width:min(540px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow:auto;
+  padding:18px 22px 22px;border:1px solid #dcc9c0;border-top:3px solid #a8877a;
   background:#fffaf6;box-shadow:0 18px 44px #211b1844;color:#342d2a;
   font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
 }
 .page-view .viewer-note-heading{display:flex;align-items:start;justify-content:space-between;gap:16px}
-.page-view .viewer-note-heading h2{margin:0;font-size:18px;line-height:1.35;letter-spacing:-.03em}
+.page-view .viewer-note-heading h2{margin:0;font-size:15px;line-height:1.35;letter-spacing:-.03em}
 .page-view .viewer-note-heading button{
-  border:0;background:none;color:#715f58;font-size:25px;line-height:1;cursor:pointer;
+  border:0;background:none;color:#715f58;font-size:21px;line-height:1;cursor:pointer;
 }
-.page-view .viewer-note-panel dl{margin:17px 0 0}
+.page-view .viewer-note-panel dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin:12px 0 0}
 .page-view .viewer-note-panel dt{
-  margin:17px 0 6px;padding-top:15px;border-top:1px solid #eadfd9;
+  margin:0 0 5px;
   color:#a65f59;font-size:11px;font-weight:800;
 }
 .page-view .viewer-note-panel dd{
   margin:0;color:#473a35;font-size:14px;line-height:1.65;word-break:keep-all;overflow-wrap:break-word;
 }
 @media(max-width:640px){
-  .page-view .viewer-note-toggle{width:32px;min-height:100px;padding:9px 6px}
-  .page-view .viewer-note-panel{left:max(39px,calc(env(safe-area-inset-left) + 39px));width:calc(100vw - 51px);max-height:calc(100dvh - 28px)}
+  .page-view .viewer-note-toggle{min-height:34px;padding:6px 14px}
+  .page-view .viewer-note-panel{left:14px;width:calc(100vw - 28px);max-height:calc(100dvh - 28px);padding:14px}
+  .page-view .viewer-note-panel dl{grid-template-columns:1fr;gap:10px}
 }

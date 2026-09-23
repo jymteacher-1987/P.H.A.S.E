@@ -39,7 +39,6 @@
     dailyFeatureTitle: document.getElementById("dailyFeatureTitle"),
     dailyFeatureCategory: document.getElementById("dailyFeatureCategory"),
     dailyFeatureDescription: document.getElementById("dailyFeatureDescription"),
-    dailyFeatureDate: document.getElementById("dailyFeatureDate"),
   };
 
   // 메인 페이지에서 검색어/카테고리를 들고 넘어온 경우 반영.
@@ -67,7 +66,7 @@
   const openMenus = new Set();
 
   const LAB_SECTION = { id: "lab", name: "물리 가상실험" };
-  const PLAY_SECTION = { id: "play", name: "과학 놀이", icon: "🎈" };
+  const PLAY_SECTION = { id: "play", name: "과학 놀이" };
   const escapeHTML = value => String(value ?? "").replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 
   const recommendation = SITE.getDailyRecommendation(state.experiments);
@@ -78,7 +77,6 @@
     els.dailyFeatureTitle.textContent = item.title;
     els.dailyFeatureCategory.textContent = state.categories.find((category) => category.id === item.category)?.name || "물리 가상실험";
     els.dailyFeatureDescription.textContent = item.description || "직접 조작하며 물리 개념을 살펴보세요.";
-    els.dailyFeatureDate.textContent = recommendation.dateLabel;
     const fallback = () => {
       els.dailyFeatureImage.classList.add("is-fallback");
       els.dailyFeatureImage.replaceChildren();
@@ -146,11 +144,11 @@
   }
 
   function catInfo(id) {
-    return state.categories.find((c) => c.id === id) || { name: id, icon: "🧪" };
+    return state.categories.find((c) => c.id === id) || { name: id };
   }
 
   function playInfo(id) {
-    return state.plays.find((p) => p.id === id) || { title: id, icon: "🎈" };
+    return state.plays.find((p) => p.id === id) || { title: id };
   }
 
   function isNew(exp) {
@@ -161,7 +159,7 @@
   }
 
   // ---------- 좌측 영역 메뉴 ----------
-  // 박스 하나를 그린다. rows는 {id, name, icon, count?} 목록.
+  // 박스 하나를 그린다. rows는 {id, name, count?} 목록.
   function sideBox(section, title, rows) {
     const body = rows
       .map((r) => {
@@ -169,7 +167,6 @@
         const count = r.count == null ? "" : `<span class="count">${r.count}</span>`;
         return `
         <div class="side-item ${on ? "active" : ""}" data-section="${section}" data-cat="${r.id}">
-          <span class="icon">${r.icon}</span>
           <span class="name">${escapeHTML(r.name)}</span>
           ${count}
         </div>`;
@@ -252,10 +249,9 @@
       syncMenus();
       return;
     }
-    const catRows = [{ id: "all", name: "전체", icon: "🗂️" }, ...state.categories].map((c) => ({
+    const catRows = [{ id: "all", name: "전체" }, ...state.categories].map((c) => ({
       id: c.id,
       name: c.name,
-      icon: c.icon,
       count: c.id === "all" ? state.experiments.length : state.experiments.filter((e) => e.category === c.id).length,
     }));
 
@@ -263,8 +259,8 @@
     // 전체 줄에만 단다 — 활동 줄마다 붙이면 전부 "1"이라 아무 정보도 안 된다.
     const playRows = state.plays.length
       ? [
-          { id: "all", name: "전체", icon: "🗂️", count: state.plays.length },
-          ...state.plays.map((p) => ({ id: p.id, name: p.title, icon: p.icon || PLAY_SECTION.icon })),
+          { id: "all", name: "전체", count: state.plays.length },
+          ...state.plays.map((p) => ({ id: p.id, name: p.title })),
         ]
       : [];
 
@@ -367,15 +363,10 @@
 
     els.expGrid.innerHTML = filtered
       .map((e, index) => {
-        // 놀이 카드는 영역 태그 자리에 "과학 놀이"가 들어간다. 태그 아이콘은
-        // 활동 아이콘이 아니라 묶음 아이콘을 쓴다 — 실험 카드가 "영역 아이콘 +
-        // 영역 이름"인 것과 짝을 맞추기 위해서다. 색은 style.css의
-        // [data-cat="play"] 규칙이 맡는다.
+        // 목록 태그는 이름만 표시하고 색은 [data-cat] 규칙이 맡는다.
         const isPlay = e.section === "play";
         const tagCat = isPlay ? "play" : e.category;
-        const tag = isPlay
-          ? `${PLAY_SECTION.icon} ${PLAY_SECTION.name}`
-          : `${catInfo(e.category).icon} ${catInfo(e.category).name}`;
+        const tag = isPlay ? PLAY_SECTION.name : catInfo(e.category).name;
         let url = isPlay
           ? `view.html?id=${encodeURIComponent(e.id)}&src=play`
           : `view.html?id=${encodeURIComponent(e.id)}&src=${e.source}`;
