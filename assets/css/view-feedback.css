@@ -9,8 +9,8 @@
   font-size:12px; font-weight:700; line-height:1; text-decoration:none;
   touch-action:manipulation;
 }
-/* 폰·패드에서는 실험 위의 '실험실로' 버튼을 표시하지 않는다. */
-.phone-tablet .viewer-app-back{display:none}
+/* 폰에서는 실험 위의 '실험실로' 버튼을 표시하지 않는다. */
+.phone-device .viewer-app-back{display:none}
 .viewer-app-back:focus-visible, .viewer-feedback .nav-btn:focus-visible{
   outline:3px solid var(--accent); outline-offset:3px;
 }
