@@ -64,6 +64,12 @@ body.page-home .site-footer{margin-top:0}
 .page-lab .catalog-hero{padding:32px 0 27px;border-bottom:1px solid #eadfd9}
 .page-lab .catalog-hero>.wrap{gap:64px;align-items:end}
 .page-lab .catalog-hero h1{font-weight:850}
+.page-lab .catalog-title-point{
+  display:inline-block;white-space:nowrap;padding:0 .05em .03em;
+  color:var(--phase-coral);
+  background:linear-gradient(transparent 66%,#ecd3cb 66% 91%,transparent 91%);
+  -webkit-box-decoration-break:clone;box-decoration-break:clone;
+}
 .page-lab .catalog-search{
   width:100%;max-width:490px;justify-self:end;padding:0;background:transparent;
   border:0;border-radius:0;box-shadow:none;
