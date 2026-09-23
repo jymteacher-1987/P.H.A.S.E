@@ -4,13 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>저항의 직렬연결과 병렬연결에서 전류와 전압 측정하기</title>
+<link rel="stylesheet" href="../assets/css/experiment-ui-icons.css">
 <style>
   :root{
     --blue:#2563eb; --blue-d:#1e40af; --blue-l:#eff6ff;
     --red:#dc2626;  --red-d:#991b1b;
     --amber:#d97706; --amber-d:#92400e;
     --ink:#0f172a; --muted:#64748b; --line:#e2e8f0;
-    --bg:#eef2f7; --card:#fff; --ok:#16a34a; --warn:#d97706;
+    --bg:#f8f1ed; --card:#fff; --ok:#16a34a; --warn:#d97706;
+    --ui:#875a49; --ui-dark:#684537; --ui-soft:#f3e8e2;
     --sh:0 1px 3px rgba(15,23,42,.08);
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
@@ -25,15 +27,16 @@
   .app{padding:9px; display:flex; flex-direction:column; gap:9px;}
 
   /* ── 헤더 ── */
-  .top{background:linear-gradient(135deg,#1e3a8a,#0284c7); color:#fff;
+  .top{background:linear-gradient(135deg,#5c4035,#98705e); color:#fff;
     border-radius:12px; padding:9px 14px; box-shadow:var(--sh);
     display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
-  .top h1{margin:0; font-size:16px; letter-spacing:-.3px; white-space:nowrap;}
+  .top h1{margin:0; font-size:16px; letter-spacing:-.3px; white-space:normal;}
+  .top h1 .ui-icon{margin-right:.3em;}
   .top .sub{font-size:11.5px; opacity:.85; flex:1; min-width:110px;}
   .switch{display:inline-flex; background:rgba(255,255,255,.18); border-radius:999px; padding:3px; gap:2px;}
   .switch button{border:0; background:transparent; padding:5px 12px; border-radius:999px;
     font-weight:700; font-size:12px; color:rgba(255,255,255,.75); cursor:pointer; white-space:nowrap; font-family:inherit;}
-  .switch button.on{background:#fff; color:var(--blue-d);}
+  .switch button.on{background:#fff; color:var(--ui-dark);}
   .switch button.on.w{color:var(--warn);}
   .topbtn{border:0; background:rgba(255,255,255,.18); color:#fff; white-space:nowrap;
     border-radius:8px; padding:6px 11px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit;}
@@ -43,7 +46,7 @@
 
   .card{background:var(--card); border:1px solid var(--line); border-radius:12px; box-shadow:var(--sh);}
   .card>h2{margin:0; padding:8px 12px 6px; font-size:13px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
-  .badge{font-size:10px; background:var(--blue-l); color:var(--blue-d); padding:2px 8px; border-radius:999px; font-weight:700; white-space:nowrap;}
+  .badge{font-size:10px; background:var(--ui-soft); color:var(--ui-dark); padding:2px 8px; border-radius:999px; font-weight:700; white-space:nowrap;}
   .badge.w{background:#fffbeb; color:var(--warn);}
   .badge.g{background:#f0fdf4; color:var(--ok);}
   .spacer{flex:1;}
@@ -52,8 +55,8 @@
   .mid{display:flex; flex-direction:column; gap:9px;}
   .stagecard{display:flex; flex-direction:column; overflow:hidden;}
   .stagecard>h2{flex:none;}
-  #circ{width:100%; height:250px; display:block; background:linear-gradient(#f7fbff,#eaf2fd);}
-  .barwrap{border-top:1px solid var(--line); background:#fcfdff; flex:none;}
+  #circ{width:100%; height:250px; display:block; background:linear-gradient(#fcf8f5,#f1e8e1);}
+  .barwrap{border-top:1px solid var(--line); background:#fffdfb; flex:none;}
   .barhead{font-size:10px; color:#94a3b8; font-weight:700; padding:4px 10px 0; text-align:right;}
   #bars{width:100%; height:120px; display:block;}
 
@@ -69,7 +72,7 @@
   .chip{border:1.5px solid var(--line); background:#f8fafc; border-radius:999px;
     padding:8px 4px; font-size:12.5px; cursor:pointer; white-space:nowrap; font-weight:700;
     color:var(--muted); text-align:center; font-family:inherit;}
-  .chip.sel{background:var(--blue-l); border-color:var(--blue); color:var(--blue-d);}
+  .chip.sel{background:var(--ui-soft); border-color:var(--ui); color:var(--ui-dark);}
   .chip:disabled{opacity:.4; cursor:not-allowed;}
 
   .mrow{display:flex; align-items:center; gap:8px; margin:8px 0;}
@@ -97,9 +100,9 @@
   .btn{display:inline-flex; align-items:center; justify-content:center; gap:5px; border:0;
     border-radius:10px; padding:9px 10px; font-size:12.5px; font-weight:800; cursor:pointer;
     width:100%; white-space:nowrap; font-family:inherit;}
-  .btn.primary{background:var(--blue); color:#fff;}
+  .btn.primary{background:var(--ui); color:#fff;}
   .btn.primary.ready{animation:pulseBtn 1.3s ease-in-out infinite;}
-  @keyframes pulseBtn{0%{box-shadow:0 0 0 0 rgba(37,99,235,.5)}70%{box-shadow:0 0 0 8px rgba(37,99,235,0)}100%{box-shadow:0 0 0 0 rgba(37,99,235,0)}}
+  @keyframes pulseBtn{0%{box-shadow:0 0 0 0 rgba(135,90,73,.5)}70%{box-shadow:0 0 0 8px rgba(135,90,73,0)}100%{box-shadow:0 0 0 0 rgba(135,90,73,0)}}
   .btn.ok{background:var(--ok); color:#fff;}
   .btn.ghost{background:#eef2f7; color:var(--ink);}
   .btn:disabled{opacity:.35; cursor:not-allowed;}
@@ -243,7 +246,7 @@
 <div class="app">
 
   <header class="top">
-    <h1>🔌 저항의 직렬·병렬연결에서 전류와 전압 측정하기</h1>
+    <h1><span class="ui-icon" data-ui-icon="circuit" aria-hidden="true"></span>저항의 직렬·병렬연결에서 전류와 전압 측정하기</h1>
     <span class="sub">전압계는 저항에 병렬로, 전류계는 회로에 직렬로 연결해 측정한다</span>
     <div class="switch" id="modeSw">
       <button id="mIdeal" class="on">이상 모드</button>

@@ -7,7 +7,7 @@
 <style>
   * { box-sizing: border-box; }
   body { margin:0; font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;
-    background:#eef3fb; color:#1f2d3d; display:flex; flex-direction:column; align-items:center;
+    background:#f8f1ed; color:#342d2a; display:flex; flex-direction:column; align-items:center;
     word-break:keep-all; overflow-wrap:break-word; }
   h1 { font-size:clamp(15px,1.7vw,20px); margin:6px 0 6px; text-align:center; }
 
@@ -19,38 +19,38 @@
     .grp { padding:9px 10px; }
     h1 { font-size:16px; }
   }
-  .card { background:#fff; border-radius:12px; padding:8px; box-shadow:0 3px 12px rgba(40,70,120,.12); }
-  .cap { font-size:11px; font-weight:800; color:#33465e; margin:0 3px 4px; }
-  canvas { display:block; background:#f2f7ff; border-radius:8px; width:100%; height:auto; }
+  .card { background:#fff; border-radius:12px; padding:8px; box-shadow:0 3px 12px rgba(99,68,54,.1); }
+  .cap { font-size:11px; font-weight:800; color:#4e3d36; margin:0 3px 4px; }
+  canvas { display:block; background:#fcf8f5; border-radius:8px; width:100%; height:auto; }
 
   .controls { display:flex; gap:10px; justify-content:center; align-items:stretch; flex-wrap:wrap;
     width:100%; max-width:980px; padding:10px 12px; margin:0 auto; }
-  .grp { background:#fff; border-radius:12px; padding:9px 11px; box-shadow:0 3px 12px rgba(40,70,120,.12); }
+  .grp { background:#fff; border-radius:12px; padding:9px 11px; box-shadow:0 3px 12px rgba(99,68,54,.1); }
   .g1 { flex:1 1 300px; } .g2 { flex:1 1 285px; } .g3 { flex:1 1 215px; }
-  .gl { font-size:10.5px; font-weight:800; color:#7086a3; letter-spacing:.2px; margin:8px 1px 4px; }
+  .gl { font-size:10.5px; font-weight:800; color:#806b61; letter-spacing:.2px; margin:8px 1px 4px; }
   .gl:first-child { margin-top:0; }
   .ctrlRow { display:flex; gap:7px; }
   .ctrlBtn { flex:1; padding:8px 6px; font-size:13px; font-weight:800; border:none; border-radius:9px; cursor:pointer; color:#fff; }
   .play { background:#1eaf6b; } .pause { background:#e0912a; } .reset { background:#8394ab; }
   .modeRow { display:flex; gap:5px; flex-wrap:wrap; }
-  .modeBtn { flex:1 1 auto; padding:6px 5px; font-size:11.5px; font-weight:700; border:2px solid #cfdaeb;
-    background:#f3f7fd; color:#3a4c66; border-radius:8px; cursor:pointer; transition:.15s; min-width:54px; }
-  .modeBtn.active { background:#2f6df0; border-color:#2f6df0; color:#fff; }
+  .modeBtn { flex:1 1 auto; padding:6px 5px; font-size:11.5px; font-weight:700; border:2px solid #e4d8d1;
+    background:#fcf8f5; color:#58483f; border-radius:8px; cursor:pointer; transition:.15s; min-width:54px; }
+  .modeBtn.active { background:#875a49; border-color:#875a49; color:#fff; }
   .chk { display:flex; align-items:center; gap:6px; font-size:11.5px; font-weight:600; padding:2px 2px; cursor:pointer; }
-  .chk input { width:14px; height:14px; accent-color:#2f6df0; }
+  .chk input { width:14px; height:14px; accent-color:#875a49; }
   .sw { width:12px; height:4px; border-radius:2px; display:inline-block; }
-  .hintTiny { font-size:10px; color:#7086a3; margin-top:5px; line-height:1.4; }
-  .hintTiny b { color:#2f6df0; }
+  .hintTiny { font-size:10px; color:#806b61; margin-top:5px; line-height:1.4; }
+  .hintTiny b { color:#875a49; }
   .field { margin-bottom:5px; }
   .field label { display:flex; justify-content:space-between; font-size:11px; margin-bottom:1px; font-weight:600; }
-  .field label span { color:#2f6df0; font-weight:800; }
-  input[type=range] { width:100%; accent-color:#2f6df0; height:14px; margin:0; }
+  .field label span { color:#875a49; font-weight:800; }
+  input[type=range] { width:100%; accent-color:#875a49; height:14px; margin:0; }
   .presetRow { display:flex; gap:4px; margin-top:3px; }
-  .preset { flex:1; padding:4px 3px; font-size:10.5px; font-weight:700; border:1px solid #cfdaeb; background:#f3f7fd; color:#3a4c66; border-radius:6px; cursor:pointer; }
-  .preset.active { background:#2f6df0; color:#fff; border-color:#2f6df0; }
+  .preset { flex:1; padding:4px 3px; font-size:10.5px; font-weight:700; border:1px solid #e4d8d1; background:#fcf8f5; color:#58483f; border-radius:6px; cursor:pointer; }
+  .preset.active { background:#875a49; color:#fff; border-color:#875a49; }
   .readout { font-size:11.5px; line-height:1.7; }
   .readout .row { display:flex; justify-content:space-between; gap:12px; }
-  .readout b { color:#2f6df0; }
+  .readout b { color:#875a49; }
   .dotA { color:#e5484d; } .dotB { color:#0e9bb0; }
   .land { color:#e0912a; font-weight:800; }
 </style>

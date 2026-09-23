@@ -4,10 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>전자기 유도 탐구: 코일, 자석, 상대운동</title>
+<link rel="stylesheet" href="../assets/css/experiment-ui-icons.css">
 <style>
 :root{
-  --bg:#eef2f7; --card:#ffffff; --ink:#1e293b; --sub:#64748b;
-  --accent:#2563eb; --line:#dbe3ee;
+  --bg:#f8f1ed; --card:#ffffff; --ink:#342d2a; --sub:#756963;
+  --accent:#875a49; --line:#e7dad4;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
@@ -41,6 +42,7 @@ input[type=range]{width:100%;min-height:34px;margin:0;accent-color:var(--accent)
 .seg input{position:absolute;opacity:0;width:1px;height:1px}
 .seg span{display:flex;min-height:36px;align-items:center;justify-content:center;border:1px solid var(--line);
   border-radius:8px;background:#f8fafc;font-size:12.5px;padding:2px 5px;text-align:center;cursor:pointer;user-select:none}
+.seg span .ui-icon{margin-right:4px}
 .seg input:checked+span{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
 .seg input:focus-visible+span{outline:2px solid #60a5fa;outline-offset:1px}
 button{min-height:36px;padding:4px 10px;border-radius:8px;border:1px solid var(--line);background:#f8fafc;
@@ -70,10 +72,10 @@ button:disabled{opacity:.4;cursor:default}
 <main>
   <section id="stage-wrap">
     <div style="position:relative">
-      <button id="slowBtn" type="button" class="floating-btn">🐢 슬로우 모션</button>
+      <button id="slowBtn" type="button" class="floating-btn" data-ui-icon="timer">슬로우 모션</button>
       <canvas id="stage" tabindex="0" aria-label="전자기 유도 실험 영역. 자석과 코일을 드래그하세요. 방향키는 코일, A/D키는 자석을 움직입니다."></canvas>
     </div>
-    <div id="stage-hint">🖐 자석·코일 드래그 | ⌨ 방향키=코일 · A/D=자석 · Shift=빠르게 · <b>Space=순간포착(찰나의 전류 방향 관찰)</b> · R=초기화 · F=극 뒤집기</div>
+    <div id="stage-hint"><span class="ui-icon" data-ui-icon="hand" aria-hidden="true"></span> 자석·코일 드래그 | ⌨ 방향키=코일 · A/D=자석 · Shift=빠르게 · <b>Space=순간포착(찰나의 전류 방향 관찰)</b> · R=초기화 · F=극 뒤집기</div>
   </section>
 
   <section id="ctrl" class="card">
@@ -99,7 +101,7 @@ button:disabled{opacity:.4;cursor:default}
           <label><input type="radio" name="str" value="weak"><span>약한 자석</span></label>
           <label><input type="radio" name="str" value="strong" checked><span>강한 자석</span></label>
         </div>
-        <div class="btnrow"><button id="flipBtn" type="button">🔄 N–S극 뒤집기 (F)</button></div>
+        <div class="btnrow"><button id="flipBtn" type="button" data-ui-icon="swap">N–S극 뒤집기 (F)</button></div>
         <label style="display:flex;align-items:center;gap:7px;min-height:32px;font-size:12.5px;margin-top:3px">
           <input type="checkbox" id="fieldChk" checked style="width:18px;height:18px"> 자기력선 표시
         </label>
@@ -109,7 +111,7 @@ button:disabled{opacity:.4;cursor:default}
       <fieldset>
         <legend>연결 장치</legend>
         <div class="seg" role="radiogroup" aria-label="연결 장치">
-          <label><input type="radio" name="dev" value="bulb" checked><span>💡 전구</span></label>
+          <label><input type="radio" name="dev" value="bulb" checked><span><i class="ui-icon" data-ui-icon="bulb" aria-hidden="true"></i> 전구</span></label>
           <label><input type="radio" name="dev" value="led"><span>LED</span></label>
           <label><input type="radio" name="dev" value="galvo"><span>검류계</span></label>
         </div>
@@ -132,7 +134,7 @@ button:disabled{opacity:.4;cursor:default}
         </div>
         <div class="btnrow">
           <button id="autoBtn" class="primary" type="button">▶ 자동 왕복</button>
-          <button id="pauseBtn" type="button">📸 순간 포착</button>
+          <button id="pauseBtn" type="button" data-ui-icon="camera">순간 포착</button>
           <button id="resetBtn" type="button">↺ 초기화</button>
         </div>
       </fieldset>
@@ -896,7 +898,8 @@ function setPaused(v){
   /* 일시정지: 그 순간의 전류 방향·화살표·바늘·밝기가 그대로 유지 */
   state.paused = v;
   if (!v) skipEmf = true;
-  $('pauseBtn').textContent = v ? '▶ 다시 재생' : '📸 순간 포착';
+  $('pauseBtn').dataset.uiIcon = v ? 'arrow' : 'camera';
+  $('pauseBtn').textContent = v ? '다시 재생' : '순간 포착';
 }
 function syncAutoBtn(){
   $('autoBtn').textContent = state.auto ? '⏹ 왕복 멈춤' : '▶ 자동 왕복';

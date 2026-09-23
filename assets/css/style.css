@@ -1,20 +1,20 @@
 /* ================= 물리 실험실 — 공통 스타일 (밝은 테마) ================= */
 :root{
-  --bg: #f6f8fc;
+  --bg: #f8f3ef;
   --bg-soft: #ffffff;
   --surface: #ffffff;
-  --surface-2: #eef2fa;
-  --border: #e3e8f2;
-  --text: #1a2030;
-  --text-dim: #5a6274;
-  --text-faint: #8992a8;
-  --accent: #3563e8;
-  --accent-2: #0891b2;
+  --surface-2: #f2e7e1;
+  --border: #e7dad3;
+  --text: #342d2a;
+  --text-dim: #6d625e;
+  --text-faint: #9a8880;
+  --accent: #875a49;
+  --accent-2: #a8877a;
   --accent-3: #f59e0b;
   --accent-warn: #e0453b;
   --radius: 16px;
   --radius-sm: 10px;
-  --shadow: 0 10px 34px rgba(30,45,90,.08);
+  --shadow: 0 10px 34px rgba(70,45,35,.08);
   --max-w: 1180px;
   /* 상단바 높이. index / lab / view 세 페이지가 이 값 하나를 같이 쓴다 —
      페이지를 오갈 때 바 높이가 바뀌지 않게 하려는 것이니, 특정 페이지에서만
@@ -32,8 +32,8 @@ html,body{ margin:0; padding:0; overflow-x:hidden; width:100%; }
 html{ scrollbar-gutter: stable; }
 body{
   background:
-    radial-gradient(1100px 500px at 12% -10%, rgba(53,99,232,.08), transparent 60%),
-    radial-gradient(900px 500px at 100% 0%, rgba(8,145,178,.08), transparent 55%),
+    radial-gradient(1100px 500px at 12% -10%, rgba(135,90,73,.08), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, rgba(168,135,122,.08), transparent 55%),
     var(--bg);
   color: var(--text);
   font-family: "Pretendard","Apple SD Gothic Neo","Malgun Gothic",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
@@ -64,7 +64,7 @@ input, button, textarea, select{ font-family: inherit; }
 .brand .dot{
   width:10px; height:10px; border-radius:50%;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  box-shadow: 0 0 14px rgba(53,99,232,.5);
+  box-shadow: 0 0 14px rgba(135,90,73,.3);
 }
 .nav-links{ display:flex; align-items:center; gap:22px; font-size:14px; color:var(--text-dim); }
 .nav-links a{ transition: color .15s; }
@@ -76,7 +76,7 @@ input, button, textarea, select{ font-family: inherit; }
   color:#fff !important; font-weight:700; font-size:13.5px;
   text-decoration:none; transition: transform .15s ease, box-shadow .15s ease;
 }
-.nav-btn:hover{ transform: translateY(-1px); box-shadow: 0 10px 22px rgba(53,99,232,.35); color:#fff; }
+.nav-btn:hover{ transform: translateY(-1px); box-shadow: 0 10px 22px rgba(135,90,73,.3); color:#fff; }
 .nav-cta{
   padding:9px 16px; border-radius: 999px;
   background: var(--surface-2); border:1px solid var(--border);

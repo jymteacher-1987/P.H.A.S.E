@@ -4,14 +4,14 @@ window.PHASE_PREVIEWS = {
   "height": 540,
   "items": {
     "si-prefixes": {
-      "src": "assets/previews/si-prefixes-4434846a50.webp",
-      "sourceHash": "8783ef7518f58d35cfc2684837c8d33b66c7688bf9d03680ec3bc860a3527b29",
-      "bytes": 23908
+      "src": "assets/previews/si-prefixes-49c0d91186.webp",
+      "sourceHash": "c85079a39bfd80adda4e0deed7a1bec40e2a63034b3160e91925ebed738bb23d",
+      "bytes": 24042
     },
     "newton-laws": {
-      "src": "assets/previews/newton-laws-98ff0f1245.webp",
-      "sourceHash": "4b6bde9f6327c61773fcf8f3c9e2eadf85487d1e625ce38acf53799c52b8f0b7",
-      "bytes": 11432
+      "src": "assets/previews/newton-laws-a85b6688ec.webp",
+      "sourceHash": "14a892e79188a29f70bc645cd05cf8e5c06da73835c495eade2f12bdebb13489",
+      "bytes": 10658
     },
     "newton-prism": {
       "src": "assets/previews/newton-prism-a421ba2179.webp",
@@ -49,24 +49,24 @@ window.PHASE_PREVIEWS = {
       "bytes": 22114
     },
     "momentum-conservation": {
-      "src": "assets/previews/momentum-conservation-3a986a145e.webp",
-      "sourceHash": "9a8274eed61974210f6bb7e86b0556b99040e432f1bc3b86dafe0f7309565294",
-      "bytes": 24232
+      "src": "assets/previews/momentum-conservation-3f4fad157b.webp",
+      "sourceHash": "d164d8e29e2d6664449a37c6296ba991df69b87af907ad7a7393664cc84641ce",
+      "bytes": 23970
     },
     "free-fall-projectile": {
-      "src": "assets/previews/free-fall-projectile-3320d1c517.webp",
-      "sourceHash": "4de8bf34cbadc7464036aec9c8cccb87bf8160f472e8b882dd16290c95b8c478",
-      "bytes": 19204
+      "src": "assets/previews/free-fall-projectile-97daa24946.webp",
+      "sourceHash": "431acccce5ccf83d73ebc778ae0763e43219eee16a34b44a9b2b73015a312112",
+      "bytes": 19108
     },
     "resistor-series-parallel": {
-      "src": "assets/previews/resistor-series-parallel-48b6b18433.webp",
-      "sourceHash": "b19945195fe9c0405e955326f1aa02e3e9334f136ba5af37f23f85a9bbd04aa8",
-      "bytes": 24494
+      "src": "assets/previews/resistor-series-parallel-232585d126.webp",
+      "sourceHash": "a528c8294dc8cf030f4da0617b8dd14857d09799735b59c64500c9b6c1a68638",
+      "bytes": 23980
     },
     "electromagnetic-induction": {
-      "src": "assets/previews/electromagnetic-induction-602b7d30ae.webp",
-      "sourceHash": "5889d3f57f319824bebf0d6cb9b3920cc25d91e422f43165d6949500bf6070a5",
-      "bytes": 25268
+      "src": "assets/previews/electromagnetic-induction-b9331dd49b.webp",
+      "sourceHash": "b55db3a720e2ed6c41a54dcc608538b42ba339cec760c124ea48da87c5f8081f",
+      "bytes": 24836
     },
     "pn-junction": {
       "src": "assets/previews/pn-junction-8d3beaea51.webp",
@@ -79,9 +79,9 @@ window.PHASE_PREVIEWS = {
       "bytes": 25420
     },
     "ideal-gas-law": {
-      "src": "assets/previews/ideal-gas-law-3ef8de0598.webp",
-      "sourceHash": "cf25c96c8ed4f82fd3dd69024b808d0c5fd2de8a8625e9868c5b6e8f10e38a96",
-      "bytes": 10934
+      "src": "assets/previews/ideal-gas-law-ef001eb771.webp",
+      "sourceHash": "2048e819ac7e01682621ba1b9c55166f51557d76b8d881dfd4607b472660f6fc",
+      "bytes": 10816
     },
     "simultaneity-relativity": {
       "src": "assets/previews/simultaneity-relativity-8ee2f70f28.webp",

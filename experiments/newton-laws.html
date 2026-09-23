@@ -7,21 +7,22 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/experiment-ui-icons.css">
 <style>
   :root{
-    --bg:#eceff4;
+    --bg:#f6f0eb;
     --paper:#ffffff;
-    --ink:#0f1f3d;
-    --ink-soft:#5a6a85;
-    --line:#dbe1ea;
-    --line-soft:#eef1f6;
+    --ink:#342d2a;
+    --ink-soft:#6d625e;
+    --line:#e6dcd6;
+    --line-soft:#f2e9e4;
     --blue:#1d4ed8;
     --blue-soft:#dbe7ff;
     --red:#dc2626;
     --red-soft:#fde2e2;
     --green:#059669;
     --green-soft:#d3f1e6;
-    --navy:#0f1f3d;
+    --navy:#4d3b36;
     --safe-t:env(safe-area-inset-top,0px);
     --safe-b:env(safe-area-inset-bottom,0px);
     --safe-l:env(safe-area-inset-left,0px);
@@ -41,7 +42,7 @@
 
   /* Header */
   header{flex:0 0 auto;}
-  .kicker{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:2.5px;color:var(--blue);text-transform:uppercase;}
+  .kicker{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:2.5px;color:#875a49;text-transform:uppercase;}
   .h-title{font-weight:900;font-size:clamp(18px,4.8vw,24px);line-height:1.1;margin-top:3px;letter-spacing:-.3px;}
   .h-rule{height:3px;width:46px;background:var(--navy);margin-top:7px;border-radius:2px;}
 
@@ -53,7 +54,7 @@
     padding:6px 3px 8px;border-bottom:3px solid transparent;margin-bottom:-1px;
     display:flex;flex-direction:column;align-items:center;gap:2px;transition:color .15s,border-color .15s;line-height:1.1;
   }
-  .tab .num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--blue);font-weight:700;letter-spacing:1px;}
+  .tab .num{font-family:'JetBrains Mono',monospace;font-size:10px;color:#875a49;font-weight:700;letter-spacing:1px;}
   .tab .nm{font-weight:800;font-size:clamp(12px,3.5vw,15px);white-space:nowrap;}
   .tab .ky{font-weight:600;font-size:clamp(10px,2.9vw,12px);color:var(--ink-soft);white-space:nowrap;}
   .tab.active{color:var(--navy);border-bottom-color:var(--navy);}
@@ -71,7 +72,7 @@
     box-shadow:0 8px 26px -16px rgba(15,31,61,.35);
   }
   .stage::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;
-    background:linear-gradient(90deg,var(--blue),#3b82f6 60%,transparent);z-index:3;pointer-events:none;}
+    background:linear-gradient(90deg,#875a49,#c7a493 60%,transparent);z-index:3;pointer-events:none;}
   canvas{display:block;width:100%;height:100%;}
 
   /* Telemetry chips on canvas */
@@ -132,9 +133,9 @@
   }
   button.act:active{transform:scale(.96);}
   button.act .ic{font-size:17px;}
-  button.primary{flex:2 1 0;color:#fff;font-size:16px;background:var(--blue);border-color:var(--blue);
-    box-shadow:0 6px 16px -8px rgba(29,78,216,.7);}
-  button.primary.active{background:#2f6bff;}
+  button.primary{flex:2 1 0;color:#fff;font-size:16px;background:#875a49;border-color:#875a49;
+    box-shadow:0 6px 16px -8px rgba(134,75,68,.5);}
+  button.primary.active{background:#684537;}
   button.ghost{color:var(--ink-soft);}
   button.ghost.active{background:#f4f7fc;color:var(--navy);border-color:var(--line);}
 
@@ -200,12 +201,12 @@
     <div class="note" id="note1"><span class="tag">NOTE</span><div class="txt" id="note1txt">정지한 물체는 힘을 받기 전까지 계속 멈춰 있습니다. 밀기 버튼을 눌러 보세요.</div></div>
     <div class="controls">
       <div class="seg">
-        <button class="seg-btn active" data-floor="normal"><span class="ic">🪨</span>일반 바닥</button>
-        <button class="seg-btn" data-floor="ice"><span class="ic">🧊</span>얼음판</button>
-        <button class="seg-btn" data-floor="none"><span class="ic">✨</span>마찰 없는<br>바닥</button>
+         <button class="seg-btn active" data-floor="normal"><span class="ic ui-icon" data-ui-icon="layers" aria-hidden="true"></span>일반 바닥</button>
+         <button class="seg-btn" data-floor="ice"><span class="ic ui-icon" data-ui-icon="snowflake" aria-hidden="true"></span>얼음판</button>
+         <button class="seg-btn" data-floor="none"><span class="ic ui-icon" data-ui-icon="sparkle" aria-hidden="true"></span>마찰 없는<br>바닥</button>
       </div>
       <div class="row">
-        <button class="act primary" id="l1-push"><span class="ic">👉</span> 밀기 (꾹 누르기)</button>
+         <button class="act primary" id="l1-push"><span class="ic ui-icon" data-ui-icon="arrow" aria-hidden="true"></span> 밀기 (꾹 누르기)</button>
         <button class="act ghost" id="l1-reset"><span class="ic">↺</span> 다시</button>
       </div>
     </div>
@@ -266,7 +267,7 @@
         </div>
       </div>
       <div class="row">
-        <button class="act primary" id="l3-push"><span class="ic">💥</span> 밀기 (꾹 누르기)</button>
+         <button class="act primary" id="l3-push"><span class="ic ui-icon" data-ui-icon="arrow" aria-hidden="true"></span> 밀기 (꾹 누르기)</button>
         <button class="act ghost" id="l3-pause"><span class="ic">⏸</span> 일시정지</button>
         <button class="act ghost" id="l3-reset"><span class="ic">↺</span> 다시</button>
       </div>

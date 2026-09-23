@@ -4,13 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>기체 법칙 가상실험</title>
+<link rel="stylesheet" href="../assets/css/experiment-ui-icons.css">
 <style>
 :root{
-  --bg:#f3f6fa;--card:#fff;--line:#dee6f0;--line2:#eef2f8;
-  --ink:#152238;--ink2:#4b5b73;--ink3:#7d8ba1;
-  --ac:#1b5fc1;--acw:#e8f0fd;--acd:#134a9b;
+  --bg:#f8f1ed;--card:#fff;--line:#e8ddd7;--line2:#f1e7e2;
+  --ink:#342d2a;--ink2:#625a56;--ink3:#8c7e78;
+  --ac:#875a49;--acw:#f3e8e2;--acd:#684537;
   --wm:#c85a2a;--wmw:#fdeee6;--ok:#1a7f5a;--okw:#e4f5ee;
-  --c1:#2f6ed0;--c2:#1d8f7f;--c3:#c26a2c;--c4:#7b52c9;
+  --c1:#875a49;--c2:#1d8f7f;--c3:#c26a2c;--c4:#7b52c9;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 [hidden]{display:none!important;}
@@ -283,11 +284,11 @@ td.d{font-weight:800;color:var(--acd);}
       </div>
       <div class="card">
         <div class="btns">
-          <button class="btn pri wide" id="bRec">📍 기록하기</button>
-          <button class="btn fit wide" id="bFit">📈 관계 분석</button>
+          <button class="btn pri wide" id="bRec" data-ui-icon="record">기록하기</button>
+          <button class="btn fit wide" id="bFit" data-ui-icon="chart">관계 분석</button>
           <button class="btn" id="bUndo">↺ 취소</button>
-          <button class="btn" id="bClr">🗑 비우기</button>
-          <button class="btn" id="bAnal">📖 결과 보기</button>
+          <button class="btn" id="bClr" data-ui-icon="trash">비우기</button>
+          <button class="btn" id="bAnal" data-ui-icon="book">결과 보기</button>
           <button class="btn" id="bRst">⟲ 초기화</button>
           <button class="btn wide fs" id="bFs">⛶ 전체 화면</button>
         </div>
@@ -309,7 +310,7 @@ const clamp=(x,a,b)=>x<a?a:(x>b?b:x);
 const f=(x,d)=>x.toFixed(d);
 const rd=(x,d)=>{const p=Math.pow(10,d);return (x<0?-1:1)*Math.round(Math.abs(x)*p)/p;};
 const r1=x=>rd(x,1), r2=x=>rd(x,2), r3=x=>rd(x,3);
-const COL={1:'#2f6ed0',2:'#1d8f7f',3:'#c26a2c',4:'#7b52c9'};
+const COL={1:'#875a49',2:'#1d8f7f',3:'#c26a2c',4:'#7b52c9'};
 
 /* ── 축 정의 ── */
 const AX={
@@ -1053,7 +1054,7 @@ function render(){
   renderSteps(); renderGHead(); renderMeter(); renderCtrl(); renderTable(); renderRes();
   const d=S[step], rs=rows();
   document.getElementById('bRec').disabled = step===4||d.rec.length>=MAXREC;
-  document.getElementById('bRec').textContent = step===4?'📍 이 단계는 기록하지 않음':(d.rec.length>=MAXREC?'📍 기록 가득 참':`📍 기록하기 (${d.rec.length+1}번째)`);
+  document.getElementById('bRec').textContent = step===4?'이 단계는 기록하지 않음':(d.rec.length>=MAXREC?'기록 가득 참':`기록하기 (${d.rec.length+1}번째)`);
   document.getElementById('bFit').disabled = rs.length<NEED;
   document.getElementById('bUndo').disabled = step===4||d.rec.length===0;
   document.getElementById('bClr').disabled = step===4;

@@ -384,7 +384,7 @@
             <h3>${escapeHTML(e.title)}</h3>
             <p>${escapeHTML(e.description)}</p>
             ${lessonMarkup}
-            <div class="meta"><span class="go">열어보기 ↗</span></div>
+            <div class="meta"><span class="go">체험하기 ↗</span></div>
           </div>
         </a>`;
       })
