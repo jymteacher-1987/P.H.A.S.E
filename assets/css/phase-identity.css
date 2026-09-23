@@ -1,11 +1,9 @@
-/* A warm field-notebook language built around the site's own experiment images. */
+/* Warm, calm framing for the teachers' virtual physics laboratory. */
 body.page-home,body.page-lab{
   --notebook-ink:#26382d;
   --notebook-line:#d4d0c5;
   background-color:#f8f6f0;
-  background-image:linear-gradient(#eae6db 1px,transparent 1px),linear-gradient(90deg,#eae6db 1px,transparent 1px);
-  background-size:32px 32px;
-  background-position:-1px -1px;
+  background-image:none;
 }
 .page-home .site-nav,.page-lab .site-nav{background:#fff;backdrop-filter:none;border-bottom-color:var(--notebook-line)}
 .page-home .brand .dot,.page-lab .brand .dot{border-radius:2px;background:#ae6245;box-shadow:none}
@@ -35,26 +33,13 @@ body.page-home,body.page-lab{
 .page-home .stat-card .num{background:none;color:#a95c40;-webkit-text-fill-color:currentColor;font-size:23px}
 .page-home .stat-card .label{color:#6b7066;line-height:1.35}
 .page-home .hero-visual{max-width:none}
-.specimen-board{
-  position:relative;padding:13px;background:#fffefa;border:1px solid #bcb7a8;
-  box-shadow:7px 7px 0 #e1ddd1;transform:rotate(.35deg);
+.teacher-board{margin:0;background:#fffefa;border:1px solid #bcb7a8;box-shadow:8px 8px 0 #e1ddd1}
+.teacher-board img{display:block;width:100%;height:auto}
+.teacher-board figcaption{
+  display:flex;justify-content:space-between;gap:12px;padding:10px 13px;
+  color:#5e705d;font-size:11px;font-weight:700;letter-spacing:.01em;
 }
-.specimen-head,.specimen-foot{
-  display:flex;justify-content:space-between;align-items:center;gap:8px;
-  color:#5e705d;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
-  font-size:10px;font-weight:700;letter-spacing:.065em;
-}
-.specimen-head{padding:0 1px 10px}
-.specimen-foot{padding:10px 1px 0}
-.specimen-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,.65fr);gap:8px;height:clamp(190px,30vh,260px)}
-.specimen-grid figure{position:relative;min-width:0;min-height:0;margin:0;overflow:hidden;border:1px solid #d2cfc3;background:#f2efe6}
-.specimen-grid img{width:100%;height:100%;object-fit:cover;object-position:center top}
-.specimen-side{display:grid;grid-template-rows:1fr 1fr;gap:8px;min-height:0}
-.specimen-grid figcaption{
-  position:absolute;right:0;bottom:0;left:0;padding:5px 8px;
-  background:rgba(33,47,38,.92);color:#fff;font-size:11px;font-weight:700;line-height:1.4;
-}
-.specimen-grid figcaption b{margin-right:6px;color:#eab78b;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:10px}
+.teacher-board figcaption span:last-child{color:#a95c40;white-space:nowrap}
 .page-home .site-footer,.page-lab .site-footer{border-top-color:#bcb7a8;color:#6b7066}
 
 .page-lab .catalog-hero{border-bottom:1px solid #c9c4b7}
@@ -101,17 +86,13 @@ body.page-home,body.page-lab{
 
 @media(max-width:860px){
   .page-home .hero-visual{width:min(100%,460px)}
-  .specimen-grid{height:210px}
   .page-lab .catalog-search{padding:18px}
 }
 @media(max-width:480px){
   .page-home .hero{padding-top:28px}
   .page-home .hero-visual{width:100%;margin-bottom:8px}
-  .specimen-board{padding:9px;box-shadow:4px 4px 0 #e1ddd1;transform:none}
-  .specimen-grid{height:178px;gap:5px}
-  .specimen-side{gap:5px}
-  .specimen-head,.specimen-foot{font-size:8px}
-  .specimen-grid figcaption{padding:4px 5px;font-size:9px}
+  .teacher-board{box-shadow:4px 4px 0 #e1ddd1}
+  .teacher-board figcaption{padding:8px 9px;font-size:9px}
   .page-home .stats-row{grid-template-columns:repeat(3,minmax(0,1fr))}
   .page-home .stat-card{padding:8px 8px}
   .page-home .stat-card .num{font-size:20px}
