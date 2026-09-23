@@ -34,6 +34,17 @@ service cloud.firestore {
         && data.updatedAt is timestamp && data.updatedAt == request.time;
     }
 
+    function validLessonNote() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['question', 'focus', 'visible', 'updatedAt'])
+        && data.keys().hasOnly(['question', 'focus', 'visible', 'updatedAt'])
+        && data.question is string && data.question.size() <= 180
+        && data.focus is string && data.focus.size() <= 180
+        && data.visible is bool
+        && (!data.visible || (data.question.trim().size() > 0 && data.focus.trim().size() > 0))
+        && data.updatedAt is timestamp && data.updatedAt == request.time;
+    }
+
     // 실험 목록: 누구나 읽을 수 있고, 관리자만 쓰기 가능
     match /experiments/{docId} {
       allow read: if true;
@@ -47,6 +58,16 @@ service cloud.firestore {
       allow create, update: if isAdmin()
         && docId.size() <= 128 && docId.matches('[a-z0-9]+(-[a-z0-9]+)*')
         && validCatalogMetadata();
+      allow delete: if isAdmin();
+    }
+
+    // 실험 길잡이는 누구나 읽고, 인증된 관리자만 문구를 바꿀 수 있다.
+    // 원래 실험 파일과 기본 문구는 GitHub에 남는다.
+    match /lessonNotes/{docId} {
+      allow read: if true;
+      allow create, update: if isAdmin()
+        && docId.size() <= 128 && docId.matches('[a-z0-9]+(-[a-z0-9]+)*')
+        && validLessonNote();
       allow delete: if isAdmin();
     }
 

@@ -94,4 +94,22 @@
   }
   frame.title = exp.title;
   frame.src = exp.path;
+  if (exp.lessonNote?.question && exp.lessonNote?.focus) {
+    const toggle = document.getElementById('viewerNoteToggle');
+    const panel = document.getElementById('viewerNotePanel');
+    document.getElementById('viewerNoteQuestion').textContent = exp.lessonNote.question;
+    document.getElementById('viewerNoteFocus').textContent = exp.lessonNote.focus;
+    toggle.hidden = false;
+    function setNoteOpen(open) {
+      panel.hidden = !open;
+      toggle.setAttribute('aria-expanded', String(open));
+      if (open) document.getElementById('viewerNoteTitle').focus({ preventScroll: true });
+      else toggle.focus({ preventScroll: true });
+    }
+    toggle.addEventListener('click', () => setNoteOpen(panel.hidden));
+    document.getElementById('viewerNoteClose').addEventListener('click', () => setNoteOpen(false));
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !panel.hidden) setNoteOpen(false);
+    });
+  }
 })();

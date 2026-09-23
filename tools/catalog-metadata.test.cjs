@@ -7,19 +7,21 @@ const source = fs.readFileSync(path.join(__dirname, '../assets/js/data.js'), 'ut
 const copy = (value) => JSON.parse(JSON.stringify(value));
 const base = {
   categories: [{ id: 'mechanics', name: '역학과 에너지' }],
-  experiments: [{ id: 'pendulum', title: '진자', description: '원래 설명', category: 'mechanics', path: 'experiments/pendulum.html?v=123', tags: ['운동'], preview: 'pendulum.webp' }],
+  experiments: [{ id: 'pendulum', title: '진자', description: '원래 설명', category: 'mechanics', path: 'experiments/pendulum.html?v=123', tags: ['운동'], preview: 'pendulum.webp',
+    lessonNote: { question: '어떤 움직임일까요?', focus: '주기를 살펴보세요.' } }],
   plays: [{ id: 'orbit-game', title: '궤도 놀이', description: '', path: 'plays/orbit.html', tags: [] }],
 };
 const metadata = (patch = {}) => ({ title: '새 제목', description: '새 설명', tags: ['물리'], listed: true, updatedAt: { seconds: 100 }, ...patch });
+const note = (patch = {}) => ({ question: '어떻게 달라질까요?', focus: '변화를 비교해 보세요.', visible: true, updatedAt: { seconds: 100 }, ...patch });
 const snapshot = (entries) => ({ docs: Object.entries(entries).map(([id, data]) => ({ id, data: () => data })) });
-function harness({ experiments = {}, overrides = {}, reads, configured = true, timers } = {}) {
+function harness({ experiments = {}, overrides = {}, notes = {}, reads, configured = true, timers } = {}) {
   const requests = [];
   const db = { collection(name) {
     const query = {
       orderBy() { return query; },
       get(options) {
         requests.push({ name, options });
-        return reads ? reads(name) : Promise.resolve(snapshot(name === 'experiments' ? experiments : overrides));
+        return reads ? reads(name) : Promise.resolve(snapshot(name === 'experiments' ? experiments : name === 'lessonNotes' ? notes : overrides));
       },
     };
     return query;
@@ -51,6 +53,7 @@ test('metadata changes experiments and plays while preserving paths, categories,
   assert.equal(exp.category, 'mechanics');
   assert.equal(exp.preview, 'pendulum.webp');
   assert.equal(exp.source, 'static');
+  assert.equal(exp.lessonNote.question, '어떤 움직임일까요?');
   assert.equal(data.experiments[0].source, 'firebase');
   assert.equal(data.experiments[0].path, 'https://example.com/exp.html');
   assert.equal(data.plays[0].title, '새 놀이');
@@ -109,12 +112,12 @@ test('missing Firebase configuration preserves a complete static catalog without
 test('permission denial falls back safely, while independent successful override reads still apply', async () => {
   const { site, requests } = harness({ reads: (name) => name === 'experiments'
     ? Promise.reject(Object.assign(new Error('denied'), { code: 'permission-denied' }))
-    : Promise.resolve(snapshot({ pendulum: metadata() })) });
+    : Promise.resolve(snapshot(name === 'catalogOverrides' ? { pendulum: metadata() } : {})) });
   const data = await site.getAllData();
   assert.equal(data.experiments[0].title, '새 제목');
   assert.equal(data.catalogStatus.experiments, 'unavailable');
   assert.equal(data.catalogStatus.overrides, 'ready');
-  assert.deepEqual(copy(requests.map((request) => request.options)), [{ source: 'server' }, { source: 'server' }]);
+  assert.deepEqual(copy(requests.map((request) => request.options)), [{ source: 'server' }, { source: 'server' }, { source: 'server' }]);
   const denied = harness({ reads: () => Promise.reject(new Error('denied')) });
   assert.equal((await denied.site.getAllData()).experiments[0].title, '진자');
 });
@@ -132,12 +135,13 @@ test('offline reads are bounded at 2000ms and late failures cannot change the re
   });
   const pending = site.getAllData();
   await Promise.resolve();
-  assert.equal(rejections.length, 2, 'both reads start without waiting for each other');
+  assert.equal(rejections.length, 3, 'all reads start without waiting for each other');
   for (const callback of [...timers.values()]) callback();
   const result = await pending;
   assert.equal(result.experiments[0].title, '진자');
   assert.equal(result.catalogStatus.experiments, 'timeout');
   assert.equal(result.catalogStatus.overrides, 'timeout');
+  assert.equal(result.catalogStatus.lessonNotes, 'timeout');
   assert.equal(timers.size, 0);
   for (const reject of rejections) reject(new Error('late network failure'));
   await new Promise((resolve) => setImmediate(resolve));
@@ -152,6 +156,30 @@ test('subsequent reads observe restoration and do not retain stale hidden metada
   const restored = await site.getAllData();
   assert.equal(restored.experiments[0].title, '진자');
   assert.equal(restored.experiments[0].listed, true);
+});
+
+test('curated guidance survives offline reads, while valid Firebase text can replace or hide it', async () => {
+  const { site } = harness({ notes: { pendulum: note() } });
+  const replaced = await site.getAllData();
+  assert.deepEqual(copy(replaced.experiments[0].lessonNote), {
+    question: '어떻게 달라질까요?', focus: '변화를 비교해 보세요.',
+  });
+  const hidden = harness({ notes: { pendulum: note({ question: '', focus: '', visible: false }) } });
+  assert.equal((await hidden.site.getAllData()).experiments[0].lessonNote, null);
+  const offline = harness({ reads: () => Promise.reject(new Error('offline')) });
+  assert.equal((await offline.site.getAllData()).experiments[0].lessonNote.question, '어떤 움직임일까요?');
+});
+
+test('invalid guidance is rejected without replacing the curated text', async () => {
+  for (const value of [
+    note({ question: '' }), note({ focus: 'x'.repeat(181) }),
+    note({ visible: 'true' }), note({ path: 'changed' }),
+  ]) {
+    const { site } = harness({ notes: { pendulum: value } });
+    const data = await site.getAllData();
+    assert.equal(data.experiments[0].lessonNote.question, '어떤 움직임일까요?');
+    assert.equal((await site.getCatalogEditorData()).invalidLessonNoteCount, 1);
+  }
 });
 
 test('admin metadata editor initializes without the optional Storage SDK', () => {

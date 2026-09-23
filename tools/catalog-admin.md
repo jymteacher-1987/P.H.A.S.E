@@ -1,12 +1,14 @@
 # 실험실 소개 편집
 
-새 실험은 기존대로 HTML 파일과 `data/experiments.json`에 등록하고 `assets/js/experiments-data.js`를 재생성합니다. **새 실험을 등록할 때 Firebase 작업은 필요하지 않습니다.** 관리자 목록도 같은 등록 데이터를 읽어 새 항목을 표시합니다.
+새 실험은 기존대로 HTML 파일과 `data/experiments.json`에 등록하고 `assets/js/experiments-data.js`를 재생성합니다. 등록할 때 `lessonNote.question`과 `lessonNote.focus`도 실험 내용에 맞춰 작성합니다. **새 실험을 등록할 때 Firebase 작업은 필요하지 않습니다.** 관리자 목록도 같은 등록 데이터를 읽어 새 항목을 표시합니다.
 
 사이트 관리자 화면에서는 제목, 설명, 검색 태그, 목록 표시 여부를 바꿀 수 있습니다. 저장한 정보는 Firebase 프로젝트 `physics-lab-b0591`의 `catalogOverrides/{기존 활동 ID}`에만 기록됩니다. 실험 HTML, 경로, 분류, 대표 사진은 GitHub의 원본을 유지합니다. 원래 정보로 복원하면 해당 덮어쓰기 문서가 삭제되어 최신 GitHub 기본값을 다시 사용합니다. 기존 항목의 ID를 바꾸면 별개의 활동으로 취급됩니다.
 
+실험 길잡이의 질문, 관찰 포인트, 표시 여부는 별도 `lessonNotes/{기존 실험 ID}` 문서에 저장합니다. 공개 목록과 뷰어는 저장된 문구를 우선 표시하고, Firebase를 읽지 못하면 GitHub의 기본 문구를 표시합니다. 관리자 화면의 ‘기본 문구로 되돌리기’는 해당 문서를 삭제합니다.
+
 ## 최초 적용
 
-1. 현재 Firestore 규칙을 보관하고 이 저장소의 `firestore.rules`와 비교합니다. 기존 실험 및 방문자 카운터 규칙을 유지한 상태에서 `catalogOverrides` 규칙을 함께 적용합니다.
+1. 현재 Firestore 규칙을 보관하고 이 저장소의 `firestore.rules`와 비교합니다. 기존 실험 및 방문자 카운터 규칙을 유지한 상태에서 `catalogOverrides`와 `lessonNotes` 규칙을 함께 적용합니다.
 2. 사이트 코드 변경을 배포합니다. 관리자 계정은 기존 `phase@phase.com`을 그대로 사용합니다. 콘솔의 Google 계정과 사이트 관리자 로그인은 별개입니다.
 3. 관리자 화면에서 연결 상태와 저장·원래 정보 복원을 확인합니다. 저장 후 공개 목록을 다시 열어 제목과 검색 태그가 반영되는지 확인합니다.
 

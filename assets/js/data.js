@@ -12,6 +12,7 @@ const SITE = (function () {
   let db = null;
   const CATALOG_READ_TIMEOUT = 2000;
   const METADATA_LIMITS = Object.freeze({ title: 100, description: 600, tags: 8, tag: 24 });
+  const LESSON_NOTE_LIMIT = 180;
 
   function isFirebaseConfigured() {
     const c = window.FIREBASE_CONFIG;
@@ -114,6 +115,38 @@ const SITE = (function () {
     }, { overrides: Object.create(null), invalidCount: 0 });
   }
 
+  // 실험 길잡이는 목록 소개와 별도로 저장한다. Firebase가 닿지 않아도 감수한
+  // 기본 문구를 보여주고, 관리자가 저장한 문구만 덮어쓴다.
+  function validateLessonNote(value) {
+    if (!value || typeof value !== "object" || Array.isArray(value)) return { error: "실험 길잡이를 확인해주세요." };
+    const allowed = ["question", "focus", "visible", "updatedAt"];
+    if (Object.keys(value).some((key) => !allowed.includes(key))) return { error: "질문·관찰 포인트·표시 여부만 수정할 수 있습니다." };
+    if (typeof value.question !== "string" || value.question.length > LESSON_NOTE_LIMIT ||
+        typeof value.focus !== "string" || value.focus.length > LESSON_NOTE_LIMIT) {
+      return { error: `질문과 관찰 포인트는 각각 ${LESSON_NOTE_LIMIT}자 이내로 입력해주세요.` };
+    }
+    if (typeof value.visible !== "boolean") return { error: "길잡이 표시 여부를 확인해주세요." };
+    const question = value.question.trim();
+    const focus = value.focus.trim();
+    if (value.visible && (!question || !focus)) return { error: "길잡이를 표시하려면 질문과 관찰 포인트를 모두 입력해주세요." };
+    return { value: { question, focus, visible: value.visible } };
+  }
+
+  function loadLessonNotes() {
+    return readCatalog(async () => {
+      const snap = await db.collection("lessonNotes").get({ source: "server" });
+      const notes = Object.create(null);
+      let invalidCount = 0;
+      snap.docs.forEach((doc) => {
+        const raw = doc.data();
+        const result = validateLessonNote(raw);
+        if (result.error) { invalidCount++; return; }
+        notes[doc.id] = { ...result.value, updatedAt: raw.updatedAt || null };
+      });
+      return { notes, invalidCount };
+    }, { notes: Object.create(null), invalidCount: 0 });
+  }
+
   function applyCatalogOverride(item, overrides) {
     const override = overrides[item.id];
     if (!override) return { ...item, listed: true };
@@ -123,8 +156,8 @@ const SITE = (function () {
   }
 
   async function getCatalogEditorData() {
-    const [staticData, dynamicResult, overrideResult] = await Promise.all([
-      loadStaticExperiments(), loadFirestoreExperiments(), loadCatalogOverrides(),
+    const [staticData, dynamicResult, overrideResult, noteResult] = await Promise.all([
+      loadStaticExperiments(), loadFirestoreExperiments(), loadCatalogOverrides(), loadLessonNotes(),
     ]);
     return {
       categories: staticData.categories || [],
@@ -132,7 +165,9 @@ const SITE = (function () {
       plays: (staticData.plays || []).map((item) => ({ ...item, source: "static", section: "play" })),
       overrides: overrideResult.value.overrides,
       invalidOverrideCount: overrideResult.value.invalidCount,
-      catalogStatus: { experiments: dynamicResult.status, overrides: overrideResult.status },
+      lessonNotes: noteResult.value.notes,
+      invalidLessonNoteCount: noteResult.value.invalidCount,
+      catalogStatus: { experiments: dynamicResult.status, overrides: overrideResult.status, lessonNotes: noteResult.status },
     };
   }
 
@@ -144,7 +179,12 @@ const SITE = (function () {
   // listed=false는 목록에서만 숨긴다. 직접 링크를 막는 보안 기능은 아니다.
   async function getAllData({ includeUnlisted = false } = {}) {
     const data = await getCatalogEditorData();
-    const merge = (items) => items.map((item) => applyCatalogOverride(item, data.overrides))
+    const merge = (items) => items.map((item) => {
+      const catalogItem = applyCatalogOverride(item, data.overrides);
+      const saved = data.lessonNotes[item.id];
+      const note = saved || (item.lessonNote ? { ...item.lessonNote, visible: true } : null);
+      return { ...catalogItem, lessonNote: note?.visible ? { question: note.question, focus: note.focus } : null };
+    })
       .filter((item) => includeUnlisted || item.listed);
     return { categories: data.categories, experiments: merge(data.experiments), plays: merge(data.plays), catalogStatus: data.catalogStatus };
   }
@@ -241,6 +281,7 @@ const SITE = (function () {
     getDailyRecommendation,
     getCatalogEditorData,
     validateCatalogMetadata,
+    validateLessonNote,
     recordVisit,
     recordVisitAndGetCounts,
     get db() {

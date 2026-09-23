@@ -5,6 +5,7 @@
 ## 새 실험을 추가하거나 수정할 때
 
 1. 실험 HTML을 `experiments/` 또는 `plays/`에 저장하고 기존처럼 `data/experiments.json`과 `assets/js/experiments-data.js`에 등록합니다. 두 목록의 ID와 경로는 같아야 합니다. 새 HTML도 기존 활동처럼 `<head>`에서 `../assets/js/browser-compat.js`를 먼저 불러와 구형 Safari의 그리기 대체 처리를 사용하세요. 메뉴 링크는 공통 `view.html?id=...` 뷰어를 유지합니다.
+   `experiments/`에 새 실험을 등록할 때는 실제 조작과 맞는 `lessonNote.question`(생각해 볼 질문)과 `lessonNote.focus`(관찰 포인트)도 함께 작성합니다. 현재 실험 21개 모두에 길잡이가 있으므로 새 실험만 빠지지 않도록 합니다. 기본 문구는 GitHub에 보관하며 Firebase 연결 없이도 표시됩니다.
 2. 필요하면 `tools/preview-scenes.json`에 촬영 전에 누를 버튼과 대기 시간을 적습니다. 예: `"newton-rush": { "steps": [{ "click": "#start" }, { "wait": 1000 }] }`. `select` + `value`, `press`, `target`(촬영할 요소), `viewport`도 지원합니다. 별도 설정이 없으면 첫 실험 화면을 촬영합니다.
 3. `main`에 올리면 **Update activity previews** 작업이 새롭거나 바뀐 장면만 촬영하고, 사진·목록을 GitHub에 저장한 뒤 Pages 배포를 요청합니다. 이전 이미지가 준비돼 있으면 새 촬영에 실패해도 유지됩니다. 실행 오류나 빈 캡처는 작업 실패로 표시되니 Actions 결과를 확인하세요.
 

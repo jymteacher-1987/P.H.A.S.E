@@ -381,6 +381,9 @@
           : `view.html?id=${encodeURIComponent(e.id)}&src=${e.source}`;
         const from = catalogParams().toString();
         if (from) url += `&from=${encodeURIComponent(from)}`;
+        const lessonMarkup = e.lessonNote?.question
+          ? `<div class="lesson-note-preview"><span>실험 길잡이</span><strong>${escapeHTML(e.lessonNote.question)}</strong></div>`
+          : "";
         return `
         <a class="exp-card ${isNew(e) ? "new" : ""}" data-id="${escapeHTML(e.id)}" href="${escapeHTML(url)}">
           <div class="exp-preview">${previewMarkup(e)}<span class="card-index" aria-hidden="true">${String(index + 1).padStart(2, "0")}</span></div>
@@ -388,7 +391,8 @@
             <span class="tag" data-cat="${escapeHTML(tagCat)}">${escapeHTML(tag)}</span>
             <h3>${escapeHTML(e.title)}</h3>
             <p>${escapeHTML(e.description)}</p>
-            <div class="meta"><span>${escapeHTML(e.date || "")}</span><span class="go">열어보기 ↗</span></div>
+            ${lessonMarkup}
+            <div class="meta"><span class="go">열어보기 ↗</span></div>
           </div>
         </a>`;
       })

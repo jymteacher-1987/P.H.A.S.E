@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex, nofollow" />
 <title>관리자 — 가상 물리 실험실</title>
 <link rel="stylesheet" href="assets/css/style.css?v=4d7b6bd877" />
-<link rel="stylesheet" href="assets/css/admin-catalog.css?v=catalog-20260923" />
+<link rel="stylesheet" href="assets/css/admin-catalog.css?v=notes-20260924b" />
 </head>
 <body class="page-admin">
 <main class="wrap">
@@ -70,6 +70,34 @@
       </fieldset>
       <div class="msg" id="catalogMsg" role="status" aria-live="polite"></div>
     </form>
+    <section class="lesson-editor" id="lessonEditor" aria-labelledby="lessonEditorTitle">
+      <div class="lesson-editor-heading">
+        <h2 id="lessonEditorTitle">실험 길잡이</h2>
+        <p>실험을 시작할 때 생각해 볼 질문과, 화면에서 관찰할 점을 적어주세요.</p>
+      </div>
+      <p class="catalog-help" id="lessonSavedStatus" role="status" aria-live="polite"></p>
+      <form id="lessonForm">
+        <fieldset id="lessonFields" disabled>
+          <div class="field">
+            <label for="lessonQuestion">생각해 볼 질문 <span class="catalog-limit">180자 이내</span></label>
+            <textarea id="lessonQuestion" maxlength="180" rows="2"></textarea>
+          </div>
+          <div class="field">
+            <label for="lessonFocus">관찰 포인트 <span class="catalog-limit">180자 이내</span></label>
+            <textarea id="lessonFocus" maxlength="180" rows="2"></textarea>
+          </div>
+          <label class="catalog-visibility" for="lessonVisible">
+            <input type="checkbox" id="lessonVisible" checked />
+            <span>방문자에게 길잡이 표시</span>
+          </label>
+          <div class="catalog-actions">
+            <button class="btn-primary" id="lessonSave" type="submit">길잡이 저장</button>
+            <button class="btn-secondary" id="lessonRestore" type="button">기본 문구로 되돌리기</button>
+          </div>
+        </fieldset>
+        <div class="msg" id="lessonMsg" role="status" aria-live="polite"></div>
+      </form>
+    </section>
     <details class="catalog-comparison" id="catalogComparison" hidden>
       <summary>원래 정보와 저장된 정보 비교</summary>
       <div class="catalog-comparison-grid">
@@ -99,9 +127,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-<script src="assets/js/experiments-data.js?v=6ee6c8efdf"></script>
+<script src="assets/js/experiments-data.js?v=notes-20260924b"></script>
 <script src="assets/js/firebase-config.js"></script>
-<script src="assets/js/data.js?v=catalog-20260923"></script>
-<script src="assets/js/admin.js?v=catalog-20260923"></script>
+<script src="assets/js/data.js?v=notes-20260924b"></script>
+<script src="assets/js/admin.js?v=notes-20260924b"></script>
 </body>
 </html>

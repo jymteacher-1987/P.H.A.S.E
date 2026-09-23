@@ -49,6 +49,10 @@ window.EXPERIMENTS_DATA = {
       "title": "SI 단위 접두어 탐험",
       "category": "fundamentals",
       "description": "통합과학의 기초, SI 단위와 접두어를 시각적으로 탐험합니다.",
+      "lessonNote": {
+        "question": "같은 양을 다른 SI 접두어로 나타내면 숫자는 어떻게 달라질까요?",
+        "focus": "킬로와 밀리 등 크기가 다른 접두어로 단위를 변환하고, 나타내는 양은 그대로인지 확인해 보세요."
+      },
       "path": "experiments/si-prefixes.html?v=4605f35aa8",
       "date": "2026-07-28",
       "tags": [
@@ -62,6 +66,10 @@ window.EXPERIMENTS_DATA = {
       "title": "뉴턴 운동 법칙 시뮬레이터",
       "category": "mechanics",
       "description": "뉴턴의 운동 법칙을 직접 조작하며 확인하는 시뮬레이터.",
+      "lessonNote": {
+        "question": "같은 힘으로 밀어도 물체의 질량이 다르면 움직임은 어떻게 달라질까요?",
+        "focus": "제2법칙에서 힘은 그대로 두고 질량만 바꿔, 가속도의 변화를 살펴보세요."
+      },
       "path": "experiments/newton-laws.html?v=802cd7b806",
       "date": "2026-07-28",
       "tags": [
@@ -75,6 +83,10 @@ window.EXPERIMENTS_DATA = {
       "title": "뉴턴의 프리즘 실험",
       "category": "waves-optics",
       "description": "프리즘을 통과한 빛이 분산되는 과정을 가상 실험실에서 재현합니다.",
+      "lessonNote": {
+        "question": "흰빛이 프리즘을 지나면 왜 여러 색으로 나뉠까요?",
+        "focus": "색에 따라 빛이 꺾이는 정도가 어떻게 다른지 살펴보세요."
+      },
       "path": "experiments/newton-prism.html?v=51324ce1cf",
       "date": "2026-07-28",
       "tags": [
@@ -88,6 +100,10 @@ window.EXPERIMENTS_DATA = {
       "title": "원운동과 단진동",
       "category": "mechanics",
       "description": "원운동과 단진동의 관계를 시뮬레이션으로 비교합니다.",
+      "lessonNote": {
+        "question": "원운동하는 공의 그림자는 어떤 움직임을 할까요?",
+        "focus": "평행광선을 켜고 그림자와 용수철 추를 함께 출발시켜, 두 움직임의 주기를 비교해 보세요."
+      },
       "path": "experiments/shm-circular-motion.html?v=0b9c5753bc",
       "date": "2026-07-28",
       "tags": [
@@ -101,6 +117,10 @@ window.EXPERIMENTS_DATA = {
       "title": "로켓 운동 비교 — 질량 고정 vs 질량 변화",
       "category": "mechanics",
       "description": "질량이 변하는 로켓 운동과 질량이 고정된 경우를 비교 시뮬레이션합니다.",
+      "lessonNote": {
+        "question": "같은 추력으로 날아갈 때, 연료를 쓰며 가벼워지는 로켓의 가속도는 어떻게 달라질까요?",
+        "focus": "연료가 줄어드는 동안 두 로켓의 질량과 가속도, 속도 그래프를 함께 비교해 보세요."
+      },
       "path": "experiments/rocket-motion.html?v=fc3d55283a",
       "date": "2026-07-28",
       "tags": [
@@ -114,6 +134,10 @@ window.EXPERIMENTS_DATA = {
       "title": "물체 운동 분석 실험실",
       "category": "mechanics",
       "description": "물체의 운동을 그래프와 데이터로 분석하는 실험실.",
+      "lessonNote": {
+        "question": "같은 시간 간격으로 위치를 기록하면 운동의 차이가 어떻게 드러날까요?",
+        "focus": "등속 운동과 자유 낙하를 추적하고, 두 운동의 위치-시간 그래프 모양을 비교해 보세요."
+      },
       "path": "experiments/motion-analysis.html?v=8cdf2df379",
       "date": "2026-07-28",
       "tags": [
@@ -127,6 +151,10 @@ window.EXPERIMENTS_DATA = {
       "title": "발전기의 원리 — 교류 발전 시뮬레이션",
       "category": "electromagnetism",
       "description": "코일과 자석의 상대 운동으로 교류가 발생하는 원리를 시뮬레이션합니다.",
+      "lessonNote": {
+        "question": "코일을 더 빠르게 돌리면 전류의 모습은 어떻게 달라질까요?",
+        "focus": "회전 속도를 바꾸며 전구의 밝기와 검류계의 움직임을 비교해 보세요."
+      },
       "path": "experiments/generator-principle.html?v=047f1fb9f4",
       "date": "2026-07-28",
       "tags": [
@@ -140,6 +168,10 @@ window.EXPERIMENTS_DATA = {
       "title": "볼록 렌즈 초점 거리 찾기 실험",
       "category": "waves-optics",
       "description": "단계별로 볼록렌즈의 초점 거리를 찾아가는 가상 실험.",
+      "lessonNote": {
+        "question": "볼록 렌즈의 초점 거리를 측정값만으로 알아낼 수 있을까요?",
+        "focus": "광원과 스크린의 위치를 조절해 값을 기록하고, 그래프에서 초점 거리를 찾아보세요."
+      },
       "path": "experiments/convex-lens-focus.html?v=92bf9be22f",
       "date": "2026-07-28",
       "tags": [
@@ -153,6 +185,10 @@ window.EXPERIMENTS_DATA = {
       "title": "빛의 3원색 vs 색의 3원색(물감)",
       "category": "waves-optics",
       "description": "빛의 3원색(RGB)과 색의 3원색(CMY)의 혼합 원리를 비교합니다.",
+      "lessonNote": {
+        "question": "여러 색을 섞을 때 빛과 물감은 왜 서로 다른 결과를 낼까요?",
+        "focus": "빛과 물감의 세기 슬라이더를 각각 움직여, 색이 밝아지는지 어두워지는지 비교해 보세요."
+      },
       "path": "experiments/rgb-cmy-light.html?v=0d74b4cdad",
       "date": "2026-07-28",
       "tags": [
@@ -167,6 +203,10 @@ window.EXPERIMENTS_DATA = {
       "title": "일차원 충돌에서 운동량 보존 확인하기",
       "category": "mechanics",
       "description": "1차원 충돌 상황을 통해 운동량 보존 법칙을 확인합니다.",
+      "lessonNote": {
+        "question": "충돌 전후에 두 물체의 운동량을 더하면 값이 어떻게 달라질까요?",
+        "focus": "각 물체의 운동량과 전체 운동량을 나누어 비교해 보세요."
+      },
       "path": "experiments/momentum-conservation.html?v=48a223459b",
       "date": "2026-07-28",
       "tags": [
@@ -180,6 +220,10 @@ window.EXPERIMENTS_DATA = {
       "title": "자유낙하 vs 수평 투사 비교 실험",
       "category": "mechanics",
       "description": "자유낙하와 수평으로 던진 물체의 운동을 비교합니다.",
+      "lessonNote": {
+        "question": "같은 높이에서 동시에 출발하면, 수평으로 던진 물체와 놓아준 물체 중 어느 쪽이 먼저 바닥에 닿을까요?",
+        "focus": "가로 방향의 움직임이 달라도 세로 방향의 위치 변화는 같은지 살펴보세요."
+      },
       "path": "experiments/free-fall-projectile.html?v=bea5d1ffdb",
       "date": "2026-07-28",
       "tags": [
@@ -193,6 +237,10 @@ window.EXPERIMENTS_DATA = {
       "title": "저항의 직렬·병렬연결에서 전류와 전압 측정하기",
       "category": "electromagnetism",
       "description": "저항의 직렬연결과 병렬연결에서 전류와 전압을 측정하는 가상실험.",
+      "lessonNote": {
+        "question": "저항을 직렬과 병렬로 연결할 때, 각 저항의 전류와 전압은 어떻게 달라질까요?",
+        "focus": "직렬에서 전류가 어디서나 같은지, 병렬에서 각 가지에 걸리는 전압이 같은지 확인해 보세요."
+      },
       "path": "experiments/resistor-series-parallel.html?v=b8bb272762",
       "date": "2026-07-28",
       "tags": [
@@ -207,6 +255,10 @@ window.EXPERIMENTS_DATA = {
       "title": "전자기 유도 탐구: 코일, 자석, 상대운동",
       "category": "electromagnetism",
       "description": "코일과 자석의 상대 운동에 따른 전자기 유도 현상을 탐구합니다.",
+      "lessonNote": {
+        "question": "자석과 코일을 같은 방향으로 함께 움직이면 전구는 켜질까요?",
+        "focus": "자석만 움직일 때와 둘을 함께 움직일 때를 비교해, 상대 운동이 필요한지 살펴보세요."
+      },
       "path": "experiments/electromagnetic-induction.html?v=701a8f86ef",
       "date": "2026-07-28",
       "tags": [
@@ -220,6 +272,10 @@ window.EXPERIMENTS_DATA = {
       "title": "PN 접합 반도체 시뮬레이션",
       "category": "modern-physics",
       "description": "p형과 n형 반도체가 만나 만들어지는 공핍층을 관찰하고, 순방향·역방향 바이어스에서 전자와 양공의 움직임, 에너지 띠와 전위 분포가 어떻게 달라지는지 확인합니다.",
+      "lessonNote": {
+        "question": "PN 접합에 거는 전압의 방향을 바꾸면 전류의 흐름은 어떻게 달라질까요?",
+        "focus": "순방향과 역방향을 번갈아 살펴보며 공핍층과 전자·양공의 움직임을 비교해 보세요."
+      },
       "path": "experiments/pn-junction.html?v=44466e2951",
       "date": "2026-09-13",
       "tags": [
@@ -234,6 +290,10 @@ window.EXPERIMENTS_DATA = {
       "title": "특수 상대성 이론: 고유시간과 고유길이",
       "category": "relativity",
       "description": "행성 관찰자와 로켓 관찰자의 관점을 오가며 고유시간·고유길이·시간 팽창·길이 수축을 비교합니다.",
+      "lessonNote": {
+        "question": "행성과 로켓에서 같은 여행을 바라보면 시간과 거리는 어떻게 달라질까요?",
+        "focus": "관찰자를 바꾸고 로켓의 속도를 높이며, 각 관점에 기록된 시간과 길이를 비교해 보세요."
+      },
       "path": "experiments/proper-time-length.html?v=660bd1c486",
       "date": "2026-07-31",
       "tags": [
@@ -248,6 +308,10 @@ window.EXPERIMENTS_DATA = {
       "title": "이상 기체 상태방정식",
       "category": "thermal",
       "description": "보일·샤를·아보가드로 법칙을 단계별 가상실험으로 확인하고 PV=nRT로 종합하는 실험입니다.",
+      "lessonNote": {
+        "question": "기체의 양과 온도를 그대로 두고 부피를 줄이면 압력은 어떻게 될까요?",
+        "focus": "한 번에 한 조건만 바꾸며 압력과 부피의 관계를 확인해 보세요."
+      },
       "path": "experiments/ideal-gas-law.html?v=ae6ee73812",
       "date": "2026-08-01",
       "tags": [
@@ -262,6 +326,10 @@ window.EXPERIMENTS_DATA = {
       "title": "동시성의 상대성 — 번개와 두 관찰자",
       "category": "relativity",
       "description": "달리는 기차 양 끝에 친 번개를 지면 관찰자와 기차 관찰자의 눈으로 비교하며 동시성이 상대적임을 확인합니다.",
+      "lessonNote": {
+        "question": "지면에서 동시에 친 두 번개는 기차에서도 동시에 친 것일까요?",
+        "focus": "두 관점에서 번개가 친 시각과 빛이 관찰자에게 도착한 시각을 구분해 보세요."
+      },
       "path": "experiments/simultaneity-relativity.html?v=bf7fc1cb57",
       "date": "2026-08-01",
       "tags": [
@@ -276,6 +344,10 @@ window.EXPERIMENTS_DATA = {
       "title": "유압 장치와 파스칼 법칙",
       "category": "mechanics",
       "description": "작은 피스톤을 눌러 무거운 물체를 들어 올리며, 압력이 그대로 전달되어 힘은 커지지만 일은 그대로임을 확인합니다.",
+      "lessonNote": {
+        "question": "작은 피스톤을 눌러 무거운 물체를 들어 올릴 수 있는 까닭은 무엇일까요?",
+        "focus": "피스톤의 지름을 바꾸며 필요한 힘과 두 피스톤이 움직인 거리를 함께 비교해 보세요."
+      },
       "path": "experiments/pascal-hydraulic.html?v=4adbb69e2a",
       "date": "2026-08-07",
       "tags": [
@@ -290,6 +362,10 @@ window.EXPERIMENTS_DATA = {
       "title": "러더퍼드 산란 실험 — 톰슨 모형과의 비교",
       "category": "modern-physics",
       "description": "같은 알파입자를 톰슨 모형과 러더퍼드 모형에 동시에 쏘아 궤적을 비교합니다. 핵을 겨눠 되튕김을 만들어 보고, 대부분의 알파입자는 그대로 통과한다는 사실도 함께 확인합니다.",
+      "lessonNote": {
+        "question": "알파입자 대부분은 지나가는데, 일부는 왜 크게 꺾일까요?",
+        "focus": "같은 입자의 궤적을 톰슨 모형과 원자핵 모형에서 비교해 보세요."
+      },
       "path": "experiments/rutherford-scattering.html?v=c08f80d75a",
       "date": "2026-08-20",
       "tags": [
@@ -304,6 +380,10 @@ window.EXPERIMENTS_DATA = {
       "title": "베르누이의 원리",
       "category": "mechanics",
       "description": "전체압력이 일정할 때 속력이 커지면 압력이 낮아지는 베르누이 원리를 관찰합니다.",
+      "lessonNote": {
+        "question": "공기가 빨라질수록 압력은 어떻게 변할까요?",
+        "focus": "빨라진 정도를 바꾸며 속력과 압력 값을 읽고, 두 값의 관계를 확인해 보세요."
+      },
       "path": "experiments/bernoulli-principle.html?v=e9803bf220",
       "date": "2026-09-09",
       "tags": [
@@ -318,6 +398,10 @@ window.EXPERIMENTS_DATA = {
       "title": "광전효과 원리 이해하기",
       "category": "modern-physics",
       "description": "빛의 파장, 들어오는 광자 수와 전압을 바꾸며 광전자의 운동을 관찰합니다. 일함수와 한계 진동수, 최대 운동 에너지, 광전류와 정지 전압의 관계를 탐구합니다.",
+      "lessonNote": {
+        "question": "빛을 더 강하게 하는 것과 파장을 짧게 하는 것은 광전자에 어떤 차이를 만들까요?",
+        "focus": "전자 방출 여부를 먼저 확인한 뒤, 광전자의 수와 최대 운동 에너지를 따로 비교해 보세요."
+      },
       "path": "experiments/photoelectric-effect.html?v=89c3adc29d",
       "date": "2026-09-13",
       "tags": [

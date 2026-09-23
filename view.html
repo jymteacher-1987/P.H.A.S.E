@@ -6,7 +6,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>실험 보기 — 가상 물리 실험실</title>
 <link rel="stylesheet" href="assets/css/style.css?v=4d7b6bd877" />
-<link rel="stylesheet" href="assets/css/view-feedback.css?v=20260923b" />
+<link rel="stylesheet" href="assets/css/view-feedback.css?v=20260924" />
+<link rel="stylesheet" href="assets/css/lesson-notes.css?v=20260924b" />
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="P.H.A.S.E">
@@ -43,14 +44,27 @@
   </section>
 </div>
 
+<button class="viewer-note-toggle" id="viewerNoteToggle" type="button" aria-controls="viewerNotePanel" aria-expanded="false" hidden>실험 길잡이</button>
+<aside class="viewer-note-panel" id="viewerNotePanel" aria-labelledby="viewerNoteTitle" hidden>
+  <div class="viewer-note-heading">
+    <h2 id="viewerNoteTitle" tabindex="-1">실험 길잡이</h2>
+    <button id="viewerNoteClose" type="button" aria-label="길잡이 닫기">×</button>
+  </div>
+  <dl>
+    <dt>생각해 볼 질문</dt>
+    <dd id="viewerNoteQuestion"></dd>
+    <dt>관찰 포인트</dt>
+    <dd id="viewerNoteFocus"></dd>
+  </dl>
+</aside>
 <a class="viewer-app-back" data-viewer-return href="lab.html" aria-label="실험실로 돌아가기"><span aria-hidden="true">↩</span> 실험실로</a>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="assets/js/experiments-data.js?v=6ee6c8efdf"></script>
+<script src="assets/js/experiments-data.js?v=notes-20260924b"></script>
 <script src="assets/js/firebase-config.js"></script>
-<script src="assets/js/data.js?v=catalog-20260923"></script>
+<script src="assets/js/data.js?v=notes-20260924b"></script>
 <script src="assets/js/visit-entry.js?v=visits-20260909"></script>
-<script src="assets/js/view.js?v=bba0b8dcad"></script>
+<script src="assets/js/view.js?v=notes-20260924b"></script>
 </body>
 </html>
