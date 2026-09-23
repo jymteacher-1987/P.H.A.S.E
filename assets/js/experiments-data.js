@@ -256,8 +256,8 @@ window.EXPERIMENTS_DATA = {
       "category": "electromagnetism",
       "description": "코일과 자석의 상대 운동에 따른 전자기 유도 현상을 탐구합니다.",
       "lessonNote": {
-        "question": "자석과 코일을 같은 방향·같은 속력으로 움직이면 전구는 켜질까요?",
-        "focus": "자석만 움직일 때와 둘을 같은 속력으로 움직일 때를 비교해 보세요."
+        "question": "자석과 코일이 나란히 움직여 둘 사이의 거리가 그대로라면 전구는 켜질까요?",
+        "focus": "자석만 움직일 때와 둘 사이의 거리를 유지하며 함께 움직일 때 전구의 밝기를 비교해 보세요."
       },
       "path": "experiments/electromagnetic-induction.html?v=701a8f86ef",
       "date": "2026-07-28",
