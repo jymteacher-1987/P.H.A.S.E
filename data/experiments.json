@@ -152,7 +152,7 @@
       "category": "electromagnetism",
       "description": "코일의 회전 속도를 바꾸며 교류가 생기는 원리를 확인합니다.",
       "lessonNote": {
-        "question": "코일을 더 빠르게 돌리면 전류의 모습은 어떻게 달라질까요?",
+        "question": "코일을 더 빠르게 돌리면 유도 전류는 어떻게 달라질까요?",
         "focus": "회전 속도를 바꾸며 전구의 밝기와 검류계의 움직임을 비교해 보세요."
       },
       "path": "experiments/generator-principle.html?v=047f1fb9f4",
@@ -169,8 +169,8 @@
       "category": "waves-optics",
       "description": "광원과 스크린을 움직이며 볼록 렌즈의 초점 거리를 찾습니다.",
       "lessonNote": {
-        "question": "볼록 렌즈의 초점 거리를 측정값만으로 알아낼 수 있을까요?",
-        "focus": "광원과 스크린의 위치를 조절해 값을 기록하고, 그래프에서 초점 거리를 찾아보세요."
+        "question": "광원과 스크린의 위치를 재면 렌즈의 초점 거리를 알아낼 수 있을까요?",
+        "focus": "광원을 옮겨 선명한 상이 맺히는 위치를 기록하고, 그래프에서 초점 거리를 찾아보세요."
       },
       "path": "experiments/convex-lens-focus.html?v=92bf9be22f",
       "date": "2026-07-28",
@@ -187,7 +187,7 @@
       "description": "빛의 3원색(RGB)과 색의 3원색(CMY)의 혼합 원리를 비교합니다.",
       "lessonNote": {
         "question": "여러 색을 섞을 때 빛과 물감은 왜 서로 다른 결과를 낼까요?",
-        "focus": "빛과 물감의 세기 슬라이더를 각각 움직여, 색이 밝아지는지 어두워지는지 비교해 보세요."
+        "focus": "RGB와 CMY 슬라이더를 각각 움직여, 색을 섞을수록 밝아지는지 어두워지는지 비교해 보세요."
       },
       "path": "experiments/rgb-cmy-light.html?v=0d74b4cdad",
       "date": "2026-07-28",
@@ -256,8 +256,8 @@
       "category": "electromagnetism",
       "description": "코일과 자석의 상대 운동에 따른 전자기 유도 현상을 탐구합니다.",
       "lessonNote": {
-        "question": "자석과 코일을 같은 방향으로 함께 움직이면 전구는 켜질까요?",
-        "focus": "자석만 움직일 때와 둘을 함께 움직일 때를 비교해, 상대 운동이 필요한지 살펴보세요."
+        "question": "자석과 코일을 같은 방향·같은 속력으로 움직이면 전구는 켜질까요?",
+        "focus": "자석만 움직일 때와 둘을 같은 속력으로 움직일 때를 비교해 보세요."
       },
       "path": "experiments/electromagnetic-induction.html?v=701a8f86ef",
       "date": "2026-07-28",
@@ -291,8 +291,8 @@
       "category": "relativity",
       "description": "행성 관찰자와 로켓 관찰자의 관점을 오가며 고유시간·고유길이·시간 팽창·길이 수축을 비교합니다.",
       "lessonNote": {
-        "question": "행성과 로켓에서 같은 여행을 바라보면 시간과 거리는 어떻게 달라질까요?",
-        "focus": "관찰자를 바꾸고 로켓의 속도를 높이며, 각 관점에 기록된 시간과 길이를 비교해 보세요."
+        "question": "행성 기준과 로켓 기준에서 두 사건 사이의 시간과 거리는 같을까요?",
+        "focus": "관찰자를 바꾸고 로켓의 속도를 높이며, 두 기준에서 측정한 시간과 길이를 비교해 보세요."
       },
       "path": "experiments/proper-time-length.html?v=660bd1c486",
       "date": "2026-07-31",
@@ -381,7 +381,7 @@
       "category": "mechanics",
       "description": "전체압력이 일정할 때 속력이 커지면 압력이 낮아지는 베르누이 원리를 관찰합니다.",
       "lessonNote": {
-        "question": "공기가 빨라질수록 압력은 어떻게 변할까요?",
+        "question": "전체 압력이 일정할 때, 공기가 빨라지면 압력은 어떻게 변할까요?",
         "focus": "빨라진 정도를 바꾸며 속력과 압력 값을 읽고, 두 값의 관계를 확인해 보세요."
       },
       "path": "experiments/bernoulli-principle.html?v=e9803bf220",

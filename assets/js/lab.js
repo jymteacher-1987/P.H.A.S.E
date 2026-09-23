@@ -76,6 +76,7 @@
     els.dailyFeatureLink.href = `view.html?id=${encodeURIComponent(item.id)}&src=${encodeURIComponent(item.source)}`;
     els.dailyFeatureTitle.textContent = item.title;
     els.dailyFeatureCategory.textContent = state.categories.find((category) => category.id === item.category)?.name || "물리 가상실험";
+    els.dailyFeatureCategory.dataset.cat = item.category;
     els.dailyFeatureDescription.textContent = item.description || "직접 조작하며 물리 개념을 살펴보세요.";
     const fallback = () => {
       els.dailyFeatureImage.classList.add("is-fallback");

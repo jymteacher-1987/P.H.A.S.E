@@ -1,0 +1,64 @@
+/* A single fine-line icon family replaces platform-dependent emoji. */
+.page-lab .side-item .name,
+.page-lab .side-menu-title,
+.page-lab .side-box-title,
+.page-lab .exp-card .tag,
+.page-lab .daily-feature-category,
+.page-view .cat-tag{
+  display:inline-flex;align-items:center;gap:7px;
+}
+.page-lab .side-item .name{min-width:0}
+@media(min-width:861px){.page-lab .side-filter-heading>.side-box-title{display:none}}
+.page-lab .side-item .name::before,
+.page-lab .side-menu-title::before,
+.page-lab .side-box-title::before,
+.page-lab .exp-card .tag::before,
+.page-lab .daily-feature-category::before,
+.page-view .cat-tag::before{
+  content:"";display:block;flex:0 0 auto;width:16px;height:16px;
+  background:currentColor;
+  -webkit-mask:var(--phase-icon) center/contain no-repeat;
+  mask:var(--phase-icon) center/contain no-repeat;
+}
+.page-lab .side-item .name::before{width:18px;height:18px;color:#a47b6e}
+.page-lab .side-item.active .name::before{color:#fff}
+.page-lab .side-menu-title::before{width:19px;height:19px}
+.page-lab .side-box-title::before{width:15px;height:15px}
+.page-lab .exp-card .tag::before,
+.page-lab .daily-feature-category::before,
+.page-view .cat-tag::before{width:15px;height:15px}
+.page-lab .side-filter-box[data-menu="lab"]{--phase-icon:url("../icons/modern-physics.svg")}
+.page-lab .side-filter-box[data-menu="play"]{--phase-icon:url("../icons/play.svg")}
+:is(.page-lab .side-item,.page-lab .exp-card .tag,.page-lab .daily-feature-category,.page-view .cat-tag)[data-cat="all"]{--phase-icon:url("../icons/all.svg")}
+:is(.page-lab .side-item,.page-lab .exp-card .tag,.page-lab .daily-feature-category,.page-view .cat-tag)[data-cat="fundamentals"]{--phase-icon:url("../icons/fundamentals.svg")}
+:is(.page-lab .side-item,.page-lab .exp-card .tag,.page-lab .daily-feature-category,.page-view .cat-tag)[data-cat="mechanics"]{--phase-icon:url("../icons/mechanics.svg")}
+:is(.page-lab .side-item,.page-lab .exp-card .tag,.page-lab .daily-feature-category,.page-view .cat-tag)[data-cat="thermal"]{--phase-icon:url("../icons/thermal.svg")}
+:is(.page-lab .side-item,.page-lab .exp-card .tag,.page-lab .daily-feature-category,.page-view .cat-tag)[data-cat="waves-optics"]{--phase-icon:url("../icons/waves-optics.svg")}
+:is(.page-lab .side-item,.page-lab .exp-card .tag,.page-lab .daily-feature-category,.page-view .cat-tag)[data-cat="electromagnetism"]{--phase-icon:url("../icons/electromagnetism.svg")}
+:is(.page-lab .side-item,.page-lab .exp-card .tag,.page-lab .daily-feature-category,.page-view .cat-tag)[data-cat="relativity"]{--phase-icon:url("../icons/relativity.svg")}
+:is(.page-lab .side-item,.page-lab .exp-card .tag,.page-lab .daily-feature-category,.page-view .cat-tag)[data-cat="modern-physics"]{--phase-icon:url("../icons/modern-physics.svg")}
+:is(.page-lab .side-item,.page-lab .exp-card .tag,.page-lab .daily-feature-category,.page-view .cat-tag)[data-cat="play"]{--phase-icon:url("../icons/play.svg")}
+.page-lab .side-item[data-cat="hero-maker"]{--phase-icon:url("../icons/hero-maker.svg")}
+.page-lab .side-item[data-cat="newton-rush"]{--phase-icon:url("../icons/newton-rush.svg")}
+.page-lab .side-item[data-cat="physics-fighter"]{--phase-icon:url("../icons/physics-fighter.svg")}
+.page-lab .side-item[data-cat="giants-shoulders"]{--phase-icon:url("../icons/giants-shoulders.svg")}
+.page-lab .side-item[data-cat="faraday-flight"]{--phase-icon:url("../icons/faraday-flight.svg")}
+.page-lab .side-item[data-cat="afterlight"]{--phase-icon:url("../icons/afterlight.svg")}
+.page-lab .side-item[data-cat="hanbut"]{--phase-icon:url("../icons/hanbut.svg")}
+.page-lab .side-item[data-cat="jjomuldak-factory"]{--phase-icon:url("../icons/jjomuldak-factory.svg")}
+.page-lab .side-item[data-cat="bamti-escape"]{--phase-icon:url("../icons/bamti-escape.svg")}
+
+/* Muted category inks sit with the site's paper and terracotta palette. */
+:is(.page-lab .exp-card .tag,.page-view .cat-tag)[data-cat="fundamentals"]{color:#56727d;background:#eef3f2;border-color:#cfdbd9}
+:is(.page-lab .exp-card .tag,.page-view .cat-tag)[data-cat="mechanics"]{color:#936b45;background:#f7efe5;border-color:#e6d7bf}
+:is(.page-lab .exp-card .tag,.page-view .cat-tag)[data-cat="thermal"]{color:#a65c52;background:#faeeea;border-color:#e8cfc8}
+:is(.page-lab .exp-card .tag,.page-view .cat-tag)[data-cat="waves-optics"]{color:#5a7e8a;background:#edf4f5;border-color:#cedde0}
+:is(.page-lab .exp-card .tag,.page-view .cat-tag)[data-cat="electromagnetism"]{color:#77667f;background:#f3eef5;border-color:#dfd3e3}
+:is(.page-lab .exp-card .tag,.page-view .cat-tag)[data-cat="relativity"]{color:#986e79;background:#f8eff2;border-color:#e7d5dc}
+:is(.page-lab .exp-card .tag,.page-view .cat-tag)[data-cat="modern-physics"]{color:#617866;background:#edf3ed;border-color:#d1ded1}
+:is(.page-lab .exp-card .tag,.page-view .cat-tag)[data-cat="play"]{color:#9b645f;background:#f9efec;border-color:#e7d3ce}
+@media(max-width:640px){
+  .page-lab .side-item .name::before{width:16px;height:16px}
+  .page-view .cat-tag{gap:5px}
+  .page-view .cat-tag::before{width:13px;height:13px}
+}
