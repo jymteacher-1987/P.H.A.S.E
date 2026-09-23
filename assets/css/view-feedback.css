@@ -1,10 +1,11 @@
-/* 기존 홈 화면 앱의 하단 중앙 복귀 위치를 모바일 브라우저에도 적용한다.
-   작은 가로 화면에서도 실험 영역을 유지하도록 프레임 높이는 줄이지 않는다. */
+/* 작은 화면에서는 시작·조작 버튼이 몰린 하단과 게임 메뉴가 있는 양쪽 모서리를 비운다.
+   프레임 높이는 줄이지 않아 가로형 게임의 플레이 공간을 유지한다. */
 .phone-tablet .viewer-app-back, .standalone-viewer .viewer-app-back{
-  display:inline-flex; align-items:center; justify-content:center; gap:6px;
-  position:fixed; z-index:100; left:50%;
-  bottom:max(3px, env(safe-area-inset-bottom, 0px)); transform:translateX(-50%);
-  width:auto; height:44px; padding:0 13px; border-radius:999px;
+  display:inline-flex; align-items:center; justify-content:center; gap:5px;
+  position:fixed; z-index:100;
+  top:max(6px, env(safe-area-inset-top, 0px)); left:50%;
+  bottom:auto; transform:translateX(-50%);
+  width:auto; height:36px; padding:0 9px; border-radius:4px;
   background:#152335df; border:1px solid #ffffff88; color:#fff;
   font-size:12px; font-weight:700; line-height:1; text-decoration:none;
   touch-action:manipulation;

@@ -1,0 +1,117 @@
+/* A lighter lab notebook language built around the site's own experiment images. */
+body.page-home,body.page-lab{
+  --notebook-ink:#193044;
+  --notebook-line:#cbd8de;
+  background-color:#f8faf8;
+  background-image:linear-gradient(#e9eff0 1px,transparent 1px),linear-gradient(90deg,#e9eff0 1px,transparent 1px);
+  background-size:32px 32px;
+  background-position:-1px -1px;
+}
+.page-home .site-nav,.page-lab .site-nav{background:#fff;backdrop-filter:none;border-bottom-color:var(--notebook-line)}
+.page-home .brand .dot,.page-lab .brand .dot{border-radius:2px;background:#2463a6;box-shadow:none}
+.page-home .nav-cta,.page-lab .nav-cta{border-radius:5px;background:#f5f8f8;border-color:var(--notebook-line)}
+.page-home .hero .eyebrow,.page-lab .hero .eyebrow{
+  padding:0 0 0 11px;border:0;border-left:3px solid #1b80a1;border-radius:0;
+  background:none;box-shadow:none;color:#345b74;font-size:11px;letter-spacing:.07em;
+}
+.page-home .hero h1,.page-lab .hero h1{color:var(--notebook-ink);letter-spacing:-.055em}
+.page-home .hero h1 .grad{background:none;color:#2564a5;-webkit-text-fill-color:currentColor}
+.page-home .hero p.sub,.page-lab .hero p.sub{color:#485e6b}
+.page-home .btn-cta{
+  border-radius:5px;background:var(--notebook-ink);box-shadow:4px 4px 0 #b9d6df;
+  color:#fff;transition:transform .15s,box-shadow .15s;
+}
+.page-home .btn-cta:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 #b9d6df}
+.page-home .stats-row{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;
+  max-width:525px;margin-bottom:8px;padding-top:5px;border-top:1px solid #a9bdc6;
+}
+.page-home .stat-card{
+  min-width:0;padding:8px 15px;background:transparent;border:0;border-right:1px solid var(--notebook-line);
+  border-radius:0;box-shadow:none;
+}
+.page-home .stat-card:first-child{padding-left:0}
+.page-home .stat-card:last-child{border-right:0}
+.page-home .stat-card .num{background:none;color:#2564a5;-webkit-text-fill-color:currentColor;font-size:23px}
+.page-home .stat-card .label{color:#637682;line-height:1.35}
+.page-home .hero-visual{max-width:none}
+.specimen-board{
+  position:relative;padding:13px;background:#fff;border:1px solid #a9bdc6;
+  box-shadow:7px 7px 0 #d8e4e7;transform:rotate(.35deg);
+}
+.specimen-head,.specimen-foot{
+  display:flex;justify-content:space-between;align-items:center;gap:8px;
+  color:#426076;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+  font-size:10px;font-weight:700;letter-spacing:.065em;
+}
+.specimen-head{padding:0 1px 10px}
+.specimen-foot{padding:10px 1px 0}
+.specimen-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,.65fr);gap:8px;height:clamp(190px,30vh,260px)}
+.specimen-grid figure{position:relative;min-width:0;min-height:0;margin:0;overflow:hidden;border:1px solid #c8d5db;background:#eaf1f4}
+.specimen-grid img{width:100%;height:100%;object-fit:cover;object-position:center top}
+.specimen-side{display:grid;grid-template-rows:1fr 1fr;gap:8px;min-height:0}
+.specimen-grid figcaption{
+  position:absolute;right:0;bottom:0;left:0;padding:5px 8px;
+  background:rgba(16,36,53,.9);color:#fff;font-size:11px;font-weight:700;line-height:1.4;
+}
+.specimen-grid figcaption b{margin-right:6px;color:#94d9e4;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:10px}
+.page-home .site-footer,.page-lab .site-footer{border-top-color:#a9bdc6;color:#647784}
+
+.page-lab .catalog-hero{border-bottom:1px solid #b9cbd0}
+.page-lab .catalog-hero h1{font-weight:850}
+.page-lab .catalog-search{
+  padding:20px;background:#fff;border:1px solid #b9cbd0;border-top:4px solid #2463a6;
+  border-radius:3px;box-shadow:4px 4px 0 #dce7e9;
+}
+.page-lab .search-label{color:var(--notebook-ink);font-size:13px}
+.page-lab .catalog-search .search-box{
+  border:1px solid #a9bdc6;border-radius:3px;box-shadow:none;background:#fff;
+}
+.page-lab .catalog-search .search-box:focus-within{border-color:#2463a6;box-shadow:0 0 0 2px #2463a633}
+.page-lab .catalog-search .search-icon{color:#3e769f;font-size:22px}
+.page-lab .catalog-search .search-box button[type="submit"]{border-radius:2px;background:var(--notebook-ink)}
+.page-lab .search-suggestions{margin-top:7px;color:#647784}
+.page-lab .search-suggestions button{color:#2463a6;text-decoration:underline;text-underline-offset:3px;border-radius:2px}
+.page-lab .search-suggestions button:hover{background:#eaf3f5}
+.page-lab .section-title{padding-bottom:9px;border-bottom:2px solid var(--notebook-ink)}
+.page-lab .section-title h2{color:var(--notebook-ink)}
+.page-lab .side-box{
+  border:1px solid var(--notebook-line);border-left:3px solid var(--menu-ink,#2463a6);
+  border-radius:3px;box-shadow:none;background:#fff;
+}
+.page-lab .side-menu-toggle{background:#fff;border-radius:2px}
+.page-lab .side-menu-toggle:hover{box-shadow:inset 0 0 0 1px var(--menu-border)}
+.page-lab .side-item{border-radius:2px}
+.page-lab .side-item.active{background:var(--accent);background-image:none}
+.page-lab .exp-card{
+  border:1px solid #c6d4db;border-radius:3px;box-shadow:none;
+  transition:transform .15s,border-color .15s,box-shadow .15s;
+}
+.page-lab .exp-card:hover{transform:translateY(-2px);border-color:#2463a6;box-shadow:3px 3px 0 #d6e4e7}
+.page-lab .exp-card .tag{border-radius:2px;letter-spacing:0}
+.page-lab .exp-card h3{color:var(--notebook-ink);font-weight:800}
+.page-lab .exp-card .go{color:#1e6585}
+.page-lab .search-results-tools,.page-lab .catalog-empty{border-radius:3px;box-shadow:none}
+.page-lab .search-results-tools{background:#eff6f6;border-color:#b9cbd0}
+.page-lab .search-scopes button,.page-lab .catalog-empty button{border-radius:2px}
+.page-lab .search-scopes button[aria-pressed="true"]{background:var(--notebook-ink);border-color:var(--notebook-ink)}
+
+@media(max-width:860px){
+  .page-home .hero-visual{width:min(100%,460px)}
+  .specimen-grid{height:210px}
+  .page-lab .catalog-search{padding:18px}
+}
+@media(max-width:480px){
+  .page-home .hero{padding-top:28px}
+  .page-home .hero-visual{width:100%;margin-bottom:8px}
+  .specimen-board{padding:9px;box-shadow:4px 4px 0 #d8e4e7;transform:none}
+  .specimen-grid{height:178px;gap:5px}
+  .specimen-side{gap:5px}
+  .specimen-head,.specimen-foot{font-size:8px}
+  .specimen-grid figcaption{padding:4px 5px;font-size:9px}
+  .page-home .stats-row{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .page-home .stat-card{padding:8px 8px}
+  .page-home .stat-card .num{font-size:20px}
+  .page-home .stat-card .label{font-size:10px}
+  .page-lab .catalog-search{padding:14px}
+}
