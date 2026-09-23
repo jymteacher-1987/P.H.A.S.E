@@ -33,6 +33,12 @@
     searchTools: document.getElementById("searchTools"),
     searchSummary: document.getElementById("searchSummary"),
     selectionScope: document.getElementById("selectionScope"),
+    dailyFeature: document.getElementById("dailyFeature"),
+    dailyFeatureLink: document.getElementById("dailyFeatureLink"),
+    dailyFeatureImage: document.getElementById("dailyFeatureImage"),
+    dailyFeatureTitle: document.getElementById("dailyFeatureTitle"),
+    dailyFeatureDescription: document.getElementById("dailyFeatureDescription"),
+    dailyFeatureDate: document.getElementById("dailyFeatureDate"),
   };
 
   // 메인 페이지에서 검색어/카테고리를 들고 넘어온 경우 반영.
@@ -62,6 +68,30 @@
   const LAB_SECTION = { id: "lab", name: "물리 가상실험" };
   const PLAY_SECTION = { id: "play", name: "과학 놀이", icon: "🎈" };
   const escapeHTML = value => String(value ?? "").replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+
+  const recommendation = SITE.getDailyRecommendation(state.experiments);
+  if (recommendation) {
+    const item = recommendation.item;
+    const scene = item.source === "static" ? window.PHASE_PREVIEWS?.items?.[item.id] : null;
+    els.dailyFeatureLink.href = `view.html?id=${encodeURIComponent(item.id)}&src=${encodeURIComponent(item.source)}`;
+    els.dailyFeatureTitle.textContent = item.title;
+    els.dailyFeatureDescription.textContent = item.description || "직접 조작하며 물리 개념을 살펴보세요.";
+    els.dailyFeatureDate.textContent = recommendation.dateLabel;
+    const fallback = () => {
+      els.dailyFeatureImage.classList.add("is-fallback");
+      els.dailyFeatureImage.replaceChildren();
+      els.dailyFeatureImage.textContent = "P.H.A.S.E · VIRTUAL LAB";
+    };
+    if (scene?.src) {
+      const image = document.createElement("img");
+      image.src = scene.src;
+      image.alt = `${item.title} 실제 장면`;
+      image.loading = "lazy";
+      image.decoding = "async";
+      image.addEventListener("error", fallback, { once: true });
+      els.dailyFeatureImage.append(image);
+    } else fallback();
+  }
 
   // 주소에 탐색 상태를 남긴다. 공유·새로고침·실험실로 복귀가 같은 목록을 가리킨다.
   function catalogParams() {
@@ -334,7 +364,7 @@
     }
 
     els.expGrid.innerHTML = filtered
-      .map((e) => {
+      .map((e, index) => {
         // 놀이 카드는 영역 태그 자리에 "과학 놀이"가 들어간다. 태그 아이콘은
         // 활동 아이콘이 아니라 묶음 아이콘을 쓴다 — 실험 카드가 "영역 아이콘 +
         // 영역 이름"인 것과 짝을 맞추기 위해서다. 색은 style.css의
@@ -351,12 +381,12 @@
         if (from) url += `&from=${encodeURIComponent(from)}`;
         return `
         <a class="exp-card ${isNew(e) ? "new" : ""}" data-id="${escapeHTML(e.id)}" href="${escapeHTML(url)}">
-          <div class="exp-preview">${previewMarkup(e)}</div>
+          <div class="exp-preview">${previewMarkup(e)}<span class="card-index" aria-hidden="true">${String(index + 1).padStart(2, "0")}</span></div>
           <div class="body">
-            <span class="tag" data-cat="${tagCat}">${tag}</span>
+            <span class="tag" data-cat="${escapeHTML(tagCat)}">${escapeHTML(tag)}</span>
             <h3>${escapeHTML(e.title)}</h3>
             <p>${escapeHTML(e.description)}</p>
-            <div class="meta"><span>${e.date || ""}</span><span class="go">열어보기 →</span></div>
+            <div class="meta"><span>${escapeHTML(e.date || "")}</span><span class="go">열어보기 ↗</span></div>
           </div>
         </a>`;
       })
@@ -373,6 +403,7 @@
   }
 
   function render(reveal = false) {
+    els.dailyFeature.hidden = !recommendation || Boolean(state.query) || state.section !== "lab" || state.activeCategory !== "all";
     renderSidebar(reveal);
     renderExperiments();
     if (location.pathname.endsWith("/lab.html")) {

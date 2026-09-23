@@ -8,7 +8,7 @@
 <meta name="description" content="과학의 기초부터 현대물리까지 — 영역별로 실험을 찾아보고 검색해보세요." />
 <link rel="stylesheet" href="assets/css/style.css?v=4d7b6bd877" />
 <link rel="stylesheet" href="assets/css/catalog.css?v=20260923" />
-<link rel="stylesheet" href="assets/css/phase-identity.css?v=20260923e" />
+<link rel="stylesheet" href="assets/css/phase-identity.css?v=20260923f" />
 <link rel="manifest" href="manifest.webmanifest">
 <script defer src="assets/js/mobile-launch.js?v=fe9cc51e93"></script>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -57,6 +57,19 @@
   </div>
 </header>
 
+<section class="daily-feature wrap" id="dailyFeature" aria-labelledby="dailyFeatureTitle" hidden>
+  <div class="daily-feature-heading"><span>PHASE / DAILY PICK</span><span id="dailyFeatureDate"></span></div>
+  <a class="daily-feature-card" id="dailyFeatureLink">
+    <div class="daily-feature-image" id="dailyFeatureImage"></div>
+    <div class="daily-feature-copy">
+      <span class="daily-feature-kicker">오늘의 추천 실험</span>
+      <h2 id="dailyFeatureTitle"></h2>
+      <p id="dailyFeatureDescription"></p>
+      <span class="daily-feature-action">실험 시작하기 <span aria-hidden="true">↗</span></span>
+    </div>
+  </a>
+</section>
+
 <main class="wrap">
   <div class="lab-shell" id="catSection">
     <aside class="lab-sidebar" id="sideMenu"></aside>
@@ -91,9 +104,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="assets/js/experiments-data.js?v=6ee6c8efdf"></script>
 <script src="assets/js/firebase-config.js"></script>
-<script src="assets/js/data.js?v=catalog-20260923"></script>
+<script src="assets/js/data.js?v=daily-20260923"></script>
 <script src="assets/js/visit-entry.js?v=visits-20260909"></script>
 <script src="assets/previews/index.js?v=ba5f9a16fc"></script>
-<script src="assets/js/lab.js?v=fbed32ee58"></script>
+<script src="assets/js/lab.js?v=daily-20260923"></script>
 </body>
 </html>

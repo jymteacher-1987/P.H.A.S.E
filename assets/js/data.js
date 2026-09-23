@@ -149,6 +149,27 @@ const SITE = (function () {
     return { categories: data.categories, experiments: merge(data.experiments), plays: merge(data.plays), catalogStatus: data.catalogStatus };
   }
 
+  // A stable, shuffled rotation: everyone sees the same pick on a Korean day,
+  // and consecutive days do not repeat while the catalog stays unchanged.
+  function getDailyRecommendation(experiments, now = new Date()) {
+    const pool = (experiments || []).filter((item) => item?.listed !== false && item.id && item.path);
+    if (!pool.length) return null;
+    const parts = Object.fromEntries(new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit",
+    }).formatToParts(now).filter((part) => part.type !== "literal").map((part) => [part.type, Number(part.value)]));
+    const dayNumber = Math.floor(Date.UTC(parts.year, parts.month - 1, parts.day) / 86400000);
+    const hashId = (id) => {
+      let hash = 2166136261;
+      for (const character of String(id)) hash = Math.imul(hash ^ character.codePointAt(0), 16777619);
+      return hash >>> 0;
+    };
+    const shuffled = [...pool].sort((a, b) => hashId(a.id) - hashId(b.id) || String(a.id).localeCompare(String(b.id)));
+    return {
+      item: shuffled[dayNumber % shuffled.length],
+      dateLabel: `${parts.year}.${String(parts.month).padStart(2, "0")}.${String(parts.day).padStart(2, "0")}`,
+    };
+  }
+
   // ---------------- 방문자 카운터 ----------------
   function todayKey() {
     const d = new Date();
@@ -217,6 +238,7 @@ const SITE = (function () {
     isFirebaseConfigured,
     initFirebase,
     getAllData,
+    getDailyRecommendation,
     getCatalogEditorData,
     validateCatalogMetadata,
     recordVisit,
