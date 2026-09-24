@@ -384,7 +384,7 @@ window.EXPERIMENTS_DATA = {
         "question": "유체의 속력이 빨라지면 압력은 어떻게 달라질까요?",
         "focus": "빨라진 정도를 바꾸며 속력과 압력 값을 읽고, 두 값의 관계를 확인해 보세요."
       },
-      "path": "experiments/bernoulli-principle.html?v=0d198f717f",
+      "path": "experiments/bernoulli-principle.html?v=18457ff5b3",
       "date": "2026-09-09",
       "tags": [
         "베르누이",
@@ -419,7 +419,7 @@ window.EXPERIMENTS_DATA = {
       "title": "히어로 만들기",
       "icon": "🛡️",
       "description": "실험 원리로 나만의 히어로를 만들고 포스터를 완성합니다.",
-      "path": "plays/hero-maker.html?v=fb895a1145",
+      "path": "plays/hero-maker.html?v=f313a83198",
       "date": "2026-09-02",
       "tags": [
         "히어로",

@@ -99,9 +99,9 @@ window.PHASE_PREVIEWS = {
       "bytes": 20728
     },
     "bernoulli-principle": {
-      "src": "assets/previews/bernoulli-principle-6992f50ed3.webp",
-      "sourceHash": "7c0b352e74c7317314572f680bffe0eb9eb0398a496395c91b3884e6f6252b76",
-      "bytes": 18434
+      "src": "assets/previews/bernoulli-principle-fe15bc304e.webp",
+      "sourceHash": "4539830d77b5b9437dac60561a961d2f14dbad8e5e1dccdae4d8040f1f7c9920",
+      "bytes": 17758
     },
     "photoelectric-effect": {
       "src": "assets/previews/photoelectric-effect-1e1662cf39.webp",
@@ -110,7 +110,7 @@ window.PHASE_PREVIEWS = {
     },
     "hero-maker": {
       "src": "assets/previews/hero-maker-15e2667ef3.webp",
-      "sourceHash": "0f2b4c28138be30f1723d32977db46830ababd9a1dc4d5ca78a654538078f8da",
+      "sourceHash": "61a3b774e67eb7120e4023967db8b74a81d6d6f3521e668d4c980232f6ddc363",
       "bytes": 23214
     },
     "newton-rush": {
