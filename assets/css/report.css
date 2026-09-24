@@ -1,42 +1,41 @@
-/* 시뮬레이션 오류 신고 — 실험실 왼쪽 메뉴 밑, 실험 보기 화면, 신고 창 */
-.side-report{padding:14px 14px 15px}
-.page-lab .side-report{--menu-ink:#a65f59}
-.side-report-title{color:#6f4d43;font-size:14px;font-weight:800;letter-spacing:-.03em}
-.side-report p{margin:6px 0 11px;color:#76675f;font-size:12px;line-height:1.55;word-break:keep-all}
-.side-report-btn,.report-inline button{
-  width:100%;min-height:38px;padding:8px 12px;border:1px solid #d9c3b9;border-radius:2px;
-  background:#fffaf6;color:#6f4d43;font-size:13px;font-weight:700;
+/* 신고 안내는 메뉴 아래에 중복하지 않고, 목록 위에 한 번 보여 준다. */
+.page-lab .side-report{display:none}
+.report-inline{
+  display:flex;align-items:center;gap:16px;margin:0 0 24px;padding:17px 20px;
+  border:1px solid #dcc5b8;border-left:4px solid #875a49;border-radius:3px;
+  background:#f3e7df;color:#5b3e32;
 }
-.side-report-btn:hover,.report-inline button:hover{background:#f4e8e1}
-.side-report-btn:focus-visible,.report-inline button:focus-visible,.viewer-report-btn:focus-visible{outline:3px solid #bf716a;outline-offset:2px}
-
-/* 좁은 화면: 메뉴가 목록 위에 있으므로 신고 칸은 목록 아래로 */
-.report-inline{display:none}
-@media (max-width:860px){
-  .lab-sidebar .side-report{display:none}
-  .report-inline{
-    display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 28px;
-    padding:12px 14px;border:1px solid #eadfd9;border-left:3px solid #a65f59;background:#fff;
-    color:#6f5c55;font-size:13px;line-height:1.5;word-break:keep-all;
-  }
-  .report-inline button{width:auto;flex:none}
+.report-inline-icon{display:grid;place-items:center;flex:none;width:38px;height:38px;color:#875a49}
+.report-inline-icon svg{width:29px;height:29px}
+.report-inline-copy{flex:1;min-width:0}
+.report-inline-copy strong{display:block;font-size:15px;font-weight:800;letter-spacing:-.03em;line-height:1.4}
+.report-inline-copy span{display:block;margin-top:4px;color:#725d52;font-size:12px;line-height:1.55;word-break:keep-all}
+.report-inline button,.page-view .viewer-report-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;flex:none;
+  min-height:44px;padding:10px 16px;border:1px solid #875a49;border-radius:3px;
+  background:#875a49;color:#fff;font:700 13px/1.4 "Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  white-space:nowrap;cursor:pointer;
+}
+.report-inline button svg{width:15px;height:15px}
+.report-inline button:hover,.page-view .viewer-report-btn:hover{background:#704535;border-color:#704535}
+.report-inline button:focus-visible,.viewer-report-btn:focus-visible{outline:3px solid #bf716a;outline-offset:2px}
+@media(max-width:640px){
+  .report-inline{gap:12px;padding:14px;margin-bottom:20px}
+  .report-inline-icon{display:none}
+  .report-inline-copy strong{font-size:13px}
+  .report-inline button{padding:9px 11px;font-size:12px}
 }
 
-/* 실험 보기: 길잡이 줄 오른쪽 끝 */
+/* 길잡이와 같은 줄에 공간을 확보한다. 실험 위에 겹치는 고정 버튼은 두지 않는다. */
 .page-view .viewer-report-btn{
-  flex:0 0 auto;min-height:36px;padding:7px 16px;border:0;border-left:1px solid #e0d0c8;
-  background:#fffaf6;color:#8a4f49;font:700 12px/1.4 "Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
-  cursor:pointer;white-space:nowrap;
+  margin:4px 8px;min-height:36px;padding:7px 13px;font-size:12px;
 }
-.page-view .viewer-report-btn:hover{background:#f4e8e1}
+.page-view .viewer-report-btn svg{width:17px;height:17px}
 .page-view .viewer-tools[data-report]{border-bottom:1px solid #e0d0c8}
 .page-view .viewer-tools[data-report] .viewer-note-toggle{border-bottom:0}
 .page-view .viewer-tools[data-report="alone"]{justify-content:flex-end}
-@media (max-width:860px){
-  /* 과학 놀이처럼 길잡이 줄이 없는 화면에서는 놀이 공간을 줄이지 않는다. */
-  .page-view .viewer-tools[data-report="alone"]{border-bottom:0}
-  .page-view .viewer-tools[data-report="alone"] .viewer-report-btn{display:none}
-  .page-view .viewer-report-btn{min-height:34px;padding:6px 12px}
+@media(pointer:coarse){
+  .page-view .viewer-report-btn{min-height:44px;margin:0 6px;border-radius:0;padding:9px 12px}
 }
 
 /* 신고 창 */
@@ -67,6 +66,9 @@
 }
 .report-form textarea{resize:vertical;min-height:110px}
 .report-form select:focus,.report-form textarea:focus,.report-form input:focus{outline:2px solid #bf716a;outline-offset:0;border-color:#bf716a}
+@media(max-width:640px){
+  .report-form select,.report-form textarea,.report-form input{font-size:16px}
+}
 .report-trap{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 .report-note{margin:8px 0 0;color:#8a7a72;font-size:11.5px;line-height:1.55;word-break:keep-all}
 .report-status{min-height:1.5em;margin:4px 0 0;color:#6f4d43;font-size:13px;font-weight:600;line-height:1.5;word-break:keep-all}

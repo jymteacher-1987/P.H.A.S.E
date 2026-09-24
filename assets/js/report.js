@@ -169,14 +169,16 @@
   }
 
   function mountPage() {
-    // 좁은 화면에서는 메뉴가 목록 위로 올라가므로, 신고 칸은 목록 아래에 따로 둔다.
+    // PC·모바일 모두 목록 위에서 발견할 수 있게 둔다. 실험을 덮는 플로팅 UI는 쓰지 않는다.
     const shell = document.querySelector(".page-lab .lab-shell");
     if (shell && !document.querySelector(".report-inline")) {
       const inline = document.createElement("div");
       inline.className = "report-inline";
-      inline.innerHTML = `<span>실험이 이상하게 움직이거나 설명이 틀려 보이나요?</span><button type="button">오류 신고하기</button>`;
+      inline.innerHTML = `<span class="report-inline-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-5 3v-3a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/><path d="M12 8v4m0 3h.01"/></svg></span>
+        <div class="report-inline-copy"><strong>시뮬레이션 오류 신고</strong><span>동작이나 설명에서 발견한 문제를 알려주세요.</span></div>
+        <button type="button" aria-haspopup="dialog">신고하기 <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12m-5-5 5 5-5 5"/></svg></button>`;
       inline.querySelector("button").addEventListener("click", () => open());
-      shell.after(inline);
+      shell.before(inline);
     }
     // 실험 보기 화면: 보고 있는 활동을 미리 골라 둔다.
     const viewButton = document.querySelector("[data-report-open]");

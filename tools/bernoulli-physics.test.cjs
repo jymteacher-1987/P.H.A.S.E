@@ -24,7 +24,9 @@ function simulation(strength = 0) {
   sim.setStrength(strength);
   return sim;
 }
-const randomSpeed = (velocity, strength) => Math.hypot(velocity.vx - 200 * strength / 100, velocity.vy);
+// Both pixel-speed components share the requested 1.6x drawing scale; v and P do not change.
+const DRAWN_DRIFT = 200 * 1.6;
+const randomSpeed = (velocity, strength) => Math.hypot(velocity.vx - DRAWN_DRIFT * strength / 100, velocity.vy);
 function run(sim, seconds) {
   for (let frame = 0; frame < seconds * 120; frame++) sim.step(1 / 120);
   return sim.snapshot();
@@ -68,11 +70,11 @@ test('every molecule shares the same drift, and only the random part weakens as 
   const sim = simulation();
   const baseline = sim.velocities();
   assert.equal(baseline.length, 96);
-  for (const velocity of baseline) close(randomSpeed(velocity, 0), 45);
+  for (const velocity of baseline) close(randomSpeed(velocity, 0), 45 * 1.6);
   let previous = Infinity;
   for (const strength of [0, 10, 40, 70, 100]) {
     sim.setStrength(strength);
-    const velocities = sim.velocities(), drift = 200 * strength / 100;
+    const velocities = sim.velocities(), drift = DRAWN_DRIFT * strength / 100;
     const thermal = randomSpeed(velocities[0], strength);
     assert.ok(thermal > 0, 'drawing exaggeration must not stop random motion');
     let meanX = 0, meanY = 0;
@@ -80,8 +82,8 @@ test('every molecule shares the same drift, and only the random part weakens as 
       const velocity = velocities[i];
       close(randomSpeed(velocity, strength), thermal);
       // Each random direction stays the same; only its size changes.
-      close((velocity.vx - drift) / thermal, baseline[i].vx / 45);
-      close(velocity.vy / thermal, baseline[i].vy / 45);
+      close((velocity.vx - drift) / thermal, baseline[i].vx / 72);
+      close(velocity.vy / thermal, baseline[i].vy / 72);
       meanX += velocity.vx; meanY += velocity.vy;
     }
     close(meanX / velocities.length, drift);
@@ -192,7 +194,7 @@ test('a mode change clears old impacts and waits half a second for a fresh sampl
 });
 
 test('at the medium setting molecules collide and every one of them is carried to the right', () => {
-  const sim = simulation(40), dt = 1 / 120, drift = 200 * 40 / 100;
+  const sim = simulation(40), dt = 1 / 120, drift = DRAWN_DRIFT * 40 / 100;
   const start = sim.snapshot().points, sumUx = points => points.reduce((sum, p) => sum + p.ux, 0);
   const sumAbsUy = points => points.reduce((sum, p) => sum + Math.abs(p.uy), 0);
   const moved = new Array(start.length).fill(0);
@@ -217,6 +219,28 @@ test('at the medium setting molecules collide and every one of them is carried t
   assert.ok(backward / windows < 0.02, 'over two seconds almost every molecule moves right: ' + backward / windows);
 });
 
+test('molecules travel briefly before another random turn instead of immediately reversing again', () => {
+  const sim = simulation(40), dt = 1 / 120;
+  let previous = sim.snapshot().points, turns = 0;
+  const lastTurn = previous.map(() => null);
+  for (let frame = 1; frame <= 4 * 120; frame++) {
+    sim.step(dt);
+    const current = sim.snapshot().points;
+    current.forEach((point, i) => {
+      // Wall reflections change uy, so compare ux to observe molecule-to-molecule turns.
+      if (point.ux === previous[i].ux) return;
+      const time = frame * dt;
+      if (lastTurn[i] !== null) {
+        assert.ok(time - lastTurn[i] >= 0.08 - 1e-9, `molecule ${i} turned again too soon`);
+      }
+      lastTurn[i] = time;
+      turns++;
+    });
+    previous = current;
+  }
+  assert.ok(turns > previous.length, 'random directions must still change over time');
+});
+
 test('weak flow is visibly rightward over half-second to two-second observation windows', () => {
   // Short backward steps remain possible at 10%; test the observable accumulated
   // displacement without mistaking a right-edge wrap for movement to the left.
@@ -236,7 +260,7 @@ test('weak flow is visibly rightward over half-second to two-second observation 
         assert.ok(rightward >= minimum,
           `${seconds}s window ending at frame ${frame}: only ${rightward * 100}% moved right`);
         close(moved.reduce((sum, distance) => sum + distance, 0) / moved.length,
-          20 * seconds, 1e-6);
+          DRAWN_DRIFT * 0.1 * seconds, 1e-6);
         moved.fill(0);
       }
     }

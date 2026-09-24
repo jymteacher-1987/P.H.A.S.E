@@ -76,7 +76,11 @@
 (() => {
   const $=id=>document.getElementById(id),canvas=$('scene'),ctx=canvas.getContext('2d');
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const RHO=1.2,TOTAL_PRESSURE=100,MAX_SPEED=12,THERMAL_SPEED=45,DRIFT_SPEED=200,DRAWN_BASE=4,HIT_WINDOW=3,COLLISION_TIME=.08;
+  // Use one pixel-speed scale so faster thermal motion keeps the same visible flow balance.
+  // The physical v and P shown below still come from the unchanged Bernoulli model.
+  const RHO=1.2,TOTAL_PRESSURE=100,MAX_SPEED=12;
+  const PARTICLE_SPEED_SCALE=1.6,THERMAL_SPEED=45*PARTICLE_SPEED_SCALE,DRIFT_SPEED=200*PARTICLE_SPEED_SCALE;
+  const DRAWN_BASE=4,HIT_WINDOW=3,COLLISION_TIME=.12,DIRECTION_HOLD=.08;
   const state={strength:0,paused:reduced,time:0,points:[],flashes:[],hits:[],hitStartedAt:0,collisionCount:0,swaps:0};
   let width=600,height=270,dpr=1,last=null;
   // The gauge uses Bernoulli with a fixed total gauge pressure.
@@ -101,7 +105,7 @@
     for(let i=0;i<24;i++){
       const angle=(i+.5)/24*Math.PI/2,ux=Math.cos(angle),uy=Math.sin(angle);
       for(const sx of [-1,1])for(const sy of [-1,1]){
-        state.points.push({x:random(),y:.01+random()*.98,ux:sx*ux,uy:sy*uy,r:2.5});
+        state.points.push({x:random(),y:.01+random()*.98,ux:sx*ux,uy:sy*uy,r:2.5,lastTurn:-DIRECTION_HOLD});
       }
     }
   }
@@ -113,16 +117,20 @@
   }
   // Molecules also collide with one another. Two molecules of equal mass can exchange velocities
   // in an elastic collision, so swapping their random directions keeps the same set of directions
-  // (zero mean flow at rest, the same wall hits) while no molecule keeps moving against the flow:
-  // within a second or two every molecule is carried along by the shared drift.
+  // (zero mean flow at rest, the same thermal energy). Let each direction last briefly so
+  // a molecule travels before its next turn instead of repeatedly trembling in one spot.
+  // This visual timing does not postpone reflections at a wall.
   function collide(dt){
     const n=state.points.length;
     state.swaps+=dt*n/(2*COLLISION_TIME);
+    const eligible=state.points.filter(p=>state.time-p.lastTurn>=DIRECTION_HOLD);
     while(state.swaps>=1){
       state.swaps-=1;
-      const a=state.points[Math.floor(random()*n)],b=state.points[Math.floor(random()*n)];
-      if(a===b)continue;
+      if(eligible.length<2)continue;
+      const a=eligible.splice(Math.floor(random()*eligible.length),1)[0];
+      const b=eligible.splice(Math.floor(random()*eligible.length),1)[0];
       const ux=a.ux,uy=a.uy;a.ux=b.ux;a.uy=b.uy;b.ux=ux;b.uy=uy;
+      a.lastTurn=b.lastTurn=state.time;
     }
   }
   function update(){
