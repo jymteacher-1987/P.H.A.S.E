@@ -10,7 +10,7 @@
   "use strict";
 
   // Apps Script 웹 앱을 배포한 뒤 받은 .../exec 주소를 넣는다.
-  const REPORT_ENDPOINT = "";
+  const REPORT_ENDPOINT = "https://script.google.com/macros/s/AKfycbxToXYVKC5Yr5fjJ-G8jV08H4cArtKdZChCJlqzfaGYqxjubL41Wv8KmDmLOxOgiIWB/exec";
   const RECIPIENT = "jymteacher@naver.com";
   const LIMITS = { message: 2000, contact: 120 };
 
