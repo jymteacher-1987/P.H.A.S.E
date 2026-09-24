@@ -4,7 +4,6 @@
 // 보내기를 누르면 아래 주소의 Google Apps Script 웹 앱이 메일을 보낸다.
 // 받는 사람은 스크립트 안에 jymteacher@naver.com 으로 고정돼 있어서
 // 이 파일에서 무엇을 보내든 다른 주소로는 가지 않는다(tools/error-report 참고).
-// 주소가 비어 있거나 보내기에 실패하면, 같은 받는 사람으로 메일 앱을 연다.
 // ================================================================
 (function () {
   "use strict";
@@ -49,19 +48,6 @@
       sentAt: new Date().toISOString(),
       website: form.website.value
     };
-  }
-
-  function mailtoHref(payload) {
-    const subject = `[P.H.A.S.E 오류 신고] ${payload.activityTitle}`;
-    const body = [
-      `활동: ${payload.activityTitle}${payload.activityId ? ` (${payload.activityId})` : ""}`,
-      "",
-      payload.message,
-      "",
-      `기기: ${payload.device}`,
-      `페이지: ${payload.page}`
-    ].join("\n");
-    return `mailto:${RECIPIENT}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   }
 
   async function send(payload) {
@@ -112,14 +98,13 @@
           <p class="report-note">받는 사람: ${RECIPIENT} · 적은 글, 활동 이름, 기기·브라우저 정보가 함께 전달돼요.</p>
           <p class="report-status" role="status" aria-live="polite"></p>
           <div class="report-actions">
-            <a class="report-mail" hidden>메일 앱으로 보내기</a>
             <button type="submit" class="report-send">보내기</button>
           </div>
         </form>
       </section>`;
     document.body.append(dialog);
     const form = dialog.querySelector("form"), status = dialog.querySelector(".report-status"),
-      sendButton = dialog.querySelector(".report-send"), mailLink = dialog.querySelector(".report-mail");
+      sendButton = dialog.querySelector(".report-send");
     dialog.querySelector(".report-close").addEventListener("click", close);
     dialog.addEventListener("click", event => { if (event.target === dialog) close(); });
     dialog.addEventListener("keydown", event => {
@@ -140,22 +125,17 @@
         form.message.focus();
         return;
       }
-      mailLink.href = mailtoHref(payload);
       sendButton.disabled = true;
       status.textContent = "보내는 중이에요…";
       try {
         await send(payload);
         status.textContent = "고맙습니다. 신고가 전달됐어요.";
         form.message.value = "";
-        mailLink.hidden = true;
         sendButton.textContent = "한 건 더 보내기";
       } catch (error) {
-        status.textContent = error.message === "NO_ENDPOINT"
-          ? "바로 보내기가 아직 준비되지 않았어요. 아래 버튼을 누르면 내용이 채워진 메일 앱이 열려요."
-          : error.message === "LIMIT"
-            ? "지금은 신고가 많아 잠시 뒤에 보낼 수 있어요. 아래 버튼으로 메일 앱에서 보낼 수도 있어요."
-            : "지금은 바로 보내지 못했어요. 아래 버튼을 누르면 내용이 채워진 메일 앱이 열려요.";
-        mailLink.hidden = false;
+        status.textContent = error.message === "LIMIT"
+          ? "지금은 신고가 많아요. 잠시 뒤에 다시 보내기를 눌러 주세요."
+          : "보내지 못했어요. 인터넷 연결을 확인하고 다시 보내기를 눌러 주세요.";
       } finally { sendButton.disabled = false; }
     });
   }
@@ -166,7 +146,6 @@
     const form = dialog.querySelector("form");
     form.activity.innerHTML = optionList(options.activityId || "");
     dialog.querySelector(".report-status").textContent = "";
-    dialog.querySelector(".report-mail").hidden = true;
     dialog.querySelector(".report-send").textContent = "보내기";
     dialog.hidden = false;
     document.documentElement.classList.add("report-open");
@@ -212,5 +191,5 @@
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mountPage);
   else mountPage();
 
-  window.PhaseReport = { open, sideBox, buildPayload, mailtoHref, RECIPIENT };
+  window.PhaseReport = { open, sideBox, buildPayload, RECIPIENT };
 })();

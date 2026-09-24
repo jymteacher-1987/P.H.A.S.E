@@ -58,7 +58,7 @@ test('an hourly limit stops a flood of reports', () => {
   assert.equal(sent.length, 20);
 });
 
-test('the page never sends a recipient, and its mail fallback uses the fixed address', () => {
+test('the page never sends a recipient and offers only the direct send', () => {
   const window = { EXPERIMENTS_DATA: { experiments: [{ id: 'convex-lens-focus', title: '볼록 렌즈 초점 거리 찾기' }], plays: [] } };
   const context = {
     window, navigator: { userAgent: 'Test' }, location: { href: 'https://example.test/view.html?id=convex-lens-focus', search: '' },
@@ -74,7 +74,7 @@ test('the page never sends a recipient, and its mail fallback uses the fixed add
   assert.equal(payload.activityTitle, '볼록 렌즈 초점 거리 찾기');
   assert.equal(payload.message, '상이 사라져요');
   for (const key of ['to', 'recipient', 'email']) assert.ok(!(key in payload), 'no recipient field: ' + key);
-  const href = report.mailtoHref(payload);
-  assert.ok(href.startsWith('mailto:' + RECIPIENT + '?'), href);
   assert.equal(report.RECIPIENT, RECIPIENT);
+  assert.ok(!('mailtoHref' in report), 'no mail-app fallback');
+  assert.ok(!/mailto:|report-mail/.test(fs.readFileSync(path.join(__dirname, '../assets/js/report.js'), 'utf8')));
 });
