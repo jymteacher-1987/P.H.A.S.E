@@ -219,7 +219,7 @@ test('at the medium setting molecules collide and every one of them is carried t
   assert.ok(backward / windows < 0.02, 'over two seconds almost every molecule moves right: ' + backward / windows);
 });
 
-test('molecules travel briefly before another random turn instead of immediately reversing again', () => {
+test('molecules keep a visible free-flight segment before another random turn', () => {
   const sim = simulation(40), dt = 1 / 120;
   let previous = sim.snapshot().points, turns = 0;
   const lastTurn = previous.map(() => null);
@@ -231,7 +231,7 @@ test('molecules travel briefly before another random turn instead of immediately
       if (point.ux === previous[i].ux) return;
       const time = frame * dt;
       if (lastTurn[i] !== null) {
-        assert.ok(time - lastTurn[i] >= 0.08 - 1e-9, `molecule ${i} turned again too soon`);
+        assert.ok(time - lastTurn[i] >= 0.30 - 1e-9, `molecule ${i} turned again too soon`);
       }
       lastTurn[i] = time;
       turns++;
@@ -241,14 +241,27 @@ test('molecules travel briefly before another random turn instead of immediately
   assert.ok(turns > previous.length, 'random directions must still change over time');
 });
 
-test('weak flow is visibly rightward over half-second to two-second observation windows', () => {
-  // Short backward steps remain possible at 10%; test the observable accumulated
-  // displacement without mistaking a right-edge wrap for movement to the left.
-  for (const {seconds, minimum} of [
-    {seconds: 0.5, minimum: 0.8},
-    {seconds: 1, minimum: 0.9},
-    {seconds: 2, minimum: 0.95}
-  ]) {
+test('still-air particles explore space instead of merely trembling near their starting points', () => {
+  const sim = simulation(0), dt = 1 / 120;
+  const moved = sim.snapshot().points.map(() => ({x: 0, y: 0}));
+  for (let frame = 1; frame <= 12 * 120; frame++) {
+    sim.velocities().forEach((v, i) => { moved[i].x += v.vx * dt; moved[i].y += v.vy * dt; });
+    sim.step(dt);
+    if (frame % 120 === 0) {
+      // Integrate actual velocities so crossing the periodic side does not look like a jump.
+      const rms = Math.sqrt(moved.reduce((sum, p) => sum + p.x ** 2 + p.y ** 2, 0) / moved.length);
+      assert.ok(rms > 35, `one-second travel was only ${rms}px: random turns are too frequent`);
+      close(moved.reduce((sum, p) => sum + p.x, 0) / moved.length, 0, 1e-9);
+      moved.forEach(p => { p.x = 0; p.y = 0; });
+    }
+  }
+});
+
+test('weak flow carries the particle group rightward without suppressing random backward travel', () => {
+  // The longer free-flight segments must remain random at weak flow. Check the
+  // group's drift over short windows and advection over a longer observation,
+  // rather than forcing almost every molecule to turn right within half a second.
+  for (const seconds of [0.5, 1, 2, 6]) {
     const sim = simulation(10), dt = 1 / 120;
     const moved = new Array(sim.snapshot().points.length).fill(0);
     const framesPerWindow = Math.round(seconds / dt);
@@ -257,8 +270,9 @@ test('weak flow is visibly rightward over half-second to two-second observation 
       sim.step(dt);
       if (frame % framesPerWindow === 0) {
         const rightward = moved.filter(distance => distance > 0).length / moved.length;
-        assert.ok(rightward >= minimum,
-          `${seconds}s window ending at frame ${frame}: only ${rightward * 100}% moved right`);
+        assert.ok(rightward > 0.5,
+          `${seconds}s window ending at frame ${frame}: most particles should move right`);
+        if (seconds === 6) assert.ok(rightward >= 0.95, 'sustained weak flow carries almost all particles right');
         close(moved.reduce((sum, distance) => sum + distance, 0) / moved.length,
           DRAWN_DRIFT * 0.1 * seconds, 1e-6);
         moved.fill(0);

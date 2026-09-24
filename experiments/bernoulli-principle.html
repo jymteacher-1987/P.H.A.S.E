@@ -80,7 +80,7 @@
   // The physical v and P shown below still come from the unchanged Bernoulli model.
   const RHO=1.2,TOTAL_PRESSURE=100,MAX_SPEED=12;
   const PARTICLE_SPEED_SCALE=1.6,THERMAL_SPEED=45*PARTICLE_SPEED_SCALE,DRIFT_SPEED=200*PARTICLE_SPEED_SCALE;
-  const DRAWN_BASE=4,HIT_WINDOW=3,COLLISION_TIME=.12,DIRECTION_HOLD=.08;
+  const DRAWN_BASE=4,HIT_WINDOW=3,COLLISION_TIME=.45,DIRECTION_HOLD=.30;
   const state={strength:0,paused:reduced,time:0,points:[],flashes:[],hits:[],hitStartedAt:0,collisionCount:0,swaps:0};
   let width=600,height=270,dpr=1,last=null;
   // The gauge uses Bernoulli with a fixed total gauge pressure.
@@ -117,8 +117,8 @@
   }
   // Molecules also collide with one another. Two molecules of equal mass can exchange velocities
   // in an elastic collision, so swapping their random directions keeps the same set of directions
-  // (zero mean flow at rest, the same thermal energy). Let each direction last briefly so
-  // a molecule travels before its next turn instead of repeatedly trembling in one spot.
+  // (zero mean flow at rest, the same thermal energy). Keep a visible free-flight segment:
+  // at rest a molecule travels at least 21.6 px before another random turn, not just 5.76 px.
   // This visual timing does not postpone reflections at a wall.
   function collide(dt){
     const n=state.points.length;
