@@ -384,7 +384,7 @@ window.EXPERIMENTS_DATA = {
         "question": "유체의 속력이 빨라지면 압력은 어떻게 달라질까요?",
         "focus": "빨라진 정도를 바꾸며 속력과 압력 값을 읽고, 두 값의 관계를 확인해 보세요."
       },
-      "path": "experiments/bernoulli-principle.html?v=3231a1a7b1",
+      "path": "experiments/bernoulli-principle.html?v=0d198f717f",
       "date": "2026-09-09",
       "tags": [
         "베르누이",
@@ -397,12 +397,12 @@ window.EXPERIMENTS_DATA = {
       "id": "photoelectric-effect",
       "title": "광전효과 원리 이해하기",
       "category": "modern-physics",
-      "description": "빛의 파장과 광자 수, 전압을 바꾸며 광전자의 방출과 에너지 변화를 관찰합니다.",
+      "description": "빛의 진동수와 광자 수, 전압을 바꾸며 광전자의 방출과 에너지 변화를 관찰합니다.",
       "lessonNote": {
-        "question": "빛의 세기를 높이거나 파장을 짧게 하면, 광전자의 수와 최대 운동 에너지는 각각 어떻게 달라질까요?",
-        "focus": "방출 조건을 확인한 뒤, 파장을 고정하고 ‘들어오는 광자 수’를 늘려 보세요. 이어 광자 수를 고정한 채 파장을 줄여, 같은 시간 동안 방출되는 광전자 수와 최대 운동 에너지를 비교해 보세요."
+        "question": "빛의 세기를 높이거나 진동수를 높이면, 광전자의 수와 최대 운동 에너지는 각각 어떻게 달라질까요?",
+        "focus": "방출 조건을 확인한 뒤, 진동수를 고정하고 ‘들어오는 광자 수’를 늘려 보세요. 이어 광자 수를 고정한 채 진동수를 높여, 같은 시간 동안 방출되는 광전자 수와 최대 운동 에너지를 비교해 보세요."
       },
-      "path": "experiments/photoelectric-effect.html?v=7fc11ad0c0",
+      "path": "experiments/photoelectric-effect.html?v=c7c7de26b7",
       "date": "2026-09-13",
       "tags": [
         "광전효과",

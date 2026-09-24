@@ -7,9 +7,14 @@ async function get(url){const r=await fetch(url+(url.includes('?')?'&':'?')+'ver
 (async()=>{
  const catalog=await (await get(base+'data/experiments.json')).json();
  const entry=catalog.experiments.find(e=>e.id===local.id);assert.ok(entry);assert.equal(entry.category,'modern-physics');assert.equal(entry.path,local.path);
+ assert.equal(entry.description,local.description);assert.deepEqual(entry.lessonNote,local.lessonNote);
+ assert.ok(entry.description.includes('진동수')&&entry.lessonNote.question.includes('진동수')&&entry.lessonNote.focus.includes('진동수'));
+ assert.ok(!JSON.stringify([entry.description,entry.lessonNote]).includes('파장'));
  const html=await (await get(base+entry.path)).text();
  assert.equal(digest(html),digest(fs.readFileSync(path.join(root,entry.path.split('?')[0]),'utf8')));
- assert.ok(html.includes('id="lambdaMark" data-label="f₀"'));assert.ok(!html.includes('모형초'));
+ assert.ok(html.includes('id="frequencyMark" data-label="f₀"'));assert.ok(!html.includes('모형초'));
+ assert.ok(/id="frequency"[^>]*min="4"[^>]*max="15"[^>]*step="0\.01"/.test(html));
+ assert.ok(!html.includes('id="lambda"'));
  const home=await (await get(base+'index.html')).text();
  const dataScript=home.match(/src="(assets\/js\/experiments-data\.js[^\"]*)"/)[1];
  const script=await (await get(base+dataScript)).text();assert.ok(script.includes('"id": "'+entry.id+'"')&&script.includes(entry.path));
