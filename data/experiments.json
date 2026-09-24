@@ -53,7 +53,7 @@
         "question": "같은 양을 접두어가 다른 단위로 나타내면 수치는 어떻게 달라질까요?",
         "focus": "킬로와 밀리 등 크기가 다른 접두어로 단위를 변환하고, 나타내는 양은 그대로인지 확인해 보세요."
       },
-      "path": "experiments/si-prefixes.html?v=96fd30c4ef",
+      "path": "experiments/si-prefixes.html?v=3305d63d66",
       "date": "2026-07-28",
       "tags": [
         "단위",
@@ -70,7 +70,7 @@
         "question": "알짜힘에 따라 물체의 운동은 어떻게 달라지고, 두 물체가 주고받는 힘은 어떤 관계일까요?",
         "focus": "제1법칙에서는 알짜힘이 0일 때의 운동을, 제2법칙에서는 알짜힘과 질량을 하나씩 바꾸며 가속도를 살펴보세요. 제3법칙에서는 두 물체가 주고받는 힘의 크기와 방향을 비교해 보세요."
       },
-      "path": "experiments/newton-laws.html?v=887e4135b8",
+      "path": "experiments/newton-laws.html?v=1830f25642",
       "date": "2026-07-28",
       "tags": [
         "뉴턴",
@@ -204,8 +204,8 @@
       "category": "mechanics",
       "description": "일차원 충돌에서 두 물체의 전체 운동량이 보존되는지 확인합니다.",
       "lessonNote": {
-        "question": "충돌 전후에 두 물체의 운동량을 더하면 값이 어떻게 달라질까요?",
-        "focus": "충돌 전후에 각 물체의 운동량과 두 물체의 전체 운동량을 각각 비교해 보세요."
+        "question": "충돌 전과 후에 두 물체의 운동량을 더한 값은 어떻게 될까요?",
+        "focus": "운동 방향(+, −)을 생각하며, 충돌 전후에 각 물체의 운동량과 두 물체의 전체 운동량을 비교해 보세요."
       },
       "path": "experiments/momentum-conservation.html?v=407c5e8380",
       "date": "2026-07-28",
@@ -330,7 +330,7 @@
         "question": "지면에서 동시에 친 두 번개는 기차에서도 동시에 친 것일까요?",
         "focus": "두 관점에서 번개가 친 시각과 빛이 관찰자에게 도착한 시각을 구분해 보세요."
       },
-      "path": "experiments/simultaneity-relativity.html?v=e6df9b419b",
+      "path": "experiments/simultaneity-relativity.html?v=fd55f796b3",
       "date": "2026-08-01",
       "tags": [
         "특수상대성",
@@ -379,12 +379,12 @@
       "id": "bernoulli-principle",
       "title": "베르누이의 원리",
       "category": "mechanics",
-      "description": "유체의 속력이 빨라질 때 압력이 어떻게 달라지는지 관찰합니다.",
+      "description": "관을 따라 흐르는 공기의 속력이 커질 때 압력과 분자의 움직임이 어떻게 달라지는지 관찰합니다.",
       "lessonNote": {
-        "question": "유체의 속력이 빨라지면 압력은 어떻게 달라질까요?",
-        "focus": "빨라진 정도를 바꾸며 속력과 압력 값을 읽고, 두 값의 관계를 확인해 보세요."
+        "question": "같은 관을 따라 흐르는 공기의 속력이 커지면, 압력은 어떻게 달라질까요?",
+        "focus": "빨라진 정도를 바꾸며 속력과 압력 값을 읽어 보세요. 벽에 부딪히는 횟수와 점선이 흘러가는 빠르기도 함께 비교해 보세요."
       },
-      "path": "experiments/bernoulli-principle.html?v=18457ff5b3",
+      "path": "experiments/bernoulli-principle.html?v=448ab78452",
       "date": "2026-09-09",
       "tags": [
         "베르누이",
@@ -400,9 +400,9 @@
       "description": "빛의 진동수와 광자 수, 전압을 바꾸며 광전자의 방출과 에너지 변화를 관찰합니다.",
       "lessonNote": {
         "question": "광전자는 어떤 조건에서 방출되며, 방출된 광전자의 에너지와 광전류는 무엇에 따라 달라질까요?",
-        "focus": "진동수를 일정하게 두고, 단위 시간당 광자 수만 바꿔 보세요. 별도의 실험에서는 단위 시간당 광자 수를 일정하게 두고, 진동수만 바꿔 보세요. 방출 여부·최대 운동 에너지·광전류를 비교하고, 금속별 한계 진동수와 광전자가 방출될 때의 정지 전압도 찾아보세요."
+        "focus": "진동수를 일정하게 두고, 단위 시간당 광자 수만 바꿔 보세요. 별도의 실험에서는 단위 시간당 광자 수를 일정하게 두고, 진동수만 바꿔 보세요. 방출 여부·최대 운동 에너지·광전류를 비교하고, 금속별 한계 진동수와, 광전류가 0이 되는 정지 전압도 찾아보세요."
       },
-      "path": "experiments/photoelectric-effect.html?v=c7c7de26b7",
+      "path": "experiments/photoelectric-effect.html?v=df621cf927",
       "date": "2026-09-13",
       "tags": [
         "광전효과",
@@ -419,7 +419,7 @@
       "title": "히어로 만들기",
       "icon": "🛡️",
       "description": "실험 원리로 나만의 히어로를 만들고 포스터를 완성합니다.",
-      "path": "plays/hero-maker.html?v=f313a83198",
+      "path": "plays/hero-maker.html?v=986cb4bd7b",
       "date": "2026-09-02",
       "tags": [
         "히어로",

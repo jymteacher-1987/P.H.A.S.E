@@ -608,6 +608,15 @@
       return true;
     }
 
+    function gcd(a,b){ return b?gcd(b,a%b):a; }
+    // 표시용 속력: 운동량 보존(vA:vB = mB:mA)이 화면의 곱에서도 정확히 보이도록
+    // 소수 둘째 자리의 짝으로 맞춘다. 물리 계산의 속도는 그대로 둔다.
+    function shownSpeeds(){
+      const g=gcd(s.mA,s.mB), k=s.mB/g, j=s.mA/g;
+      const n=Math.max(1,Math.round(Math.abs(s.vA)/(k/100)));
+      return {vA:n*k/100, vB:n*j/100};
+    }
+
     function endPush(){
       if(s.phase!=='push') return;
       document.getElementById('l3-push').classList.remove('active');
@@ -702,17 +711,19 @@
         ctx.fillStyle=COL.blue; roundRect(ctx,gxx,gyy,Math.max(gh,gw*prog),gh,6); ctx.fill();
         ctx.fillStyle=COL.navy; ctx.font="700 12px 'Noto Sans KR',sans-serif";
         ctx.fillText('서로 미는 중 · 손이 떨어지면 등속 운동', cx0, gyy-7);
-      } else if(s.phase==='glide'){
-        const vAr=Math.abs(s.vA), vBr=Math.abs(s.vB);
-        if(vAr>0.005){ const L=Math.max(0,Math.min(Math.min(98,Math.max(54,vAr*SCALE*0.8))+8,ax-e-12)); arrow(ctx,ax-e,midY,ax-e-L,midY,COL.green,'속도',vAr.toFixed(2)+' m/s',3,'above'); }
-        if(vBr>0.005){ const L=Math.max(0,Math.min(Math.min(98,Math.max(54,vBr*SCALE*0.8))+8,W-bx-e-12)); arrow(ctx,bx+e,midY,bx+e+L,midY,COL.green,'속도',vBr.toFixed(2)+' m/s',3,'above'); }
-        ctx.fillStyle=COL.green; ctx.font="800 13px 'Noto Sans KR',sans-serif";
-        ctx.fillText('운동량의 크기는 양쪽이 같다', cx0, H-29);
+      } else if(s.phase==='glide' || s.phase==='complete'){
+        const vAr=Math.abs(s.vA), vBr=Math.abs(s.vB), shown=shownSpeeds();
+        if(s.phase==='glide'){
+          if(vAr>0.005){ const L=Math.max(0,Math.min(Math.min(98,Math.max(54,vAr*SCALE*0.8))+8,ax-e-12)); arrow(ctx,ax-e,midY,ax-e-L,midY,COL.green,'속도',shown.vA.toFixed(2)+' m/s',3,'above'); }
+          if(vBr>0.005){ const L=Math.max(0,Math.min(Math.min(98,Math.max(54,vBr*SCALE*0.8))+8,W-bx-e-12)); arrow(ctx,bx+e,midY,bx+e+L,midY,COL.green,'속도',shown.vB.toFixed(2)+' m/s',3,'above'); }
+          ctx.fillStyle=COL.green; ctx.font="800 13px 'Noto Sans KR',sans-serif";
+          ctx.fillText('운동량의 크기는 양쪽이 같다', cx0, H-29);
+        } else {
+          ctx.fillStyle=COL.navy; ctx.font="700 13px 'Noto Sans KR',sans-serif";
+          ctx.fillText('관찰 종료 · ‘다시’를 눌러 새 실험', cx0, H-29);
+        }
         ctx.fillStyle=COL.ink; ctx.font="700 11px 'JetBrains Mono',monospace";
-        ctx.fillText('A '+(s.mA*vAr).toFixed(2)+' · B '+(s.mB*vBr).toFixed(2)+' kg·m/s', cx0, H-13);
-      } else if(s.phase==='complete'){
-        ctx.fillStyle=COL.navy; ctx.font="700 13px 'Noto Sans KR',sans-serif";
-        ctx.fillText('관찰 종료 · ‘다시’를 눌러 새 실험', cx0, H-14);
+        ctx.fillText('A '+s.mA+'×'+shown.vA.toFixed(2)+' = B '+s.mB+'×'+shown.vB.toFixed(2)+' = '+(s.mA*shown.vA).toFixed(2)+' kg·m/s', cx0, H-13);
       } else {
         ctx.fillStyle=COL.soft; ctx.font="600 13px 'Noto Sans KR',sans-serif";
         ctx.fillText('‘밀기’를 꾹 눌러 보세요', cx0, H-14);

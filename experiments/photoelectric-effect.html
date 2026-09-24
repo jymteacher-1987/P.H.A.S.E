@@ -247,7 +247,7 @@ select{width:100%;border:1px solid #ccdbe8;border-radius:8px;background:#f5f9fc;
   <div class="control control-metal">
    <div class="control-head"><label for="metal">금속</label></div>
    <select id="metal"><option value="Na">나트륨 Na</option><option value="Al">알루미늄 Al</option><option value="Zn">아연 Zn</option><option value="Cu">구리 Cu</option></select>
-   <div class="foot"><span>일함수 <b id="phiValue">2.46 eV</b></span><span>한계 진동수 f₀ <b id="f0Value">≈ 5.9483 ×10¹⁴ Hz</b></span></div>
+   <div class="foot"><span>일함수 <b id="phiValue">2.46 eV</b></span><span>한계 진동수 f₀ <b id="f0Value">≈ 5.95 ×10¹⁴ Hz</b></span></div>
   </div>
   <div class="control control-wave">
    <div class="control-head"><label for="frequency">빛의 진동수</label><output id="freqValue" for="frequency">7.50 ×10¹⁴ Hz</output></div>
@@ -427,7 +427,7 @@ function calc(s){
   model=calc(state);
   const light=lightStyle(model.lambda);
   ui.phiValue.textContent=model.material.phi.toFixed(2)+" eV";
-  ui.f0Value.textContent="≈ "+(model.material.phi/(H_EV*1e14)).toFixed(4)+" ×10¹⁴ Hz";
+  ui.f0Value.textContent="≈ "+(model.material.phi/(H_EV*1e14)).toFixed(2)+" ×10¹⁴ Hz";
   ui.freqValue.style.color=light.color;
   ui.frequency.value=state.frequency;
   ui.frequency.setAttribute("aria-valuetext",state.frequency.toFixed(2)+" 곱하기 10의 14제곱 헤르츠");
