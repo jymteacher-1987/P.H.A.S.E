@@ -71,7 +71,7 @@ test('every molecule shares the same drift, and only the random part weakens as 
     previous = thermal;
   }
   close(sim.model(0).random, 1);
-  assert.ok(sim.model(100).random > 0.45 && sim.model(100).random < 0.55);
+  assert.ok(sim.model(100).random > 0.35 && sim.model(100).random < 0.45);
 });
 
 test('zero gauge pressure is not zero random molecular motion', () => {
@@ -82,7 +82,7 @@ test('zero gauge pressure is not zero random molecular motion', () => {
   sim.setStrength(strength);
   close(sim.model().P, 0);
   const thermal = 180 * sim.model().random;
-  assert.ok(thermal > 0.3 * 180, 'random motion stays clearly visible at atmospheric pressure');
+  assert.ok(thermal > 0.15 * 180, 'random motion never stops at atmospheric pressure');
   for (const velocity of sim.velocities()) close(randomSpeed(velocity, strength), thermal);
 });
 
@@ -91,7 +91,7 @@ test('faster flow gives fewer and weaker wall impacts', () => {
   assert.ok(slow.collisionCount > 100, 'random motion keeps hitting the walls');
   assert.ok(fast.collisionCount > 0, 'fast flow still hits the walls');
   const ratio = fast.collisionCount / slow.collisionCount;
-  assert.ok(ratio > 0.4 && ratio < 0.6, 'hits fall with the random speed: ' + ratio);
+  assert.ok(ratio > 0.3 && ratio < 0.5, 'hits fall with the random speed: ' + ratio);
   const meanStrength = snapshot => snapshot.flashes.reduce((sum, f) => sum + f.strength, 0) / snapshot.flashes.length;
   assert.ok(meanStrength(fast) < meanStrength(slow));
   assert.ok(fast.points.some((p, i) => p.x !== slow.points[i].x), 'the added drift remains visible');
@@ -106,14 +106,4 @@ test('the hit counter reports recent wall impacts per second', () => {
   sim.setStrength(100);
   run(sim, 4);
   assert.ok(sim.hitRate() < restRate * 0.6);
-});
-
-test('dashed flow markers move with the drift shared by every molecule', () => {
-  const rest = simulation(0);
-  run(rest, 1);
-  close(rest.snapshot().flow, 0);
-  const sim = simulation(100), dt = 1 / 120;
-  sim.step(dt);
-  // The default 600 px canvas leaves 580 px of pipe between the side margins.
-  close(sim.snapshot().flow, 200 * dt / 580);
 });

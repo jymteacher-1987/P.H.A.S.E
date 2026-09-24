@@ -382,9 +382,9 @@
       "description": "관을 따라 흐르는 공기의 속력이 커질 때 압력과 분자의 움직임이 어떻게 달라지는지 관찰합니다.",
       "lessonNote": {
         "question": "같은 관을 따라 흐르는 공기의 속력이 커지면, 압력은 어떻게 달라질까요?",
-        "focus": "빨라진 정도를 바꾸며 속력과 압력 값을 읽어 보세요. 벽에 부딪히는 횟수와 점선이 흘러가는 빠르기도 함께 비교해 보세요."
+        "focus": "빨라진 정도를 바꾸며 속력과 압력 값을 읽고, 분자가 벽에 부딪히는 횟수와 세기가 어떻게 달라지는지도 살펴보세요."
       },
-      "path": "experiments/bernoulli-principle.html?v=448ab78452",
+      "path": "experiments/bernoulli-principle.html?v=d345187ad3",
       "date": "2026-09-09",
       "tags": [
         "베르누이",
