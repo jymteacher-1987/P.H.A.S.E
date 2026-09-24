@@ -77,7 +77,7 @@
   const $=id=>document.getElementById(id),canvas=$('scene'),ctx=canvas.getContext('2d');
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const RHO=1.2,TOTAL_PRESSURE=100,MAX_SPEED=12,THERMAL_SPEED=45,DRIFT_SPEED=200,DRAWN_BASE=4,HIT_WINDOW=3,COLLISION_TIME=.08;
-  const state={strength:0,paused:reduced,time:0,points:[],flashes:[],hits:[],collisionCount:0,swaps:0};
+  const state={strength:0,paused:reduced,time:0,points:[],flashes:[],hits:[],hitStartedAt:0,collisionCount:0,swaps:0};
   let width=600,height=270,dpr=1,last=null;
   // The gauge uses Bernoulli with a fixed total gauge pressure.
   // Every molecule shares one drift, the flow speed v; only the random part reaches the walls.
@@ -91,11 +91,11 @@
     const random=Math.sqrt((DRAWN_BASE+P)/(DRAWN_BASE+TOTAL_PRESSURE));
     return {v,q,P,total:TOTAL_PRESSURE,random};
   }
-  function hitRate(){return state.time>0?state.hits.length/Math.min(HIT_WINDOW,state.time):null;}
+  function hitRate(){const elapsed=state.time-state.hitStartedAt;return elapsed>=.5?state.hits.length/Math.min(HIT_WINDOW,elapsed):null;}
   function rng(seed){return()=>{seed=(1664525*seed+1013904223)>>>0;return(seed+.5)/4294967296;};}
   let random=rng(31927);
   function seed(){
-    random=rng(31927);state.time=0;state.flashes=[];state.hits=[];state.collisionCount=0;state.swaps=0;
+    random=rng(31927);state.time=0;state.flashes=[];state.hits=[];state.hitStartedAt=0;state.collisionCount=0;state.swaps=0;
     state.points=[];
     // Balanced quadrants give zero mean flow at rest, without speed outliers.
     for(let i=0;i<24;i++){
@@ -106,7 +106,9 @@
     }
   }
   function particleVelocity(p){
-    const m=model(),thermal=THERMAL_SPEED*m.random;
+    // Magnify the contrast only in this schematic, including at the medium preset.
+    // Real wall crossings still drive every yellow flash and the displayed count.
+    const m=model(),drawingScale=m.random/(1+2*state.strength/100),thermal=THERMAL_SPEED*drawingScale;
     return {vx:DRIFT_SPEED*m.v/MAX_SPEED+thermal*p.ux,vy:thermal*p.uy};
   }
   // Molecules also collide with one another. Two molecules of equal mass can exchange velocities
@@ -139,7 +141,7 @@
     if($('insight').innerHTML!==insight)$('insight').innerHTML=insight;
     document.querySelectorAll('[data-value]').forEach(button=>button.setAttribute('aria-pressed',String(Number(button.dataset.value)===s)));
   }
-  function setStrength(value){state.strength=Math.max(0,Math.min(100,Number(value)));state.flashes=[];update();render();}
+  function setStrength(value){state.strength=Math.max(0,Math.min(100,Number(value)));state.flashes=[];state.hits=[];state.hitStartedAt=state.time;update();render();}
   function step(dt){
     state.time+=dt;
     const drawW=Math.max(1,width-20),drawH=Math.max(1,height-89);

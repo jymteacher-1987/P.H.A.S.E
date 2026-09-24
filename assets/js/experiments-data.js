@@ -383,7 +383,7 @@ window.EXPERIMENTS_DATA = {
         "question": "같은 관을 따라 흐르는 공기의 속력이 커지면, 압력은 어떻게 달라질까요?",
         "focus": "빨라진 정도를 바꾸며 속력과 압력 값을 읽고, 분자가 벽에 부딪히는 횟수와 세기가 어떻게 달라지는지도 살펴보세요."
       },
-      "path": "experiments/bernoulli-principle.html?v=c084702b9f",
+      "path": "experiments/bernoulli-principle.html?v=0e87d64ef0",
       "date": "2026-09-09",
       "tags": [
         "베르누이",

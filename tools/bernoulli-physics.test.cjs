@@ -6,14 +6,17 @@ const assert = require('node:assert/strict');
 const source = fs.readFileSync(path.join(__dirname, '../experiments/bernoulli-principle.html'), 'utf8');
 const between = (first, last) => source.slice(source.indexOf(first), source.indexOf(last));
 const modelCode = between('  const RHO=', '  function update(){');
+const strengthCode = between('  function setStrength(value){', '  function step(dt){');
 const stepCode = between('  function step(dt){', '  function render(){');
 const close = (a, b, tolerance = 1e-9) => assert.ok(Math.abs(a - b) <= tolerance, `${a} != ${b}`);
 
 // Exercise the published model and animation functions, without rebuilding their physics.
 function simulation(strength = 0) {
-  const sim = new Function('reduced', modelCode + stepCode + `
-    return {model, step, seed, hitRate,
-      setStrength: value => {state.strength = value;},
+  const sim = new Function('reduced', modelCode + strengthCode + stepCode + `
+    function update() {}
+    function render() {}
+    return {model, step, seed, hitRate, setStrength,
+      setBoundaryStrength: value => {state.strength = value;},
       velocities: () => state.points.map(particleVelocity),
       snapshot: () => structuredClone(state)};
   `)(false);
@@ -25,6 +28,18 @@ const randomSpeed = (velocity, strength) => Math.hypot(velocity.vx - 200 * stren
 function run(sim, seconds) {
   for (let frame = 0; frame < seconds * 120; frame++) sim.step(1 / 120);
   return sim.snapshot();
+}
+
+function observeImpacts(sim, seconds) {
+  let count = sim.snapshot().collisionCount;
+  const impacts = [];
+  for (let frame = 0; frame < seconds * 120; frame++) {
+    sim.step(1 / 120);
+    const state = sim.snapshot(), added = state.collisionCount - count;
+    if (added) impacts.push(...state.flashes.slice(-added));
+    count = state.collisionCount;
+  }
+  return {state: sim.snapshot(), impacts};
 }
 
 test('Bernoulli speed and pressure retain the existing numerical relationship', () => {
@@ -52,10 +67,14 @@ test('Bernoulli speed and pressure retain the existing numerical relationship', 
 test('every molecule shares the same drift, and only the random part weakens as the flow speeds up', () => {
   const sim = simulation();
   const baseline = sim.velocities();
+  assert.equal(baseline.length, 96);
+  for (const velocity of baseline) close(randomSpeed(velocity, 0), 45);
   let previous = Infinity;
-  for (const strength of [0, 40, 100]) {
+  for (const strength of [0, 10, 40, 70, 100]) {
     sim.setStrength(strength);
-    const velocities = sim.velocities(), drift = 200 * strength / 100, thermal = 45 * sim.model().random;
+    const velocities = sim.velocities(), drift = 200 * strength / 100;
+    const thermal = randomSpeed(velocities[0], strength);
+    assert.ok(thermal > 0, 'drawing exaggeration must not stop random motion');
     let meanX = 0, meanY = 0;
     for (let i = 0; i < velocities.length; i++) {
       const velocity = velocities[i];
@@ -79,23 +98,58 @@ test('zero gauge pressure is not zero random molecular motion', () => {
   // Extend the same equation to its zero-gauge point for this conceptual boundary check.
   // The displayed slider still has its original 0..100 range and 12 m/s maximum.
   const strength = Math.sqrt(2 * 100 / 1.2) / 12 * 100;
-  sim.setStrength(strength);
+  // The actual UI setter clamps at 100%; bypass only for this boundary case.
+  sim.setBoundaryStrength(strength);
   close(sim.model().P, 0);
-  const thermal = 45 * sim.model().random;
-  assert.ok(thermal > 0.15 * 45, 'random motion never stops at atmospheric pressure');
+  const thermal = randomSpeed(sim.velocities()[0], strength);
+  assert.ok(thermal > 0, 'random motion never stops at atmospheric pressure');
   for (const velocity of sim.velocities()) close(randomSpeed(velocity, strength), thermal);
 });
 
-test('faster flow gives fewer and weaker wall impacts', () => {
-  // Slower animation needs a longer observation window for enough wall impacts.
-  const slow = run(simulation(0), 12), fast = run(simulation(100), 12);
-  assert.ok(slow.collisionCount > 100, 'random motion keeps hitting the walls');
-  assert.ok(fast.collisionCount > 0, 'fast flow still hits the walls');
-  const ratio = fast.collisionCount / slow.collisionCount;
-  assert.ok(ratio > 0.3 && ratio < 0.5, 'hits fall with the random speed: ' + ratio);
-  const meanStrength = snapshot => snapshot.flashes.reduce((sum, f) => sum + f.strength, 0) / snapshot.flashes.length;
-  assert.ok(meanStrength(fast) < meanStrength(slow));
-  assert.ok(fast.points.some((p, i) => p.x !== slow.points[i].x), 'the added drift remains visible');
+test('medium and fast flow have visibly fewer and weaker actual wall impacts', () => {
+  // Compare complete observation windows, not whichever flash survives at the end.
+  const still = observeImpacts(simulation(0), 36);
+  const medium = observeImpacts(simulation(40), 36);
+  const fast = observeImpacts(simulation(100), 36);
+  assert.ok(still.impacts.length > 100, 'observe enough impacts to compare the modes');
+  const ratio = medium.impacts.length / still.impacts.length;
+  assert.ok(ratio > 0.4 && ratio < 0.7, 'medium flow should show about half as many impacts: ' + ratio);
+  assert.ok(fast.impacts.length > 0, 'fast flow still hits the walls');
+  assert.ok(fast.impacts.length < medium.impacts.length * 0.6);
+  const meanStrength = result => result.impacts.reduce((sum, f) => sum + f.strength, 0) / result.impacts.length;
+  assert.ok(meanStrength(medium) < meanStrength(still) * 0.7);
+  assert.ok(meanStrength(fast) < meanStrength(medium) * 0.6);
+  assert.ok(fast.state.points.some((p, i) => p.x !== still.state.points[i].x), 'the added drift remains visible');
+});
+
+test('each counted yellow flash comes from a molecule crossing a wall', () => {
+  for (const strength of [0, 40, 100]) {
+    const sim = simulation(strength), dt = 1 / 120, drawingHeight = 270 - 89;
+    let verified = 0;
+    for (let frame = 0; frame < 12 * 120; frame++) {
+      const before = sim.snapshot(), velocities = sim.velocities();
+      const crossings = [];
+      before.points.forEach((point, i) => {
+        const dy = velocities[i].vy * dt / drawingHeight;
+        if (point.y + dy < 0 || point.y + dy > 1) {
+          crossings.push({wall: point.y + dy < 0 ? 0 : 1});
+        }
+      });
+      sim.step(dt);
+      const after = sim.snapshot();
+      assert.equal(after.collisionCount - before.collisionCount, crossings.length);
+      const added = after.flashes.filter(flash => flash.time >= before.time);
+      assert.equal(added.length, crossings.length, 'no timed or decorative wall flashes');
+      added.forEach((flash, i) => {
+        assert.equal(flash.wall, crossings[i].wall);
+        assert.ok(flash.time <= after.time);
+        assert.ok(flash.x >= 0 && flash.x <= 1);
+        assert.ok(after.hits.includes(flash.time), 'the counter uses the same actual crossing');
+      });
+      verified += added.length;
+    }
+    assert.ok(verified > 0, `no actual wall impacts verified at strength ${strength}`);
+  }
 });
 
 test('the hit counter reports recent wall impacts per second', () => {
@@ -107,6 +161,34 @@ test('the hit counter reports recent wall impacts per second', () => {
   sim.setStrength(100);
   run(sim, 4);
   assert.ok(sim.hitRate() < restRate * 0.6);
+});
+
+test('a mode change clears old impacts and waits half a second for a fresh sample', () => {
+  const sim = simulation();
+  const before = run(sim, 4);
+  assert.ok(before.hits.length > 0);
+  sim.setStrength(40);
+  const changed = sim.snapshot();
+  assert.equal(changed.time, before.time);
+  assert.deepEqual(changed.points, before.points, 'changing modes does not reseed molecules');
+  assert.deepEqual(changed.hits, []);
+  assert.deepEqual(changed.flashes, []);
+  assert.equal(sim.hitRate(), null);
+  for (let frame = 0; frame < 49; frame++) sim.step(0.01);
+  assert.equal(sim.hitRate(), null, 'do not report a rate from less than half a second');
+  sim.step(0.02);
+  const sample = sim.snapshot();
+  assert.ok(Number.isFinite(sim.hitRate()));
+  assert.ok(sample.hits.every(time => time >= before.time));
+  close(sim.hitRate(), sample.hits.length / 0.51);
+  const steady = run(sim, 4);
+  close(sim.hitRate(), steady.hits.length / 3);
+  sim.setStrength(0);
+  assert.equal(sim.hitRate(), null, 'returning to still air also starts a new sample');
+  sim.seed();
+  assert.equal(sim.snapshot().time, 0);
+  assert.deepEqual(sim.snapshot().hits, []);
+  assert.equal(sim.hitRate(), null);
 });
 
 test('at the medium setting molecules collide and every one of them is carried to the right', () => {
