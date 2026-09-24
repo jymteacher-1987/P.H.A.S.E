@@ -113,11 +113,74 @@ test('local chart distribution is the pinned version and includes its license', 
 });
 
 test('edited experiment scripts remain syntactically valid', () => {
-  for (const name of ['motion-analysis', 'newton-laws', 'bernoulli-principle', 'rocket-motion', 'si-prefixes']) {
+  for (const name of ['motion-analysis', 'newton-laws', 'momentum-conservation', 'bernoulli-principle', 'rocket-motion', 'si-prefixes']) {
     for (const match of read(name).matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) {
       if (!/\bsrc=/.test(match[1])) new vm.Script(match[2], {filename: name + '.html'});
     }
   }
+});
+
+function newtonSecondLaw(force, mass) {
+  const source = read('newton-laws');
+  const start = source.indexOf('  const Law2 = (function(){');
+  const end = source.indexOf('  })();', start) + '  })();'.length;
+  const code = source.slice(start, end).replace(
+    'return {resize,reset,update,draw,bind};',
+    'return {resize,reset,update,draw,bind,snapshot:()=>structuredClone(s)};');
+  const elements = new Map();
+  const document = {getElementById(id) {
+    if (!elements.has(id)) elements.set(id, {
+      style: {}, listeners: {},
+      addEventListener(type, handler) { this.listeners[type] = handler; }
+    });
+    return elements.get(id);
+  }};
+  const law = new Function('document', code + ';return Law2;')(document);
+  law.bind();
+  for (const [id, value] of [['l2-F', force], ['l2-m', mass]]) {
+    const input = document.getElementById(id);
+    input.value = String(value); input.listeners.input();
+  }
+  document.getElementById('l2-go').listeners.click();
+  return {law, document};
+}
+
+for (const {name, force, mass, frames, time} of [
+  {name: 'speed boundary between frames', force: 7, mass: 1, frames: [1/60], time: 20/7},
+  {name: 'time boundary between frames', force: 6, mass: 5, frames: [.017], time: 12},
+  {name: 'irregular frames', force: 11, mass: 2, frames: [.013, .041, .009, .023], time: 40/11}
+]) {
+  test(`second-law ${name} ends on the same constant-acceleration trajectory`, () => {
+    const {law, document} = newtonSecondLaw(force, mass);
+    let updates = 0;
+    while (law.snapshot().running && updates < 2000) law.update(frames[updates++ % frames.length]);
+    const final = law.snapshot(), acceleration = force/mass;
+    assert.equal(final.running, false);
+    close(final.t, time);
+    close(final.v, acceleration*time);
+    close(final.dist, 0.5*acceleration*time*time);
+    const points = final.runs[0].pts;
+    for (const point of points) {
+      close(point.v, acceleration*point.t);
+      assert.ok(point.t <= 12 && point.v <= 20 + 1e-10);
+    }
+    const [before, last] = points.slice(-2);
+    close((last.v-before.v)/(last.t-before.t), acceleration);
+    assert.equal(document.getElementById('l2-F').disabled, false);
+    assert.equal(document.getElementById('l2-m').disabled, false);
+    law.update(.1);
+    assert.deepEqual(law.snapshot(), final, 'a finished observation must remain unchanged');
+  });
+}
+
+test('second-law distance and velocity use the same elapsed interval before the endpoint', () => {
+  const {law} = newtonSecondLaw(7, 1);
+  law.update(.4);
+  close(law.snapshot().v, 2.8);
+  close(law.snapshot().dist, .56);
+  law.update(.1);
+  close(law.snapshot().v, 3.5);
+  close(law.snapshot().dist, .875);
 });
 
 function newtonThirdLaw() {
@@ -253,7 +316,7 @@ test('viewport boundary ends both observations together without a fictitious col
   assert.equal(button.classes.has('active'), false);
 });
 
-function momentumRecording() {
+function momentumRecording(random = Math.random) {
   const source = read('momentum-conservation');
   const elements = new Map();
   const $ = id => {
@@ -264,17 +327,54 @@ function momentumRecording() {
     between(source, 'const r3 =', 'function toast(') +
     between(source, 'function collide(', 'function makeSparks(') +
     between(source, "$('bumper').onclick=", 'function paintMode(') +
-    between(source, 'function analyze(', 'function metrics(') +
+    between(source, 'function analyze(', 'function renderReadout(') +
+    between(source, 'function writeConcl()', 'function drawChart()') +
     between(source, "$('btnRec').onclick=", "$('btnClear').onclick=");
-  return new Function('$', `
+  return new Function('$', 'Math', `
     function makeSparks() {} function renderReadout() {} function renderTable() {}
     function toast() {} function resetRun() {} function openModal() {}
     ${code}
-    return {state:S, stepPhysics, record:()=>$('btnRec').onclick(),
+    return {state:S, stepPhysics, sensor, collide, record:()=>$('btnRec').onclick(),
+      conclusion:()=>{writeConcl();return $('conclText').innerHTML;},
       selectBumper: bumper => $('bumper').onclick({target:{closest:()=>({dataset:{b:bumper}})}}),
       approach:()=>{S.c1.x=.6;S.c2.x=.6+2*HW+.0001;S.c1.v=.4;S.c2.v=-.2;}};
-  `)($);
+  `)($, Object.assign(Object.create(Math), {random}));
 }
+
+test('real-mode sensor adds bounded noise and rounds rather than truncating velocity', () => {
+  for (const [random, positive, negative] of [[0, .232, -.238], [.5, .235, -.235], [1, .238, -.232]]) {
+    const sim = momentumRecording(() => random);
+    sim.state.mode = 'real';
+    close(sim.sensor(.2348), positive);
+    close(sim.sensor(-.2348), negative);
+    sim.state.mode = 'ideal';
+    close(sim.sensor(.2348), .235);
+    close(sim.sensor(-.2348), -.235);
+  }
+});
+
+test('sensor noise affects measured momentum without changing the collision solution', () => {
+  const sims = [[0, 0, .999, .999], [.999, .999, 0, 0]].map(values => {
+    let i = 0;
+    return momentumRecording(() => values[i++ % values.length]);
+  });
+  for (const sim of sims) {
+    sim.state.mode = 'real';
+    sim.selectBumper('velcro'); // Fixed restitution isolates sensor noise from spring variability.
+    sim.state.m1 = .5; sim.state.m2 = .9;
+    sim.approach(); sim.stepPhysics(.01);
+    const {raw} = sim.state.reading;
+    close(.5*raw.v1 + .9*raw.v2, .5*raw.v1p + .9*raw.v2p);
+    sim.record();
+    assert.ok(sim.state.rows[0].diff > 0);
+    const explanation = sim.conclusion();
+    assert.match(explanation, /측정 잡음/);
+    assert.match(explanation, /소수 셋째 자리까지 반올림/);
+    assert.doesNotMatch(explanation, /넷째 자리부터 버리|현실의 측정에서는 원래 이 정도/);
+  }
+  assert.deepEqual(sims[0].state.reading.raw, sims[1].state.reading.raw);
+  assert.notEqual(sims[0].state.reading.v1, sims[1].state.reading.v1);
+});
 
 for (const [atCollision, afterCollision] of [['spring', 'velcro'], ['velcro', 'spring']]) {
   test(`recording a ${atCollision} collision retains its type after selecting ${afterCollision}`, () => {

@@ -22,6 +22,12 @@ window.__inductionTest = {
     state.xM+=magnetDelta; state.xC+=coilDelta; update(1/120);
     return {xM:state.xM,xC:state.xC,I:state.I,emf:state.emfS,lambda:state.lambda};
   },
+  readLabels: () => {
+    const labels=[], original=ctx.fillText;
+    ctx.fillText=function(value,...args){labels.push(String(value)); return original.call(this,value,...args);};
+    try {render();} finally {ctx.fillText=original;}
+    return labels;
+  },
   advance: seconds => {
     setPaused(true);
     const rows=[];
@@ -69,6 +75,48 @@ for (const engine of [chromium,webkit]) {
               assert.ok(labels.includes('유도 전류 없음'), 'painted current indicator must agree with the model');
             }
           }
+        });
+
+        await t.test(`current labels distinguish weak induction from zero (${width}px)`, async () => {
+          const W = (await page.evaluate(() => __inductionTest.snapshot())).W;
+          await page.locator('input[name=dev][value=bulb]').check();
+          await page.locator('#nRange').fill('10');
+          await page.locator('#nRange').dispatchEvent('input');
+          for (const delta of [-0.02,0.02]) {
+            await page.evaluate(W => __inductionTest.placeManual(W*.2,W*.75),W);
+            const weak = await page.evaluate(delta => {
+              const model=__inductionTest.manualStep(delta,0);
+              return {model,labels:__inductionTest.readLabels()};
+            },delta);
+            assert.ok(Math.abs(weak.model.I)>0 && Math.abs(weak.model.emf)<1,
+              'slow relative motion must produce a nonzero current below the direction-display threshold');
+            assert.ok(weak.labels.includes('유도 전류가 매우 작음'));
+            assert.ok(!weak.labels.includes('유도 전류 없음'));
+            const stopped = await page.evaluate(() => ({
+              model:__inductionTest.manualStep(0,0),labels:__inductionTest.readLabels()
+            }));
+            assert.ok(stopped.model.I===0,'stopped relative motion gives exact zero current');
+            assert.ok(stopped.labels.includes('유도 전류 없음'));
+          }
+          await page.locator('#nRange').fill('200');
+          await page.locator('#nRange').dispatchEvent('input');
+          await page.evaluate(W => __inductionTest.placeManual(W*.45,W*.55),W);
+          const visible = await page.evaluate(() => ({
+            model:__inductionTest.manualStep(4,0),labels:__inductionTest.readLabels()
+          }));
+          assert.ok(Math.abs(visible.model.emf)>=1);
+          assert.ok(visible.labels.includes('유도 전류: − (시계 방향)'));
+          await page.locator('input[name=dev][value=led]').check();
+          await page.evaluate(W => __inductionTest.placeManual(W*.45,W*.55),W);
+          const blocked = await page.evaluate(() => ({
+            model:__inductionTest.manualStep(4,0),labels:__inductionTest.readLabels()
+          }));
+          assert.equal(blocked.model.I,0);
+          assert.ok(blocked.model.emf < -5);
+          assert.ok(blocked.labels.includes('LED 역방향 → 전류 차단 (I = 0)'));
+          await page.locator('input[name=dev][value=bulb]').check();
+          await page.locator('#nRange').fill('60');
+          await page.locator('#nRange').dispatchEvent('input');
         });
 
         await t.test(`active mode changes and resize use the new motion reference (${width}px)`, async () => {

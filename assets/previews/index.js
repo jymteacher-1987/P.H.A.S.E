@@ -9,9 +9,9 @@ window.PHASE_PREVIEWS = {
       "bytes": 24482
     },
     "newton-laws": {
-      "src": "assets/previews/newton-laws-4fcbf03d49.webp",
-      "sourceHash": "50d49cf2075efb2996fe0c314ae057aa456127f2e615e33f31995d0ed53a8c76",
-      "bytes": 10640
+      "src": "assets/previews/newton-laws-f0b3e41a4a.webp",
+      "sourceHash": "7b38b8d5eac0148c117ece28353a82af9fb2ea2bccf355033aee0c8ea5e5c3e8",
+      "bytes": 10738
     },
     "newton-prism": {
       "src": "assets/previews/newton-prism-828e779c0a.webp",
@@ -44,14 +44,14 @@ window.PHASE_PREVIEWS = {
       "bytes": 23728
     },
     "rgb-cmy-light": {
-      "src": "assets/previews/rgb-cmy-light-0ab8968ee5.webp",
-      "sourceHash": "86045ce091612dae7655075b838d56a693d0d6db21b2ead2c7294ad7000628f6",
-      "bytes": 20938
+      "src": "assets/previews/rgb-cmy-light-5e2d16cbd1.webp",
+      "sourceHash": "7e26a5436bff77656b7bc694278ddbdaa8a1b5e5b0422964d80227af897a02eb",
+      "bytes": 20784
     },
     "momentum-conservation": {
-      "src": "assets/previews/momentum-conservation-dc82ed7cd3.webp",
-      "sourceHash": "f3b772e2af52b91bef11521209ab99b633c6bc1e835b37826c34253b407e18c8",
-      "bytes": 23598
+      "src": "assets/previews/momentum-conservation-7f8cd6ea9e.webp",
+      "sourceHash": "29b513cf54763ecb0f9bfc44ae0e77d6ee30286c58bbad3bb5010b346a67ceab",
+      "bytes": 23698
     },
     "free-fall-projectile": {
       "src": "assets/previews/free-fall-projectile-a32119483d.webp",
@@ -64,9 +64,9 @@ window.PHASE_PREVIEWS = {
       "bytes": 23150
     },
     "electromagnetic-induction": {
-      "src": "assets/previews/electromagnetic-induction-34626d10fa.webp",
-      "sourceHash": "899a59a215d82e700c8199cec110750138ada6ec71623b885775f1302cac4511",
-      "bytes": 23404
+      "src": "assets/previews/electromagnetic-induction-b5aee3a9de.webp",
+      "sourceHash": "09ec27ff467361d21ff575791ec5b2f7f6e8d454ee8d85d67a7df99176bead80",
+      "bytes": 24408
     },
     "pn-junction": {
       "src": "assets/previews/pn-junction-4dbd8e1088.webp",
@@ -94,9 +94,9 @@ window.PHASE_PREVIEWS = {
       "bytes": 16958
     },
     "rutherford-scattering": {
-      "src": "assets/previews/rutherford-scattering-428b0fc1d9.webp",
-      "sourceHash": "2e159ee369d784863cafc9bdbea941c06f085e93e7cc84d02b0c9b8f534339b8",
-      "bytes": 19588
+      "src": "assets/previews/rutherford-scattering-ebfe05713c.webp",
+      "sourceHash": "cf38e0a213f6c1bbdd20af196c33d05843c64f7df8a424d8df2e6cf8f38599d0",
+      "bytes": 21330
     },
     "bernoulli-principle": {
       "src": "assets/previews/bernoulli-principle-8774976bbe.webp",
@@ -109,9 +109,9 @@ window.PHASE_PREVIEWS = {
       "bytes": 21916
     },
     "hero-maker": {
-      "src": "assets/previews/hero-maker-340c30230e.webp",
-      "sourceHash": "5cd5bdb7ec167498608a7f41d1c30b98526efb6039c5ee76531e4d58ffd03e66",
-      "bytes": 25256
+      "src": "assets/previews/hero-maker-15e2667ef3.webp",
+      "sourceHash": "61e8b944e7cef4dae8802b102f51d8a5c718051ab41fa560a5e8f455e564c69d",
+      "bytes": 23214
     },
     "newton-rush": {
       "src": "assets/previews/newton-rush-ba99bf92a4.webp",
@@ -119,9 +119,9 @@ window.PHASE_PREVIEWS = {
       "bytes": 38208
     },
     "physics-fighter": {
-      "src": "assets/previews/physics-fighter-59cc170959.webp",
+      "src": "assets/previews/physics-fighter-e576b47194.webp",
       "sourceHash": "f87dbe89e6fe8f597de0e8909ec1a8f212a417720f8675176f7c4b2449a1ca88",
-      "bytes": 51986
+      "bytes": 53362
     },
     "giants-shoulders": {
       "src": "assets/previews/giants-shoulders-0f8b8349d5.webp",
@@ -149,9 +149,9 @@ window.PHASE_PREVIEWS = {
       "bytes": 26052
     },
     "bamti-escape": {
-      "src": "assets/previews/bamti-escape-66cb492db3.webp",
+      "src": "assets/previews/bamti-escape-3d3e8cc9de.webp",
       "sourceHash": "aa2698bd6d58e240bb33c362711daf92bf493d8dc977088a8ba4046b1e8e129b",
-      "bytes": 22542
+      "bytes": 23254
     }
   }
 };

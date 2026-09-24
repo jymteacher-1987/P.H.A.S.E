@@ -1956,12 +1956,12 @@ elementary:[
    en:'a slim throat microphone and earpiece linked by a taut filament conduit clipped along the collar, transmitting by vibration through the line rather than by radio',
    materials:['종이컵 2개','실 5m','이쑤시개 2개','송곳(선생님이 사용)'],
    steps:['컵 바닥 가운데에 작은 구멍을 뚫는다.','실을 꿰고 안쪽에서 이쑤시개로 묶어 고정한다.','실을 팽팽하게 당긴 채로 한 사람이 말한다.','실을 느슨하게 늘어뜨리고 다시 해 본다.'],
-   principle:'말을 하면 컵 바닥이 <b>떨립니다</b>. 그 떨림이 팽팽한 실을 타고 건너가 반대편 컵을 다시 떨게 만들어 소리가 들립니다. 실이 느슨하면 실이 통째로 출렁이기만 할 뿐 떨림이 실을 따라 건너가지 못해서, 소리가 훨씬 작게 들립니다.',
+   principle:'말을 하면 컵 바닥이 <b>떨립니다</b>. 그 떨림이 팽팽한 실을 타고 건너가 반대편 컵을 다시 떨게 만들어 소리가 들립니다. 실이 느슨하면 떨림이 실을 따라 잘 전달되지 않아 소리가 훨씬 작게 들립니다.',
    safety:'구멍은 반드시 선생님이 송곳으로 뚫습니다. 학생이 직접 다루지 않습니다. 실을 목에 감지 않도록 주의하세요.',
    check:{q:'실을 느슨하게 하면 왜 소리가 잘 안 들릴까요?',
-     options:['떨림이 실을 타고 전달되지 못해서','느슨한 실이 소리를 되돌려 보내서','실이 가벼워져서'],
+     options:['떨림이 실을 타고 잘 전달되지 않아서','느슨한 실이 소리를 되돌려 보내서','실이 가벼워져서'],
      answer:0,
-     explain:'떨림이 실을 따라 건너가지 못하기 때문입니다. 느슨한 실은 컵의 떨림을 받아도 통째로 출렁이기만 할 뿐, 그 떨림을 반대쪽 끝까지 실어 나르지 못합니다. 팽팽하게 당겨야 한쪽 끝의 떨림이 그대로 반대쪽까지 전해집니다. 실을 늘이거나 줄인 것도 아니고, 무게가 달라진 것도 아닙니다. 바뀐 것은 오직 당긴 정도뿐입니다. 이때도 아주 작은 소리는 들리는데, 그건 실이 아니라 공기를 타고 온 소리입니다.'}}
+     explain:'실이 느슨하면 컵의 떨림이 실을 따라 잘 전달되지 않기 때문입니다. 실을 팽팽하게 당기면 반대쪽 컵에 떨림이 더 잘 전달되어 소리가 커집니다. 이 실험에서는 같은 실의 당긴 정도를 바꾸어 비교합니다. 말소리는 공기를 통해서도 전해지므로 실을 느슨하게 해도 작은 소리가 들릴 수 있습니다.'}}
  ]}
 ]
 };
@@ -7177,9 +7177,11 @@ const simCell = {
     if(V <= this.VF) return 0;
     return (V - this.VF) / (this.R_INT * v.n);
   },
+  // LED에 전류가 흐르면 내부 저항에서 전압이 낮아진다. 연결 전 전압과 구별한다.
+  terminalVolts(v){ return this.volts(v) - this.current(v) * this.R_INT * v.n; },
   lit(v){ return this.current(v) >= this.I_MIN; },
   draw(g,W,H,v,st,t){
-    const V=this.volts(v), I=this.current(v), lit=this.lit(v);
+    const V=this.volts(v), terminalV=this.terminalVolts(v), I=this.current(v), lit=this.lit(v);
     const n=v.n, cw=Math.min(96, (W*0.52)/n), y=H*0.52;
     for(let i=0;i<n;i++){
       const x=W*0.10 + i*(cw+10);
@@ -7218,11 +7220,11 @@ const simCell = {
     g.beginPath(); g.moveTo(xv,yret); g.lineTo(gx,yret); g.stroke();
     g.fillStyle='#0d2331'; g.beginPath(); g.arc(gx,ledY,30,0,7); g.fill();
     g.strokeStyle=P.line; g.lineWidth=2.5; g.stroke();
-    const ang = Math.PI*0.78 + clamp(V/4,0,1)*Math.PI*1.44*0.62;
+    const ang = Math.PI*0.78 + clamp(terminalV/4,0,1)*Math.PI*1.44*0.62;
     g.strokeStyle=P.pink; g.lineWidth=2.5;
     g.beginPath(); g.moveTo(gx,ledY); g.lineTo(gx+Math.cos(ang)*22, ledY+Math.sin(ang)*22); g.stroke();
-    label(g,'전압계', gx, ledY-40, P.dim, 10);
-    label(g, V.toFixed(2)+' V', gx, ledY+46, V>0.05?P.ink:P.dim, 15);
+    label(g,'LED 양단 전압', gx, ledY-40, P.dim, 10);
+    label(g, terminalV.toFixed(2)+' V', gx, ledY+46, terminalV>0.05?P.ink:P.dim, 15);
 
     // LED — 회로에 직렬로 끼워져 있다
     g.fillStyle = lit? P.lime : '#20323c';
@@ -7335,14 +7337,18 @@ const simCell = {
   },
   read(v){
     const I=this.current(v);
-    return this.volts(v).toFixed(2)+' V · ' + (I>0? (I*1e6).toFixed(0)+' μA' : '0 μA') + (this.lit(v)?' · 점등':'');
+    return '연결 전 '+this.volts(v).toFixed(2)+' V · 연결 후 ' + (I>0? (I*1e6).toFixed(0)+' μA' : '0 μA') + (this.lit(v)?' · 점등':'');
   },
   tip(v){
+    const model = '그림은 LED 연결 후의 회로입니다. 전류가 흐를 때 LED 양단 전압을 1.8 V로 두며, 나머지 전압은 전지 내부 저항에 걸립니다. ';
+    return model + this.guide(v);
+  },
+  guide(v){
     if(v.a===v.b) return '두 쪽을 다른 금속으로 바꿔 보세요.';
     if(v.e==='pure') return '레몬이나 소금물로 바꿔 보세요. 이온이 오갈 길이 필요합니다.';
     if(v.a==='al'||v.b==='al') return '알루미늄은 산화되기 쉬운 금속이지만, 표면의 산화막이 전극 반응을 방해할 수 있습니다.';
     if(this.lit(v)) return '드디어 켜졌습니다. 실제 수업에서도 레몬 서너 개에서 대여섯 개는 이어야 LED에 불이 들어옵니다.';
-    if(v.n<4) return '전압이 1.8 V를 넘어도 LED가 안 켜집니다. 레몬 전지 하나하나의 내부 저항이 수백~수천 Ω으로 커서 전류가 모자라기 때문입니다. 개수를 더 늘려 보세요.';
+    if(v.n<4) return '연결 전 전압이 1.8 V를 넘더라도, 전지의 내부 저항 때문에 전류가 부족하면 LED가 켜지지 않습니다. 전지 개수를 더 늘려 보세요.';
     return '소금물로 바꿔도 전기는 흐릅니다. 소금물에서는 구리 표면에서 전자를 받는 반응이 레몬즙과 달라, 이 모형에서는 전압이 조금 낮게 나옵니다.';
   }
 };
@@ -8262,13 +8268,13 @@ const simString = {
     rr(g, W/2-54, H*0.10+4, 108*clamp(heard/100,0,1), 22, 6); g.fill();
     label(g, st.e>0.02? `${heard}% 들림` : '말해보기를 눌러 보세요', W/2, H*0.10+15, heard>40?'#0a2016':P.mut, 13);
     if(st.e>0.02) label(g, `실을 타고 ${viaString}% + 공기를 타고 ${Math.round(st.e*viaAir)}%`, W/2, H*0.10+44, P.dim, 11);
-    label(g, k<0.4? '실이 느슨하면 실이 통째로 출렁일 뿐, 떨림이 실을 따라 건너가지 못합니다 (공기로만 아주 작게 들림)'
-           : '팽팽한 실을 타고 떨림이 그대로 건너갑니다',
+    label(g, k<0.4? '실이 느슨하면 떨림이 잘 전달되지 않아 소리가 작게 들립니다'
+           : '팽팽한 실을 따라 떨림이 잘 전달됩니다',
           W/2, H-14, k<0.4?P.pink:P.lime, 13);
   },
   read:(v,st)=> v.ten<4? '느슨함' : v.ten<8? '조금 팽팽' : '팽팽함',
   tip:(v,st)=> !st.e ? '실을 팽팽하게 당기고 말해보기를 눌러 보세요.'
-             : v.ten<4 ? '느슨한 실은 통째로 출렁이기만 해서 떨림을 실 끝까지 전하지 못합니다. 이때 들리는 아주 작은 소리는 실이 아니라 공기를 타고 온 것입니다. 더 당겨 보세요.'
+             : v.ten<4 ? '실이 느슨하면 떨림이 잘 전달되지 않아 소리가 작게 들립니다. 공기를 통해서도 소리가 전해집니다. 실을 더 당겨 소리의 크기를 비교해 보세요.'
              : '소리는 무언가가 떨려야 전해집니다. 팽팽할수록 떨림이 실을 따라 잘 건너갑니다.'
 };
 

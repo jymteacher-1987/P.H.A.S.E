@@ -485,11 +485,13 @@ body{word-break:keep-all;overflow-wrap:break-word}  /* 어절 단위 줄바꿈 *
     }
     function update(dt){
       if(s.running){
-        s.t += dt; s.v += cur.a*dt; s.dist += s.v*dt;   // cur.a = 출발 시점 가속도(중간에 안 바뀜)
-        let stop=null;
-        if(s.v>=VMAX){ s.v=VMAX; stop='top'; }
-        else if(s.t>=RUN_T){ stop='time'; }
-        cur.pts.push({t:Math.min(s.t,RUN_T), v:s.v});
+        // 관찰 종료까지 남은 시간만 반영해 마지막 점도 같은 직선 위에 놓는다.
+        const topT=VMAX/cur.a, endT=Math.min(RUN_T,topT);
+        const nextT=Math.min(s.t+dt,endT), step=nextT-s.t;
+        s.dist += s.v*step + 0.5*cur.a*step*step;
+        s.t=nextT; s.v=cur.a*s.t;                     // cur.a = 출발 시점 가속도(중간에 안 바뀜)
+        const stop=s.t>=endT ? (topT<=RUN_T?'top':'time') : null;
+        cur.pts.push({t:s.t, v:s.v});
         if(stop){
           s.running=false; cur=null; setLock(false);
           document.getElementById('note2').className='note b';

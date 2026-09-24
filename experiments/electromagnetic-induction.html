@@ -828,7 +828,8 @@ function render(){
     ctx.fillText(ii > 0 ? '유도 전류: ＋ (반시계 방향)' : '유도 전류: − (시계 방향)', 12, 12);
   } else {
     ctx.fillStyle = '#94a3b8';
-    ctx.fillText('유도 전류 없음', 12, 12);
+    // 같은 속도로 움직일 때 생기는 부동소수점 잔차는 문구에서만 0으로 취급한다.
+    ctx.fillText(Math.abs(ii) < 1e-9 ? '유도 전류 없음' : '유도 전류가 매우 작음', 12, 12);
   }
 
   ctx.textAlign = 'right';

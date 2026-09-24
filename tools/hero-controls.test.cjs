@@ -162,14 +162,17 @@ for (const engine of [chromium, webkit]) {
                   try {
                     g.clearRect(0, 0, canvas.width, canvas.height);
                     simulation.draw(g, canvas.width, canvas.height, simVals, simSt, 2);
-                    return {n:simVals.n, volts:simulation.volts(simVals), read:simulation.read(simVals), labels};
+                    return {n:simVals.n, volts:simulation.volts(simVals), terminal:simulation.terminalVolts(simVals), current:simulation.current(simVals), read:simulation.read(simVals), labels};
                   } finally { g.fillText = saved; }
                 });
                 assert.equal(result.n, n, 'the actual range input must change the cell count');
                 close(result.volts, expected[n-1], 1e-12, `${metal}/Cu, ${n} cells (V)`);
                 const displayed = expected[n-1].toFixed(2) + ' V';
-                assert.ok(result.read.startsWith(displayed), 'the readout must use the series voltage');
-                assert.ok(result.labels.includes(displayed), 'the painted voltmeter must use the series voltage');
+                assert.ok(result.read.startsWith('연결 전 '+displayed), 'the open-circuit readout must retain the series voltage');
+                const terminal = expected[n-1] - result.current * 900 * n;
+                close(result.terminal, terminal, 1e-12, 'loaded terminal voltage must satisfy Kirchhoff');
+                assert.ok(result.labels.includes(terminal.toFixed(2)+' V'), 'the voltmeter across the LED must show its loaded voltage');
+                assert.ok(result.labels.includes('LED 양단 전압'), 'the circuit meter must identify what it measures');
               }
             }
           }
