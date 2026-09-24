@@ -69,6 +69,7 @@
   #keyLine{
     border-radius:12px; padding:12px 16px; font-size:.98rem; line-height:1.65;
     margin-bottom:10px; border:1px solid var(--line); text-align:center;
+    text-wrap:balance;
   }
   #keyLine.planet{background:rgba(255,176,58,.08); border-color:rgba(255,176,58,.45);}
   #keyLine.rocket{background:rgba(57,208,255,.08); border-color:rgba(57,208,255,.45);}
@@ -79,6 +80,8 @@
         border-radius:999px; padding:1px 9px; font-size:.78rem; font-weight:700;}
   .tagN{background:rgba(255,93,122,.13); color:var(--red); border:1px solid rgba(255,93,122,.45);
         border-radius:999px; padding:1px 9px; font-size:.78rem; font-weight:700;}
+  /* 값과 단위(t = 10.00초, 4.80 광초)가 두 줄로 갈라지지 않게 */
+  .hl-c,.hl-o,.hl-r,.tagY,.tagN{white-space:nowrap;}
 
   /* 하단 */
   .bottom{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;}
@@ -264,7 +267,7 @@
   ② <b>진행 방향 앞쪽에 있는 Y의 시계가 vL₀/c²만큼 앞선 채</b>로 간다.
   그 덕분에 로켓이 Y를 지나는 순간 Y의 시계는 정확히 L₀/v, 즉 행성 관찰자가 잰 시간을 가리키게 되어
   두 관점의 측정이 모순 없이 맞아떨어진다.</p>
-  <p><b>🚂 기차 사고실험으로 이해하기</b> —
+  <p><b>🚂 기차 사고 실험으로 이해하기</b> —
   달리는 기차의 앞과 뒤에 번개가 치고, 지면 관찰자에게 두 번개가 동시라고 하자.
   기차 가운데 있는 사람은 앞쪽 번개 빛을 먼저 만나므로 <b>"앞쪽 사건이 먼저 일어났다"</b>고 판단한다.
   즉 움직이는 관찰자에게는 <b>진행 방향 앞쪽의 사건일수록 먼저</b> 일어난 것이 된다.
@@ -478,15 +481,15 @@ function sceneRocket(){
   const D=SPAN/gamma;
   const NOSE=NOSE_X, len=88;
   const xX=NOSE-s*D, xY=xX+D;
-  const RCX=NOSE-len/2;                 // 로켓(=내 시계) 위치
-  // 사건 지점 표시: 두 사건 모두 이 한 점에서 일어난다
+  const RCX=NOSE;                       // 로켓 코(=내 시계) 위치. 행성 관점과 같은 점에서 통과를 잰다
+  // 사건 지점 표시: 두 사건 모두 이 한 점(로켓 코)에서 일어난다
   ctx.strokeStyle="rgba(57,208,255,.55)"; ctx.lineWidth=1.5; ctx.setLineDash([5,5]);
-  ctx.beginPath(); ctx.moveTo(RCX,178); ctx.lineTo(RCX,344); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(RCX,ROCK_Y); ctx.lineTo(RCX,344); ctx.stroke();
   ctx.setLineDash([]);
-  // 로켓 (정지 → 고유 길이) + 로켓에 부착된 시계
+  // 로켓 (정지 → 고유 길이) + 로켓 코에 부착된 시계
   rocket(NOSE, ROCK_Y, len, playing);
   ctx.strokeStyle="#39d0ff"; ctx.lineWidth=2;
-  ctx.beginPath(); ctx.moveTo(RCX,172); ctx.lineTo(RCX,206); ctx.stroke();   // 부착 마스트
+  ctx.beginPath(); ctx.moveTo(RCX,172); ctx.lineTo(RCX,ROCK_Y); ctx.stroke();   // 부착 마스트
   clock(RCX, 118, tauNow, "나의 시계 (로켓에 부착)", {text:"사건①·② 모두 내 앞에서 → 고유 시간 ✓", ok:true}, "#39d0ff", false);
   ctx.fillStyle="#9aa5d8"; ctx.font="12px sans-serif"; ctx.textAlign="left";
   ctx.fillText("나는 정지 — 행성들이 나를 지나간다", NOSE+64, ROCK_Y+4);

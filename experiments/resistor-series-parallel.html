@@ -380,9 +380,9 @@ const CELL_V = 1.5, N_MAX = 3;
      → 교과서 예시답안 0.21 / 0.14 / 0.07 / 1.4 와 사실상 일치
    직렬 10Ω+20Ω, 전지 1개: I=0.0495 A, V₁=0.495, V₂=0.990, V=1.485 V
      → 교과서 예시답안 0.047 / 0.47 / 0.94 / 1.42 와 같은 경향, 이상값과의 차이는 1% 수준 */
-const R_INT  = 0.20;   // 전지 1개당 내부저항 (현실 모드, Ω) — 알칼리 건전지 수준
-const R_WIRE = 0.10;   // 전선·집게 접촉저항 (현실 모드, Ω)
-const R_AMM  = 0.01;   // 전류계 내부저항 (현실 모드, Ω)
+const R_INT  = 0.20;   // 전지 1개당 내부 저항 (현실 모드, Ω) — 알칼리 건전지 수준
+const R_WIRE = 0.10;   // 전선·집게 접촉 저항 (현실 모드, Ω)
+const R_AMM  = 0.01;   // 전류계 내부 저항 (현실 모드, Ω)
 const NV = 0.001, NA = 0.0001;   // 계기 잡음 — 마지막 표시 자리에서만 흔들린다
 const SETTLE_T = 0.75;           // 계기 정착 시간 (s)
 
@@ -602,7 +602,7 @@ function renderTables(){
   if(typeof scheduleFit==='function') scheduleFit();
 }
 
-/* 판정: |차이| ÷ 전체값 (규모 대비 상대오차) */
+/* 판정: |차이| ÷ 전체값 (규모 대비 상대 오차) */
 function verdict(diff, scale){
   const rel = scale>1e-12 ? diff/scale : 0;
   if(rel<0.01) return {c:'ok',  t:'일치',      rel};
@@ -742,7 +742,7 @@ function writeConcl(){
       sameLine([p[0].V,p[1].V,p[2].V], fV, 'V')+`.</div>`+
     `<div class="cline">· 전류 — `+
       sumSentence(p[0].I, p[1].I, p[2].I, fA, 'A', A4, R1, R2, '흐른다')+`.</div>`+
-    (real ? `<div class="cnote">이상 모드보다 값이 조금 작게 나온다. 전지의 <b>내부저항</b>과 <b>도선의 저항</b> 때문에 전압이 조금 떨어지기 때문이다.</div>` : '');
+    (real ? `<div class="cnote">이상 모드보다 값이 조금 작게 나온다. 전지의 <b>내부 저항</b>과 <b>도선의 저항</b> 때문에 전압이 조금 떨어지기 때문이다.</div>` : '');
 }
 
 /* ══════════ 캔버스 유틸 ══════════ */

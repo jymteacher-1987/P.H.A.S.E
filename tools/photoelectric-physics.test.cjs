@@ -32,7 +32,7 @@ run('Core equations, emission thresholds, current, units',()=>{
   }
  }
  ok(!/nA|나노암페어|SURFACE_SHARE|FMIN|FMAX|PLACEHOLDER/.test(html),'Obsolete units/model code left');
- ok(html.includes('정지 전압의 크기'));ok(html.includes('들어오는 광자 수'));
+ ok(html.includes('정지 전압의 크기'));ok(html.includes('<label for="power">빛의 세기</label>'));
  ok(html.includes('id="lambdaMark" data-label="f₀"'));ok(!html.includes('모형초'));ok(html.includes('개/s'));
  return {conditions:4*501*3*4};
 });

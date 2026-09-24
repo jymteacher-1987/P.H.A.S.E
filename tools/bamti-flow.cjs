@@ -70,7 +70,7 @@ module.exports = async function walkthrough({id,takeHeart=false}) {
     // Solve by displayed orientation labels, not by setting puzzle state.
     for(let i=0;i<4;i++){const target=[1,3,0,2][i];let k=0;while(true){const mesh=interactables.find(o=>o.userData.id==='statue_'+i);check(mesh,'statue mesh');if(mesh.userData.dir===target)break;act('statue_'+i);check(++k<=4,'statue orientation');}}
     await wait(800);act('papyrus');act('scale');click('#choiceBtns button',0);act('scarab');act('sarcophagus');symbols(['👁','🐦','🐍','☥']);act('ankh');act('ankhdoor');await wait(2800);check(G.room===3,'manor relic room');stages.push('relics');
-    act('obsnote');act('telescope');act('chart');act('celglobe');keypad('729');act('prism');act('pedestal');for(const c of ['blue','yellow','red','green'])act('lever_'+c);await wait(1100);act('floorhatch');await wait(2400);check(G.room===4,'observatory');stages.push('observatory');
+    act('obsnote');act('telescope');act('chart');act('celglobe');keypad('729');act('prism');act('pedestal');for(const c of ['red','yellow','green','blue'])act('lever_'+c);await wait(1100);act('floorhatch');await wait(2400);check(G.room===4,'observatory');stages.push('observatory');
     act('stonedoor');symbols(['📖','⚗','☥','★']);act('pathmural');close();
     // Follow the pressure-plate path through actual room update/collision logic.
     const path=[[0,1],[1,1],[1,2],[2,2],[2,1],[2,0],[3,0]];

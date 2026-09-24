@@ -10,6 +10,7 @@
 <script src="../assets/vendor/chartjs-4.4.1/chart.umd.min.js?v=d2af8974e9"></script>
 
 <style>
+body{word-break:keep-all;overflow-wrap:break-word}  /* 어절 단위 줄바꿈 */
 /* ====================================================================
    밝은 "과학 모눈종이 실험실" 테마
    파랑(x) / 주황(y) / 초록(추적) 색상 체계
@@ -318,7 +319,7 @@ const MODELS={
     x0:0, y0:0,
     holdTime:HOLD_TIME,
     H0:4.9,        /* tFall=1.0s → 바닥접촉이 정확히 프레임(0.1s 격자) 위에 떨어짐 */
-    e:0.5,         /* 반발계수 0.5 → 이후 바운스 간격도 0.1s의 정수배라 모든 접촉이 프레임에 정렬 */
+    e:0.5,         /* 반발 계수 0.5 → 이후 바운스 간격도 0.1s의 정수배라 모든 접촉이 프레임에 정렬 */
     maxBounce:2,   
     _segs:null,
     _build(){

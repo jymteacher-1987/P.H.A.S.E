@@ -442,7 +442,7 @@ function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');
   clearTimeout(toast._h);toast._h=setTimeout(()=>t.classList.remove('show'),1800);}
 
 /* ══════════ 물리 ══════════ */
-/* 1차원 충돌 해석해 — 운동량 보존 + 반발계수 e를 동시에 만족 */
+/* 1차원 충돌 해석해 — 운동량 보존 + 반발 계수 e를 동시에 만족 */
 function collide(m1,m2,u1,u2,e){
   const M=m1+m2, P=m1*u1+m2*u2, d=u1-u2;
   return [ (P - m2*e*d)/M , (P + m1*e*d)/M ];
@@ -738,7 +738,7 @@ $('btnRec').onclick=()=>{
 $('btnClear').onclick=()=>{ if(S.rows.length&&confirm('기록한 데이터를 모두 지울까요?')){S.rows=[];renderTable();resetRun();} };
 $('btnCsv').onclick=()=>{
   if(!S.rows.length){toast('기록된 데이터가 없습니다');return;}
-  const head=['회차','m1(kg)','m2(kg)','전 v1','전 v2','전 p1','전 p2',"후 v1'","후 v2'","후 p1'","후 p2'",'전 Σp','후 Σp','차이','상대오차(%)','보존 여부','충돌방식','모드'];
+  const head=['회차','m1(kg)','m2(kg)','전 v1','전 v2','전 p1','전 p2',"후 v1'","후 v2'","후 p1'","후 p2'",'전 Σp','후 Σp','차이','상대 오차(%)','보존 여부','충돌방식','모드'];
   const lines=[head.join(',')].concat(S.rows.map((r,i)=>{const m=metrics(r);
     return [i+1,r.m1.toFixed(3),r.m2.toFixed(3),r.v1,r.v2,r.p1,r.p2,r.v1p,r.v2p,r.p1p,r.p2p,
       r.pre,r.post,r.diff,(m.rel*100).toFixed(2),m.txt,

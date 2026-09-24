@@ -8,7 +8,7 @@ const data = JSON.parse(read('data/experiments.json'));
 const id = 'photoelectric-effect';
 const entry = {
   id, title: '광전효과 원리 이해하기', category: 'modern-physics',
-  description: '빛의 파장, 들어오는 광자 수와 전압을 바꾸며 광전자의 운동을 관찰합니다. 일함수와 한계 진동수, 최대 운동 에너지, 광전류와 정지 전압의 관계를 탐구합니다.',
+  description: '빛의 파장과 세기, 전압을 바꾸며 광전자의 운동을 관찰합니다. 일함수와 한계 진동수, 최대 운동 에너지, 광전류와 정지 전압의 관계를 탐구합니다.',
   path: 'experiments/photoelectric-effect.html?v=' + hash(read('experiments/photoelectric-effect.html')),
   date: '2026-09-13', tags: ['광전효과', '광자', '일함수', '정지 전압', '빛의 입자성']
 };
