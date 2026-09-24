@@ -24,9 +24,9 @@ window.PHASE_PREVIEWS = {
       "bytes": 22182
     },
     "rocket-motion": {
-      "src": "assets/previews/rocket-motion-308ef50e4d.webp",
-      "sourceHash": "ad75b5385abd7881c00e6f6f2b2f81ab60b13627081474a6c58e6b77e259a411",
-      "bytes": 14932
+      "src": "assets/previews/rocket-motion-5600cd0fb1.webp",
+      "sourceHash": "d131cc8f4c789c793a28469146e0be46261c851ac3b4913e54cbf0db5f69031c",
+      "bytes": 14586
     },
     "motion-analysis": {
       "src": "assets/previews/motion-analysis-2ddce2fdb2.webp",
@@ -54,9 +54,9 @@ window.PHASE_PREVIEWS = {
       "bytes": 23272
     },
     "free-fall-projectile": {
-      "src": "assets/previews/free-fall-projectile-35c78239c5.webp",
-      "sourceHash": "d2db2a8c9cf8d248f5e852ba4e89d58d103875ff7d37f94914f130924ac782df",
-      "bytes": 19128
+      "src": "assets/previews/free-fall-projectile-97610c087d.webp",
+      "sourceHash": "c7579677be2a3c781d132ff8c6830acbf910fcbbd2b94722402d8fb0c00e7dce",
+      "bytes": 18460
     },
     "resistor-series-parallel": {
       "src": "assets/previews/resistor-series-parallel-620760fe37.webp",
