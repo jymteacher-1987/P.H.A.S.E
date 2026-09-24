@@ -302,6 +302,7 @@ document.querySelectorAll('.modeBtn[data-g]').forEach(b=>{ b.onclick=()=>{
 
 function bind(id,key,fmt){ const el=document.getElementById(id);
   el.oninput=()=>{ state[key]=parseFloat(el.value); document.getElementById(id+'Val').textContent=fmt(state[key]);
+    if(key==='v0'){state.playing=false;state.lastFrame=null;}
     if(!state.playing){state.t=0;state.finished=false;state.hoverT=null;setPlayBtn(false);} render(); }; }
 bind('v0','v0',v=>v.toFixed(1)+' m/s'); bind('dt','dt',v=>v.toFixed(2)+' s');
 

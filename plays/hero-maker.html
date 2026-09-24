@@ -6763,6 +6763,7 @@ const simOobleck = {
   ],
   init:()=>({ph:'idle', y:0, depth:0, imp:0, bounce:0, peak:0, pxcm:13.6}),
   MAXCM: 5,                                        // 그릇 깊이 눈금 : maxD(px) = 5cm
+  onChange(id,v,st){ if(id==='speed') Object.assign(st,this.init()); },
   onButton(id,v,st){
     if(id==='reset'){ st.ph='idle'; st.y=0; st.depth=0; st.imp=0; st.bounce=0; st.peak=0; return; }
     if(id==='press' && st.ph==='idle'){ st.ph='down'; st.y=0; st.depth=0; st.imp=0; st.bounce=0; st.peak=0; }
@@ -7081,10 +7082,6 @@ const simCell = {
     return (v.a==='zn'||v.b==='zn') && Math.abs(B-A)*eff > this.CAP_ZN + 1e-9;
   },
   volts(v){ return this.perCell(v) * v.n; },
-  ideal(v){
-    const A=METALS.find(m=>m[0]===v.a)[2], B=METALS.find(m=>m[0]===v.b)[2];
-    return Math.abs(B-A);
-  },
   /* 전압만 보면 레몬 두 개로도 1.8V 가 넘지만, 실제로는 레몬 하나가 수백~수천 Ω의
      큰 내부 저항을 가지고 있어서 전류가 거의 안 흐른다(여기서는 대표값 900Ω).
      그래서 실제 수업에서도 LED 를 켜려면 서너 개 이상을 직렬로 이어야 한다.
@@ -7234,7 +7231,7 @@ const simCell = {
       label(g,'이온의 이동은 전극 반응에 따른 전하의 불균형을 줄입니다', W*0.36, y+79, P.dim, 9.5);
       label(g,'전자는 도선으로만 흐릅니다 — 과일 속을 지나가지 않습니다', W*0.36, y+92, P.dim, 9.5);
     }
-    // 알루미늄은 계산값과 실제값이 크게 어긋난다 — 그 이유를 짚어 준다.
+    // 알루미늄 표면의 산화막이 전극 반응에 미치는 영향을 짚어 준다.
     // 아래 이온 설명과 겹치지 않도록 오른쪽 빈 자리에 놓는다.
     if(this.capped(v)){
       label(g, '아연 셀은 한 개당 약 1.0V 가 한계입니다', W*0.79, H*0.44, P.gold, 11.5);
@@ -7243,9 +7240,8 @@ const simCell = {
     }
     const usesAl = (v.a==='al' || v.b==='al') && v.a!==v.b && v.e!=='pure';
     if(usesAl){
-      label(g, `표준전위로 계산하면 ${(this.ideal(v)*v.n).toFixed(2)}V 지만`, W*0.79, H*0.60, P.mut, 11.5);
-      label(g, '알루미늄은 표면 산화막에 막혀', W*0.79, H*0.60+17, P.gold, 11.5);
-      label(g, '이만큼밖에 안 나옵니다', W*0.79, H*0.60+33, P.gold, 11.5);
+      label(g, '알루미늄 표면의 산화막이', W*0.79, H*0.60, P.gold, 11.5);
+      label(g, '전극 반응을 방해할 수 있습니다', W*0.79, H*0.60+17, P.gold, 11.5);
     }
     label(g, v.a===v.b ? '같은 금속끼리는 전압이 생기지 않습니다'
            : v.e==='pure' ? '증류수는 이온이 거의 없어 전류가 흐를 길이 막힙니다'
@@ -7259,7 +7255,7 @@ const simCell = {
   tip(v){
     if(v.a===v.b) return '두 쪽을 다른 금속으로 바꿔 보세요.';
     if(v.e==='pure') return '레몬이나 소금물로 바꿔 보세요. 이온이 오갈 길이 필요합니다.';
-    if(v.a==='al'||v.b==='al') return '알루미늄은 여기 있는 금속 가운데 전자를 가장 잘 내주는데도 실제 전압은 낮습니다. 표면에 생긴 얇은 산화막이 반응을 막기 때문입니다.';
+    if(v.a==='al'||v.b==='al') return '알루미늄은 산화되기 쉬운 금속이지만, 표면의 산화막이 전극 반응을 방해할 수 있습니다.';
     if(this.lit(v)) return '드디어 켜졌습니다. 실제 수업에서도 레몬 서너 개에서 대여섯 개는 이어야 LED에 불이 들어옵니다.';
     if(v.n<4) return '전압이 1.8 V를 넘어도 LED가 안 켜집니다. 레몬 전지 하나하나의 내부 저항이 수백~수천 Ω으로 커서 전류가 모자라기 때문입니다. 개수를 더 늘려 보세요.';
     return '소금물로 바꿔도 전기는 흐릅니다. 소금물에서는 구리 표면에서 전자를 받는 반응이 레몬즙과 달라, 이 모형에서는 전압이 조금 낮게 나옵니다.';
@@ -7405,7 +7401,8 @@ const simGas = {
   M_CAN: 26, M_CAP: 3,                             // 통(식초 포함) g, 뚜껑 g — 운동량 보존에 쓴다
   launchSpeed(amt){ return 1.1 + amt*0.55; },      // m/s
   peakM(amt){ const v0=this.launchSpeed(amt); return v0*v0/(2*this.G); },
-  init:()=>({p:0, fired:0, y:0, vy:0, cap:0, capV:0, peak:0}),
+  init:()=>({p:0, fired:0, y:0, vy:0, cap:0, capV:0, peak:0, run:0}),
+  onChange(id,v,st){ if(id==='amt') Object.assign(st,this.init()); },
   onButton(id,v,st){ if(id==='go'){ Object.assign(st,{p:0,fired:0,y:0,vy:0,cap:0,capV:0,peak:0}); st.run=1; } },
   draw(g,W,H,v,st,t){
     const floor=H-26, limit=1;
@@ -7528,7 +7525,7 @@ const simBalloon = {
       if(mx>x1) break;
       g.beginPath(); g.moveTo(mx, y-26); g.lineTo(mx, y-36); g.stroke();
       label(g, m+'m', mx, y-46, P.dim, 10); }
-    label(g, st.run? `${(st.dist*CM).toFixed(0)}cm 이동${st.air>0?' · 분사 중':' · 멈춤'}`
+    label(g, st.run? `${(st.dist*CM).toFixed(0)}cm 이동${st.air>0?' · 분사 중':st.v>0 && st.x<TRACK?' · 분사 종료 · 이동 중':' · 멈춤'}`
                    : '공기 양을 정하고 손을 놓아 보세요',
           W/2, H-18, st.run?P.lime:P.mut, 13);
   },
@@ -8256,7 +8253,10 @@ function mountSim(exp){
     const el = $('#c_'+c.id);
     if(c.t==='range'){
       const out = $('#out_'+c.id);
-      const sync = () => { simVals[c.id] = Number(el.value);
+      const sync = () => {
+        const previous = simVals[c.id];
+        simVals[c.id] = Number(el.value);
+        if(previous!==simVals[c.id] && s.onChange) s.onChange(c.id,simVals,simSt);
         if(out) out.textContent = ' ' + el.value + (c.unit||''); };
       el.oninput = sync; sync();
     } else if(c.t==='select'){

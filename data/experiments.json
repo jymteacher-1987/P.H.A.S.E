@@ -172,7 +172,7 @@
         "question": "광원과 스크린의 위치를 재면 렌즈의 초점 거리를 알아낼 수 있을까요?",
         "focus": "먼 물체의 상으로 초점 거리를 어림해 보세요. 광원 위치를 고정하고 스크린만 움직여 선명한 상의 위치를 기록하세요. 여러 광원 위치에서 측정을 반복하고, 그래프로 초점 거리를 구해 보세요."
       },
-      "path": "experiments/convex-lens-focus.html?v=5bc301d420",
+      "path": "experiments/convex-lens-focus.html?v=da72e9ac7f",
       "date": "2026-07-28",
       "tags": [
         "볼록렌즈",
@@ -207,7 +207,7 @@
         "question": "충돌 전과 후에 두 물체의 운동량을 더한 값은 어떻게 될까요?",
         "focus": "운동 방향(+, −)을 생각하며, 충돌 전후에 각 물체의 운동량과 두 물체의 전체 운동량을 비교해 보세요."
       },
-      "path": "experiments/momentum-conservation.html?v=763b4377f1",
+      "path": "experiments/momentum-conservation.html?v=3cff73064e",
       "date": "2026-07-28",
       "tags": [
         "운동량 보존",
@@ -224,7 +224,7 @@
         "question": "같은 높이에서 동시에 출발하면, 수평으로 던진 물체와 가만히 놓은 물체 중 어느 쪽이 먼저 바닥에 닿을까요?",
         "focus": "수평 방향의 운동이 달라도 연직 방향의 위치 변화는 같은지 살펴보세요."
       },
-      "path": "experiments/free-fall-projectile.html?v=e36f223d88",
+      "path": "experiments/free-fall-projectile.html?v=6c086715f6",
       "date": "2026-07-28",
       "tags": [
         "자유 낙하",
@@ -418,7 +418,7 @@
       "title": "히어로 만들기",
       "icon": "🛡️",
       "description": "실험실을 돌며 고른 물리 원리로 나만의 과학 히어로를 설계하고, 사진을 찍어 히어로 포스터까지 완성하는 활동입니다.",
-      "path": "plays/hero-maker.html?v=920532e359",
+      "path": "plays/hero-maker.html?v=31a308fdf9",
       "date": "2026-09-02",
       "tags": [
         "히어로",

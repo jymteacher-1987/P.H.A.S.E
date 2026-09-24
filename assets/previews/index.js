@@ -39,9 +39,9 @@ window.PHASE_PREVIEWS = {
       "bytes": 23382
     },
     "convex-lens-focus": {
-      "src": "assets/previews/convex-lens-focus-c79cbab7a5.webp",
-      "sourceHash": "f20527f25c6949389fd801c79f9b8d7e65ddd1163c4d5c35737d98a4b48589f2",
-      "bytes": 22374
+      "src": "assets/previews/convex-lens-focus-1e0b4bb069.webp",
+      "sourceHash": "4a6c42d30dbf11eeeaef417d28d7858a93dae3fac38604710e2e8c77a947c5d8",
+      "bytes": 23728
     },
     "rgb-cmy-light": {
       "src": "assets/previews/rgb-cmy-light-0ab8968ee5.webp",
@@ -49,14 +49,14 @@ window.PHASE_PREVIEWS = {
       "bytes": 20938
     },
     "momentum-conservation": {
-      "src": "assets/previews/momentum-conservation-cde835743c.webp",
-      "sourceHash": "5a46b6586c7d2c9c50171b816f51542ffe8cfff834ec85669754cac52f5a0dff",
-      "bytes": 23272
+      "src": "assets/previews/momentum-conservation-dc82ed7cd3.webp",
+      "sourceHash": "f3b772e2af52b91bef11521209ab99b633c6bc1e835b37826c34253b407e18c8",
+      "bytes": 23598
     },
     "free-fall-projectile": {
-      "src": "assets/previews/free-fall-projectile-97610c087d.webp",
-      "sourceHash": "c7579677be2a3c781d132ff8c6830acbf910fcbbd2b94722402d8fb0c00e7dce",
-      "bytes": 18460
+      "src": "assets/previews/free-fall-projectile-a32119483d.webp",
+      "sourceHash": "6da95842acf4cd534a5252afb103cf7b350b713cc3049fec0a28a08869d5c832",
+      "bytes": 19498
     },
     "resistor-series-parallel": {
       "src": "assets/previews/resistor-series-parallel-620760fe37.webp",
@@ -109,9 +109,9 @@ window.PHASE_PREVIEWS = {
       "bytes": 21916
     },
     "hero-maker": {
-      "src": "assets/previews/hero-maker-340c30230e.webp",
-      "sourceHash": "d5974c3f852997b41c03d9f8129c01793f758ae1d4259c8686b761b3220579e4",
-      "bytes": 25256
+      "src": "assets/previews/hero-maker-e8f9e2cea7.webp",
+      "sourceHash": "e564059aafa9216d33f862b26e1ed1422550ab95f1924c5e7391f7c19a11ef3b",
+      "bytes": 23144
     },
     "newton-rush": {
       "src": "assets/previews/newton-rush-ba99bf92a4.webp",

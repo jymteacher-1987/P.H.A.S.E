@@ -252,3 +252,101 @@ test('viewport boundary ends both observations together without a fictitious col
   assert.deepEqual(law.snapshot(), ended, 'observation must stay finished until reset');
   assert.equal(button.classes.has('active'), false);
 });
+
+function momentumRecording() {
+  const source = read('momentum-conservation');
+  const elements = new Map();
+  const $ = id => {
+    if (!elements.has(id)) elements.set(id, {querySelectorAll: () => []});
+    return elements.get(id);
+  };
+  const code = between(source, 'const RAIL_L', 'const $  =') +
+    between(source, 'const r3 =', 'function toast(') +
+    between(source, 'function collide(', 'function makeSparks(') +
+    between(source, "$('bumper').onclick=", 'function paintMode(') +
+    between(source, 'function analyze(', 'function metrics(') +
+    between(source, "$('btnRec').onclick=", "$('btnClear').onclick=");
+  return new Function('$', `
+    function makeSparks() {} function renderReadout() {} function renderTable() {}
+    function toast() {} function resetRun() {} function openModal() {}
+    ${code}
+    return {state:S, stepPhysics, record:()=>$('btnRec').onclick(),
+      selectBumper: bumper => $('bumper').onclick({target:{closest:()=>({dataset:{b:bumper}})}}),
+      approach:()=>{S.c1.x=.6;S.c2.x=.6+2*HW+.0001;S.c1.v=.4;S.c2.v=-.2;}};
+  `)($);
+}
+
+for (const [atCollision, afterCollision] of [['spring', 'velcro'], ['velcro', 'spring']]) {
+  test(`recording a ${atCollision} collision retains its type after selecting ${afterCollision}`, () => {
+    const sim = momentumRecording();
+    sim.selectBumper(atCollision);
+    sim.approach(); sim.stepPhysics(.01);
+    assert.equal(sim.state.collided, true);
+    const measured = structuredClone(sim.state.reading);
+    if (atCollision === 'velcro') close(measured.raw.v1p, measured.raw.v2p);
+    else assert.notEqual(measured.raw.v1p, measured.raw.v2p);
+    sim.selectBumper(afterCollision);
+    assert.equal(sim.state.bumper, afterCollision, 'the next selected condition may change');
+    sim.record();
+    const [row] = sim.state.rows;
+    assert.equal(row.bumper, atCollision, 'the saved type must describe the measured collision');
+    for (const key of ['v1', 'v2', 'v1p', 'v2p']) close(row[key], measured[key]);
+    close(row.pre, row.post);
+  });
+}
+
+function projectileInputs() {
+  const source = read('free-fall-projectile');
+  const elements = new Map();
+  const document = {getElementById(id) {
+    if (!elements.has(id)) elements.set(id, {value: id === 'v0' ? '6' : '.2'});
+    return elements.get(id);
+  }};
+  const code = between(source, 'function ballData(', 'function drawBall(') +
+    between(source, 'function loop(ts){', 'function setPlayBtn(') +
+    between(source, 'function bind(id,key,fmt){', 'function hoverMove(e){');
+  const sim = new Function('document', `
+    const state={mode:'real',v0:6,h:40,g:9.8,dt:.2,t:1,playing:true,
+      finished:false,lastFrame:1000,hoverT:.8};
+    const fallT=()=>Math.sqrt(2*state.h/state.g);
+    const posA=y=>[0,y],posB=(x,y)=>[x,y];
+    const queued=[];let playButton=null;
+    function render() {} function setPlayBtn(value){playButton=value;}
+    function requestAnimationFrame(callback){queued.push(callback);}
+    ${code}
+    return {state,loop,ballData,button:()=>playButton};
+  `)(document);
+  return {...sim, input(id, value) {
+    const element = document.getElementById(id);
+    element.value = String(value); element.oninput();
+  }};
+}
+
+test('changing initial horizontal speed stops the current fall and starts a fresh trajectory', () => {
+  const sim = projectileInputs();
+  close(sim.ballData(sim.state.t).xB, 6);
+  sim.input('v0', 14);
+  assert.equal(sim.state.v0, 14);
+  assert.equal(sim.state.playing, false);
+  assert.equal(sim.state.finished, false);
+  assert.equal(sim.state.lastFrame, null);
+  assert.equal(sim.state.hoverT, null);
+  assert.equal(sim.button(), false);
+  close(sim.state.t, 0); close(sim.ballData(sim.state.t).xB, 0);
+  sim.loop(1050); // A callback queued before the input must not resume the old fall.
+  close(sim.state.t, 0);
+  sim.state.playing = true;
+  sim.loop(2000); sim.loop(2500);
+  close(sim.state.t, .5); close(sim.ballData(sim.state.t).xB, 7);
+  close(sim.ballData(sim.state.t).y, 1.225);
+});
+
+test('changing the strobe observation interval keeps a running trajectory continuous', () => {
+  const sim = projectileInputs();
+  const before = sim.ballData(sim.state.t);
+  sim.input('dt', .4);
+  assert.equal(sim.state.dt, .4);
+  assert.equal(sim.state.playing, true);
+  close(sim.state.t, 1);
+  assert.deepEqual(sim.ballData(sim.state.t), before);
+});

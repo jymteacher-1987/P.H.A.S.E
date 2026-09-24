@@ -472,7 +472,7 @@ function stepPhysics(dt){
     if(e===0){ S.stuck=true; S.c2.v=S.c1.v; S.c2.x=S.c1.x+2*HW; }
     if(!S.collided){                            // 측정은 첫 충돌에서 1회만
       S.collided=true; S.tCol=S.t; S.flash=1; makeSparks();
-      S.reading={ mode:S.mode, raw:{v1:u1,v2:u2,v1p:p1,v2p:p2},
+      S.reading={ mode:S.mode, bumper:S.bumper, raw:{v1:u1,v2:u2,v1p:p1,v2p:p2},
                   v1:sensor(u1), v2:sensor(u2), v1p:sensor(p1), v2p:sensor(p2) };
       renderReadout();
       $('btnRec').disabled=false;
@@ -728,7 +728,7 @@ function renderTable(){
 $('btnRec').onclick=()=>{
   if(!S.reading) return;
   if(S.rows.length>=5){ toast('이미 5회를 모두 기록했습니다'); return; }
-  S.rows.push(Object.assign({m1:S.m1,m2:S.m2,bumper:S.bumper,mode:S.mode},
+  S.rows.push(Object.assign({m1:S.m1,m2:S.m2,bumper:S.reading.bumper,mode:S.mode},
               analyze(S.reading,S.m1,S.m2)));
   renderTable();
   toast(S.rows.length>=5?'5회 완료! 분석해 보자':`${S.rows.length}회차 기록 완료 — 추를 바꿔 다시!`);

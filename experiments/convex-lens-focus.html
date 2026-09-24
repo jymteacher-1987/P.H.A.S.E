@@ -411,7 +411,7 @@ function drawMeasure(){
     sctx.save();sctx.filter=`blur(${blurPx}px)`;sctx.globalAlpha=Math.max(0.12,1-spread/6);
     sctx.strokeStyle=focused?'#ffef9f':'#ffd24d';sctx.fillStyle=focused?'#ffef9f':'#ffd24d';sctx.lineWidth=3;
     sctx.beginPath();sctx.moveTo(sx,wy(0));sctx.lineTo(sx,wy(hi));sctx.stroke();
-    sctx.beginPath();sctx.moveTo(sx,wy(hi));sctx.lineTo(sx-6,wy(hi)+10);sctx.lineTo(sx+6,wy(hi)+10);
+    sctx.beginPath();sctx.moveTo(sx,wy(hi));sctx.lineTo(sx-6,wy(hi)-10);sctx.lineTo(sx+6,wy(hi)-10);
     sctx.closePath();sctx.fill();sctx.restore();
     if(focused){sctx.strokeStyle='rgba(55,214,122,.9)';sctx.lineWidth=2;sctx.setLineDash([4,3]);
       sctx.strokeRect(sx-8,AXIS_Y-halfH-2,16,2*halfH+4);sctx.setLineDash([]);}
@@ -439,7 +439,7 @@ function updateMeasureReadout(di,real,hi){
   if(!real){
     imgEl.textContent='실상 없음';fill.style.width='0%';txt.textContent='—';btn.disabled=true;
     document.getElementById('measureHint').textContent=
-      (state.do<=LENSES[curLens].f)?'광원이 초점보다 가까워 실상이 안 맺힙니다. 광원을 더 멀리 옮기세요.'
+      (state.do<=LENSES[curLens].f)?'광원이 초점에 있거나 그보다 가까워 스크린에 실상이 맺히지 않습니다. 광원을 더 멀리 옮기세요.'
       :'상이 또렷할 때만 기록할 수 있어요.';
     return;
   }
