@@ -121,7 +121,7 @@
         "question": "같은 추력으로 추진할 때, 질량이 줄어드는 로켓의 가속도는 어떻게 달라질까요?",
         "focus": "두 로켓의 질량과 가속도를 비교하고, 속도–시간 그래프에서 속도 차이가 어떻게 달라지는지 살펴보세요."
       },
-      "path": "experiments/rocket-motion.html?v=3cfc9a4ebc",
+      "path": "experiments/rocket-motion.html?v=d37b71ad5b",
       "date": "2026-07-28",
       "tags": [
         "로켓",
@@ -224,7 +224,7 @@
         "question": "같은 높이에서 동시에 출발하면, 수평으로 던진 물체와 가만히 놓은 물체 중 어느 쪽이 먼저 바닥에 닿을까요?",
         "focus": "수평 방향의 운동이 달라도 연직 방향의 위치 변화는 같은지 살펴보세요."
       },
-      "path": "experiments/free-fall-projectile.html?v=7a67c8c285",
+      "path": "experiments/free-fall-projectile.html?v=e36f223d88",
       "date": "2026-07-28",
       "tags": [
         "자유 낙하",
