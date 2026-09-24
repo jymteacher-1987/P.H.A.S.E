@@ -32,7 +32,7 @@ module.exports = async function walkthrough({id,takeHeart=false}) {
   } else if(id==='wave'){
     act('낡은 현판');act('북쪽 등불');check(G.lanternSeq===0,'wrong lantern');for(const d of ['서','북','동','남'])act(d+'쪽 등불');act('선실 문 —');dial([4,3,7]);check(S.solved[0],'cabin');stages.push('cabin');
     for(const q of ['상자 뒤에 낀','술통 사이의','그물 아래'])act(q);
-    act('선체 균형 레일');dial([3,1,3],'#bRow','#scGo');await wait(950);check(S.solved[1],'ballast 5/4/7');stages.push('cargo');
+    act('선체 균형 레일');dial([5,1,1],'#bRow','#scGo');await wait(950);check(S.solved[1],'ballast 7/4/5');stages.push('cargo');
     act('대포 — 어딘가');act('화약 배선반');
     // Connected upper route: inlet -> (0,0) -> (0,1) -> (0,2) -> outlet.
     for(const [i,n] of [[0,3],[1,1],[2,1],[3,3],[5,1]])many('#pGrid .ptile',n,i);

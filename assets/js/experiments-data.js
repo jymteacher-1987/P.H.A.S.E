@@ -40,7 +40,7 @@ window.EXPERIMENTS_DATA = {
       "id": "modern-physics",
       "name": "현대 물리",
       "icon": "⚛️",
-      "description": "양자역학 등 현대물리 개념"
+      "description": "양자역학 등 현대 물리 개념"
     }
   ],
   "experiments": [
@@ -365,7 +365,7 @@ window.EXPERIMENTS_DATA = {
         "question": "알파 입자 대부분은 거의 그대로 지나가는데, 일부는 왜 크게 휘어질까요?",
         "focus": "같은 조건으로 쏜 알파 입자의 궤적을 톰슨 원자 모형과 러더퍼드 원자 모형에서 비교해 보세요."
       },
-      "path": "experiments/rutherford-scattering.html?v=b163c377ca",
+      "path": "experiments/rutherford-scattering.html?v=7a003794e2",
       "date": "2026-08-20",
       "tags": [
         "러더퍼드",
@@ -447,7 +447,7 @@ window.EXPERIMENTS_DATA = {
       "title": "물리학자 대전",
       "icon": "🥊",
       "description": "뉴턴·아인슈타인·호킹·하위헌스 등 물리학자 8인의 공식 필살기 대전! 손발 콤보와 전용 기술로 평평 지구 교주를 이기고, 캐릭터별 논문 강의 엔딩을 만나보세요. 키보드와 모바일 조이스틱을 지원합니다.",
-      "path": "plays/physics-fighter.html?v=114608d156",
+      "path": "plays/physics-fighter.html?v=bc66c3c06e",
       "date": "2026-09-09",
       "tags": [
         "물리학자",
@@ -541,7 +541,7 @@ window.EXPERIMENTS_DATA = {
       "title": "밤티 방탈출 게임",
       "icon": "🔓",
       "description": "학교·해적선·우주정거장·저택·신전·금지구역, 여섯 이야기 속 단서를 연결해 마지막 문을 여는 3D 방탈출 게임입니다. 테마별 힌트와 PC·모바일 조작을 지원합니다.",
-      "path": "plays/bamti-escape.html?v=0cba343b14",
+      "path": "plays/bamti-escape.html?v=65735ff45a",
       "date": "2026-09-12",
       "tags": [
         "밤티",
