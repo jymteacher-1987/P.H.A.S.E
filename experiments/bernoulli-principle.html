@@ -76,7 +76,7 @@
 (() => {
   const $=id=>document.getElementById(id),canvas=$('scene'),ctx=canvas.getContext('2d');
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const RHO=1.2,TOTAL_PRESSURE=100,MAX_SPEED=12,THERMAL_SPEED=180,DRIFT_SPEED=200,DRAWN_BASE=4,HIT_WINDOW=3,COLLISION_TIME=.08;
+  const RHO=1.2,TOTAL_PRESSURE=100,MAX_SPEED=12,THERMAL_SPEED=45,DRIFT_SPEED=200,DRAWN_BASE=4,HIT_WINDOW=3,COLLISION_TIME=.08;
   const state={strength:0,paused:reduced,time:0,points:[],flashes:[],hits:[],collisionCount:0,swaps:0};
   let width=600,height=270,dpr=1,last=null;
   // The gauge uses Bernoulli with a fixed total gauge pressure.

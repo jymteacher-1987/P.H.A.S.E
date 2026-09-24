@@ -55,14 +55,14 @@ test('every molecule shares the same drift, and only the random part weakens as 
   let previous = Infinity;
   for (const strength of [0, 40, 100]) {
     sim.setStrength(strength);
-    const velocities = sim.velocities(), drift = 200 * strength / 100, thermal = 180 * sim.model().random;
+    const velocities = sim.velocities(), drift = 200 * strength / 100, thermal = 45 * sim.model().random;
     let meanX = 0, meanY = 0;
     for (let i = 0; i < velocities.length; i++) {
       const velocity = velocities[i];
       close(randomSpeed(velocity, strength), thermal);
       // Each random direction stays the same; only its size changes.
-      close((velocity.vx - drift) / thermal, baseline[i].vx / 180);
-      close(velocity.vy / thermal, baseline[i].vy / 180);
+      close((velocity.vx - drift) / thermal, baseline[i].vx / 45);
+      close(velocity.vy / thermal, baseline[i].vy / 45);
       meanX += velocity.vx; meanY += velocity.vy;
     }
     close(meanX / velocities.length, drift);
@@ -81,13 +81,14 @@ test('zero gauge pressure is not zero random molecular motion', () => {
   const strength = Math.sqrt(2 * 100 / 1.2) / 12 * 100;
   sim.setStrength(strength);
   close(sim.model().P, 0);
-  const thermal = 180 * sim.model().random;
-  assert.ok(thermal > 0.15 * 180, 'random motion never stops at atmospheric pressure');
+  const thermal = 45 * sim.model().random;
+  assert.ok(thermal > 0.15 * 45, 'random motion never stops at atmospheric pressure');
   for (const velocity of sim.velocities()) close(randomSpeed(velocity, strength), thermal);
 });
 
 test('faster flow gives fewer and weaker wall impacts', () => {
-  const slow = run(simulation(0), 4), fast = run(simulation(100), 4);
+  // Slower animation needs a longer observation window for enough wall impacts.
+  const slow = run(simulation(0), 12), fast = run(simulation(100), 12);
   assert.ok(slow.collisionCount > 100, 'random motion keeps hitting the walls');
   assert.ok(fast.collisionCount > 0, 'fast flow still hits the walls');
   const ratio = fast.collisionCount / slow.collisionCount;
@@ -101,7 +102,7 @@ test('the hit counter reports recent wall impacts per second', () => {
   const sim = simulation(0);
   assert.equal(sim.hitRate(), null);
   const rest = run(sim, 4), restRate = sim.hitRate();
-  assert.ok(restRate > 40 && restRate < 80, 'about sixty hits per second at rest: ' + restRate);
+  assert.ok(restRate > 8 && restRate < 25, 'slower random motion still produces visible wall impacts: ' + restRate);
   close(restRate, rest.hits.length / 3);
   sim.setStrength(100);
   run(sim, 4);
@@ -115,7 +116,10 @@ test('at the medium setting molecules collide and every one of them is carried t
   const moved = new Array(start.length).fill(0);
   let windows = 0, backward = 0, last = moved.slice();
   for (let frame = 1; frame <= 12 * 120; frame++) {
-    sim.velocities().forEach((velocity, i) => { moved[i] += velocity.vx * dt; });
+    sim.velocities().forEach((velocity, i) => {
+      assert.ok(velocity.vx > 0, `medium flow reverses molecule ${i} at frame ${frame}`);
+      moved[i] += velocity.vx * dt;
+    });
     sim.step(dt);
     if (frame % 240 === 0) {
       moved.forEach((x, i) => { windows++; if (x - last[i] <= 0) backward++; });
@@ -129,4 +133,30 @@ test('at the medium setting molecules collide and every one of them is carried t
   assert.ok(moved.every(x => x > 0), 'no molecule keeps moving against the flow');
   close(moved.reduce((sum, x) => sum + x, 0) / moved.length, drift * 12, 1e-6);
   assert.ok(backward / windows < 0.02, 'over two seconds almost every molecule moves right: ' + backward / windows);
+});
+
+test('weak flow is visibly rightward over half-second to two-second observation windows', () => {
+  // Short backward steps remain possible at 10%; test the observable accumulated
+  // displacement without mistaking a right-edge wrap for movement to the left.
+  for (const {seconds, minimum} of [
+    {seconds: 0.5, minimum: 0.8},
+    {seconds: 1, minimum: 0.9},
+    {seconds: 2, minimum: 0.95}
+  ]) {
+    const sim = simulation(10), dt = 1 / 120;
+    const moved = new Array(sim.snapshot().points.length).fill(0);
+    const framesPerWindow = Math.round(seconds / dt);
+    for (let frame = 1; frame <= 12 * 120; frame++) {
+      sim.velocities().forEach((velocity, i) => { moved[i] += velocity.vx * dt; });
+      sim.step(dt);
+      if (frame % framesPerWindow === 0) {
+        const rightward = moved.filter(distance => distance > 0).length / moved.length;
+        assert.ok(rightward >= minimum,
+          `${seconds}s window ending at frame ${frame}: only ${rightward * 100}% moved right`);
+        close(moved.reduce((sum, distance) => sum + distance, 0) / moved.length,
+          20 * seconds, 1e-6);
+        moved.fill(0);
+      }
+    }
+  }
 });

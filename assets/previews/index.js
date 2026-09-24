@@ -99,9 +99,9 @@ window.PHASE_PREVIEWS = {
       "bytes": 19588
     },
     "bernoulli-principle": {
-      "src": "assets/previews/bernoulli-principle-1eaa9a53fe.webp",
-      "sourceHash": "0c177804b614f897b8d141f3ad1d6d1be03e8cf18cd36fac70069a7d06a83178",
-      "bytes": 18016
+      "src": "assets/previews/bernoulli-principle-3875891e07.webp",
+      "sourceHash": "1a6b1d502284faebd02a28498aac31438d82ac2013e85f1e0867a97741c47b7d",
+      "bytes": 17872
     },
     "photoelectric-effect": {
       "src": "assets/previews/photoelectric-effect-f2354bd8e7.webp",
