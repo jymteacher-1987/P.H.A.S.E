@@ -5,7 +5,7 @@
   "items": {
     "si-prefixes": {
       "src": "assets/previews/si-prefixes-ae8e3490d8.webp",
-      "sourceHash": "6db404607511c377692c934702fe23786a38dcf74f025e940ffa4dd7d7178bd7",
+      "sourceHash": "84837b85319cc9a640fca62a227cf8b431f04af45083c618ba06468bb64321af",
       "bytes": 24482
     },
     "newton-laws": {
@@ -24,9 +24,9 @@
       "bytes": 22182
     },
     "rocket-motion": {
-      "src": "assets/previews/rocket-motion-b7b2bece8a.webp",
-      "sourceHash": "d131cc8f4c789c793a28469146e0be46261c851ac3b4913e54cbf0db5f69031c",
-      "bytes": 14496
+      "src": "assets/previews/rocket-motion-308ef50e4d.webp",
+      "sourceHash": "ad75b5385abd7881c00e6f6f2b2f81ab60b13627081474a6c58e6b77e259a411",
+      "bytes": 14932
     },
     "motion-analysis": {
       "src": "assets/previews/motion-analysis-2ddce2fdb2.webp",
@@ -40,7 +40,7 @@
     },
     "convex-lens-focus": {
       "src": "assets/previews/convex-lens-focus-c79cbab7a5.webp",
-      "sourceHash": "c006a655840622be1b154d9d45efb60d861b209dc28d4e25ed9804123efabd3f",
+      "sourceHash": "f20527f25c6949389fd801c79f9b8d7e65ddd1163c4d5c35737d98a4b48589f2",
       "bytes": 22374
     },
     "rgb-cmy-light": {
@@ -54,9 +54,9 @@
       "bytes": 23272
     },
     "free-fall-projectile": {
-      "src": "assets/previews/free-fall-projectile-d7f054b771.webp",
-      "sourceHash": "c7579677be2a3c781d132ff8c6830acbf910fcbbd2b94722402d8fb0c00e7dce",
-      "bytes": 18458
+      "src": "assets/previews/free-fall-projectile-35c78239c5.webp",
+      "sourceHash": "d2db2a8c9cf8d248f5e852ba4e89d58d103875ff7d37f94914f130924ac782df",
+      "bytes": 19128
     },
     "resistor-series-parallel": {
       "src": "assets/previews/resistor-series-parallel-620760fe37.webp",
