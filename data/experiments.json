@@ -53,7 +53,7 @@
         "question": "같은 양을 접두어가 다른 단위로 나타내면 수치는 어떻게 달라질까요?",
         "focus": "킬로와 밀리 등 크기가 다른 접두어로 단위를 변환하고, 나타내는 양은 그대로인지 확인해 보세요."
       },
-      "path": "experiments/si-prefixes.html?v=0eb5b4f4f4",
+      "path": "experiments/si-prefixes.html?v=992352a412",
       "date": "2026-07-28",
       "tags": [
         "단위",
@@ -121,7 +121,7 @@
         "question": "같은 추력으로 추진할 때, 질량이 줄어드는 로켓의 가속도는 어떻게 달라질까요?",
         "focus": "두 로켓의 질량과 가속도를 비교하고, 속도–시간 그래프에서 속도 차이가 어떻게 달라지는지 살펴보세요."
       },
-      "path": "experiments/rocket-motion.html?v=d37b71ad5b",
+      "path": "experiments/rocket-motion.html?v=3cfc9a4ebc",
       "date": "2026-07-28",
       "tags": [
         "로켓",
@@ -172,7 +172,7 @@
         "question": "광원과 스크린의 위치를 재면 렌즈의 초점 거리를 알아낼 수 있을까요?",
         "focus": "먼 물체의 상으로 초점 거리를 어림해 보세요. 광원 위치를 고정하고 스크린만 움직여 선명한 상의 위치를 기록하세요. 여러 광원 위치에서 측정을 반복하고, 그래프로 초점 거리를 구해 보세요."
       },
-      "path": "experiments/convex-lens-focus.html?v=d662b3dda6",
+      "path": "experiments/convex-lens-focus.html?v=5bc301d420",
       "date": "2026-07-28",
       "tags": [
         "볼록렌즈",
@@ -224,7 +224,7 @@
         "question": "같은 높이에서 동시에 출발하면, 수평으로 던진 물체와 가만히 놓은 물체 중 어느 쪽이 먼저 바닥에 닿을까요?",
         "focus": "수평 방향의 운동이 달라도 연직 방향의 위치 변화는 같은지 살펴보세요."
       },
-      "path": "experiments/free-fall-projectile.html?v=e36f223d88",
+      "path": "experiments/free-fall-projectile.html?v=7a67c8c285",
       "date": "2026-07-28",
       "tags": [
         "자유 낙하",
@@ -308,7 +308,7 @@
       "category": "thermal",
       "description": "보일 법칙·샤를 법칙·아보가드로 법칙을 단계별 가상 실험으로 확인하고 이상 기체 방정식 PV = nRT로 종합합니다.",
       "lessonNote": {
-        "question": "기체의 압력, 부피, 온도, 몰수 사이에는 어떤 관계가 있을까요?",
+        "question": "기체의 압력, 부피, 온도, 물질량 사이에는 어떤 관계가 있을까요?",
         "focus": "각 단계에서 일정하게 유지되는 변인을 확인하고, 나머지 두 변인 사이의 관계를 알아보세요. 세 실험의 기록을 모아 PV = nRT가 성립하는지 확인해 보세요."
       },
       "path": "experiments/ideal-gas-law.html?v=f33d93bb22",
