@@ -198,7 +198,9 @@
     if (desktopMenu.matches) {
       const headerHeight = boxes.reduce((sum, box) => sum + box.querySelector(".side-filter-heading").getBoundingClientRect().height, 0),
         navHeight = document.querySelector(".site-nav").getBoundingClientRect().height,
-        available = innerHeight - navHeight - headerHeight - boxes.length * 26 - (boxes.length - 1) * 14 - 48;
+        extraHeight = Array.from(els.sideMenu.children).filter(el => !el.classList.contains("side-filter-box"))
+          .reduce((sum, el) => sum + el.getBoundingClientRect().height + 14, 0),
+        available = innerHeight - navHeight - headerHeight - extraHeight - boxes.length * 26 - (boxes.length - 1) * 14 - 48;
       const listHeight = available / Math.max(1, openMenus.size);
       els.sideMenu.style.setProperty("--side-list-height", Math.max(112, Math.min(400, listHeight)) + "px");
       els.sideMenu.classList.toggle("side-menu-tall", openMenus.size > 0 && listHeight < 112);
@@ -268,6 +270,8 @@
     let html = sideBox("lab", "물리 가상실험", catRows);
     if (playRows.length) html += sideBox("play", PLAY_SECTION.name, playRows);
     els.sideMenu.innerHTML = html;
+    // 메뉴 밑 빈자리에 시뮬레이션 오류 신고 칸을 둔다(assets/js/report.js).
+    if (window.PhaseReport) els.sideMenu.append(window.PhaseReport.sideBox());
     els.sideMenu.querySelectorAll(".side-menu-toggle").forEach(button => button.addEventListener("click", () => {
       const section = button.closest("[data-menu]").dataset.menu;
       if (openMenus.has(section)) openMenus.delete(section);
