@@ -1318,10 +1318,16 @@ function motifEntries(){
     });
 }
 const allMotifs    = () => motifEntries().map(e=>e.ko);
-const motifListEn  = () => {
-  const ai = String(state.motifsEn||'').split(',').map(x=>x.trim()).filter(Boolean);
-  return [...new Set(motifEntries().map((e,i)=> e.preset ? e.en : (ai[i] || e.en)).filter(Boolean))];
-};
+// 모델의 번역 순서나 추가 제안이 사용자의 선택을 바꾸지 못하게 한다.
+const motifListEn = () => [...new Set(motifEntries().map(e=>e.en).filter(Boolean))];
+const motifCueKey = value => String(value||'').trim().replace(/\s+/g,' ').toLowerCase();
+function motifSelectionRule(){
+  const selected = motifEntries().map((e,i)=>`${i+1}. ${e.ko}${e.en!==e.ko ? ` (${e.en})` : ''}`).join('\n');
+  return `SELECTED MOTIFS — CLOSED LIST, AUTHORITATIVE FOR EVERY SECTION
+${selected || 'NONE — the student selected no motif.'}
+${selected ? 'Use exactly these selected motifs, in this order. Preserve every selected motif; never rename, replace or add one. A Korean custom name is the original selection, not a placeholder for a different theme.' : 'Build the costume from the chosen role and earned experiment equipment only; do not invent an animal, nature, object or other design motif.'}
+All suggested hair, eyewear, headgear, palette, signature details, fusion geometry and art direction must obey this list. Ignore any suggestion that introduces a different motif, even if it appears later. Examples and possible shapes are not extra selections: use a shape only when it belongs to a selected motif. The chosen role's practical tools and the earned experiment equipment remain required, but never become permission to add an unrelated design theme.`;
+}
 
 /* 히어로를 남성형 / 여성형 / 어느 쪽도 아닌 쪽 중 어떻게 그릴지.
    학생 본인의 얼굴이 들어가는 포스터이므로 몸매를 드러내는 방향으로는 절대 가지 않는다.
@@ -1354,7 +1360,7 @@ Silhouette word: a bright narrow column that breaks at the waist into a wide fla
 
 MAKE IT READ AS A GIRL HERO IMMEDIATELY — AND DO IT ENTIRELY ABOVE THE NECK, IN THE CLOTH, AND IN THE ORNAMENT. NEVER IN THE BODY.
 The single hardest rule on this whole poster: the body is never used to say "female". No chest, waist, hip or leg shaping, no clinging, nothing bare, no coy or glamorous pose, nothing shorter or thinner or tighter than the male version. Coverage is identical to the male version — high closed neck, full sleeves, full legs, opaque everywhere. If you find yourself reaching for the figure to make it feminine, you have taken the banned route; go back and take the four legitimate routes below instead.
-1. HAIR — THE STRONGEST CUE YOU HAVE, AND IT COSTS NOTHING. Preserve the photographed hair colour, forehead hairline and temple/sideburn face boundary. Outside that boundary, style the hair deliberately for this hero — a real cut with its own length, shape, volume and movement — but it never becomes someone else's hair and never hides the face. Design any headgear only on the crown and back behind the hairline — a crest, open circlet or cap-style shell — with no mask, visor or optical band across the face.
+1. HAIR — THE STRONGEST CUE YOU HAVE, AND IT COSTS NOTHING. Preserve the photographed hair colour, forehead hairline and temple/sideburn face boundary. Outside that boundary, style the hair deliberately for this hero — a real cut with its own length, shape, volume and movement — but it never becomes someone else's hair and never hides the face. Design any headgear only on the crown and back behind the hairline — a crest, open circlet or cap-style shell — with no mask or face-covering visor. For a photographed wearer, the redesigned hero eyewear specified in the EYEWEAR section is allowed at the original eye position, with clear lenses and both eyes visible; no second optical band is added.
 2. LINE — CURVES WHERE THE MALE VERSION HAS CORNERS. Every edge that the male hero would cut as a hard straight bevel is drawn here as an arc: scalloped and petal-shaped plate edges, a curved shoulder line that sweeps up and back, sweeping seams that follow the body's motion instead of boxing it in, a hem cut in points or petals rather than straight across. Repeating shapes come from the motif and are round or leaf-like — petals, feathers, scales, droplets, crescents — never blocks and slabs.
 3. ORNAMENT — MORE OF IT, WITH ITS CRAFT GRADE HONEST. The same full-size motif-derived filigree, fittings, crown/back-of-head crest, shoulder clasp and sash are visibly hand-cut, hand-drawn, taped or glued at rough grade; engraving, enamel, jewels and polished edges appear only when that piece earned a finished grade. Ornament never crosses the photographed face.
 4. MOVEMENT — SOMETHING IS ALWAYS FLOWING. Long light elements are permanently in the air: a split cape, ribbons, sleeve panels, a floor-length hem, a sash. The male version is planted and still; this one is caught mid-motion.
@@ -1382,18 +1388,18 @@ ${A.adult ? '' : `- LEG LENGTH, AND THIS IS THE ONE THAT DECIDES WHETHER THIS RE
 ${adult
  ? `This is an adult, so adult proportions are correct and expected. Do NOT shrink them into a teenager.`
  : `THIS IS A CHILD OF ${A.mAge}, AND THE MOST COMMON FAILURE IS DRAWING THEM TOO OLD AND TOO TALL. Fight it deliberately:
-${state.photo ? `- EVERYTHING FROM THE NECK UP COMES FROM THE PHOTOGRAPH AND IS ALREADY CORRECT AT THIS AGE. This section is about the body only. Treat the head as a finished object that is simply placed on the figure at the size the ratio above gives.
+${state.photo ? `- THE FACIAL FEATURES AND HEAD POSE COME FROM THE PHOTOGRAPH AND ARE ALREADY CORRECT AT THIS AGE. This section is about the body only. Preserve the facial geometry, expression, gaze and head angle while fitting the body to the stated proportions. The hair is styled for the hero, and photographed eyewear follows the separate redesign rule.
 - The neck is short and thin.` : `- The cranium is large relative to the face, the forehead is high and rounded, and the eyes sit LOW on the head — roughly at or below the midline of the skull. In adults the eyes sit at the midline; in children the whole face occupies the lower part of a big round head.
 - Big eyes relative to the face, a short small nose, full rounded cheeks, a small chin, a narrow jaw with no angle to it, and a short neck.`}
 - Narrow, sloping, undeveloped shoulders. Thin straight limbs. Small hands and small feet. No visible muscle definition anywhere.
-- Keep the legs short, the shoulders narrow and the height as stated${state.photo ? '. Age is read off the body alone; the head is simply placed, never adjusted.' : ', the jaw unsquared and the cheeks full.'}
+- Keep the legs short, the shoulders narrow and the height as stated${state.photo ? '. Age is read off the body alone; the facial features and head pose are never adjusted.' : ', the jaw unsquared and the cheeks full.'}
 If the finished figure could pass for a university student or an adult, it is WRONG and must be rebuilt shorter and younger ${state.photo ? 'IN THE BODY — shorter legs, narrower shoulders, a bigger head SIZE. Never by reshaping the head or the face.' : 'and rounder-headed.'}${A.mAge <= 12 ? `
 
 THIS ONE IS A PRIMARY-SCHOOL CHILD AND MUST OBVIOUSLY BE ONE. A stranger seeing only this poster has to say "that is a primary-school kid", not "that is a small teenager". Teenagers keep coming out of this prompt where children were asked for, so build these in on purpose:
 - PROPORTION, MEASURED, AND MEASURED BY THE HEAD. The head is the whole difference. Stack heads up the figure: this body is ${A.headsEn}, an adult is about 7.5. That means the head must be drawn NOTICEABLY BIG for the body — big enough that it looks slightly too large, which is exactly how a real primary-school child looks. Every other proportion follows from getting the head right, so fix the head first and check it last.
 - The shoulders are narrow: roughly two head-widths across, against about two and a half on a grown adult. The neck is short and thin enough that the head looks set almost straight onto the shoulders, and it is never thick.
 - The upper arm and the forearm are short and roughly even in thickness, with no taper into a defined wrist. The hands are small and the fingers are short and blunt, with soft dimpled knuckles rather than visible tendons.
-${state.photo ? `- THE FACE AND THE HAIR ARE NOT PART OF THIS SECTION AT ALL. They come from the photograph, exactly as it gives them, and no age rule applies to them. Everything here is about the body.` : `- THE FACE IS A CHILD'S FACE. Round soft cheeks with baby fat still on them, a small rounded chin, a jawline with no corner to it, smooth skin with no shadow under the cheekbone, and eyebrows that are thin and light. Hair is a child's hair — a school haircut, slightly untidy, soft rather than styled.`}
+${state.photo ? `- NO AGE RULE CHANGES THE PHOTOGRAPHED FACIAL FEATURES OR HEAD POSE. Everything here is about the body. The hair is deliberately restyled for this hero under the HAIR rule, preserving its colour and the natural hairline without copying the everyday haircut.` : `- THE FACE IS A CHILD'S FACE. Round soft cheeks with baby fat still on them, a small rounded chin, a jawline with no corner to it, smooth skin with no shadow under the cheekbone, and eyebrows that are thin and light. Hair is a child's hair — a school haircut, slightly untidy, soft rather than styled.`}
 - THE COSTUME IS A CHILD-SIZED COSTUME. It was made to fit this body, so every part is small in absolute terms: short gauntlets, a short cape, a shallow chest plate, small boots. A helmet or hood looks big and round on a child's head because the head is big and round — let it. Do not scale the gear to an adult and then shrink the person inside it.
 - THE STANCE IS A CHILD'S STANCE, AND STILL A HERO'S. Feet about shoulder width, not planted far apart; knees straight or slightly soft rather than braced wide; ${state.photo ? 'the chest and shoulders rise proudly while the photographed neck and head angle remain exactly unchanged' : 'chin up, chest out'}, both feet flat. Read it as a nine-to-twelve-year-old standing as tall as they possibly can because they know the photo is being taken. That earnestness is the point of the picture and it must survive into the final image — proud, delighted, absolutely serious about it.
 ${A.mAge <= 9 ? `- WARM AND ENDEARING, NOT GRIM — THIS ONE IS ONLY BECAUSE THEY ARE ${A.mAge}. Make the family smile when they see it. Round the forms and pad them, let the gear sit a little big on them the way a school backpack does, and put bright warm light on the whole scene.${state.photo ? ' The warmth NEVER comes from the face — keep exactly the expression the photograph shows, the same mouth and the same eyes. Changing the expression means redrawing the face, and then it is not this child any more.' : ' A real open grin is welcome.'} A small determined kid in slightly-too-big equipment is the most charming thing this picture can be, so aim at that on purpose rather than at a brooding action hero.
@@ -4008,7 +4014,7 @@ function openingLine(n){
 `A photorealistic still frame from a live-action superhero film, captured on a cinema camera with real glass. Properly lit and properly built — a real film image, held one notch below the very top.`,
 `A single photorealistic still frame from a live-action superhero film, captured on a cinema camera with real anamorphic glass, lit and composed like the final theatrical poster.`,
 `A single photorealistic still frame from a live-action superhero film, captured on a cinema camera with real anamorphic glass, lit like a relic in a hall — the most spectacular image this whole set can produce.`];
-  return `${KIND[K]}\n${CRAFT_ONLY_INVARIANT}\n${state.photo ? 'THE ATTACHED PHOTOGRAPH IS THE PERSON. Keep their head exactly as it is in that photograph and build everything else around it — this is a re-costuming and re-lighting of a real photograph, not a new face invented from a description.' : ''} Not an illustration, not a 3D render, not digital painting, not anime, not AI concept art.`;
+  return `${KIND[K]}\n${CRAFT_ONLY_INVARIANT}\n${state.photo ? 'THE ATTACHED PHOTOGRAPH IS THE PERSON. Preserve their facial features, expression, gaze and head pose, and build the costume around that identity. Restyle the hair for the hero; any photographed eyewear is redesigned under the EYEWEAR rule. This is a re-costuming and re-lighting of a real person, not a new face invented from a description.' : ''} Not an illustration, not a 3D render, not digital painting, not anime, not AI concept art.`;
 }
 
 /* 발동 컷에서 '기술이 얼마나 세게 터지는가' — 이것도 문제를 몇 개 맞혔느냐가 정한다.
@@ -4318,12 +4324,7 @@ ${best.length  ? `BEST — ${best.map(nm).join(', ')}. ${best.length===1?'This p
   const nOk = got.filter(g=>g.ok !== false).length;
   const nAce = got.filter(g=>g.grade === 'ace').length;
   const nRough = got.length - nOk;
-  /* 연출 모델이 영어로 옮겨 준 목록을 쓰되, 학생이 고른 것이 하나라도 빠지면 안 되므로
-     원래 목록과 합친다. 개수가 맞고 빠진 게 없을 때만 모델 번역본을 그대로 쓴다. */
-  const mine = motifListEn();
-  const fromAI = String(state.motifsEn||'').split(',').map(s=>s.trim()).filter(Boolean);
-  const motifList = (fromAI.length >= mine.length) ? fromAI
-                  : [...new Set([...fromAI, ...mine])];
+  const motifList = motifListEn();
   const hasKo = motifList.some(c=>/[가-힣]/.test(c));
   const tags = heroTags();
   /* 고른 모티브마다 '무엇을 어떻게 그릴지' 를 구체적으로 지정한다.
@@ -4345,28 +4346,16 @@ ${best.length  ? `BEST — ${best.map(nm).join(', ')}. ${best.length===1?'This p
   const aiCues = {};
   String(state.motifCues||'').split('\n').forEach(line=>{
     const m = line.match(/^\s*([^|]+)\|([^|]+)\|(.+)$/);
-    if(m) aiCues[m[1].trim().toLowerCase()] = {d:m[2].trim(), f:m[3].trim()};
+    if(m) aiCues[motifCueKey(m[1])] = {d:m[2].trim(), f:m[3].trim()};
   });
-  /* 적힌 순서 그대로. 목록에 있는 것은 준비된 LOOK/POWER 를,
-     직접 적은 것은 연출 모델이 써 준 것을 쓴다.
-     주의 — 직접 적은 것은 학생이 한글로 쓰고(해파리) 모델은 영어로 돌려준다(jellyfish).
-     한글 낱말로만 찾으면 영영 못 찾아서, 결과적으로 LOOK/POWER 없이 한글이 그대로
-     영어 프롬프트에 실려 나갔다. 모델이 준 영어 이름을 같은 자리에서 가져와 함께 찾는다. */
-  const aiEn = String(state.motifsEn||'').split(',').map(x=>x.trim()).filter(Boolean);
-  const cueKeys = Object.keys(aiCues);
-  const cueList = motifEntries().map((e,i)=>{
+  /* 직접 입력한 모티브도 선택 원문으로만 연결한다. 모델이 다른 이름을 보내거나
+     순서를 바꾸면 해당 설명을 쓰지 않고, 원래 모티브의 기본 설계 지시를 쓴다. */
+  const cueList = motifEntries().map(e=>{
     if(e.preset){
       return {en:e.en, d:e.d, f:e.f};
     }
-    const en = aiEn[i] || e.en;                       // 같은 자리의 영어 이름
-    const a = aiCues[String(en).toLowerCase()]
-           || aiCues[e.ko.toLowerCase()]
-           || aiCues[String(e.en).toLowerCase()]
-           /* 이름이 조금 달라도(jellyfish / jelly fish) 서로 품고 있으면 같은 것으로 본다 */
-           || (()=>{ const k = cueKeys.find(k =>
-                        k.includes(String(en).toLowerCase()) || String(en).toLowerCase().includes(k));
-                     return k ? aiCues[k] : null; })();
-    return a ? {en, d:a.d, f:a.f} : {en, d:'', f:''};
+    const a = aiCues[motifCueKey(e.ko)];
+    return {en:e.en, d:a?.d || '', f:a?.f || ''};
   });
   /* 압축 경로에서도 똑같은 모티브 자료를 쓴다 — 여기서 만든 것을 그대로 넘겨 둔다 */
   lastCueList = cueList;
@@ -4382,6 +4371,8 @@ ${best.length  ? `BEST — ${best.map(nm).join(', ')}. ${best.length===1?'This p
 
   return [
 openingLine(isLegend() ? 5 : loadoutScore().ok),
+
+motifSelectionRule(),
 
 qualityCap(isLegend() ? 5 : loadoutScore().ok),
 
@@ -4554,13 +4545,7 @@ Show the finished picture to someone who was told nothing and ask what it was bu
 THE THREE THINGS EVERYONE ALREADY KNOWS — DO THIS FIRST, BEFORE ANYTHING ELSE ON THIS PAGE
 This is where these posters go wrong most often. The suit ends up "sort of animal-shaped, in the right colours", and the student looks at it and says "this could be anyone's". The fix is not more detail. It is building the specific famous things.
 Before drawing, name to yourself THE THREE THINGS a child would say if you asked them what they know about this motif. Not what it is classified as — what everybody knows about it. Then give each one its OWN NAMED PART OF THE COSTUME, big enough to see in a thumbnail. Three separate features, three separate parts of the body, all three visible in the finished picture.
-Worked examples of the level required — match this, and do it for whatever this student actually chose:
-- CHEETAH → (1) the black tear-stripes: cut them as sunken channels into the temples of the open headpiece and continue them down the collar, never onto a photographed face. (2) fastest thing on land but only for thirty seconds: a burst actuator in each calf with a heat gauge on the wrist that visibly runs down. (3) the long tail it steers with at speed: a weighted counterbalance sash trailing from the belt, clearly a rudder and not decoration.
-- OWL → (1) the flat facial disc that funnels sound: build twin dish-like acoustic forms around the collar and shoulders, framing but never covering a photographed face. (2) a head that turns almost all the way round: a visible geared collar ring while the photographed head angle itself stays fixed. (3) silent flight from fringed feathers: serrated soft trailing edges on every cape and panel edge.
-- PUFFERFISH → (1) inflating to a ball: overlapping plates that visibly stand off on struts. (2) spines: deployable moulded studs, flush when down. (3) it is famously poisonous: hazard-marked ports at the wrists.
-- TYPHOON → (1) the spiral seen from a satellite: the suit's entire seam layout spirals from a single point on the chest. (2) the calm eye at the centre: one clear, still, perfectly circular void at that point, the only quiet thing on the whole garment. (3) it drives rain sideways: every hem, sash and trailing edge is swept hard in one direction as if permanently in a crosswind.
-- MAGNET → (1) two ends that do opposite things: the suit is split into two colours down the middle, red one side and blue the other, meeting at a hard line. (2) the horseshoe shape everyone draws: that arch is the shoulder yoke. (3) iron sticks to it: filings gathered in fine standing lines along the gauntlet and boot edges.
-- OLD BOOK → (1) stacked page block: the layered hem and cuffs are a fanned block of thin leaves. (2) the sewn spine: a corded, stitched ridge running up the centre of the back. (3) gold leaf on the cover: fine gilt tooling worked into the chest plate border.
+Derive those three features only from the SELECTED MOTIFS list above; examples of other themes are not part of this costume.
 RULES FOR THIS SECTION: every one of the three must be a thing you could point at and name. None of them may be a badge, a logo, a printed picture or a small charm hung on the suit — they are built, structural, and made of the costume's own materials. And they must be spread across the body (head, torso, limbs, back), never all three clustered on the chest.
 IF THE MOTIF IS NOT AN ANIMAL, the rule does not change: a force of nature, a machine, a plant, an object or a place all have three famous things about them too. Find them and build them the same way. What is banned is the lazy version — a picture of the thing printed on the chest, or a small model of it hung off the belt.
 
@@ -4640,7 +4625,7 @@ ${state.photo
 ★ READ THIS BEFORE ANYTHING ELSE IN THIS SECTION. ${state.photo ? (wearsGlasses() ? 'A real person is going to look at this poster to find themselves in it. Their hairline, forehead, facial outline, nose, mouth, cheeks, jaw and chin remain unchanged. The only object over facial skin is this hero eyewear — redesigned for the costume, but sitting exactly where the photographed pair sits, with clear lenses and both eyes fully visible. ' : 'A real person is going to look at this poster to find themselves in it. Their hairline, forehead, both bare eyes, both eyebrows, facial outline, nose, mouth, cheeks, jaw and chin remain visible and unchanged, with nothing over the eyes. ') : 'THE WHOLE FACE — hairline, forehead, both eyes, both eyebrows, the nose, the mouth, the cheeks, the jaw and the chin — IS VISIBLE, UNCOVERED AND LIT IN THIS PICTURE. '}Nothing on this list is worth losing that.
 LET THE MOTIF DECIDE, AND DO NOT BE TIMID ABOUT IT. If the motif has a head worth building — a crested bird, a horned or antlered animal, a shelled or armoured creature, a rider, a diver, a pilot, a machine — then BUILD THE HELMET, because that is where that motif reads best. If the motif lives in the body instead, a crown or back crest, an ear piece, a circlet, a brow band or a bare head is the better answer. Both are good posters; what is wrong is defaulting to the same choice for everyone.
 WHENEVER A HELMET IS BUILT, IT IS WORN THE WAY A CAP IS WORN — OPEN-FACED, ALWAYS. Then build it like a hard hat, a cap or a rider's shell: it sits on the CROWN and the BACK of the head, beginning behind the preserved hairline and leaving the face boundary unchanged. It has NO faceplate, NO chin bar, NO cheek guards, NO muzzle, NO chin strap crossing the jaw, NO neck seal climbing over the chin, and no optical piece hinged down over the eyes. All its detail — the crest, the plating, the ridges, the motif's own head shape — is built on the crown and around the back, never forward onto the face and never as a second layer over photographed glasses.
-THE TEST: if you removed the person, the helmet would look like a piece of headwear you could set on a table, not a mask you could look out of.${state.photo ? ' A CLOSED helmet is the one thing that is never built: if the motif seems to demand a full face, build the same helmet open — crown and back only, everything from the brow down bare. The helmet is welcome; the faceplate is not.' : ''}
+THE TEST: if you removed the person, the helmet would look like a piece of headwear you could set on a table, not a mask you could look out of.${state.photo ? ` A CLOSED helmet is the one thing that is never built: if the motif seems to demand a full face, build the same helmet open — crown and back only. ${wearsGlasses() ? 'The face stays uncovered except for the redesigned hero eyewear, with clear lenses and both eyes visible.' : 'Everything from the brow down stays bare.'} The helmet is welcome; the faceplate is not.` : ''}
 Work through the rest of this section with that in mind:
 ${headgearEyewear()}
 
@@ -4857,7 +4842,7 @@ The showcase zones are the ones marked BUILT TO SHOWCASE STANDARD above. Do not 
 ${state.palette || 'Choose a distinctive scheme drawn from the motifs and the role above — two main colours plus one sharp accent.'}
 Build the entire costume from that scheme. Do NOT default to navy, teal and gold; that combination is forbidden unless it genuinely comes from the motifs listed above.`,
 
-state.signature ? `SIGNATURE DETAIL — the one thing people remember about this hero
+state.signature ? `SIGNATURE DETAIL — use only the parts of this suggestion derived from the selected motifs or earned equipment; discard any unselected theme
 ${state.signature}
 Make it clearly visible and well lit. ${got.some(x=>x.ok===false) ? 'Its workmanship follows the exact zone carrying it: if that zone is ROUGH, the same complete recognisable object is hand-built from card, foam, offcuts or classroom material with hand-cut edges, tape or simple fasteners and uneven motif-colour paint; if it is a finished zone, only that zone may be clean. This signature sentence never upgrades a rough zone.' : 'Its workmanship follows its assigned finished or showcase grade.'}` : '',
 
@@ -4870,7 +4855,7 @@ HOW POLISHED any of this is — moulded or hand-cut, machined or taped, gleaming
 `AVOID
 No cut-and-paste composite look. No head pasted onto a different body. No mismatched lighting between face and costume. No sticker-like edges or glow outlines around the person. No airbrushed plastic skin, no over-sharpening, no exaggerated muscles, and no muscles printed, quilted or shaded onto stretch fabric.${state.gender === 'girl' ? ' No muscle-sculpted armour of any kind on this hero — no moulded abs, no six-pack panelling, no anatomical cuirass, no sculpted pectorals.' : ''} No floating science icons, holograms, formulas, gears or symbols in the air. No glossy plastic covering the whole suit. No cartoon, anime, CGI-render or painterly finish. No text, letters, numbers, logos or watermarks anywhere. No extra people, duplicated limbs, extra fingers, cropped shoes, or a blurred or altered face.`,
 
-direction ? `ART DIRECTION FOR THIS SPECIFIC PERSON (use it to sharpen the design, never to add clutter)
+direction ? `ART DIRECTION FOR THIS SPECIFIC PERSON (use only details consistent with the selected motifs, role and earned equipment; discard any unselected theme)
 ${String(direction).replace(/\s+/g,' ').trim()}` : '',
 
 motifFaceRule(),
@@ -4940,6 +4925,7 @@ AND THE FACE IS THE FACE FROM THE ATTACHED PHOTOGRAPH. Same eye spacing, same no
 const LEAN_FIELDS = [
   ['picture',  'THE PICTURE'],
   ['person',   'THE PERSON'],
+  ['hair',     'THE HAIRSTYLE'],
   ['garment',  'THE GARMENT'],
   ['motif',    'THE MOTIF — WHAT THIS HERO IS BUILT TO LOOK LIKE'],
   ['head',     'THE HEAD'],
@@ -4954,6 +4940,8 @@ const LEAN_FIELDS = [
 async function askCinematographer(full){
   const instruction =
 `Below is a very long costume-and-photography rulebook for ONE poster of ONE student. It is long because it covers every case, argues with itself about which rule wins, and repeats its warnings. Your job is to READ ALL OF IT, resolve every conflict, and write the single short shooting brief that the rulebook is actually asking for.
+
+${motifSelectionRule()}
 
 You are writing FOR AN IMAGE MODEL. That means:
 - WRITE ONLY WHAT IS IN THE PICTURE. Never write about rules, priorities, failures, checks, or what to avoid. Do not write "make sure", "do not", "it must", "this outranks". Just describe the photograph as if it already exists.
@@ -4982,7 +4970,8 @@ ${state.photo ? `
 Output ONLY this JSON, nothing else:
 {
  "picture": "One sentence: what this photograph shows happening. Present tense. If the rulebook describes an action moment, this sentence IS that action. 1 sentence.",
- "person": "${state.photo ? 'The reference supplies the complete face, expression, gaze and head pose; do not describe or reinterpret any of them. Write only the body build and posture, plus hair styling outside the preserved hairline and temple/sideburn boundary. DESIGN A HAIRSTYLE for this hero: its cut, length, shape, volume, parting, texture, and any braids, ponytail, bun, topknot or slicked-back treatment are yours to choose, and it should suit the costume. Preserve the hair colour and the forehead hairline, and never let hair cover the face. End exactly: The face, expression, gaze and head angle are copied unchanged from the attached photograph.' : 'No photograph is attached. Describe an ordinary believable Korean student of the stated age — real build, real hair, an unremarkable real face, never a model. Then say what expression their face is making.'} 2-3 sentences.",
+ "person": "${state.photo ? 'The reference supplies the complete face, expression, gaze and head pose; do not describe or reinterpret any of them. Write only the body build and posture. Put hair styling in the separate hair field. End exactly: The face, expression, gaze and head angle are copied unchanged from the attached photograph.' : 'No photograph is attached. Describe an ordinary believable Korean student of the stated age — real build, real hair, an unremarkable real face, never a model. Then say what expression their face is making.'} 2-3 sentences.",
+ "hair": "${state.photo ? 'DESIGN A HAIRSTYLE for this hero, suited to the costume and motif. Describe only its cut, length, silhouette, volume, parting and texture, choosing a concrete treatment such as swept-back strands, braids or a ponytail. Preserve the photographed hair colour, natural forehead hairline and temple/sideburn face boundary; do not copy the everyday styling. Keep both eyes and the facial features visible. Do not describe facial features, expression, head pose, eyewear or body build. 1-2 sentences.' : 'No reference photograph is attached. Leave this field empty; the existing person and age rules supply the original student hairstyle.'}",
  "garment": "The clothing itself, up close: how it is layered and cut, where the seams, belts, cuffs, collar and fastenings sit, how thick and how stiff each surface is, and what it looks like where two different materials meet. Use the materials the student's experiments produced and no others. 3-4 sentences.",
  "motif": "How the motif's features and the four pieces of equipment become ONE object rather than a costume with gadgets attached — which shape absorbs which, where they share a seam, a mount or a colour. 2-3 sentences.",
  "head": "${noGlasses()
@@ -5132,7 +5121,7 @@ WHAT STAYS FIXED WHILE YOU DO IT: the forehead hairline, the forehead shape, the
 SKIN — real texture with pores and fine hairs; a temporary spot or shine may go; every mole, freckle, dimple and scar stays exactly where it is.
 NOT ALLOWED: slimming the face or jaw, enlarging the eyes, reshaping or darkening the brows, changing the teeth, smoothing the skin to plastic, evening out the two sides, or making them prettier, cuter or younger. Flatter them with LIGHT, HAIR and BEARING, never with BONE STRUCTURE. Age is carried by the body; no rule anywhere else on this page may change one measurement of this face.
 ${glasses}
-TEST: hold this beside the photograph — their family says "that's them" without hesitating.${wearsGlasses() ? ` THEN ONE MORE TEST, AND IT IS THE ONE THIS PICTURE KEEPS FAILING: look at the FRAMES alone. Everything above about copying the face still stands in full and the face itself is copied exactly — the frames are the single object on this head that is REBUILT. Same eyes, same bridge of the nose, same eye line, but the ordinary school or shop glasses have become hero goggles or a designed hero frame. If the frames still look like the glasses in the photograph, the eyewear has not been designed yet: rebuild the frames only, and change nothing about the face.` : ''}`;
+TEST: hold this beside the photograph — their family says "that's them" without hesitating.${wearsGlasses() ? ` THEN CHECK THE FRAMES: the face itself is preserved while the hairstyle and hero eyewear are designed for the costume. Same eyes, same bridge of the nose, same eye line, but the ordinary school or shop glasses have become hero goggles or a designed hero frame. If the frames still look like the glasses in the photograph, redesign them without changing the face beneath them.` : ''}`;
 }
 
 /* ② 나이 · 노출 */
@@ -5144,13 +5133,13 @@ ${A.adult ? '' : A.mAge >= 13 ? `
 THIS IS A TEENAGER — NOT A CHILD, AND NOT A GROWN ADULT. Both mistakes are easy, so build it deliberately:
 1. THE LIMBS ARE LONG, NOT SHORT. Floor to hip is about ${A.legHeads} head-heights of ${A.heads}, so the figure divides close to halfway and the legs read long. Do NOT shorten the arms or legs — that is exactly how a ${A.mAge}-year-old turns into a small child.
 2. LEAN AND LIGHTLY BUILT. A slim frame with real but unbulked muscle, ${A.mAge >= 16 ? 'shoulders close to adult width but without the mass of a heavy adult build' : 'shoulders only just beginning to widen'}, a flat straight torso, and hands and feet already near adult size.
-3. ${state.photo ? 'THE HEAD IS NOT REDRAWN, RESHAPED OR RESIZED. Take the photographed head exactly as it is, place it at full size, and build the body underneath it to the measurements here. If the figure reads wrong, fix the BODY — never the head.' : 'The head is only a shade large for the frame, barely past adult proportion.'}
+3. ${state.photo ? 'THE FACIAL FEATURES AND HEAD POSE ARE PRESERVED. Keep the photographed facial geometry, expression, gaze and head angle while building the body to the measurements here. Hair styling and hero eyewear follow their separate design rules. If the age or proportions read wrong, fix the BODY, never the facial features.' : 'The head is only a shade large for the frame, barely past adult proportion.'}
 THE CHECK: cover the face and look only at the body — a stranger must guess about ${A.mAge}: neither a small child nor a thirty-year-old.` : `
 ★ THE PHOTOGRAPH IS ONLY THE FACE — IT DOES NOT DECIDE THE BODY OR THE FRAMING. Height, build, limb length and proportion come from the numbers above, even if the person in the photo looks older or taller. And however the reference is cropped, this picture is FULL-LENGTH: clear air above the head down to the soles of both boots.
 BUILD THE PROPORTIONS FIRST — a child is a DIFFERENT SHAPE, not a smaller adult, and left alone you will draw a young adult and shrink it.
 1. SHORT LIMBS, ARMS AND LEGS BOTH. Floor to hip is only about ${A.legHeads} head-heights of ${A.heads} — less than half the figure — while head plus torso is about ${A.upperHeads}, more than half. Hanging straight down, the fingertips reach only the upper thigh and the elbow sits at the waist. Arms are even in thickness, no forearm taper, no bicep.
 2. ${state.photo
-  ? `THE HEAD IS NOT REDRAWN, RESHAPED OR RESIZED IN ITSELF. Take the photographed head exactly as it is, place it at full size, and build the body underneath it to the measurements here. What makes this figure read as a child is the SHORT LEGS, the narrow shoulders and the even limbs — never anything done to the head. If the proportion still looks off, make the BODY smaller. Never round the cheeks, shrink the chin, enlarge the eyes, raise the forehead or widen the cranium: every measurement inside this head is the photograph's.`
+  ? `THE FACIAL FEATURES AND HEAD POSE ARE PRESERVED. Keep the photographed facial geometry, expression, gaze and head angle while building the body to the measurements here. Hair styling and hero eyewear follow their separate design rules. What makes this figure read as a child is the SHORT LEGS, the narrow shoulders and the even limbs. If the proportion still looks off, make the BODY smaller. Never round the cheeks, shrink the chin, enlarge the eyes, raise the forehead or widen the cranium.`
   : `THE HEAD IS BIG — ${A.headsEn}, slightly too large for the body, and that wrongness IS the childness. Draw the head first at full size and fit the body under it.`}
 3. NARROW SHOULDERS — about two head-widths, no deltoid caps, no V-taper; the body runs straight from armpit to hip with no waist.
 4. SHORT THIN NECK, small hands and feet with short blunt fingers, slim even limbs with no adult muscle.
@@ -5194,7 +5183,7 @@ LIGHT: ${low
    그래서 함수로 빼 둔다. buildLeanPrompt 와 tightenPrompt 가 같은 것을 쓴다. */
 function faceCheckTail(){
   if(!state.photo) return '';
-  return `★ THE FACE — CHECK THIS LAST AND CHECK IT HARDEST. Hold the finished head beside the attached photograph: pupil distance against face width, eye height between chin and crown, nose length, mouth width, cheekbone-to-jaw ratio, chin shape, preserved hairline and temple/sideburn boundary. The photographed expression, gaze, visible teeth and exact head yaw, pitch and roll also match. Outside that locked boundary the hair may be a completely different, deliberately styled cut; only its colour and the boundary around the face do not move. Cover the eyes on both pictures and compare the cheeks, nose base, mouth, jawline and chin. ALSO ASK THE BLUNT QUESTION: is this the same ethnicity, the same skin tone and the same hair colour as the photograph? If a different-looking person has appeared — especially a Western or Caucasian face — throw the image away and rebuild it from the photograph. If any feature, expression or angle has drifted, put the photographed head back and rebuild the picture around it, never the other way round. ${wearsGlasses()
+  return `★ THE FACE — CHECK THIS LAST AND CHECK IT HARDEST. Hold the finished face beside the attached photograph: pupil distance against face width, eye height between chin and natural hairline, nose length, mouth width, cheekbone-to-jaw ratio, chin shape, preserved hairline and temple/sideburn boundary. The photographed expression, gaze, visible teeth and exact head yaw, pitch and roll also match. Outside that locked boundary the hair is deliberately restyled for this hero; only its colour and the boundary around the face do not move. Cover the eyes on both pictures and compare the cheeks, nose base, mouth, jawline and chin. ALSO ASK THE BLUNT QUESTION: is this the same ethnicity, the same skin tone and the same hair colour as the photograph? If a different-looking person has appeared — especially a Western or Caucasian face — restore the photographed facial features and head pose. If any feature, expression or angle has drifted, correct that identity region without reverting the new hairstyle or hero eyewear. ${wearsGlasses()
   ? 'AND THE EYEWEAR: it is the newly designed hero frame from the FACE section, NOT the glasses in the photograph — if it still looks like the everyday pair they wear, rebuild it. Its lenses are clear and both eyes are fully visible and unchanged behind them.'
   : 'The eyes remain free of new eyewear, exactly as the photograph shows. Any photographed glasses or goggles already pushed up into the hair, forehead or crown remain at their exact original shape and position.'}`;
 }
@@ -5262,7 +5251,7 @@ THE MOTIF'S REAL-WORLD COLOURS GO WHERE THEY REALLY ARE, with its real surface: 
 ${relocate}
 Still a real person in a built costume — human face, human hands, real fabric and plate, never a mascot suit.
 THE CHEST EMBLEM, IF THERE IS ONE, IS ${two ? `${NM(0)}${motifNameHint(NM(0))} OR ${NM(1)}${motifNameHint(NM(1))}` : NM(0) + motifNameHint(NM(0))} AND NOTHING ELSE: the motif's unmistakable silhouette, head or key physical structure sculpted in relief, with enough real parts that a stranger names the motif from across a room. NOT a card suit, shield, star, lightning bolt, hexagon, circle, abstract badge, letter, initial, monogram or name. If it cannot depict the motif clearly, leave the chest plain.
-QUIZ QUALITY CHANGES CRAFT ONLY, NEVER MOTIF IDENTITY OR PRESENCE: at the lowest level every required feature above stays full-size, in its real colours and completely recognisable, but is cut from cardboard, craft foam and offcuts with wavy edges, visible tape and uneven hand paint. At higher levels the SAME shapes are refined rather than replaced.${b && b.motif ? `\nADDITIONAL FUSION GEOMETRY ONLY — use this to join the named shapes, but ignore any finish or grade language in it: ${b.motif}` : ''}`;
+QUIZ QUALITY CHANGES CRAFT ONLY, NEVER MOTIF IDENTITY OR PRESENCE: at the lowest level every required feature above stays full-size, in its real colours and completely recognisable, but is cut from cardboard, craft foam and offcuts with wavy edges, visible tape and uneven hand paint. At higher levels the SAME shapes are refined rather than replaced.${b && b.motif ? `\nADDITIONAL FUSION GEOMETRY ONLY — join the selected shapes; ignore any unselected motif and any finish or grade language in this suggestion: ${b.motif}` : ''}`;
 }
 
 /* ⑤ 실험 장비 4개 */
@@ -5446,6 +5435,7 @@ function buildLeanPrompt(b){
      결과를 만들었다. 각 규칙은 이제 한 곳에서만 말한다. */
   return [
     openingLine(n),
+    motifSelectionRule(),
     leanHeadline(),
     leanFace(),
     leanMotif(b),
@@ -5462,13 +5452,14 @@ function buildLeanPrompt(b){
     leanShot(b, n),
     leanQuality(n),
     leanBody(),
+    state.photo && b.hair ? `THE HAIRSTYLE: ${b.hair}\nThis styles the hair only; the photographed facial features, expression, gaze, head pose, hair colour and natural hairline remain unchanged.` : '',
     leanGender(n),
     leanMission(),
     leanGarment(b),
     /* ★ 헬멧 규칙도 규칙집에만 있고 그림 프롬프트에는 없었다 — 안경과 똑같은 누락이었다.
        그래서 모델은 늘 맨머리나 작은 크레스트로 갔다. 짧게 여기에 붙인다. */
     `HEADGEAR — LET THE MOTIF DECIDE, AND DO NOT DEFAULT. If the motif has a head worth building — a crested bird, a horned or antlered animal, a shelled or armoured creature, a rider, a diver, a pilot, a machine — then BUILD THE HELMET, because that is where the motif reads best. If the motif lives in the body instead, a crown or back crest, a circlet, a brow band or a bare head is the better answer.
-${state.photo ? `WHENEVER A HELMET IS BUILT IT IS OPEN-FACED, WORN THE WAY A CAP IS WORN: on the crown and the back of the head, beginning behind the preserved hairline, with NO faceplate, NO chin bar, NO cheek guards, NO muzzle and nothing hinged down over the eyes. Everything from the eyebrows down is bare face. A closed helmet is the one thing never built here — the helmet is welcome, the faceplate is not.` : 'A helmet may be closed or open, but the mouth and jaw stay readable.'}`,
+${state.photo ? `WHENEVER A HELMET IS BUILT IT IS OPEN-FACED, WORN THE WAY A CAP IS WORN: on the crown and the back of the head, beginning behind the preserved hairline, with NO faceplate, NO chin bar, NO cheek guards, NO muzzle and nothing hinged down over the eyes. ${wearsGlasses() ? 'The face stays uncovered except for the redesigned hero eyewear, with clear lenses and both eyes visible.' : 'Everything from the eyebrows down is bare face.'} A closed helmet is the one thing never built here — the helmet is welcome, the faceplate is not.` : 'A helmet may be closed or open, but the mouth and jaw stay readable.'}`,
     `THE HEAD: ${b.head || ''}${state.photo ? (wearsGlasses()
       ? ` Headgear stays on the crown and back behind the preserved hairline. This hero wears the redesigned hero eyewear specified in the FACE section at the photographed eye position — a new frame designed for this costume, never the glasses from the photograph — with clear lenses and both eyes fully visible behind them. No mask, no full-face visor, no second optical object.`
       : ' Headgear stays on the crown and back behind the preserved hairline. The whole face, eyes and eyebrows are bare and lit, with no new glasses, goggles, visor, mask or optical object over them. Any photographed glasses or goggles already pushed into the hair or crown stay at their exact original shape and position and are never moved down.')
@@ -5476,7 +5467,7 @@ ${state.photo ? `WHENEVER A HELMET IS BUILT IT IS OPEN-FACED, WORN THE WAY A CAP
     `COLOUR: ${state.palette || b.colour || ''}${
       state.gender === 'girl' ? '\nIts lightest, clearest tints become the pink and gold accents, and the field of the suit stays white, ivory, cream or pearl whatever the scheme names.'
     : state.gender === 'boy' ? '\nIts deepest tone becomes the field, its metal becomes hard dark metal, and only its brightest colour survives as the single thin hot accent.'
-    : ''}${state.signature ? `\nTHE MEMORABLE DETAIL: ${state.signature} — a complete recognisable physical object whose workmanship follows the exact zone carrying it. ${gearList().some(x=>x.ok===false) ? 'If it sits in a ROUGH zone it has hand-cut edges, visible tape or simple fasteners, uneven motif-colour paint and honest classroom hand-work; only a FINISHED or SHOWCASE zone may give it clean engineered edges, and this line never upgrades a rough zone.' : 'It has clean engineered edges, proper fasteners and honest wear.'}` : ''}`,
+    : ''}${state.signature ? `\nTHE MEMORABLE DETAIL (selected motifs and earned equipment only; ignore any unselected theme in this suggestion): ${state.signature} — a complete recognisable physical object whose workmanship follows the exact zone carrying it. ${gearList().some(x=>x.ok===false) ? 'If it sits in a ROUGH zone it has hand-cut edges, visible tape or simple fasteners, uneven motif-colour paint and honest classroom hand-work; only a FINISHED or SHOWCASE zone may give it clean engineered edges, and this line never upgrades a rough zone.' : 'It has clean engineered edges, proper fasteners and honest wear.'}` : ''}`,
     `COVERAGE: one opaque full-coverage bodysuit runs from a closed high neck to the wrists and the ankles, and every plate, harness, strap, cable and pouch is mounted on top of it. The only skin in this picture is the face and the neck above the collar. Nothing sleeveless, nothing cut away, nothing sheer, nothing rolled up.`,
     `A REAL PHOTOGRAPH: fabric with real weight and wrinkles, panels with visible thickness and honest edges, functional seams, used boots and gloves, believable contact shadows, shallow depth of field, faint grain, one light direction and one white balance throughout. The whole figure is in frame, from clear air above the head to the soles of both boots.
 NOT IN IT: text, letters, initials, monograms or the hero's name anywhere including on the chest emblem; card suits (spade, heart, diamond, club), stars, lightning bolts, shields or any abstract geometric badge on the chest; logos or watermarks; floating icons, holograms or formulas; plastic airbrushed skin; cartoon, anime or CG-render finish; extra people, duplicated limbs, extra fingers, cropped shoes; bare skin other than the face and neck.${state.shot === 'activate' ? `
@@ -5654,6 +5645,9 @@ async function askDirector(){
 무난한 검은 전술복은 실패다. 탐험대나 군인처럼 보여도 실패다. 한눈에 히어로로 보여야 한다.
 아래 모티브와 장비에서 실제로 끌어낸, 이 학생만의 조합을 만들어라. 모티브가 무엇인지 그림만 보고 알아볼 수 있어야 한다.
 
+${motifSelectionRule()}
+선택한 모티브의 원문과 순서를 기준으로 모든 항목을 작성한다. 선택하지 않은 동물·사물·자연 현상을 새 모티브로 보태거나, 선택한 것을 다른 것으로 대체하지 마라.
+
 설정
 - 이름: ${cleanName(state.name)}
 - 히어로 유형: ${(GENDERS.find(g=>g.id===state.gender)||{}).ko || '상관없음'}
@@ -5669,15 +5663,15 @@ async function askDirector(){
   하는 일과 성격은 캡션이 아니라 그림에 보여야 한다. 아무 설명 없이 그림만 봐도
   이 히어로가 무슨 일을 하는 사람인지, 어떤 성격인지 짐작할 수 있어야 한다.
 - 닮고 싶은 모티브: ${allMotifs().join(', ') || '없음'}
-  (동물만이 아니라 화산·번개·기관차 같은 자연 현상이나 사물일 수도 있다.)${allMotifs().length>=2?`
+  (선택한 대상은 동물뿐 아니라 자연 현상이나 사물일 수도 있다.)${allMotifs().length>=2?`
   ★ 모티브를 두 개 골랐다. 둘 다 한눈에 알아볼 수 있어야 한다. 첫 번째가 전체 실루엣과 ${state.photo ? '사진의 헤어라인 뒤쪽 왕관·뒤통수 및 목·어깨 구조' : '마스크'}와 주 색을 정하고,
   두 번째는 장식이 아니라 몸의 두 계통(등·어깨 / 팔·장갑 / 다리·부츠 중 둘)을 통째로 가져가 자기 색과 자기 질감으로 채우고,
   머리에도 알아볼 수 있는 특징 하나를 남기고, 자기 장비를 따로 하나 갖는다.
   아무것도 모르는 사람이 그림만 보고 2가지를 모두 말할 수 있어야 한다. 하나만 보이면 실패다.`:''}
   모티브는 색만 빌려 오는 게 아니다. 그 존재가 '실제로 무엇으로 유명한지'를 생각해라.
-  복어면 몸을 부풀리고 독을 가진 것, 반딧불이면 열 없는 빛, 화산이면 오래 참았다가 한 번에 터지는 것.
+  선택한 대상의 실제 모습과 대표 특징을 골라라. 선택하지 않은 대상의 특징을 빌려 오지 마라.
   그 특징이 옷과 장비에 눈에 보이게 나타나야 한다.
-  몸의 상징 부위(전갈의 꼬리, 원숭이의 꼬리, 복어의 가시, 사슴의 뿔)는 반드시 살리되,
+  선택한 대상에 실제로 있는 상징 부위는 반드시 살리되,
   인형 탈이 아니라 '기계로 만든 장비'로 — 관절 달린 장갑 꼬리, 갈고리 달린 케이블 꼬리,
   솟아오르는 성형 가시 스터드처럼 실제로 작동할 것 같은 물건으로 만들어라.
 - 직접 한 실험으로 얻은 장비: ${gear}
@@ -5736,8 +5730,8 @@ heroName 규칙 — 이게 가장 중요하다.
  "tagline": "영화 포스터 카피 한 줄. 14자 이내 한글. 예: 세상에서 가장 단단한 아이",
  "roleEn": "위 '하는 일'을 영어 한 구절로. 예: front-line disaster rescue worker",
  "traitsEn": "위 '성격'을 영어 한 구절로. 예: calm, level-headed leader",
- "motifsEn": "위 '닮고 싶은 모티브'를 영어 이름으로. 하나도 빠뜨리지 말 것. 쉼표로 구분. 없으면 빈 문자열. 예: seahorse, praying mantis, volcano.\n  ★★ 동음이의어를 반드시 가려서 옮겨라. 한국어에는 소리가 같고 뜻이 다른 말이 아주 많고, 여기서 한 번 잘못 옮기면 학생은 자기가 고른 것과 전혀 다른 그림을 받는다. 이 칸이 그림의 출발점이므로 여기서 틀리면 되돌릴 방법이 없다.\n  가리는 방법: ① 학생이 함께 적은 다른 모티브·하는 일·성격을 근거로 어느 뜻인지 판단한다. ② 그래도 갈리면 아이가 히어로 모티브로 고를 만한 쪽을 고른다(동물·자연·힘 쪽이 대개 맞다). ③ 뜻이 정해지면 영어를 **애매하지 않은 낱말로** 적는다. 한 단어가 영어에서도 두 뜻이면 수식어를 붙여 못박아라.\n  자주 틀리는 것들: 밤 → night(시간) 또는 chestnut(견과) / 배 → ship 또는 pear 또는 belly / 눈 → eye 또는 snow / 말 → horse 또는 speech / 차 → car 또는 tea / 벌 → bee 또는 punishment / 새 → bird / 김 → laver·seaweed 또는 steam / 다리 → leg 또는 bridge / 굴 → oyster 또는 cave / 사과 → apple 또는 apology / 별 → star / 불 → fire / 종 → bell 또는 species / 상어 → shark / 전기 → electricity(전기가오리 electric ray 와 헷갈리지 말 것) / 볼트 → volt(전압) 이며 bolt(나사)가 아님 / 인치 · 미터 같은 단위어 / 자석 → magnet / 태풍 → typhoon.\n  영어에서도 갈리는 것들은 이렇게 못박아라: bat → 동물이면 'bat (the flying mammal)', 야구면 'baseball bat' / crane → 새면 'crane (the wading bird)', 기계면 'construction crane' / seal → 동물이면 'seal (the marine mammal)', 도장이면 'wax seal' / mouse, ram, jaguar, mustang, cricket, mole, pitcher 도 같은 방식으로.\n  예: 학생이 '밤'이라고만 적고 다른 모티브가 '올빼미'라면 → night. '다람쥐'와 함께 적었다면 → chestnut. 판단 근거가 된 다른 모티브를 스스로 확인하고 정할 것.",
- "motifCues": "모티브마다 한 줄씩. 형식은 정확히 '영어이름|LOOK|POWER'. ★ 이 칸이 이 학생의 히어로가 남들과 달라지는 거의 전부다. 대충 쓰면 '동물 색만 칠한 평범한 슈트'가 나온다. 규칙: 먼저 그 대상 하면 누구나 떠올리는 대표 특징 3가지를 스스로 정해라(분류학적 설명 말고, 아이가 아는 것). LOOK 은 그 특징을 옷의 구체적인 부위에, 실제 윤곽·색·무늬·표면으로 옮긴 영어 한 문장이다. POWER 는 실제 유명한 능력과 손으로 조작하는 물리 장비를 잇는다. 가슴 뱃지·로고·그림·작은 모형은 금지한다.${state.photo ? ' 사진이 있으므로 LOOK/POWER 어디에도 얼굴·눈·눈썹·이마·콧등·입·턱·마스크·바이저를 쓰지 마라. 얼굴 특징은 삭제하지 말고 보존된 헤어라인 뒤의 왕관/뒤통수 또는 목·어깨·등·팔 장비로 옮겨라. 안경을 쓴 학생이면 안경은 히어로용으로 새로 디자인해도 되고, LOOK 에 프레임 형태를 써도 된다. 다만 렌즈는 투명하게 두어 두 눈이 사진 그대로 보이게 하고, 마스크나 얼굴 전체 바이저로 만들지 마라.' : ''} 여러 줄이면 줄바꿈으로 구분.",
+ "motifsEn": "선택한 모티브만 원래 순서대로 영어로 옮긴 참고용 목록. 쉼표로 구분하며, 선택이 없으면 빈 문자열. 다른 모티브를 추가하거나 선택을 대체하지 않는다. 동음이의어는 함께 선택한 모티브와 학생이 적은 설정에 맞게 해석한다. 이 번역이 선택 원문을 바꾸지는 않는다.",
+ "motifCues": "모티브마다 한 줄씩. 형식은 정확히 '선택한 원문|LOOK|POWER'. 첫 칸은 위 선택 목록의 이름을 번역하거나 바꾸지 말고 그대로 적는다. LOOK과 POWER만 영어로 작성한다. ★ 이 칸이 이 학생의 히어로가 남들과 달라지는 거의 전부다. 대충 쓰면 '동물 색만 칠한 평범한 슈트'가 나온다. 규칙: 먼저 그 대상 하면 누구나 떠올리는 대표 특징 3가지를 스스로 정해라(분류학적 설명 말고, 아이가 아는 것). LOOK 은 그 특징을 옷의 구체적인 부위에, 실제 윤곽·색·무늬·표면으로 옮긴 영어 한 문장이다. POWER 는 실제 유명한 능력과 손으로 조작하는 물리 장비를 잇는다. 가슴 뱃지·로고·그림·작은 모형은 금지한다.${state.photo ? ' 사진이 있으므로 LOOK/POWER 어디에도 얼굴·눈·눈썹·이마·콧등·입·턱·마스크·바이저를 쓰지 마라. 얼굴 특징은 삭제하지 말고 보존된 헤어라인 뒤의 왕관/뒤통수 또는 목·어깨·등·팔 장비로 옮겨라. 안경을 쓴 학생이면 안경은 히어로용으로 새로 디자인해도 되고, LOOK 에 프레임 형태를 써도 된다. 다만 렌즈는 투명하게 두어 두 눈이 사진 그대로 보이게 하고, 마스크나 얼굴 전체 바이저로 만들지 마라.' : ''} 여러 줄이면 줄바꿈으로 구분.",
  "palette": "이 히어로만의 색 배합을 영어 한 문장으로. 반드시 위에 적힌 모티브의 실제 색에서 끌어낼 것. 주 색 2가지 + 강조색 1가지. 남색·청록·금색 조합은 금지. 예: burnt sienna and bone white with a single electric-lime accent",
  "signature": "이 히어로를 한 번 보면 기억하게 만드는 시각적 특징 한 가지. 영어 한 문장. 반드시 모티브에서 끌어내고, 옷 어디에 어떻게 붙어 있는지까지 말할 것.${state.photo ? ' 얼굴·눈·눈썹·이마·콧등·입·턱·바이저·마스크에는 절대 두지 말고, 보존된 헤어라인 뒤 왕관/뒤통수 또는 목 아래 부위에 둔다. 안경을 쓴 학생이라면 새로 디자인된 히어로 안경의 프레임 자체를 시그니처로 삼아도 되지만, 렌즈는 투명하고 두 눈은 그대로 보여야 한다.' : ''} 예: a segmented mantis-fold forearm shield that stows flat along the arm",
  "gear": ["위 '각 장비가 실제로 하는 일' 1번을 다듬은 한글 문장", "2번을 다듬은 문장", "3번", "4번"],

@@ -110,7 +110,7 @@ window.PHASE_PREVIEWS = {
     },
     "hero-maker": {
       "src": "assets/previews/hero-maker-e8f9e2cea7.webp",
-      "sourceHash": "e564059aafa9216d33f862b26e1ed1422550ab95f1924c5e7391f7c19a11ef3b",
+      "sourceHash": "ec562a9fe3c47ac0bd35d67fd10297a37de54251ef61523b9cad2cea13f7e91e",
       "bytes": 23144
     },
     "newton-rush": {

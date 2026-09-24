@@ -418,7 +418,7 @@ window.EXPERIMENTS_DATA = {
       "title": "히어로 만들기",
       "icon": "🛡️",
       "description": "실험실을 돌며 고른 물리 원리로 나만의 과학 히어로를 설계하고, 사진을 찍어 히어로 포스터까지 완성하는 활동입니다.",
-      "path": "plays/hero-maker.html?v=31a308fdf9",
+      "path": "plays/hero-maker.html?v=c8d164a66b",
       "date": "2026-09-02",
       "tags": [
         "히어로",
