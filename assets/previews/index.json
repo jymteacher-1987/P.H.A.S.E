@@ -95,7 +95,7 @@
     },
     "rutherford-scattering": {
       "src": "assets/previews/rutherford-scattering-428b0fc1d9.webp",
-      "sourceHash": "ff3480e897385258b4d9f733b337be39d6c039fe5d79d75d4cd1e54cdf3a6fda",
+      "sourceHash": "2e159ee369d784863cafc9bdbea941c06f085e93e7cc84d02b0c9b8f534339b8",
       "bytes": 19588
     },
     "bernoulli-principle": {
@@ -109,9 +109,9 @@
       "bytes": 21916
     },
     "hero-maker": {
-      "src": "assets/previews/hero-maker-e8f9e2cea7.webp",
-      "sourceHash": "a53951a8f7127e6b4447ae5944ade60e5bea1c4cdfc0a9a9dfc5714151c9c1c2",
-      "bytes": 23144
+      "src": "assets/previews/hero-maker-340c30230e.webp",
+      "sourceHash": "5cd5bdb7ec167498608a7f41d1c30b98526efb6039c5ee76531e4d58ffd03e66",
+      "bytes": 25256
     },
     "newton-rush": {
       "src": "assets/previews/newton-rush-ba99bf92a4.webp",
@@ -120,7 +120,7 @@
     },
     "physics-fighter": {
       "src": "assets/previews/physics-fighter-59cc170959.webp",
-      "sourceHash": "10fef4de60d07805dc6ac4b47ab9b0561e3ec8bb4070635c6a9eba78b7160ee3",
+      "sourceHash": "f87dbe89e6fe8f597de0e8909ec1a8f212a417720f8675176f7c4b2449a1ca88",
       "bytes": 51986
     },
     "giants-shoulders": {
@@ -150,7 +150,7 @@
     },
     "bamti-escape": {
       "src": "assets/previews/bamti-escape-66cb492db3.webp",
-      "sourceHash": "9cc08e78d4d57b0251d01324474b7d487a34c5fd8db216cfd0ef358c2657d136",
+      "sourceHash": "aa2698bd6d58e240bb33c362711daf92bf493d8dc977088a8ba4046b1e8e129b",
       "bytes": 22542
     }
   }
