@@ -107,3 +107,26 @@ test('the hit counter reports recent wall impacts per second', () => {
   run(sim, 4);
   assert.ok(sim.hitRate() < restRate * 0.6);
 });
+
+test('at the medium setting molecules collide and every one of them is carried to the right', () => {
+  const sim = simulation(40), dt = 1 / 120, drift = 200 * 40 / 100;
+  const start = sim.snapshot().points, sumUx = points => points.reduce((sum, p) => sum + p.ux, 0);
+  const sumAbsUy = points => points.reduce((sum, p) => sum + Math.abs(p.uy), 0);
+  const moved = new Array(start.length).fill(0);
+  let windows = 0, backward = 0, last = moved.slice();
+  for (let frame = 1; frame <= 12 * 120; frame++) {
+    sim.velocities().forEach((velocity, i) => { moved[i] += velocity.vx * dt; });
+    sim.step(dt);
+    if (frame % 240 === 0) {
+      moved.forEach((x, i) => { windows++; if (x - last[i] <= 0) backward++; });
+      last = moved.slice();
+    }
+  }
+  const end = sim.snapshot().points;
+  assert.ok(end.some((p, i) => p.ux !== start[i].ux), 'molecules change direction by colliding');
+  close(sumUx(end), sumUx(start), 1e-9);
+  close(sumAbsUy(end), sumAbsUy(start), 1e-9);
+  assert.ok(moved.every(x => x > 0), 'no molecule keeps moving against the flow');
+  close(moved.reduce((sum, x) => sum + x, 0) / moved.length, drift * 12, 1e-6);
+  assert.ok(backward / windows < 0.02, 'over two seconds almost every molecule moves right: ' + backward / windows);
+});

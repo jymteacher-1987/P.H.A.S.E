@@ -76,8 +76,8 @@
 (() => {
   const $=id=>document.getElementById(id),canvas=$('scene'),ctx=canvas.getContext('2d');
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const RHO=1.2,TOTAL_PRESSURE=100,MAX_SPEED=12,THERMAL_SPEED=180,DRIFT_SPEED=200,DRAWN_BASE=4,HIT_WINDOW=3;
-  const state={strength:0,paused:reduced,time:0,points:[],flashes:[],hits:[],collisionCount:0};
+  const RHO=1.2,TOTAL_PRESSURE=100,MAX_SPEED=12,THERMAL_SPEED=180,DRIFT_SPEED=200,DRAWN_BASE=4,HIT_WINDOW=3,COLLISION_TIME=.08;
+  const state={strength:0,paused:reduced,time:0,points:[],flashes:[],hits:[],collisionCount:0,swaps:0};
   let width=600,height=270,dpr=1,last=null;
   // The gauge uses Bernoulli with a fixed total gauge pressure.
   // Every molecule shares one drift, the flow speed v; only the random part reaches the walls.
@@ -95,7 +95,7 @@
   function rng(seed){return()=>{seed=(1664525*seed+1013904223)>>>0;return(seed+.5)/4294967296;};}
   let random=rng(31927);
   function seed(){
-    random=rng(31927);state.time=0;state.flashes=[];state.hits=[];state.collisionCount=0;
+    random=rng(31927);state.time=0;state.flashes=[];state.hits=[];state.collisionCount=0;state.swaps=0;
     state.points=[];
     // Balanced quadrants give zero mean flow at rest, without speed outliers.
     for(let i=0;i<24;i++){
@@ -108,6 +108,20 @@
   function particleVelocity(p){
     const m=model(),thermal=THERMAL_SPEED*m.random;
     return {vx:DRIFT_SPEED*m.v/MAX_SPEED+thermal*p.ux,vy:thermal*p.uy};
+  }
+  // Molecules also collide with one another. Two molecules of equal mass can exchange velocities
+  // in an elastic collision, so swapping their random directions keeps the same set of directions
+  // (zero mean flow at rest, the same wall hits) while no molecule keeps moving against the flow:
+  // within a second or two every molecule is carried along by the shared drift.
+  function collide(dt){
+    const n=state.points.length;
+    state.swaps+=dt*n/(2*COLLISION_TIME);
+    while(state.swaps>=1){
+      state.swaps-=1;
+      const a=state.points[Math.floor(random()*n)],b=state.points[Math.floor(random()*n)];
+      if(a===b)continue;
+      const ux=a.ux,uy=a.uy;a.ux=b.ux;a.uy=b.uy;b.ux=ux;b.uy=uy;
+    }
   }
   function update(){
     const m=model(),s=state.strength;
@@ -142,6 +156,7 @@
         state.hits.push(state.time-dt+hitAt);
       }
     }
+    collide(dt);
     state.flashes=state.flashes.filter(f=>state.time-f.time<.3);
     state.hits=state.hits.filter(time=>state.time-time<HIT_WINDOW);
   }
