@@ -296,27 +296,29 @@ function update(dt){
   if (state.auto){ state.autoT += dt; applyAuto(); }
   clampPositions();
 
-  /* 속도: 마우스(프레임 간) + 키보드/자동(프레임 내) 모든 변위를 합산 */
+  /* 실제 속도는 마우스·키보드·자동 운동의 프레임 변위에서 구한다.
+     화살표용 평활화 값은 물리 계산에 사용하지 않는다. */
+  var vM = (state.xM - xMp)/dt, vC = (state.xC - xCp)/dt;
   var a = Math.min(1, dt*12);
-  state.vM += ((state.xM - xMp)/dt - state.vM) * a;
-  state.vC += ((state.xC - xCp)/dt - state.vC) * a;
+  state.vM += (vM - state.vM) * a;
+  state.vC += (vC - state.vC) * a;
   state.prevXM = state.xM;
   state.prevXC = state.xC;
 
-  /* 패러데이 법칙 (해석적 유도): ε = -dΦ/dt 
-     코일 양 끝단에서의 자기장 세기 차이와 상대 속도로 즉각적이고 정확한 기전력 계산
-     (수치 적분과 스무딩으로 인한 중심점 통과 시의 위상 지연 완벽 해결) */
+  /* 패러데이 법칙: ε = -dλ/dt.
+     저항만 있는 이 모형에서는 상대 운동이 멈추면 기전력과 전류도 0이다.
+     전구 잔광·검류계 바늘의 반응은 아래에서 별도로 완화한다. */
   var xR = state.xC + state.Lpx/2 - state.xM;
   var xL = state.xC - state.Lpx/2 - state.xM;
   var BR = magB(xR);
   var BL = magB(xL);
   var n = state.N / state.Lpx;
-  var vRel = state.vM - state.vC;
+  var vRel = vM - vC;
   
   var emf = vRel * n * (BR - BL);
   if (skipEmf) emf = 0;
   skipEmf = false;
-  state.emfS = emf; // 스무딩 제거, 물리적으로 완벽히 즉각 반응
+  state.emfS = emf;
   state.dLam = -state.emfS;
   state.lambda = computeLambda();
   state.prevLambda = state.lambda;

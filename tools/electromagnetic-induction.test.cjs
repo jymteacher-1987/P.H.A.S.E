@@ -12,6 +12,16 @@ window.__inductionTest = {
   snapshot: () => ({W, xM:state.xM, xC:state.xC, I:state.I,
     paused:state.paused, kind:state.autoRef && state.autoRef.kind}),
   place: (xM,xC) => {state.xM=xM; state.xC=xC; clampPositions(); startAuto(); setPaused(true);},
+  placeManual: (xM,xC) => {
+    stopAuto(); setPaused(true);
+    state.xM=xM; state.xC=xC; clampPositions();
+    state.prevXM=state.xM; state.prevXC=state.xC; state.vM=0; state.vC=0;
+    skipEmf=false;
+  },
+  manualStep: (magnetDelta,coilDelta) => {
+    state.xM+=magnetDelta; state.xC+=coilDelta; update(1/120);
+    return {xM:state.xM,xC:state.xC,I:state.I,emf:state.emfS,lambda:state.lambda};
+  },
   advance: seconds => {
     setPaused(true);
     const rows=[];
@@ -88,6 +98,27 @@ for (const engine of [chromium,webkit]) {
           for (const row of rows) {
             close(row.xC-row.xM,before.xC-before.xM,'resize must rebuild shared motion reference');
             close(row.I,0,'resize must not leave spurious relative velocity');
+          }
+        });
+        await t.test(`stationary flux gives zero emf immediately after either object stops (${width}px)`, async () => {
+          const W = (await page.evaluate(() => __inductionTest.snapshot())).W;
+          for (const [magnetDelta,coilDelta] of [[0.5,0],[0,0.5]]) {
+            await page.evaluate(W => __inductionTest.placeManual(W*.3,W*.62),W);
+            const {moving,stopped,later} = await page.evaluate(([dm,dc]) => {
+              let moving;
+              for(let i=0;i<20;i++) moving=__inductionTest.manualStep(dm,dc);
+              const stopped=__inductionTest.manualStep(0,0);
+              const later=__inductionTest.manualStep(0,0);
+              return {moving,stopped,later};
+            },[magnetDelta,coilDelta]);
+            assert.ok(Math.abs(moving.I)>1e-6, 'relative motion must first induce current');
+            for (const row of [stopped,later]) {
+              close(row.xM,moving.xM,'stationary magnet position');
+              close(row.xC,moving.xC,'stationary coil position');
+              close(row.lambda,moving.lambda,'stationary flux linkage');
+              close(row.emf,0,'stationary flux must immediately give zero emf');
+              close(row.I,0,'resistive circuit must immediately give zero current');
+            }
           }
         });
         assert.deepEqual(errors,[]);

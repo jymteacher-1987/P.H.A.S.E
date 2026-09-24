@@ -67,10 +67,10 @@ window.EXPERIMENTS_DATA = {
       "category": "mechanics",
       "description": "힘과 질량, 마찰 조건을 바꾸며 뉴턴의 세 운동 법칙을 확인합니다.",
       "lessonNote": {
-        "question": "같은 알짜힘이 작용할 때, 물체의 질량이 다르면 가속도는 어떻게 달라질까요?",
-        "focus": "제2법칙에서 알짜힘은 그대로 두고 질량만 바꿔, 가속도의 변화를 살펴보세요."
+        "question": "알짜힘에 따라 물체의 운동은 어떻게 달라지고, 두 물체가 주고받는 힘은 어떤 관계일까요?",
+        "focus": "제1법칙에서는 알짜힘이 0일 때의 운동을, 제2법칙에서는 알짜힘과 질량을 하나씩 바꾸며 가속도를 살펴보세요. 제3법칙에서는 두 물체가 주고받는 힘의 크기와 방향을 비교해 보세요."
       },
-      "path": "experiments/newton-laws.html?v=282848e582",
+      "path": "experiments/newton-laws.html?v=887e4135b8",
       "date": "2026-07-28",
       "tags": [
         "뉴턴",
@@ -84,8 +84,8 @@ window.EXPERIMENTS_DATA = {
       "category": "waves-optics",
       "description": "프리즘을 통과한 흰빛이 여러 색으로 분산되는 과정을 관찰합니다.",
       "lessonNote": {
-        "question": "흰빛이 프리즘을 지나면 왜 여러 색으로 나뉠까요?",
-        "focus": "색에 따라 빛이 꺾이는 정도가 어떻게 다른지 살펴보세요."
+        "question": "흰빛을 프리즘으로 나누고, 나뉜 빛을 다시 굴절시키거나 모으면 어떤 색이 나타날까요?",
+        "focus": "흰빛이 분산되는 모습을 본 뒤, 한 색으로 보이는 빛을 두 번째 프리즘에 통과시켜 보세요. ‘반원 유리로 모으기’에서는 스크린을 움직여 여러 색의 빛이 겹치는 모습도 확인해 보세요."
       },
       "path": "experiments/newton-prism.html?v=746507b7cd",
       "date": "2026-07-28",
@@ -170,7 +170,7 @@ window.EXPERIMENTS_DATA = {
       "description": "광원과 스크린을 움직이며 볼록 렌즈의 초점 거리를 찾습니다.",
       "lessonNote": {
         "question": "광원과 스크린의 위치를 재면 렌즈의 초점 거리를 알아낼 수 있을까요?",
-        "focus": "광원을 옮겨 선명한 상이 맺히는 위치를 기록하고, 그래프에서 초점 거리를 찾아보세요."
+        "focus": "먼 물체의 상으로 초점 거리를 어림해 보세요. 광원 위치를 고정하고 스크린만 움직여 선명한 상의 위치를 기록하세요. 여러 광원 위치에서 측정을 반복하고, 그래프로 초점 거리를 구해 보세요."
       },
       "path": "experiments/convex-lens-focus.html?v=b74396b5b9",
       "date": "2026-07-28",
@@ -189,7 +189,7 @@ window.EXPERIMENTS_DATA = {
         "question": "여러 색을 섞을 때 빛과 물감은 왜 서로 다른 결과를 낼까요?",
         "focus": "RGB와 CMY 슬라이더를 각각 움직여, 색을 섞을수록 밝아지는지 어두워지는지 비교해 보세요."
       },
-      "path": "experiments/rgb-cmy-light.html?v=f8ccdc0de7",
+      "path": "experiments/rgb-cmy-light.html?v=ea30cf2d82",
       "date": "2026-07-28",
       "tags": [
         "빛의 3원색",
@@ -239,7 +239,7 @@ window.EXPERIMENTS_DATA = {
       "description": "저항을 직렬·병렬로 연결하고 각 저항에 흐르는 전류와 양단의 전압을 측정합니다.",
       "lessonNote": {
         "question": "저항을 직렬과 병렬로 연결할 때, 각 저항의 전류와 전압은 어떻게 달라질까요?",
-        "focus": "직렬에서는 각 저항에 흐르는 전류가 같은지, 병렬에서는 각 가지에 걸리는 전압이 같은지 확인해 보세요."
+        "focus": "직렬에서는 전류가 같고 각 저항의 전압을 더하면 전체 전압이 되는지, 병렬에서는 전압이 같고 각 가지의 전류를 더하면 전체 전류가 되는지 확인해 보세요."
       },
       "path": "experiments/resistor-series-parallel.html?v=42e052d4db",
       "date": "2026-07-28",
@@ -256,10 +256,10 @@ window.EXPERIMENTS_DATA = {
       "category": "electromagnetism",
       "description": "코일과 자석의 상대 운동에 따른 전자기 유도 현상을 탐구합니다.",
       "lessonNote": {
-        "question": "자석과 코일의 간격과 방향을 유지한 채 함께 움직이면 유도 전류가 흐를까요?",
-        "focus": "자석만 움직일 때와 자석·코일이 함께 움직일 때를 비교해 보세요. 코일을 지나는 자기선속이 변하는지 생각하며 전류 표시와 전구를 살펴보세요."
+        "question": "어떤 조건에서 유도 전류가 생기며, 전류의 방향과 세기는 어떻게 달라질까요?",
+        "focus": "다른 조건은 일정하게 두고, 자석과 코일의 운동 방식·자석의 극·자석의 세기·코일의 길이·감은 수를 하나씩 바꿔 보세요. 간격과 방향을 유지하며 함께 움직이는 경우도 비교해, 자기선속의 변화와 전류의 관계를 살펴보세요."
       },
-      "path": "experiments/electromagnetic-induction.html?v=2b23e5f061",
+      "path": "experiments/electromagnetic-induction.html?v=018dfc25a2",
       "date": "2026-07-28",
       "tags": [
         "전자기유도",
@@ -399,8 +399,8 @@ window.EXPERIMENTS_DATA = {
       "category": "modern-physics",
       "description": "빛의 진동수와 광자 수, 전압을 바꾸며 광전자의 방출과 에너지 변화를 관찰합니다.",
       "lessonNote": {
-        "question": "빛의 세기를 높이거나 진동수를 높이면, 광전자의 수와 최대 운동 에너지는 각각 어떻게 달라질까요?",
-        "focus": "방출 조건을 확인한 뒤, 진동수를 고정하고 ‘들어오는 광자 수’를 늘려 보세요. 이어 광자 수를 고정한 채 진동수를 높여, 같은 시간 동안 방출되는 광전자 수와 최대 운동 에너지를 비교해 보세요."
+        "question": "광전자는 어떤 조건에서 방출되며, 방출된 광전자의 에너지와 광전류는 무엇에 따라 달라질까요?",
+        "focus": "진동수를 일정하게 두고, 단위 시간당 광자 수만 바꿔 보세요. 별도의 실험에서는 단위 시간당 광자 수를 일정하게 두고, 진동수만 바꿔 보세요. 방출 여부·최대 운동 에너지·광전류를 비교하고, 금속별 한계 진동수와 광전자가 방출될 때의 정지 전압도 찾아보세요."
       },
       "path": "experiments/photoelectric-effect.html?v=c7c7de26b7",
       "date": "2026-09-13",
@@ -419,7 +419,7 @@ window.EXPERIMENTS_DATA = {
       "title": "히어로 만들기",
       "icon": "🛡️",
       "description": "실험 원리로 나만의 히어로를 만들고 포스터를 완성합니다.",
-      "path": "plays/hero-maker.html?v=1e0a0941a5",
+      "path": "plays/hero-maker.html?v=fb895a1145",
       "date": "2026-09-02",
       "tags": [
         "히어로",

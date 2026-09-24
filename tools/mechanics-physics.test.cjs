@@ -119,3 +119,136 @@ test('edited experiment scripts remain syntactically valid', () => {
     }
   }
 });
+
+function newtonThirdLaw() {
+  const source = read('newton-laws');
+  const start = source.indexOf('  const Law3 = (function(){');
+  const end = source.indexOf('  })();', start) + '  })();'.length;
+  const code = source.slice(start, end).replace(
+    'return {resize,reset,update,draw,bind};',
+    'return {resize,reset,update,draw,bind,snapshot:()=>({...s})};');
+  const elements = new Map();
+  const document = {getElementById(id) {
+    if (!elements.has(id)) elements.set(id, {
+      value: id === 'l3-mA' ? '2' : id === 'l3-mB' ? '6' : '',
+      _w: 1280, _h: 340,
+      listeners: {}, classes: new Set(),
+      addEventListener(type, handler) { this.listeners[type] = handler; },
+      get classList() { return {add: key => this.classes.add(key), remove: key => this.classes.delete(key)}; }
+    });
+    return elements.get(id);
+  }};
+  const bindHold = (button, on, off) => { button.hold = on; button.release = off; };
+  const law = new Function('document', 'bindHold', code + ';return Law3;')(document, bindHold);
+  law.bind();
+  const button = document.getElementById('l3-push');
+  return {law, document, button, setMass(id, value) {
+    const input = document.getElementById(id);
+    input.value = String(value);
+    input.listeners.input();
+  }};
+}
+
+for (const phase of ['push', 'glide', 'paused glide']) {
+  test(`changing a third-law mass during ${phase} starts a fresh experiment`, () => {
+    const {law, document, button, setMass} = newtonThirdLaw();
+    button.hold();
+    law.update(0.4);
+    if (phase !== 'push') button.release();
+    if (phase === 'paused glide') document.getElementById('l3-pause').listeners.click();
+    assert.notEqual(law.snapshot().vA, 0);
+    setMass('l3-mA', 4);
+    const reset = law.snapshot();
+    assert.equal(reset.mA, 4);
+    assert.equal(reset.mB, 6);
+    assert.equal(reset.phase, 'idle', 'force arrows and old momentum result must disappear');
+    assert.equal(reset.paused, false);
+    for (const key of ['vA', 'vB', 'gA', 'gB', 'time']) close(reset[key], 0);
+    assert.equal(button.classes.has('active'), false);
+    button.release(); // A late release after changing the mass must not relaunch old motion.
+    assert.equal(law.snapshot().phase, 'idle');
+    setMass('l3-mB', 8);
+    button.hold();
+    law.update(0.4);
+    button.release();
+    const next = law.snapshot();
+    assert.equal(next.mA, 4);
+    assert.equal(next.mB, 8);
+    assert.equal(next.phase, 'glide');
+    close(next.mA * next.vA + next.mB * next.vB, 0);
+    assert.ok(next.vA < 0 && next.vB > 0);
+  });
+}
+
+test('third-law forces move both bodies while they are pushing', () => {
+  for (let mA = 1; mA <= 8; mA++) for (let mB = 1; mB <= 8; mB++) {
+    const {law, button, setMass} = newtonThirdLaw();
+    setMass('l3-mA', mA); setMass('l3-mB', mB);
+    button.hold(); law.update(0.4);
+    const s = law.snapshot(), time = 0.4 * 0.16;
+    assert.equal(s.phase, 'push');
+    close(s.time, time);
+    close(s.vA, -24 / mA * time); close(s.vB, 24 / mB * time);
+    close(s.gA, -.5 * 24 / mA * time * time);
+    close(s.gB, .5 * 24 / mB * time * time);
+    close(mA * s.vA + mB * s.vB, 0);
+    close(mA * s.gA + mB * s.gB, 0);
+  }
+});
+
+test('releasing the third-law push keeps exact velocities and continues at constant speed', () => {
+  const {law, button, setMass} = newtonThirdLaw();
+  setMass('l3-mA', 3); setMass('l3-mB', 7);
+  button.hold(); law.update(0.37);
+  const before = law.snapshot();
+  button.release();
+  const released = law.snapshot();
+  close(released.vA, before.vA); close(released.vB, before.vB);
+  close(released.gA, before.gA); close(released.gB, before.gB);
+  law.update(0.63);
+  const next = law.snapshot();
+  close(next.vA, before.vA); close(next.vB, before.vB);
+  close(next.gA, before.gA + before.vA * 0.63 * 0.16);
+  close(next.gB, before.gB + before.vB * 0.63 * 0.16);
+  close(next.time, 0.16);
+});
+
+test('holding past hand separation ends both forces without capping velocity', () => {
+  const {law, button, setMass} = newtonThirdLaw();
+  setMass('l3-mA', 1); setMass('l3-mB', 8);
+  button.hold(); law.update(5);
+  const s = law.snapshot();
+  const contactTime = Math.sqrt(2 * 0.36 / (24 / 1 + 24 / 8));
+  assert.equal(s.phase, 'glide');
+  assert.equal(button.classes.has('active'), false);
+  close(s.vA, -24 * contactTime); close(s.vB, 3 * contactTime);
+  assert.ok(Math.abs(s.vA) > 3, 'old arbitrary speed cap must not survive');
+  close(s.gA, -.5 * 24 * contactTime ** 2 + s.vA * (0.8 - contactTime));
+  close(s.gB, .5 * 3 * contactTime ** 2 + s.vB * (0.8 - contactTime));
+  const wholeStep = law.snapshot();
+  law.reset(); button.hold();
+  for (let i = 0; i < 100; i++) law.update(0.05);
+  const manySteps = law.snapshot();
+  for (const key of ['vA', 'vB', 'gA', 'gB', 'time']) close(manySteps[key], wholeStep[key]);
+});
+
+test('viewport boundary ends both observations together without a fictitious collision', () => {
+  const {law, document, button} = newtonThirdLaw();
+  const canvas = document.getElementById('cv3'); canvas._w = 390;
+  button.hold(); law.update(2); button.release();
+  const before = law.snapshot();
+  assert.equal(before.phase, 'glide');
+  law.update(100);
+  const ended = law.snapshot();
+  assert.equal(ended.phase, 'complete');
+  close(ended.vA, before.vA); close(ended.vB, before.vB);
+  close(ended.mA * ended.vA + ended.mB * ended.vB, 0);
+  close(ended.mA * ended.gA + ended.mB * ended.gB, 0);
+  const box = Math.max(46, Math.min(74, canvas._h * .19));
+  const limit = (canvas._w / 2 - box * .34 - (box * .34 + 72)) / 46;
+  close(ended.gA, -limit);
+  assert.ok(ended.gB < limit);
+  law.update(100); button.hold();
+  assert.deepEqual(law.snapshot(), ended, 'observation must stay finished until reset');
+  assert.equal(button.classes.has('active'), false);
+});

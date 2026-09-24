@@ -254,7 +254,7 @@
       <span class="hr">A가 B를</span> 미는 힘의 크기 = <span class="hl">B가 A를</span> 미는 힘의 크기
       <small style="margin-top:6px;margin-bottom:0;">두 힘은 크기가 같고 방향만 반대입니다</small>
     </div>
-    <div class="note g" id="note3"><span class="tag">NOTE</span><div class="txt" id="note3txt">밀기 버튼을 누르면 두 사람이 맞닿은 채 서로를 밉니다. 이때 주고받는 두 힘은 크기가 같고 방향만 반대입니다.</div></div>
+    <div class="note g" id="note3"><span class="tag">NOTE</span><div class="txt" id="note3txt">밀기 버튼을 누르면 두 사람이 손을 맞대고 서로를 밉니다. 이때 주고받는 두 힘은 크기가 같고 방향은 반대입니다.</div></div>
     <div class="controls">
       <div class="row">
         <div class="field">
@@ -579,68 +579,70 @@
   const Law3 = (function(){
     const cv=document.getElementById('cv3'); let ctx=null;
     const FORCE=24;          // N — 두 물체가 받는 힘의 크기(항상 동일)
-    const SLOW=0.16;         // 접촉 동안 슬로모션 → 힘을 충분히 관찰
-    const GLIDE_SLOW=0.26;   // 분리 후 미끄러짐을 늦춰 관찰 쉽게(비율은 유지)
-    const VMAX_PUSH=3;       // 누적 속도 상한 → 가벼운 쪽이 화면 밖으로 튀지 않게
+    const SLOW=0.16;         // 접촉 전후에 같은 시간 배율을 사용한다.
+    const CONTACT_REACH=0.36; // m — 손이 닿는 동안만 서로 미는 힘이 작용한다.
     const SCALE=46;          // px per meter
     
     // [FIX] paused 상태 추가
-    const s={mA:2,mB:6,vA:0,vB:0,vA0:0,vB0:0,gA:0,gB:0,phase:'idle',pulse:0,paused:false};
+    const s={mA:2,mB:6,vA:0,vB:0,gA:0,gB:0,time:0,phase:'idle',pulse:0,paused:false};
     
     function resize(){ ctx=setupCanvas(cv); }
     function note(cls,txt){ document.getElementById('note3').className='note '+cls; document.getElementById('note3txt').textContent=txt; }
     function boxSize(){ return Math.max(46,Math.min(74,(cv._h||300)*0.19)); }
     
     function reset(){
-      s.vA=0; s.vB=0; s.vA0=0; s.vB0=0; s.gA=0; s.gB=0; s.phase='idle'; s.paused=false;
+      s.vA=0; s.vB=0; s.gA=0; s.gB=0; s.time=0; s.phase='idle'; s.paused=false;
+      document.getElementById('l3-push').classList.remove('active');
       const pb = document.getElementById('l3-pause');
       if(pb){ pb.innerHTML = '<span class="ic">⏸</span> 일시정지'; pb.classList.remove('active'); }
-      note('g','밀기 버튼을 누르면 두 사람이 맞닿은 채 서로를 밉니다. 이때 주고받는 두 힘은 크기가 같고 방향만 반대입니다.');
+      note('g','밀기 버튼을 누르면 두 사람이 손을 맞대고 서로를 밉니다. 이때 주고받는 두 힘은 크기가 같고 방향은 반대입니다.');
     }
     
     function startPush(){
-      if(s.phase==='glide') return;          // 미끄러지는 중엔 ‘다시’ 후에
+      if(s.phase!=='idle') return false;    // 새로 밀려면 ‘다시’로 돌아간다.
       s.phase='push';
       s.paused=false; // 시작 시 일시정지 해제
       const pb = document.getElementById('l3-pause');
       if(pb){ pb.innerHTML = '<span class="ic">⏸</span> 일시정지'; pb.classList.remove('active'); }
       note('r','접촉하는 동안에만 두 힘이 함께 나타납니다. 질량을 바꿔도 두 힘의 크기는 언제나 똑같습니다.');
+      return true;
     }
-    
-    function gcd(a,b){ return b?gcd(b,a%b):a; }
-    
+
     function endPush(){
       if(s.phase!=='push') return;
-      if(Math.abs(s.vA)<0.02 && Math.abs(s.vB)<0.02){ s.phase='idle'; return; }
-      // 운동량 보존(vA:vB = mB:mA)을 소수 1자리로 깔끔하게 스냅 → 화면 곱이 정확히 일치
-      const g=gcd(s.mA,s.mB), k0=s.mB/g, j0=s.mA/g;
-      const n=Math.max(1, Math.round(Math.abs(s.vA)/(k0/10)));
-      s.vA=-(n*k0/10); s.vB=(n*j0/10);   // A는 왼쪽(−), B는 오른쪽(+)
-      s.vA0=s.vA; s.vB0=s.vB;
+      document.getElementById('l3-push').classList.remove('active');
+      if(s.vA===0 && s.vB===0){ reset(); return; }
       s.phase='glide';
-      
-      // 일시정지 상태가 아닐 때만 텍스트 갱신 (관찰 방해 방지)
-      if(!s.paused) {
-        note('g','손을 떼면 서로 미는 힘이 사라져 두 사람은 등속으로 미끄러집니다. 같은 크기의 힘을 같은 시간 동안 받았으므로 가벼운 쪽의 속력이 더 큽니다.');
-      }
+      note('g','손이 떨어지면 서로 미는 힘이 사라져 두 사람은 등속으로 미끄러집니다. 같은 크기의 힘을 같은 시간 동안 받았으므로, 질량이 다르면 가벼운 쪽의 속력이 더 큽니다.');
     }
-    
+
     function update(dt){
-      // [FIX] 일시정지 중이면 업데이트 건너뜀
-      if(s.paused) return;
-      
+      if(s.paused || s.phase==='idle' || s.phase==='complete') return;
       s.pulse+=dt;
+      let remaining=dt*SLOW;
       if(s.phase==='push'){
-        // 접촉 유지(위치 고정), 속도만 누적 → 힘은 ‘접촉 중에만’ 존재
-        const aA=FORCE/s.mA, aB=FORCE/s.mB, pdt=dt*SLOW;
-        const nvA=s.vA-aA*pdt, nvB=s.vB+aB*pdt;
-        // 빠른 쪽이 상한에 닿으면 양쪽 누적 정지(운동량 비율 유지 + 관찰성)
-        if(Math.max(Math.abs(nvA),Math.abs(nvB))<=VMAX_PUSH){ s.vA=nvA; s.vB=nvB; }
-      } else if(s.phase==='glide'){
-        s.gA+=s.vA*dt*GLIDE_SLOW; s.gB+=s.vB*dt*GLIDE_SLOW;   // 천천히 미끄러져 관찰 쉬움
-        const W=cv._w||360, box=boxSize(), half=box*0.34, cx0=W/2, lim=box*0.55;
-        if(cx0-half+s.gA*SCALE < lim){ s.gA=(lim-(cx0-half))/SCALE; s.vA=0; }
-        if(cx0+half+s.gB*SCALE > W-lim){ s.gB=((W-lim)-(cx0+half))/SCALE; s.vB=0; }
+        const aA=FORCE/s.mA, aB=FORCE/s.mB, relativeA=aA+aB;
+        const gap=Math.max(0,CONTACT_REACH-(s.gB-s.gA)), relativeV=s.vB-s.vA;
+        const contactTime=2*gap/(Math.sqrt(relativeV*relativeV+2*relativeA*gap)+relativeV || 1);
+        const h=Math.min(remaining,contactTime);
+        // Exact constant-acceleration motion, with equal and opposite impulses.
+        s.gA+=s.vA*h-.5*aA*h*h; s.gB+=s.vB*h+.5*aB*h*h;
+        s.vA-=aA*h; s.vB+=aB*h; s.time+=h; remaining-=h;
+        if(contactTime<=h+1e-12) endPush();
+      }
+      if(s.phase==='glide'){
+        const W=cv._w||360, box=boxSize();
+        // Leave room for the outward velocity arrow and its number at either edge.
+        const limit=Math.max(0,(W/2-box*.34-(box*.34+72))/SCALE);
+        const toA=s.vA<0?Math.max(0,(s.gA+limit)/-s.vA):Infinity;
+        const toB=s.vB>0?Math.max(0,(limit-s.gB)/s.vB):Infinity;
+        const untilEdge=Math.min(toA,toB), h=Math.min(remaining,untilEdge);
+        s.gA+=s.vA*h; s.gB+=s.vB*h; s.time+=h;
+        if(untilEdge<=remaining){
+          // End both observations together; a viewport edge is not a collision.
+          s.phase='complete';
+          note('b','화면 범위의 끝에 도달해 관찰을 마쳤습니다. 두 사람이 실제로 멈춘 것은 아닙니다. ‘다시’를 눌러 새로 실험해 보세요.');
+        }
       }
     }
 
@@ -683,26 +685,34 @@
 
       skater(ax,cy,['#2b4a86','#16294d'],'A',s.mA,box, lean);
       skater(bx,cy,['#7c3aed','#4c1d95'],'B',s.mB,box,-lean);
+      if(s.phase==='push'){
+        // Arms remain in contact while the bodies accelerate apart.
+        const touch=(ax+bx)/2;
+        ctx.lineWidth=5; ctx.lineCap='round';
+        ctx.strokeStyle='#2b4a86'; ctx.beginPath(); ctx.moveTo(ax+box*.2,midY); ctx.lineTo(touch,midY); ctx.stroke();
+        ctx.strokeStyle='#7c3aed'; ctx.beginPath(); ctx.moveTo(bx-box*.2,midY); ctx.lineTo(touch,midY); ctx.stroke();
+        ctx.fillStyle='#e8c8ac'; ctx.beginPath(); ctx.arc(touch,midY,3.5,0,Math.PI*2); ctx.fill();
+      }
 
       ctx.textAlign='center';
       if(s.phase==='push'){
-        // 얼마나 밀고 있는지 게이지로 표시 (누른 만큼 = 떼면 얻는 속도)
-        const prog=Math.min(1, Math.max(Math.abs(s.vA),Math.abs(s.vB))/VMAX_PUSH);
-        const full=prog>=0.999;
+        const prog=Math.min(1,(s.gB-s.gA)/CONTACT_REACH);
         const gw=Math.min(W*0.58,230), gxx=cx0-gw/2, gyy=H-26, gh=12;
         ctx.fillStyle='#e9edf3'; roundRect(ctx,gxx,gyy,gw,gh,6); ctx.fill();
-        ctx.fillStyle=full?COL.green:COL.blue; roundRect(ctx,gxx,gyy,Math.max(gh,gw*prog),gh,6); ctx.fill();
-        ctx.fillStyle=full?COL.green:COL.navy; ctx.font="700 12px 'Noto Sans KR',sans-serif";
-        ctx.fillText(full?'충분히 밀었어요 · 손을 떼 보세요':'미는 중… 누른 만큼 밀려납니다', cx0, gyy-7);
+        ctx.fillStyle=COL.blue; roundRect(ctx,gxx,gyy,Math.max(gh,gw*prog),gh,6); ctx.fill();
+        ctx.fillStyle=COL.navy; ctx.font="700 12px 'Noto Sans KR',sans-serif";
+        ctx.fillText('서로 미는 중 · 손이 떨어지면 등속 운동', cx0, gyy-7);
       } else if(s.phase==='glide'){
-        // vA0, vB0는 이미 소수1자리 보존쌍으로 스냅됨 → 곱이 정확히 일치
-        const vAr=Math.abs(s.vA0), vBr=Math.abs(s.vB0), p=s.mA*vAr;
-        if(vAr>0.005){ const L=Math.min(98,Math.max(54,vAr*SCALE*0.8))+8; arrow(ctx,ax-e,midY,ax-e-L,midY,COL.green,'속도',vAr.toFixed(1)+' m/s',3,'above'); }
-        if(vBr>0.005){ const L=Math.min(98,Math.max(54,vBr*SCALE*0.8))+8; arrow(ctx,bx+e,midY,bx+e+L,midY,COL.green,'속도',vBr.toFixed(1)+' m/s',3,'above'); }
+        const vAr=Math.abs(s.vA), vBr=Math.abs(s.vB);
+        if(vAr>0.005){ const L=Math.max(0,Math.min(Math.min(98,Math.max(54,vAr*SCALE*0.8))+8,ax-e-12)); arrow(ctx,ax-e,midY,ax-e-L,midY,COL.green,'속도',vAr.toFixed(2)+' m/s',3,'above'); }
+        if(vBr>0.005){ const L=Math.max(0,Math.min(Math.min(98,Math.max(54,vBr*SCALE*0.8))+8,W-bx-e-12)); arrow(ctx,bx+e,midY,bx+e+L,midY,COL.green,'속도',vBr.toFixed(2)+' m/s',3,'above'); }
         ctx.fillStyle=COL.green; ctx.font="800 13px 'Noto Sans KR',sans-serif";
         ctx.fillText('운동량의 크기는 양쪽이 같다', cx0, H-29);
         ctx.fillStyle=COL.ink; ctx.font="700 11px 'JetBrains Mono',monospace";
-        ctx.fillText('A '+s.mA+'×'+vAr.toFixed(1)+' = B '+s.mB+'×'+vBr.toFixed(1)+' = '+p.toFixed(1)+' kg·m/s', cx0, H-13);
+        ctx.fillText('A '+(s.mA*vAr).toFixed(2)+' · B '+(s.mB*vBr).toFixed(2)+' kg·m/s', cx0, H-13);
+      } else if(s.phase==='complete'){
+        ctx.fillStyle=COL.navy; ctx.font="700 13px 'Noto Sans KR',sans-serif";
+        ctx.fillText('관찰 종료 · ‘다시’를 눌러 새 실험', cx0, H-14);
       } else {
         ctx.fillStyle=COL.soft; ctx.font="600 13px 'Noto Sans KR',sans-serif";
         ctx.fillText('‘밀기’를 꾹 눌러 보세요', cx0, H-14);
@@ -711,15 +721,16 @@
 
     function bind(){
       const mA=document.getElementById('l3-mA'), mB=document.getElementById('l3-mB');
-      mA.addEventListener('input',()=>{ s.mA=+mA.value; document.getElementById('l3-mAval').textContent=s.mA; });
-      mB.addEventListener('input',()=>{ s.mB=+mB.value; document.getElementById('l3-mBval').textContent=s.mB; });
+      // A changed mass is a new experiment; old velocities belong to the previous masses.
+      mA.addEventListener('input',()=>{ s.mA=+mA.value; document.getElementById('l3-mAval').textContent=s.mA; reset(); });
+      mB.addEventListener('input',()=>{ s.mB=+mB.value; document.getElementById('l3-mBval').textContent=s.mB; reset(); });
       const pb=document.getElementById('l3-push');
-      bindHold(pb, ()=>{ startPush(); pb.classList.add('active'); }, ()=>{ endPush(); pb.classList.remove('active'); });
+      bindHold(pb, ()=>{ if(startPush()) pb.classList.add('active'); }, ()=>{ endPush(); pb.classList.remove('active'); });
       
       // [FIX] 일시정지 버튼 이벤트
       const pauseBtn = document.getElementById('l3-pause');
       pauseBtn.addEventListener('click', () => {
-        if(s.phase === 'idle') return; // 출발 전에는 무시
+        if(s.phase === 'idle' || s.phase === 'complete') return;
         s.paused = !s.paused;
         if(s.paused){
           pauseBtn.innerHTML = '<span class="ic">▶</span> 계속';
