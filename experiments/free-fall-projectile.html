@@ -3,7 +3,7 @@
 <head><script src="../assets/js/browser-compat.js?v=9e1028454f"></script><script defer src="../assets/js/visit-entry.js?v=dcaa1fcbb5"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>자유낙하 vs 수평 투사 비교 실험</title>
+<title>자유 낙하 vs 수평으로 던진 물체 비교 실험</title>
 <style>
   * { box-sizing: border-box; }
   body { margin:0; font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;
@@ -56,7 +56,7 @@
 </style>
 </head>
 <body>
-  <h1>자유낙하 vs 수평으로 던진 물체</h1>
+  <h1>자유 낙하 vs 수평으로 던진 물체</h1>
 
   <!-- 위: 시뮬레이션 + 그래프 나란히 -->
   <div class="stageRow">
@@ -102,18 +102,18 @@
         <button class="modeBtn" data-g="vel">속도-시간</button>
       </div>
       <div class="gl">표시 곡선</div>
-      <label class="chk"><input type="checkbox" id="c_fy" checked><span class="sw" style="background:#e5484d"></span>자유낙하 (수직 y)</label>
-      <label class="chk"><input type="checkbox" id="c_py" checked><span class="sw" style="background:#e08a1e"></span>수평투사 (수직 y)</label>
-      <label class="chk"><input type="checkbox" id="c_px" checked><span class="sw" style="background:#0e9bb0"></span>수평투사 (수평 x)</label>
-      <div class="hintTiny"><b>위치-시간 그래프</b>의 기울기는 속도를, <b>속도-시간 그래프</b>의 기울기는 가속도를 뜻합니다. 자유낙하와 수평투사의 수직(y) 운동은 완전히 같아서 두 곡선이 서로 겹칩니다.</div>
+      <label class="chk"><input type="checkbox" id="c_fy" checked><span class="sw" style="background:#e5484d"></span>자유 낙하 (수직 y)</label>
+      <label class="chk"><input type="checkbox" id="c_py" checked><span class="sw" style="background:#e08a1e"></span>수평으로 던진 공 (수직 y)</label>
+      <label class="chk"><input type="checkbox" id="c_px" checked><span class="sw" style="background:#0e9bb0"></span>수평으로 던진 공 (수평 x)</label>
+      <div class="hintTiny"><b>위치-시간 그래프</b>의 기울기는 속도를, <b>속도-시간 그래프</b>의 기울기는 가속도를 뜻합니다. 자유 낙하와 수평으로 던진 물체의 수직(y) 운동은 완전히 같아서 두 곡선이 서로 겹칩니다.</div>
     </div>
 
     <div class="grp g3">
       <div class="gl">수치</div>
       <div class="readout">
         <div class="row"><span>경과 시간</span><b id="tOut">0.00 s</b></div>
-        <div class="row"><span class="dotA">● 자유낙하</span><span>수평 <b>0</b> · 수직 <b id="yAOut">0.0</b> m</span></div>
-        <div class="row"><span class="dotB">● 수평 투사</span><span>수평 <b id="xOut">0.0</b> · 수직 <b id="yBOut">0.0</b> m</span></div>
+        <div class="row"><span class="dotA">● 자유 낙하</span><span>수평 <b>0</b> · 수직 <b id="yAOut">0.0</b> m</span></div>
+        <div class="row"><span class="dotB">● 수평으로 던진 공</span><span>수평 <b id="xOut">0.0</b> · 수직 <b id="yBOut">0.0</b> m</span></div>
         <div class="row"><span>수직 거리(두 공 같음)</span><b id="yOut">0.0 m</b></div>
         <div class="row"><span>착지 예상</span><b id="landOut">— s</b></div>
         <div id="landMsg" style="text-align:center;margin-top:4px;"></div>
@@ -187,14 +187,14 @@ const gm={l:50,r:20,t:14,b:36};
 const gpW=GW-gm.l-gm.r, gpH=GH-gm.t-gm.b;
 function curveDefs(){
   if(state.graph==='pos') return [
-    {key:'fy',label:'자유낙하 y',color:'#e5484d',dash:[],val:t=>0.5*state.g*t*t, slope:t=>state.g*t},
-    {key:'py',label:'수평투사 y',color:'#e08a1e',dash:[7,5],val:t=>0.5*state.g*t*t, slope:t=>state.g*t},
-    {key:'px',label:'수평투사 x',color:'#0e9bb0',dash:[],val:t=>state.v0*t, slope:t=>state.v0},
+    {key:'fy',label:'자유 낙하 y',color:'#e5484d',dash:[],val:t=>0.5*state.g*t*t, slope:t=>state.g*t},
+    {key:'py',label:'수평으로 던진 공 y',color:'#e08a1e',dash:[7,5],val:t=>0.5*state.g*t*t, slope:t=>state.g*t},
+    {key:'px',label:'수평으로 던진 공 x',color:'#0e9bb0',dash:[],val:t=>state.v0*t, slope:t=>state.v0},
   ];
   return [
-    {key:'fy',label:'자유낙하 v_y',color:'#e5484d',dash:[],val:t=>state.g*t, slope:t=>state.g},
-    {key:'py',label:'수평투사 v_y',color:'#e08a1e',dash:[7,5],val:t=>state.g*t, slope:t=>state.g},
-    {key:'px',label:'수평투사 v_x',color:'#0e9bb0',dash:[],val:t=>state.v0, slope:t=>0},
+    {key:'fy',label:'자유 낙하 v_y',color:'#e5484d',dash:[],val:t=>state.g*t, slope:t=>state.g},
+    {key:'py',label:'수평으로 던진 공 v_y',color:'#e08a1e',dash:[7,5],val:t=>state.g*t, slope:t=>state.g},
+    {key:'px',label:'수평으로 던진 공 v_x',color:'#0e9bb0',dash:[],val:t=>state.v0, slope:t=>0},
   ];
 }
 function niceStep(x){ if(!(x>0))return 1; const e=Math.floor(Math.log10(x)), f=x/Math.pow(10,e);

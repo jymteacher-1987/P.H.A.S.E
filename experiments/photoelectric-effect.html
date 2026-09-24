@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#eef3f7">
 <title>광전효과 원리 이해하기 · P.H.A.S.E</title>
-<meta name="description" content="빛의 진동수·광자 유입량·전압을 바꾸며 광전자의 운동, 정상상태 상대 광전류와 정지 전압을 관찰하는 교육용 광전효과 시뮬레이션.">
+<meta name="description" content="빛의 파장·광자 유입량·전압을 바꾸며 광전자의 운동, 정상상태 상대 광전류와 정지 전압을 관찰하는 교육용 광전효과 시뮬레이션.">
 <style>
 :root{--bg:#eef3f7;--ink:#172c43;--muted:#667b90;--line:#dbe5ee;--paper:#fff;--blue:#136bc1;--orange:#b25b0b;--bulk:#697c8d;--green:#1f765d}
 *{box-sizing:border-box}
@@ -72,8 +72,8 @@ select{width:100%;border:1px solid #ccdbe8;border-radius:8px;background:#f5f9fc;
  background:linear-gradient(90deg,#27699f 0 4px,#fff 4px 6px,#27699f 6px 10px)}
 .range::-moz-range-thumb{width:10px;height:22px;border:none;border-radius:2px;
  background:linear-gradient(90deg,#27699f 0 4px,#fff 4px 6px,#27699f 6px 10px)}
-.spectrum::-webkit-slider-runnable-track{background:linear-gradient(90deg,#c64652 0%,#dd843a 7.6%,#e0be31 9.8%,#69af51 11.4%,#28a0b9 18.7%,#3463d6 24.2%,#794ec5 35.3%,#b4b2c8 35.4%,#b4b2c8 100%)}
-.spectrum::-moz-range-track{background:linear-gradient(90deg,#c64652 0%,#dd843a 7.6%,#e0be31 9.8%,#69af51 11.4%,#28a0b9 18.7%,#3463d6 24.2%,#794ec5 35.3%,#b4b2c8 35.4%,#b4b2c8 100%)}
+.spectrum::-webkit-slider-runnable-track{background:linear-gradient(90deg,#b4b2c8 0%,#b4b2c8 36%,#794ec5 36.1%,#3463d6 48%,#28a0b9 57%,#69af51 70%,#e0be31 78%,#dd843a 86%,#c64652 100%)}
+.spectrum::-moz-range-track{background:linear-gradient(90deg,#b4b2c8 0%,#b4b2c8 36%,#794ec5 36.1%,#3463d6 48%,#28a0b9 57%,#69af51 70%,#e0be31 78%,#dd843a 86%,#c64652 100%)}
 .slider-wrap.marked{padding-top:9px}
 .mark{position:absolute;top:0;margin-left:-4.5px;font-size:11px;line-height:1;pointer-events:none;color:#31506e}
 .mark::before{content:"\25BC"}
@@ -82,15 +82,17 @@ select{width:100%;border:1px solid #ccdbe8;border-radius:8px;background:#f5f9fc;
 .mark.stop{color:#c9761a}
 .mark.stop::after{left:auto;right:9px}
 .slider-wrap.dual .mark{top:12px}
-/* Frequency increases linearly to the right; the threshold uses the same scale. */
-.slider-wrap.dual{padding-top:23px;padding-bottom:0}
+/* one slider, two scales: wavelength above, frequency below */
+.slider-wrap.dual{padding-top:23px;padding-bottom:13px}
 .ticks{position:absolute;left:0;right:0;height:11px;pointer-events:none;font-size:8.5px;font-weight:750;line-height:1}
-.ticks.fre{top:0;color:#1c7a5e}
+.ticks.lam{top:0;color:#6b4fa8}
+.ticks.fre{bottom:0;color:#1c7a5e}
 .ticks span{position:absolute;transform:translateX(-50%);white-space:nowrap;top:0}
 .ticks span::after{content:"";position:absolute;left:50%;width:1px;height:4px;background:currentColor;opacity:.55}
-.ticks.fre span::after{top:11px}
+.ticks.lam span::after{top:11px}
+.ticks.fre span::after{bottom:11px}
 .foot .fre{color:#1c7a5e}.foot .fre b{color:#186a51}
-#freqValue{color:#1c7a5e}
+#lambdaValue{color:#6b4fa8}
 .control-bias{padding-top:11px;border-top:1px solid var(--line)}
 .voltage-label{font-size:10px;color:var(--muted);font-weight:500}
 .stepper{display:grid;grid-template-columns:40px 76px 40px minmax(0,1fr) 46px;gap:5px;margin-top:7px;align-items:center}
@@ -247,21 +249,22 @@ select{width:100%;border:1px solid #ccdbe8;border-radius:8px;background:#f5f9fc;
   <div class="control control-metal">
    <div class="control-head"><label for="metal">금속</label></div>
    <select id="metal"><option value="Na">나트륨 Na</option><option value="Al">알루미늄 Al</option><option value="Zn">아연 Zn</option><option value="Cu">구리 Cu</option></select>
-   <div class="foot"><span>일함수 <b id="phiValue">2.46 eV</b></span><span>한계 진동수 f₀ <b id="f0Value">≈ 5.95 ×10¹⁴ Hz</b></span></div>
+   <div class="foot"><span>일함수 <b id="phiValue">2.46 eV</b></span><span>한계 파장 <b id="lambda0Value">≈ 504.001 nm</b> · f₀ <b id="f0Value">5.95 ×10¹⁴ Hz</b></span></div>
   </div>
   <div class="control control-wave">
-   <div class="control-head"><label for="frequency">빛의 진동수</label><output id="freqValue" for="frequency">7.50 ×10¹⁴ Hz</output></div>
+   <div class="control-head"><label for="lambda">빛의 파장</label><output id="lambdaValue" for="lambda">400 nm</output></div>
    <div class="slider-wrap marked dual">
+    <div class="ticks lam" id="lamTicks" aria-hidden="true"></div>
     <div class="ticks fre" id="freTicks" aria-hidden="true"></div>
-    <input class="range spectrum" id="frequency" type="range" min="4" max="15" step="0.01" value="7.5" aria-label="빛의 진동수, 10의 14제곱 헤르츠 단위">
-    <span class="mark" id="frequencyMark" data-label="f₀"></span>
+    <input class="range spectrum" id="lambda" type="range" min="200" max="700" step="1" value="400" aria-label="빛의 파장, 나노미터">
+    <span class="mark" id="lambdaMark" data-label="f₀"></span>
    </div>
-   <div class="foot"><span>광자 하나의 에너지 hf <b id="photonValue">3.10 eV</b></span></div>
+   <div class="foot"><span class="fre">f <b id="freqValue">7.49</b> ×10¹⁴ Hz</span><span>hf <b id="photonValue">3.10 eV</b></span></div>
   </div>
   <div class="control control-power">
    <div class="control-head"><label for="power">들어오는 광자 수</label><output id="powerValue" for="power">60 %</output></div>
    <div class="slider-wrap"><input class="range" id="power" type="range" min="0" max="100" step="1" value="60" aria-label="광자 유입량, 최대 유입률에 대한 퍼센트"></div>
-   <div class="foot"><span>같은 진동수에서는 빛의 세기에 비례</span><span>표시 광자 <b id="fluxValue">4.8 개/s</b></span></div>
+   <div class="foot"><span>같은 파장에서는 빛의 세기에 비례</span><span>표시 광자 <b id="fluxValue">4.8 개/s</b></span></div>
   </div>
   <div class="control control-bias">
    <div class="control-head"><label for="bias">전압 V</label><span class="voltage-label">오른쪽 − 왼쪽 전위</span></div>
@@ -300,33 +303,33 @@ select{width:100%;border:1px solid #ccdbe8;border-radius:8px;background:#f5f9fc;
   <div class="help-head"><h2 id="helpTitle">이 실험을 읽는 법</h2><button id="closeHelp">닫기</button></div>
 
 
-  <p><b>광전효과란?</b> 금속에 빛을 비추었을 때 전자가 튀어나오는 현상입니다. 이때 나온 전자를 <b>광전자</b>라고 합니다. 먼저 나트륨, 7.50 ×10¹⁴ Hz, 0 V에서 회색 전자가 오른쪽 금속판으로 가는 모습을 관찰해 보세요.</p>
-  <p><b>진동수와 최대 운동 에너지.</b> 빛은 에너지를 가진 광자로 설명할 수 있습니다. 광자 하나의 에너지는 hf이므로 진동수 f가 높을수록 큽니다. <b>일함수 φ</b>는 금속에서 전자를 꺼내는 데 필요한 최소 에너지입니다. 광전자의 최대 운동 에너지는 <b>K<sub>max</sub> = hf − φ</b>입니다. 전자마다 운동 에너지가 다를 수 있으므로 ‘최대’라는 말이 붙습니다. 에너지 단위 eV는 전자볼트입니다.</p>
-  <p><b>빛을 비춰도 전자가 나오지 않을 때.</b> 광자 하나의 에너지가 일함수보다 작으면 이 모형에서는 광자 수를 늘려도 전자가 나오지 않습니다. 방출의 경계가 되는 진동수를 <b>한계 진동수 f₀ = φ/h</b>라고 합니다. f &lt; f₀이면 광자 수를 늘려도 광전자가 방출되지 않습니다. f = f₀은 최대 운동 에너지가 0인 경계이며, f &gt; f₀이면 광전자가 운동 에너지를 가지고 방출됩니다. 슬라이더의 <b>f₀ 표시</b>가 방출의 경계입니다. 광자가 금속에 도착한 순간의 상호작용으로 방출하므로, 전자가 빛 에너지를 조금씩 모아 기다리는 것은 아닙니다. 이미 출발한 광자는 진동수 설정을 바꿔도 원래 에너지를 유지합니다.</p>
-  <p><b>광자 수와 빛의 세기.</b> ‘들어오는 광자 수’는 <b>1초 동안 들어오는 광자 수</b>를 조절한다는 뜻입니다. 애니메이션은 움직임을 관찰할 수 있도록 느리게 재생됩니다. <b>같은 진동수와 같은 면적에서는</b> 광자 수가 많을수록 빛의 세기가 큽니다. 광자 수를 늘려도 광자 하나의 에너지는 그대로여서 K<sub>max</sub>는 바뀌지 않습니다. 진동수를 바꾸면 광자 하나의 에너지도 바뀌므로, 광자 수가 같다고 빛의 세기까지 같은 것은 아닙니다.</p>
+  <p><b>광전효과란?</b> 금속에 빛을 비추었을 때 전자가 튀어나오는 현상입니다. 이때 나온 전자를 <b>광전자</b>라고 합니다. 먼저 나트륨, 400 nm, 0 V에서 회색 전자가 오른쪽 금속판으로 가는 모습을 관찰해 보세요.</p>
+  <p><b>파장과 최대 운동 에너지.</b> 빛은 에너지를 가진 광자로 설명할 수 있습니다. 광자 하나의 에너지는 hf = hc/λ이므로 파장이 짧을수록 큽니다. <b>일함수 φ</b>는 금속에서 전자를 꺼내는 데 필요한 최소 에너지입니다. 광전자의 최대 운동 에너지는 <b>K<sub>max</sub> = hf − φ</b>입니다. 전자마다 운동 에너지가 다를 수 있으므로 ‘최대’라는 말이 붙습니다. 에너지 단위 eV는 전자볼트입니다.</p>
+  <p><b>빛을 비춰도 전자가 나오지 않을 때.</b> 광자 하나의 에너지가 일함수보다 작으면 이 모형에서는 광자 수를 늘려도 전자가 나오지 않습니다. 방출의 경계가 되는 진동수를 <b>한계 진동수 f₀ = φ/h</b>, 이에 해당하는 파장을 <b>한계 파장 λ₀ = hc/φ</b>라고 합니다. 슬라이더의 <b>f₀ 표시</b>가 방출의 경계입니다. 광전자는 광자가 금속에 도착한 순간의 상호작용으로 방출되므로, 전자가 빛 에너지를 조금씩 모아 기다리는 것은 아닙니다. 이미 출발한 광자는 파장 설정을 바꿔도 원래 에너지를 유지합니다.</p>
+  <p><b>광자 수와 빛의 세기.</b> ‘들어오는 광자 수’는 <b>1초 동안 들어오는 광자 수</b>를 조절한다는 뜻입니다. 애니메이션은 움직임을 관찰할 수 있도록 느리게 재생됩니다. <b>같은 파장과 같은 면적에서는</b> 광자 수가 많을수록 빛의 세기가 큽니다. 광자 수를 늘려도 광자 하나의 에너지는 그대로여서 K<sub>max</sub>는 바뀌지 않습니다. 파장을 바꾸면 광자 하나의 에너지도 바뀌므로, 광자 수가 같다고 빛의 세기까지 같은 것은 아닙니다.</p>
   <p><b>두 금속판과 전류계.</b> 왼쪽은 빛을 받아 전자를 내보내는 금속판이고, 오른쪽은 전자를 받는 금속판입니다. <b>전압 0 V는 두 판의 전위가 같다는 뜻</b>이며, 광전류가 0이라는 뜻은 아닙니다. 회로의 <b>A는 전류계 기호</b>입니다. 전류계에는 숫자 없이 바늘만 표시합니다. 예상 광전류가 클수록 바늘이 오른쪽으로 더 기울고, 전류가 0이면 왼쪽 영점을 가리킵니다. 조건을 그대로 유지하면 바늘의 위치도 일정합니다.</p>
-  <p><b>전압을 바꾸면?</b> 전압 V는 오른쪽 금속판의 전위에서 왼쪽 금속의 전위를 뺀 값입니다. V가 양수이면 전기력은 오른쪽, 음수이면 왼쪽입니다. 전자가 움직이는 방향과 힘의 방향이 같으면 속력이 커지고, 반대이면 작아집니다. 전압을 바꾼 순간 속도가 갑자기 바뀌지는 않습니다. 힘이 0이면 움직이던 방향으로 등속 운동합니다.</p>
+  <p><b>전압을 바꾸면?</b> 전압 V는 오른쪽 금속판의 전위에서 왼쪽 금속의 전위를 뺀 값입니다. V가 양수이면 전자가 받는 전기력은 오른쪽, 음수이면 왼쪽입니다. 전자가 움직이는 방향과 힘의 방향이 같으면 속력이 커지고, 반대이면 작아집니다. 전압을 바꾼 순간 속도가 갑자기 바뀌지는 않습니다. 힘이 0이면 움직이던 방향으로 등속 운동합니다.</p>
   <p><b>정지 전압을 찾아보세요.</b> 전자를 되돌리는 방향으로 전압을 걸어 광전류가 0이 되게 할 수 있습니다. 그 전압의 <b>크기 V<sub>s</sub></b>를 정지 전압이라고 하며, <b>eV<sub>s</sub> = K<sub>max</sub></b>입니다. e는 전자의 전하량의 크기입니다. 예를 들어 K<sub>max</sub> = 0.64 eV이면 V<sub>s</sub> = 0.64 V이고, 이 화면의 슬라이더에서는 −0.64 V에 해당합니다. 계산값은 근삿값으로 표시하고, 0.01 V 눈금으로 찾을 수 있는 경계 범위도 함께 보여 줍니다.</p>
   <p><b>예상 광전류를 읽는 법.</b> 광전류는 광전자의 이동으로 생기는 전류입니다. 표시값은 <b>현재 조건을 충분히 오래 유지했을 때의 예상값</b>이며, 최대 광자 수에서 모두 수집될 때를 100으로 정한 상대값입니다. 빛을 끈 직후에도 이미 출발한 입자는 계속 이동할 수 있습니다. 이 모형에서는 0 V 이상일 때 나온 광전자가 모두 도달하여 <b>포화 전류</b>가 됩니다. 광자 수가 많을수록 포화 전류가 크지만, 정지 전압은 바뀌지 않습니다. 역전압에서는 에너지가 작은 전자부터 되돌아갑니다.</p>
   <p><b>파란 전자는 비교용입니다.</b> 회색은 여러 운동 에너지로 방출된 광전자이고, 파란 전자는 <b>최대 운동 에너지를 가진 경우</b>를 보여 주는 비교용 전자입니다. 비교용 전자는 전류 계산과 전자 수에 포함하지 않습니다. 큰 고리로 선택한 전자의 에너지는 아래에 표시됩니다. 다른 전자를 누르면 선택을 바꿀 수 있습니다. 화면의 전자가 많아지면 일부만 그리지만 나머지도 계속 계산합니다.</p>
   <p><b>조작.</b> 전압은 −4 ~ +2 V 범위에서 0.01 V 단위로 설정합니다. 슬라이더, − / + 버튼, ← → 키 또는 직접 입력 후 Enter를 사용하세요. 직접 입력한 값도 0.01 V 단위로 반올림됩니다. Space는 멈춤/계속, R은 다시 시작입니다. ‘느리게’는 화면에서 시간이 흐르는 속도만 바꿉니다.</p>
 
 <div class="details">일함수의 대표 문헌값: OpenStax, <i>University Physics Volume 3</i>, 표 6.1.
-   <table><thead><tr><th>금속</th><th>φ</th><th>한계 진동수 f₀ (약 · ×10¹⁴ Hz)</th></tr></thead><tbody>
-    <tr><td>Na</td><td>2.46 eV</td><td>5.95</td></tr>
-    <tr><td>Al</td><td>4.08 eV</td><td>9.87</td></tr>
-    <tr><td>Zn</td><td>4.31 eV</td><td>10.42</td></tr>
-    <tr><td>Cu</td><td>4.70 eV</td><td>11.36</td></tr>
+   <table><thead><tr><th>금속</th><th>φ</th><th>λ₀ (약)</th><th>f₀ (×10¹⁴ Hz)</th></tr></thead><tbody>
+    <tr><td>Na</td><td>2.46 eV</td><td>504.001 nm</td><td>5.95</td></tr>
+    <tr><td>Al</td><td>4.08 eV</td><td>303.883 nm</td><td>9.87</td></tr>
+    <tr><td>Zn</td><td>4.31 eV</td><td>287.666 nm</td><td>10.42</td></tr>
+    <tr><td>Cu</td><td>4.70 eV</td><td>263.796 nm</td><td>11.36</td></tr>
    </tbody></table>
    실제 일함수는 결정면·산화·오염 등 표면 상태에 따라 달라집니다. 소수 자릿수는 모형의 계산값을 구분하기 위한 것이며 실물 시료의 측정 정확도를 뜻하지 않습니다.
   </div>
   <details class="details"><summary>이 모형에서 단순화한 내용</summary>
-   <p>광전자는 오른쪽 금속판 방향으로 나란히 출발하고 전기장은 일정하다고 가정합니다. 문턱보다 높은 에너지의 광자 하나가 광전자 하나를 방출한다고 가정합니다. 실제로는 모든 광자가 방출을 일으키지는 않으며 그 비율은 금속과 진동수에 따라 달라집니다. 실제 장치의 0 V 수집률과 포화 전압도 이 모형과 다를 수 있습니다.</p>
+   <p>광전자는 오른쪽 금속판 방향으로 나란히 출발하고 전기장은 일정하다고 가정합니다. 문턱보다 높은 에너지의 광자 하나가 광전자 하나를 방출한다고 가정합니다. 실제로는 모든 광자가 방출을 일으키지는 않으며 그 비율은 금속과 파장에 따라 달라집니다. 실제 장치의 0 V 수집률과 포화 전압도 이 모형과 다를 수 있습니다.</p>
    <p>회색 전자의 방출 에너지는 0과 K<sub>max</sub> 사이에 고르게 분포하도록 단순화했습니다. 실제 금속의 에너지 분포를 측정한 값은 아닙니다. 흡수 전의 전자 상태와 금속 안에서의 에너지 손실 등으로 광전자의 에너지가 달라질 수 있습니다. hf = φ는 최대 운동 에너지가 0인 경계이며, 이 모형에서는 이동하는 전자를 생성하지 않습니다.</p>
-   <p>빛의 세기는 단위 면적에 단위 시간 동안 전달되는 에너지입니다. 이 실험은 진동수를 바꿀 때 단위 시간당 들어오는 광자 수를 유지합니다. 빛의 세기를 일정하게 유지하는 다른 실험과 구분해야 합니다. 같은 방출률에서 모든 전자가 수집되는 안정된 상태라면, 빠른 전자는 먼저 도착하고 간격 안에 더 짧게 머물지만 단위 시간당 수집되는 수는 같습니다.</p>
+   <p>빛의 세기는 단위 면적에 단위 시간 동안 전달되는 에너지입니다. 이 실험은 파장을 바꿀 때 광자 수를 유지합니다. 빛의 세기를 일정하게 유지하는 다른 실험과 구분해야 합니다. 같은 방출률에서 모든 전자가 수집되는 안정된 상태라면, 빠른 전자는 먼저 도착하고 간격 안에 더 짧게 머물지만 단위 시간당 수집되는 수는 같습니다.</p>
    <p>진공에서 단색광을 비추는 단일광자 광전효과를 다룹니다. 접촉 전위, 전자 사이의 힘, 열에 의한 방출, 여러 광자가 함께 일으키는 방출 등은 제외합니다. 에너지·전압의 관계에는 SI 상수를 사용하며, 시간·길이·입자 수·크기는 관찰하기 쉽게 조절했습니다. 자외선을 보라색으로 그린 것은 눈으로 구분하기 위해서입니다.</p>
   </details>
-  <p class="details">참고: <a href="https://openstax.org/books/university-physics-volume-3/pages/6-2-photoelectric-effect" target="_blank" rel="noopener noreferrer">광전효과·일함수</a> · <a href="https://openstax.org/books/university-physics-volume-1/pages/16-4-energy-and-power-of-a-wave" target="_blank" rel="noopener noreferrer">빛의 세기 정의</a> · <a href="https://arpes.stanford.edu/research/tool-development/angle-resolved-photoemission-spectroscopy" target="_blank" rel="noopener noreferrer">광전자 에너지</a> · <a href="https://www.hamamatsu.com/content/dam/hamamatsu-photonics/sites/documents/99_SALES_LIBRARY/etd/PMT_TPMZ1036E.pdf" target="_blank" rel="noopener noreferrer">양자 효율</a> · <a href="https://physics.nist.gov/cuu/Constants/" target="_blank" rel="noopener noreferrer">NIST 상수</a> · P.H.A.S.E v11 · 기록·저장·외부 전송은 없습니다.</p>
+  <p class="details">참고: <a href="https://openstax.org/books/university-physics-volume-3/pages/6-2-photoelectric-effect" target="_blank" rel="noopener noreferrer">광전효과·일함수</a> · <a href="https://openstax.org/books/university-physics-volume-1/pages/16-4-energy-and-power-of-a-wave" target="_blank" rel="noopener noreferrer">빛의 세기 정의</a> · <a href="https://arpes.stanford.edu/research/tool-development/angle-resolved-photoemission-spectroscopy" target="_blank" rel="noopener noreferrer">광전자 에너지</a> · <a href="https://www.hamamatsu.com/content/dam/hamamatsu-photonics/sites/documents/99_SALES_LIBRARY/etd/PMT_TPMZ1036E.pdf" target="_blank" rel="noopener noreferrer">양자 효율</a> · <a href="https://physics.nist.gov/cuu/Constants/" target="_blank" rel="noopener noreferrer">NIST 상수</a> · P.H.A.S.E v10 · 기록·저장·외부 전송은 없습니다.</p>
 
 </section>
 </div>
@@ -337,8 +340,7 @@ select{width:100%;border:1px solid #ccdbe8;border-radius:8px;background:#f5f9fc;
  const PLANCK=6.62607015e-34, CHARGE=1.602176634e-19, LIGHT=299792458;
  const HC=PLANCK*LIGHT/CHARGE*1e9;            // eV·nm
  const H_EV=PLANCK/CHARGE;                    // eV·s
- const NU_UNIT=LIGHT*1e9/1e14;                // wavelength is derived only for the light colour
- const F_MIN=4,F_MAX=15,F_DEFAULT=7.5;        // frequency in units of 10^14 Hz
+ const NU_UNIT=LIGHT*1e9/1e14;                // lambda[nm] -> nu in 10^14 Hz
  const METAL_COLOR=Object.freeze({Na:"#1f6fb8",Al:"#1f8a63",Zn:"#c07a12",Cu:"#b8474f"});
  const SPEED=1.1, A_FACTOR=SPEED*SPEED/2;     // v = SPEED·√K  →  K[eV] = (v/SPEED)²
  const PHOTON_TIME=.5, V_LO=-4, V_HI=2, EPS=1e-12;
@@ -355,12 +357,12 @@ select{width:100%;border:1px solid #ccdbe8;border-radius:8px;background:#f5f9fc;
   Cu:Object.freeze({name:"구리",symbol:"Cu",phi:4.70})
  });
 
- const state={metal:"Na",frequency:F_DEFAULT,power:60,U:0,slow:true,paused:false};
+ const state={metal:"Na",lambda:400,power:60,U:0,slow:true,paused:false};
  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
  const $=id=>document.getElementById(id);
  const ui={};
- ["lab","scene","metal","frequency","power","bias","voltage","step","status","caption",
-  "photonKey","phiValue","f0Value","freTicks","frequencyMark","biasZero","freqValue","photonValue","powerValue",
+ ["lab","scene","metal","lambda","power","bias","voltage","step","status","caption",
+  "photonKey","phiValue","lambda0Value","f0Value","lamTicks","freTicks","lambdaValue","lambdaMark","biasZero","freqValue","photonValue","powerValue",
   "biasStop","stopValue","stopBracket","fluxValue","birthEnergy","liveEnergy","current","slowBtn","pauseBtn","restartBtn","helpBtn",
   "help","closeHelp","minusBtn","plusBtn","zeroBtn","voltageHint",
   ].forEach(id=>ui[id]=$(id));
@@ -381,16 +383,14 @@ select{width:100%;border:1px solid #ccdbe8;border-radius:8px;background:#f5f9fc;
 
 function calc(s){
   const material=METALS[s.metal]||METALS.Na;
-  // Keep the old wavelength test input as a conversion, without making it a second state.
-  const input=Number.isFinite(Number(s.frequency))?Number(s.frequency):Number(s.lambda)>0?NU_UNIT/Number(s.lambda):F_DEFAULT;
-  const frequency=clamp(input,F_MIN,F_MAX),lambda=NU_UNIT/frequency;
+  const lambda=clamp(Number(s.lambda)||400,200,700);
   const power=clamp(Number(s.power)||0,0,100);
   const U=clamp(Number(s.U)||0,V_LO,V_HI);
-  const photon=H_EV*frequency*1e14, excess=photon-material.phi;
+  const photon=HC/lambda, excess=photon-material.phi;
   const K=Math.max(0,excess), canEmit=excess>EPS;
   const rate=BASE_RATE*(power/100);   // Fixed photon arrival rate; optical intensity also depends on photon energy.
   const fraction=canEmit?collectedFraction(U,K):0;
-  return {material,frequency,lambda,lambda0:HC/material.phi,nu:frequency,power,U,photon,K,canEmit,
+  return {material,lambda,lambda0:HC/material.phi,nu:NU_UNIT/lambda,power,U,photon,K,canEmit,
    a:A_FACTOR*U,rate,fraction,current:rate*fraction*CURRENT_SCALE,
    leftSign:U<0?"+":U>0?"−":"0",rightSign:U<0?"−":U>0?"+":"0"};
  }
@@ -425,14 +425,13 @@ function calc(s){
  /* ---------- UI sync ---------- */
  function syncControls(){
   model=calc(state);
-  const light=lightStyle(model.lambda);
+  const light=lightStyle(state.lambda);
   ui.phiValue.textContent=model.material.phi.toFixed(2)+" eV";
-  ui.f0Value.textContent="≈ "+(model.material.phi/(H_EV*1e14)).toFixed(2)+" ×10¹⁴ Hz";
-  ui.freqValue.style.color=light.color;
-  ui.frequency.value=state.frequency;
-  ui.frequency.setAttribute("aria-valuetext",state.frequency.toFixed(2)+" 곱하기 10의 14제곱 헤르츠");
+  ui.lambda0Value.textContent="≈ "+model.lambda0.toFixed(3)+" nm";
+  ui.f0Value.textContent=(model.material.phi/(H_EV*1e14)).toFixed(2)+" ×10¹⁴ Hz";
+  ui.lambdaValue.textContent=state.lambda+" nm";ui.lambdaValue.style.color=light.color;
   ui.photonKey.style.color=state.power>0?light.color:"#9aa8b5";
-  ui.freqValue.textContent=model.frequency.toFixed(2)+" ×10¹⁴ Hz";
+  ui.freqValue.textContent=model.nu.toFixed(2);
   ui.photonValue.textContent=model.photon.toFixed(2)+" eV";
   ui.powerValue.textContent=state.power+" %";
   ui.fluxValue.textContent=(model.rate<10?model.rate.toFixed(1):Math.round(model.rate))+" 개/s";
@@ -443,12 +442,12 @@ function calc(s){
   ui.pauseBtn.classList.toggle("play",state.paused);
   ui.pauseBtn.setAttribute("aria-pressed",String(state.paused));
   ui.pauseBtn.setAttribute("aria-label",state.paused?"애니메이션 계속":"애니메이션 멈춤");
-  // f0 marker on the linear frequency slider
+  // λ0 marker on the wavelength slider
   const place=(el,frac)=>{
    if(!(frac>=0&&frac<=1)){el.hidden=true;return}
    el.hidden=false;el.style.left=`calc(${THUMB_W/2}px + ${(frac*100).toFixed(2)}% - ${(frac*THUMB_W).toFixed(1)}px)`;
   };
-  place(ui.frequencyMark,(model.material.phi/(H_EV*1e14)-F_MIN)/(F_MAX-F_MIN));
+  place(ui.lambdaMark,(model.lambda0-200)/500);
   // the bias slider spans only the window worth exploring, so one pixel ≈ one fine step
   const stopU=-model.K;
   ui.bias.value=state.U;
@@ -456,7 +455,7 @@ function calc(s){
   if(model.canEmit){
    place(ui.biasStop,(stopU-V_LO)/(V_HI-V_LO));ui.stopValue.textContent="≈ "+precise(model.K)+" V";
    ui.stopBracket.textContent=voltageBracket(model.K);
-  }else{ui.biasStop.hidden=true;ui.stopValue.textContent="—";ui.stopBracket.textContent="현재 진동수에서는 이동하는 광전자 방출 없음"}
+  }else{ui.biasStop.hidden=true;ui.stopValue.textContent="—";ui.stopBracket.textContent="현재 파장에서는 광전자가 방출되지 않음"}
   if(state.paused)draw();
   ui.lab.setAttribute("aria-label",
    `왼쪽 ${model.material.symbol} 금속판, 오른쪽 금속판. ${state.U===0?"두 판의 전위가 같습니다.":"왼쪽 "+model.leftSign+"극, 오른쪽 "+model.rightSign+"극."} 전압 V ${signedV(state.U)} 볼트, 정상상태 상대 광전류 예상 ${currentText(model.current)}, 임의 단위.`);
@@ -521,8 +520,8 @@ function calc(s){
  /* ---------- simulation ---------- */
  function emitPhoton(born){
   const n=photonSerial++,u=((n+1)*.6180339887498949)%1;
-  const lane=.50+.43*u,ls=lightStyle(model.lambda);
-  photons.push({born,lane,n,frequency:model.frequency,lambda:model.lambda,energy:model.photon,color:ls.color,rgb:ls.rgb,uv:model.lambda<380});
+  const lane=.50+.43*u,ls=lightStyle(state.lambda);
+  photons.push({born,lane,n,lambda:state.lambda,energy:HC/state.lambda,color:ls.color,rgb:ls.rgb,uv:state.lambda<380});
   counters.photons++;
  }
  function addElectron(energy,kind="electron",lane=.7,at=clock){
@@ -703,7 +702,7 @@ function calc(s){
 
   // lamp and photons
   const lampX=L+gap*.32,lampY=tiny?9:short?17:Math.max(24,top-44);
-  const light=lightStyle(model.lambda);
+  const light=lightStyle(state.lambda);
   if(state.power>0){
    ctx.beginPath();ctx.moveTo(lampX-2,lampY+8);ctx.lineTo(X0,yOf(.1));ctx.lineTo(X0,yOf(.96));ctx.closePath();
    ctx.fillStyle=`rgba(${light.rgb},${.025+state.power*.0007})`;ctx.fill();
@@ -798,8 +797,8 @@ if(sel)dot(ctx,x,y,r+4.5,null,"#2b7fc0",2);
   state.metal=METALS[ui.metal.value]?ui.metal.value:"Na";
   syncControls();refreshObservation();
  });
- ui.frequency.addEventListener("input",()=>{
-  state.frequency=clamp(Number(ui.frequency.value),F_MIN,F_MAX);
+ ui.lambda.addEventListener("input",()=>{
+  state.lambda=clamp(Number(ui.lambda.value),200,700);
   syncControls();refreshObservation();
  });
  ui.power.addEventListener("input",()=>{
@@ -880,7 +879,7 @@ if(sel)dot(ctx,x,y,r+4.5,null,"#2b7fc0",2);
 
  // Local test hooks only. No storage, no network, no telemetry.
  Object.defineProperty(window,"PHASE_TEST",{value:Object.freeze({
-  constants:Object.freeze({HC,H_EV,NU_UNIT,F_MIN,F_MAX,F_DEFAULT,SPEED,A_FACTOR,V_HI,MAX_DRAW,BASE_RATE,PHOTON_TIME}),
+  constants:Object.freeze({HC,SPEED,A_FACTOR,V_HI,MAX_DRAW,BASE_RATE,PHOTON_TIME}),
   metals:METALS,calc,collectedFraction,
   snapshot:()=>({state:{...state},model:{...model},clock,counters:{...counters},
    particles:particles.map(p=>({...p})),photons:photons.map(p=>({...p})),
@@ -890,9 +889,7 @@ if(sel)dot(ctx,x,y,r+4.5,null,"#2b7fc0",2);
   advance:t=>{advance(clamp(Number(t)||0,0,300));draw()},
   configure:s=>{
    if(s.metal&&METALS[s.metal]){state.metal=s.metal;ui.metal.value=s.metal}
-   if(Number.isFinite(s.frequency))state.frequency=clamp(s.frequency,F_MIN,F_MAX);
-   else if(Number.isFinite(s.lambda))state.frequency=clamp(NU_UNIT/s.lambda,F_MIN,F_MAX);
-   ui.frequency.value=state.frequency;
+   if(Number.isFinite(s.lambda)){state.lambda=clamp(s.lambda,200,700);ui.lambda.value=state.lambda}
    if(Number.isFinite(s.power)){state.power=clamp(s.power,0,100);ui.power.value=state.power}
    state.paused=true;
    if(Number.isFinite(s.U))setVoltage(s.U);else{syncControls();refreshObservation()}
@@ -905,20 +902,22 @@ if(sel)dot(ctx,x,y,r+4.5,null,"#2b7fc0",2);
 
  ui.bias.value=state.U;ui.voltage.value=state.U.toFixed(2);
  // show both panels by default wherever there is room for both (desktop, tablet portrait)
- // Equal frequency intervals have equal spacing on the control.
+ // wavelength ticks are evenly spaced; the same slider's frequency ticks are not,
+ // which is the point — equal steps in f crowd together at short wavelengths.
  (function buildScales(){
   const at=pct=>`calc(${THUMB_W/2}px + ${(pct*100).toFixed(3)}% - ${(pct*THUMB_W).toFixed(2)}px)`;
   const row=(el,items)=>{
    el.innerHTML="";
    for(const it of items){
-    const pct=(it.frequency-F_MIN)/(F_MAX-F_MIN);
+    const pct=(it.lambda-200)/500;
     if(pct<-0.001||pct>1.001)continue;
     const sp=document.createElement("span");
     sp.textContent=it.text;sp.style.left=at(clamp(pct,0,1));
     el.appendChild(sp);
    }
   };
-  row(ui.freTicks,[4,6,8,10,12,15].map(frequency=>({frequency,text:String(frequency)})));
+  row(ui.lamTicks,[200,300,400,500,600,700].map(L=>({lambda:L,text:String(L)})));
+  row(ui.freTicks,[12,10,8,6,4.5].map(F=>({lambda:NU_UNIT/F,text:F%1?F.toFixed(1):String(F)})));
  })();
  syncControls();restart();resize();requestAnimationFrame(frame);
 })();

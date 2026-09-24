@@ -31,21 +31,9 @@ test('Photoelectric: catalog launch, retarding voltage, energy, controls and res
     await page.waitForFunction(()=>document.querySelector('#expFrame')?.contentWindow?.PHASE_TEST);
     const frame=page.frames().find(f=>f.url().includes('/experiments/photoelectric-effect.html'));
     assert.ok(frame);
-    assert.equal(await frame.locator('#frequencyMark').getAttribute('data-label'),'f₀');
-    assert.equal(await frame.locator('#frequency').inputValue(),'7.5');
-    assert.equal(await frame.locator('#frequency').getAttribute('min'),'4');
-    assert.equal(await frame.locator('#frequency').getAttribute('max'),'15');
-    assert.equal(await frame.locator('#frequency').getAttribute('step'),'0.01');
-    assert.match(await frame.locator('#freqValue').innerText(),/^7\.50\s*×\s*10¹⁴\s*Hz$/);
-    assert.equal(await frame.locator('#lambda').count(),0);
-    assert.ok(!(await frame.locator('body').innerText()).includes('파장'),'visible explanation must use frequency');
-    const ticks=await frame.locator('#freTicks span').evaluateAll(items=>items.map(e=>({value:Number(e.textContent),x:e.getBoundingClientRect().x+e.getBoundingClientRect().width/2})));
-    assert.ok(ticks.length>=3,'frequency ticks must be visible');
-    const tickScale=(ticks.at(-1).x-ticks[0].x)/(ticks.at(-1).value-ticks[0].value);
-    assert.ok(tickScale>0,'frequency increases to the right');
-    for(let i=1;i<ticks.length;i++)assert.ok(Math.abs((ticks[i].x-ticks[0].x)-tickScale*(ticks[i].value-ticks[0].value))<.1,'linear frequency tick spacing');
+    assert.equal(await frame.locator('#lambdaMark').getAttribute('data-label'),'f₀');
     assert.match(await frame.locator('#fluxValue').innerText(),/개\/s/);
-    // Real controls: lower the collecting potential beyond the Na/7.50e14 Hz stopping voltage.
+    // Real controls: lower the collecting potential beyond the Na/400nm stopping voltage.
     await frame.locator('#voltage').fill('-1');await frame.locator('#voltage').press('Enter');
     assert.equal(await frame.locator('#current').innerText(),'0.0');
     const stopped=await frame.evaluate(()=>{
@@ -54,10 +42,7 @@ test('Photoelectric: catalog launch, retarding voltage, energy, controls and res
     assert.equal(stopped.counters.collected,0);assert.ok(stopped.counters.returned>0);
     assert.ok(stopped.particles.every(e=>Math.abs(e.v*e.v/1.21-(e.E0-e.x))<1e-10));
     await frame.locator('#metal').selectOption('Al');
-    await frame.locator('#frequency').evaluate(input=>{input.value='10';input.dispatchEvent(new Event('input',{bubbles:true}))});
-    const frequencyModel=await frame.evaluate(()=>PHASE_TEST.snapshot().model);
-    assert.equal(frequencyModel.frequency,10);
-    assert.ok(Math.abs(frequencyModel.photon-(6.62607015e-34*1e15/1.602176634e-19))<1e-12);
+    await frame.locator('#lambda').evaluate(input=>{input.value='300';input.dispatchEvent(new Event('input',{bubbles:true}))});
     await frame.locator('#voltage').fill('-0.05');await frame.locator('#voltage').press('Enter');
     assert.match(await frame.locator('#stopBracket').innerText(),/−0\.06 ↔ −0\.05/);
     assert.ok(Number(await frame.locator('#current').innerText())>0);
@@ -69,7 +54,6 @@ test('Photoelectric: catalog launch, retarding voltage, energy, controls and res
      await page.setViewportSize({width,height});
      await frame.waitForFunction(()=>document.querySelector('#lab').width>0&&document.querySelector('#lab').height>0);
      assert.ok(await frame.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'horizontal overflow '+width);
-     assert.ok(await frame.locator('#freqValue').evaluate(e=>e.scrollWidth<=e.clientWidth+1),'frequency value overflow '+width);
      await frame.locator('#voltage').scrollIntoViewIfNeeded();
      await frame.locator('#voltage').fill('-0.06');await frame.locator('#voltage').press('Enter');
      await frame.locator('#helpBtn').click();

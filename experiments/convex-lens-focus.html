@@ -248,7 +248,7 @@
 "use strict";
 /* ============================================================
    물리 : 얇은 렌즈. 1/f = 1/do + 1/di,  굴절식 u' = u - y/f
-   1단계(먼 물체) : 평행광선(u=0) → u' = -y/f → 초점(f,0)에 수렴
+   1단계(먼 물체) : 평행 광선(u=0) → u' = -y/f → 초점(f,0)에 수렴
    ============================================================ */
 const LENSES=[ {name:"미지의 렌즈 ①", f:10}, {name:"미지의 렌즈 ②", f:15} ];
 let curLens=0;
@@ -325,13 +325,13 @@ function drawScreenPlate(){
 /* ---------- 그리기 라우터 ---------- */
 function draw(){ drawBackground(); (state.mode==='far'?drawFar:drawMeasure)(); }
 
-/* ===== 1단계 : 먼 물체(평행광선) → 초점 ===== */
+/* ===== 1단계 : 먼 물체(평행 광선) → 초점 ===== */
 function drawFar(){
   const f=LENSES[curLens].f;
-  // 먼 물체(태양) : 왼쪽에서 평행광선
+  // 먼 물체(태양) : 왼쪽에서 평행 광선
   sctx.fillStyle='#ffd24d';sctx.font='13px system-ui';sctx.textAlign='left';
-  sctx.fillText('☀ 먼 물체 (평행광선)',wx(WORLD.xMin)+6,wy(LENS_R)+2);
-  // 평행광선들: 렌즈면 y로 들어와 초점(f,0)로 수렴
+  sctx.fillText('☀ 먼 물체 (평행 광선)',wx(WORLD.xMin)+6,wy(LENS_R)+2);
+  // 평행 광선들: 렌즈면 y로 들어와 초점(f,0)로 수렴
   const N=9;
   for(let i=0;i<=N;i++){
     const yL=-LENS_R+2*LENS_R*i/N;

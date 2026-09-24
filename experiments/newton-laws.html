@@ -185,7 +185,7 @@
   <div class="tabs">
     <button class="tab active" data-tab="law1"><span class="num">01</span><span class="nm">제1법칙</span><span class="ky">관성</span></button>
     <button class="tab" data-tab="law2"><span class="num">02</span><span class="nm">제2법칙</span><span class="ky">가속도</span></button>
-    <button class="tab" data-tab="law3"><span class="num">03</span><span class="nm">제3법칙</span><span class="ky">작용·반작용</span></button>
+    <button class="tab" data-tab="law3"><span class="num">03</span><span class="nm">제3법칙</span><span class="ky">작용 반작용</span></button>
   </div>
 
   <!-- ================= LAW 1 ================= -->
@@ -378,7 +378,7 @@
       const moving=Math.abs(s.v)>0.02;
       if(s.pushing) setNote('push','b','미는 힘이 작용해 알짜힘이 0이 아닙니다. 그래서 물체가 점점 빨라집니다.');
       else if(!moving) setNote('stop','','정지한 물체는 알짜힘이 0이면 계속 정지해 있습니다. 밀기 버튼을 눌러 보세요.');
-      else if(s.floor==='none') setNote('none','g','마찰이 없고 더 이상 밀지 않아 수평 방향의 알짜힘은 0입니다. 중력과 수직항력도 평형을 이루므로 물체는 같은 속도로 계속 움직입니다.');
+      else if(s.floor==='none') setNote('none','g','마찰이 없고 더 이상 밀지 않아 수평 방향의 알짜힘은 0입니다. 중력과 수직 항력도 평형을 이루므로 물체는 같은 속도로 계속 움직입니다.');
       else if(s.floor==='ice') setNote('ice','b','마찰이 작은 얼음판에서는 아주 천천히 느려집니다. 마찰이 전혀 없다면 어떻게 될까요?');
       else setNote('fric','r','운동 반대 방향으로 마찰력이 작용해 속도가 점점 줄어듭니다.');
     }
@@ -493,7 +493,7 @@
           s.running=false; cur=null; setLock(false);
           document.getElementById('note2').className='note b';
           document.getElementById('note2txt').textContent = (stop==='top')
-            ? '속도가 최댓값에 닿아 멈췄지만 기울기는 처음 그대로 일정합니다. 조건을 바꿔 다시 출발하면 다른 색으로 비교됩니다.'
+            ? '속도가 그래프의 최댓값에 닿아 그리기를 멈췄지만, 기울기는 처음 그대로 일정합니다. 조건을 바꿔 다시 출발하면 다른 색으로 비교됩니다.'
             : '그래프가 완성되어 그대로 남았습니다. 힘이나 질량을 바꿔 다시 출발하면 다른 색 직선으로 기울기를 비교할 수 있습니다.';
         }
       }

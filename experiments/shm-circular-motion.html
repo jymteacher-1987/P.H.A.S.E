@@ -254,7 +254,7 @@
       <div class="card card-main" id="card-concept" style="display:flex;">
         <div class="lab">실험 방법</div>
         <ol class="steps">
-          <li><b>평행광선</b>을 켜 그림자를 만든다</li>
+          <li><b>평행 광선</b>을 켜 그림자를 만든다</li>
           <li>추를 <b>최고점이나 최하점</b>까지 끝까지 당긴다</li>
           <li>그림자가 다가올 때 타이밍 맞춰 놓는다<br><span style="color:var(--muted);font-size:12px">(또는 하단의 ‘같이 출발’ 버튼)</span></li>
         </ol>
@@ -303,7 +303,7 @@
 
       <div class="card card-sub">
         <div class="lab">표시 설정</div>
-        <div class="tog"><span>☀ 평행광 비추기</span><label class="switch"><input type="checkbox" id="t-light" checked><span class="sw"></span></label></div>
+        <div class="tog"><span>☀ 평행 광선 비추기</span><label class="switch"><input type="checkbox" id="t-light" checked><span class="sw"></span></label></div>
         <div class="tog"><span><span style="color:var(--green)">→</span> 속도 벡터</span><label class="switch"><input type="checkbox" id="t-vel"><span class="sw"></span></label></div>
         <div class="tog"><span><span style="color:var(--rose)">→</span> 가속도 벡터</span><label class="switch"><input type="checkbox" id="t-acc"><span class="sw"></span></label></div>
         <div class="tog"><span>그림자↔용수철 비교선</span><label class="switch"><input type="checkbox" id="t-cmp" checked><span class="sw"></span></label></div>
@@ -428,7 +428,7 @@
       sctx.shadowBlur = 0;
 
       sctx.fillStyle=C.muted;sctx.font="500 11px 'IBM Plex Sans KR',sans-serif";sctx.textAlign='center';
-      sctx.fillText('평행광선',g.lightX + 2,botR + 16);sctx.textAlign='left';
+      sctx.fillText('평행 광선',g.lightX + 2,botR + 16);sctx.textAlign='left';
     }
 
     sctx.strokeStyle=C.ring;sctx.lineWidth=1.5;sctx.beginPath();sctx.arc(g.cx,g.cy,R,0,7);sctx.stroke();
@@ -594,7 +594,7 @@
   function launch(amp,sign){sAmp=Math.max(0.2,amp);phS=phC=(sign>=0?Math.PI/2:-Math.PI/2);
     released=true;matchedOnce=true;won=false;tg=0;trail.length=0;playing=true;
     $('play-ico').textContent='⏸';$('play-txt').textContent='멈춤';
-    $('cnote').textContent='원운동과 완벽히 겹쳐서 진동합니다 🎉';
+    $('cnote').textContent='원운동의 그림자와 완벽히 겹쳐서 진동합니다 🎉';
     $('cnote').classList.add('ok');}
   $('launch').addEventListener('click',()=>launch(1,1));
   $('resetconcept').addEventListener('click',()=>{

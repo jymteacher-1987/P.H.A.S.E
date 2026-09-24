@@ -9,7 +9,7 @@ function el(id){
  if(elements.has(id))return elements.get(id);
  const attrs=new Map(),handlers=new Map();
  const item={id,handlers,textContent:'',innerHTML:'',hidden:id==='help',style:{},tagName:'DIV',
-  value:({metal:'Na',frequency:'7.50',power:'60',bias:'0',voltage:'0.00',step:'0.01'})[id]||'',
+  value:({metal:'Na',lambda:'400',power:'60',bias:'0',voltage:'0.00',step:'0.01'})[id]||'',
   classList:{toggle:noop},setAttribute:(k,v)=>attrs.set(k,v),removeAttribute:k=>attrs.delete(k),hasAttribute:k=>attrs.has(k),
   addEventListener:(k,f)=>handlers.set(k,f),appendChild:noop,focus:noop,blur:noop,getContext:()=>ctx,
   getBoundingClientRect:()=>({left:0,top:0,width:1000,height:600})};elements.set(id,item);return item;
@@ -33,55 +33,15 @@ run('Core equations, emission thresholds, current, units',()=>{
  }
  ok(!/nA|나노암페어|SURFACE_SHARE|FMIN|FMAX|PLACEHOLDER/.test(html),'Obsolete units/model code left');
  ok(html.includes('정지 전압의 크기'));ok(html.includes('들어오는 광자 수'));
- ok(html.includes('id="frequencyMark" data-label="f₀"'));ok(!html.includes('모형초'));ok(html.includes('개/s'));
+ ok(html.includes('id="lambdaMark" data-label="f₀"'));ok(!html.includes('모형초'));ok(html.includes('개/s'));
  return {conditions:4*501*3*4};
 });
-run('Frequency is the primary variable, including bounds, legacy conversion and precedence',()=>{
- const initial=api.snapshot();close(initial.state.frequency,7.5);close(initial.model.frequency,7.5);
- close(initial.model.photon,H*7.5e14/E);close(initial.model.lambda,C/(7.5e14)*1e9);
- for(const frequency of [4,4.01,7.5,14.99,15]){
-  const m=api.calc({metal:'Na',frequency,power:60,U:0});
-  close(m.frequency,frequency);close(m.nu,frequency);close(m.photon,H*frequency*1e14/E);
-  close(m.lambda,C/(frequency*1e14)*1e9);
- }
- close(api.calc({frequency:0,lambda:400}).frequency,4);
- close(api.calc({frequency:16,lambda:400}).frequency,15);
- close(api.calc({frequency:8,lambda:400}).frequency,8);
- close(api.calc({lambda:400}).frequency,C/(400e-9)/1e14);
- api.configure({metal:'Na',frequency:8,lambda:400,power:60,U:0});close(api.snapshot().state.frequency,8);
- api.configure({lambda:400});close(api.snapshot().state.frequency,C/(400e-9)/1e14);
-});
-run('Every metal has the correct frequency threshold and linear maximum kinetic energy',()=>{
- for(const [metal,{phi}] of Object.entries(api.metals)){
-  const threshold=phi*E/H/1e14;
-  const below=api.calc({metal,frequency:threshold-1e-6,power:100,U:0});
-  const exact=api.calc({metal,frequency:threshold,power:100,U:0});
-  const above=api.calc({metal,frequency:threshold+1e-6,power:100,U:0});
-  ok(!below.canEmit);close(below.K,0);close(below.current,0);
-  ok(!exact.canEmit);close(exact.K,0);close(exact.current,0);
-  ok(above.canEmit);close(above.K,H*1e8/E);close(above.current,100);
-  const low=api.calc({metal,frequency:threshold+.1,power:60,U:0});
-  const high=api.calc({metal,frequency:threshold+1.1,power:60,U:0});
-  close(high.K-low.K,H*1e14/E);ok(high.K>low.K);
-  close(low.rate,high.rate);close(low.current,high.current);close(high.current,60);
-  close(api.calc({metal,frequency:threshold+.1,power:60,U:-low.K}).current,0);
-  close(api.calc({metal,frequency:threshold+1.1,power:60,U:-high.K}).current,0);
-  ok(api.calc({metal,frequency:threshold+1.1,power:60,U:-low.K}).current>0);
-  for(const power of [0,30,100]){
-   const m=api.calc({metal,frequency:threshold+.1,power,U:0});close(m.K,low.K);close(m.current,power);
-  }
- }
-});
-run('Photon frequency and energy are preserved when the source frequency changes in either direction',()=>{
- api.configure({metal:'Na',frequency:5,power:100,U:0});
- const original=api.snapshot().photons[0];ok(original);close(original.energy,H*5e14/E);close(original.frequency,5);
- change('frequency',7.5);
- const inFlight=api.snapshot().photons.find(p=>p.n===original.n);ok(inFlight);close(inFlight.energy,original.energy);close(inFlight.frequency,5);
- api.advance(.28);
+run('Photon energy preserved when wavelength changes in either direction',()=>{
+ api.configure({metal:'Na',lambda:600,power:100,U:0});change('lambda',400);api.advance(.28);
  let s=api.snapshot();ok(s.counters.emitted===0);ok(s.counters.absorbedNoEmission===1);
- api.configure({metal:'Na',frequency:7.5,power:100,U:0});change('frequency',5);api.advance(.28);
+ api.configure({metal:'Na',lambda:400,power:100,U:0});change('lambda',600);api.advance(.28);
  s=api.snapshot();ok(s.counters.emitted===1);ok(s.counters.references===1);
- const reference=s.particles.find(p=>p.kind==='reference');close(reference.E0,H*7.5e14/E-2.46);
+ const reference=s.particles.find(p=>p.kind==='reference');close(reference.E0,H*C/(400e-9)/E-2.46);
  return {belowThresholdPhotonEmits:false,aboveThresholdPhotonEmits:true,referenceEnergy:reference.E0};
 });
 run('Metal at impact determines work function',()=>{
@@ -142,7 +102,7 @@ run('Tiny current is not displayed as zero',()=>{
 run('Conservation over repeated changes of light, metal, voltage and power',()=>{
  api.configure({metal:'Na',lambda:400,power:100,U:0});
  for(let i=0;i<100;i++){
-  if(i%3===0)change('frequency',4+(i*47)%1101/100);
+  if(i%3===0)change('lambda',200+(i*47)%501);
   if(i%5===0)change('metal',['Na','Al','Zn','Cu'][i%4],'change');
   if(i%7===0)change('power',i%2?100:0);
   api.setU(-4+(i*13%601)/100);api.advance(.17);

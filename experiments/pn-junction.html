@@ -3,7 +3,7 @@
 <head><script src="../assets/js/browser-compat.js?v=9e1028454f"></script><script defer src="../assets/js/visit-entry.js?v=dcaa1fcbb5"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PN 접합 반도체 물리 시뮬레이션</title>
+    <title>p-n 접합 반도체 물리 시뮬레이션</title>
     <!-- Google Fonts for premium typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -277,7 +277,7 @@
         }
 
         /* 바깥 그림 슬롯만 같은 높이로 유지하고 각 캔버스의 원래 비율은 보존한다.
-           원자·캐리어는 1100:380을 유지한 채 슬롯 높이에 맞춰 축소한다. */
+           원자·나르개는 1100:380을 유지한 채 슬롯 높이에 맞춰 축소한다. */
         #lattice-canvas {
             width: 78.947%;
             aspect-ratio: 1100 / 380;
@@ -1378,23 +1378,23 @@
     <div class="app-container">
         <!-- 상단 헤더 -->
         <header class="app-header">
-            <h1>PN 접합 반도체 시뮬레이션</h1>
-            <p class="subtitle">도핑부터 PN 접합까지, 반도체의 핵심 원리를 눈으로 확인하는 시뮬레이터</p>
+            <h1>p-n 접합 반도체 시뮬레이션</h1>
+            <p class="subtitle">도핑부터 p-n 접합까지, 반도체의 핵심 원리를 눈으로 확인하는 시뮬레이터</p>
         </header>
 
         <!-- 모드 선택 버튼 -->
         <nav class="mode-selector">
-            <button id="btn-p-type" class="mode-btn active" onclick="setMode('P')">P형 반도체</button>
-            <button id="btn-n-type" class="mode-btn" onclick="setMode('N')">N형 반도체</button>
-            <button id="btn-pn-junction" class="mode-btn" onclick="setMode('PN')">PN 접합</button>
+            <button id="btn-p-type" class="mode-btn active" onclick="setMode('P')">p형 반도체</button>
+            <button id="btn-n-type" class="mode-btn" onclick="setMode('N')">n형 반도체</button>
+            <button id="btn-pn-junction" class="mode-btn" onclick="setMode('PN')">p-n 접합</button>
         </nav>
 
         <!-- 메인 콘텐츠 영역 -->
         <main class="main-content">
             <section class="simulation-section">
                 <nav class="canvas-tabs">
-                    <button id="canvas-tab-lattice" class="canvas-tab-btn active" onclick="switchCanvasTab('lattice')">원자·캐리어</button>
-                    <button id="canvas-tab-energy" class="canvas-tab-btn" onclick="switchCanvasTab('energy')">에너지 띠</button>
+                    <button id="canvas-tab-lattice" class="canvas-tab-btn active" onclick="switchCanvasTab('lattice')">원자·나르개</button>
+                    <button id="canvas-tab-energy" class="canvas-tab-btn" onclick="switchCanvasTab('energy')">에너지띠</button>
                     <button id="canvas-tab-potential" class="canvas-tab-btn" onclick="switchCanvasTab('potential')">전위 그래프</button>
                 </nav>
 
@@ -1402,16 +1402,16 @@
                 <div class="canvas-card" id="panel-lattice">
                     <div class="card-header">
                         <h3>전자와 양공의 움직임</h3>
-                        <span class="badge" id="lattice-badge">P형: 양공 다수 · 전자 소수</span>
+                        <span class="badge" id="lattice-badge">p형: 양공 다수 · 전자 소수</span>
                     </div>
                     <div class="region-labels" aria-label="반도체 영역">
-                        <span id="region-p" class="region-p">P형 · 양공이 많음</span>
-                        <span id="region-n" class="region-n" hidden>N형 · 자유 전자가 많음</span>
+                        <span id="region-p" class="region-p">p형 · 양공이 많음</span>
+                        <span id="region-n" class="region-n" hidden>n형 · 자유 전자가 많음</span>
                     </div>
                     <div class="canvas-wrapper">
                         <canvas id="lattice-canvas"></canvas>
                         <div id="junction-overlay" class="overlay hidden">
-                            <button id="btn-join-action" onclick="triggerJoinAnimation()">PN 접합 실행</button>
+                            <button id="btn-join-action" onclick="triggerJoinAnimation()">p-n 접합 실행</button>
                         </div>
                     </div>
                     <div class="canvas-notes">
@@ -1424,29 +1424,29 @@
                         <details class="teaching-details">
                             <summary>움직임과 모형 설명 더 보기</summary>
                             <p class="flow-summary" id="flow-summary">—</p>
-                            <p>접합 전 P형과 N형은 각각 전체적으로 전기적 중성입니다. P·N은 주로 전류를 운반하는 전하의 종류를 뜻합니다.</p>
+                            <p>접합 전 p형과 n형은 각각 전체적으로 전기적 중성입니다. P·N은 주로 전류를 운반하는 전하의 종류를 뜻합니다.</p>
                             <p class="scale-note">※ 개념 모형: 원자는 제자리에서 진동하고 전자와 양공은 이동합니다. 0 V에서도 열운동은 계속됩니다. 점 수·화면 속력·공핍층 그림 폭은 상대 표현이며 계산한 폭은 자세한 계측값에서 확인합니다.</p>
                             <p class="scale-note hidden" id="note-drift">※ 반도체 속 전하와 도선 전자는 화면 속력 척도가 다릅니다. 도선 전자는 모든 모드에 같은 척도를 쓰므로 전류가 클수록 빠릅니다.</p>
                         </details>
                     </div>
                 </div>
 
-                <!-- 2. 에너지 띠 -->
+                <!-- 2. 에너지띠 -->
                 <div class="canvas-card" id="panel-energy" style="display:none">
                     <div class="card-header">
-                        <h3>에너지 띠 · 위로 갈수록 전자 에너지가 높음</h3>
+                        <h3>에너지띠 · 위로 갈수록 전자 에너지가 높음</h3>
                         <span class="badge" id="energy-badge" style="background:#1e293b">—</span>
                     </div>
-                    <div class="band-key"><span>파랑: 전도띠</span><span>빨강: 원자가띠</span><span>두 띠 사이: 띠틈</span></div>
-                    <div class="region-labels" aria-label="에너지 띠의 반도체 영역"><span class="region-p">P형</span><span class="region-n" hidden>N형</span></div>
+                    <div class="band-key"><span>파랑: 전도띠</span><span>빨강: 원자가 띠</span><span>두 띠 사이: 띠 간격</span></div>
+                    <div class="region-labels" aria-label="에너지띠의 반도체 영역"><span class="region-p">p형</span><span class="region-n" hidden>n형</span></div>
                     <label class="teaching-switch"><input id="show-band-details" type="checkbox" onchange="showBandDetails = this.checked">상세 준위 표시 (페르미·도핑 준위)</label>
                     <div class="canvas-wrapper">
                         <canvas id="energy-canvas"></canvas>
                     </div>
                     <div class="canvas-notes">
-                        <p class="lesson-note">순방향에서는 전자가 접합을 넘어가기 위한 장벽이 낮아지고, 역방향에서는 높아집니다. <strong>띠틈은 같은 위치에서 전도띠와 원자가띠 사이의 에너지 차이</strong>입니다. 접합 양쪽의 장벽 높이와 구별하세요.</p>
-                        <details class="teaching-details"><summary>에너지 띠 모형 설명 더 보기</summary>
-                            <p>단일 P형·N형은 평형 기준도로 수평으로 표시합니다. 인가 전압에 따른 변화는 전위 그래프에서 확인하세요. PN 접합은 양쪽 중성영역을 수평으로 단순화하고 공핍층에서만 띠를 휘게 표시합니다. 같은 모드에서는 세로 배율이 고정됩니다.</p>
+                        <p class="lesson-note">순방향에서는 전자가 접합을 넘어가기 위한 장벽이 낮아지고, 역방향에서는 높아집니다. <strong>띠 간격은 같은 위치에서 전도띠와 원자가 띠 사이의 에너지 차이</strong>입니다. 접합 양쪽의 장벽 높이와 구별하세요.</p>
+                        <details class="teaching-details"><summary>에너지띠 모형 설명 더 보기</summary>
+                            <p>단일 p형·n형은 평형 기준도로 수평으로 표시합니다. 인가 전압에 따른 변화는 전위 그래프에서 확인하세요. p-n 접합은 양쪽 중성영역을 수평으로 단순화하고 공핍층에서만 띠를 휘게 표시합니다. 같은 모드에서는 세로 배율이 고정됩니다.</p>
                             <p>상세 준위를 켜면 단일 반도체의 페르미 준위와 도핑 준위를 볼 수 있습니다. 접합 후 페르미 준위는 전압이 0 V인 평형 상태에서만 표시합니다.</p>
                         </details>
                     </div>
@@ -1458,12 +1458,12 @@
                         <h3>정전위 분포 V(x)</h3>
                         <span class="badge" id="potential-badge" style="background:#1e293b">—</span>
                     </div>
-                    <div class="region-labels" aria-label="전위 그래프의 반도체 영역"><span class="region-p">P형</span><span class="region-n" hidden>N형</span></div>
+                    <div class="region-labels" aria-label="전위 그래프의 반도체 영역"><span class="region-p">p형</span><span class="region-n" hidden>n형</span></div>
                     <div class="canvas-wrapper">
                         <canvas id="potential-canvas"></canvas>
                     </div>
                     <div class="canvas-notes">
-                        <p class="scale-note">위로 갈수록 <strong>반도체 내부의 전위 V(x)</strong>가 높습니다. 단일 P형·N형에서는 인가 전압에 따른 균일한 전기장을 표시합니다. PN 접합은 N형 중성영역을 0 V 기준으로 두고 두 영역 사이의 상대 전위차를 나타냅니다. P형·N형 중성영역은 평평하게, 공핍층의 전위 장벽만 휘게 표시하며 전압을 바꿔도 세로축은 고정됩니다.</p>
+                        <p class="scale-note">위로 갈수록 <strong>반도체 내부의 전위 V(x)</strong>가 높습니다. 단일 p형·n형에서는 인가 전압에 따른 균일한 전기장을 표시합니다. p-n 접합은 n형 중성영역을 0 V 기준으로 두고 두 영역 사이의 상대 전위차를 나타냅니다. p형·n형 중성영역은 평평하게, 공핍층의 전위 장벽만 휘게 표시하며 전압을 바꿔도 세로축은 고정됩니다.</p>
                     </div>
                 </div>
             </section>
@@ -1565,7 +1565,7 @@
                             <div class="status-item">
                                 <span class="status-title">접합 장벽 전압</span>
                                 <span class="status-value small" id="status-barrier">--</span>
-                                <span class="status-sub" id="status-barrier-sub">PN 접합에서 형성</span>
+                                <span class="status-sub" id="status-barrier-sub">p-n 접합에서 형성</span>
                             </div>
                             <div class="status-item">
                                 <span class="status-title">소자·접합 전압</span>
@@ -1583,12 +1583,12 @@
                                 <span class="status-sub" id="status-conductivity-sub">—</span>
                             </div>
                             <div class="status-item">
-                                <span class="status-title">순수 Si의 진성 캐리어 농도</span>
+                                <span class="status-title">순수 Si의 진성 나르개 농도</span>
                                 <span class="status-value small" id="status-ni">--</span>
                                 <span class="status-sub" id="status-ni-sub">도핑하지 않았을 때 n = p = nᵢ</span>
                             </div>
                             <div class="status-item">
-                                <span class="status-title">띠틈 (밴드갭)</span>
+                                <span class="status-title">띠 간격</span>
                                 <span class="status-value small" id="status-eg">--</span>
                                 <span class="status-sub">실리콘의 에너지 차이</span>
                             </div>
@@ -1606,23 +1606,23 @@
                 </button>
                 <div class="guide-content">
                     <ul>
-                        <li><strong>P형과 N형</strong><br>
-                        P형에서는 양공이, N형에서는 자유 전자가 다수 캐리어로서 주로 전류를 운반합니다. 도핑 농도를 높이면 다수 캐리어 농도도 대체로 증가합니다. 단일 P형·N형 화면은 금속 접점에서 전류가 원활히 드나든다고 가정하므로 PN 접합 다이오드처럼 0.6~0.7 V 부근에서 전류가 급격히 증가하는 접합 특성은 나타나지 않습니다.</li>
+                        <li><strong>p형과 n형</strong><br>
+                        p형에서는 양공이, n형에서는 자유 전자가 다수 나르개로서 주로 전류를 운반합니다. 도핑 농도를 높이면 다수 나르개 농도도 대체로 증가합니다. 단일 p형·n형 화면은 금속 접점에서 전류가 원활히 드나든다고 가정하므로 p-n 접합 다이오드처럼 0.6~0.7 V 부근에서 전류가 급격히 증가하는 접합 특성은 나타나지 않습니다.</li>
 
-                        <li><strong>PN 접합</strong><br>
-                        P형과 N형을 붙이면 접합면 부근의 전자와 양공 일부가 농도 차이 때문에 반대편으로 확산하여 재결합합니다. 그 자리에 움직이지 않는 이온화 도핑 원자가 남으면서, 움직이는 캐리어가 적고 내부 전기장이 존재하는 <strong>공핍층</strong>이 형성됩니다. 평형에서는 확산하려는 경향과 내부 전기장에 의한 이동이 균형을 이루므로 외부 회로에는 순전류가 흐르지 않습니다.</li>
+                        <li><strong>p-n 접합</strong><br>
+                        p형과 n형을 붙이면 접합면 부근의 전자와 양공 일부가 농도 차이 때문에 반대편으로 확산하여 재결합합니다. 그 자리에 움직이지 않는 이온화 도핑 원자가 남으면서, 움직이는 나르개가 적고 내부 전기장이 존재하는 <strong>공핍층</strong>이 형성됩니다. 평형에서는 확산하려는 경향과 내부 전기장에 의한 이동이 균형을 이루므로 외부 회로에는 순전류가 흐르지 않습니다.</li>
 
                         <li><strong>전압의 효과</strong><br>
-                        순방향 전압은 전위 장벽을 낮추고 공핍층을 좁혀 전류를 빠르게 증가시킵니다. 역방향 전압은 장벽을 높이고 공핍층을 넓혀 다수 캐리어가 접합을 통과하기 어렵게 만듭니다. 상온 부근의 실리콘 다이오드에서는 흔히 0.6~0.7 V 부근을 <strong>문턱전압(도통전압)</strong>이라고 부르지만, 정확히 한 전압에서 갑자기 켜지는 것은 아닙니다. 역방향에서도 열로 생긴 소수 캐리어 때문에 매우 작은 전류가 흐를 수 있습니다.</li>
+                        순방향 전압은 전위 장벽을 낮추고 공핍층을 좁혀 전류를 빠르게 증가시킵니다. 역방향 전압은 장벽을 높이고 공핍층을 넓혀 다수 나르개가 접합을 통과하기 어렵게 만듭니다. 상온 부근의 실리콘 다이오드에서는 흔히 0.6~0.7 V 부근을 <strong>문턱전압(도통전압)</strong>이라고 부르지만, 정확히 한 전압에서 갑자기 켜지는 것은 아닙니다. 역방향에서도 열로 생긴 소수 나르개 때문에 매우 작은 전류가 흐를 수 있습니다.</li>
 
                         <li><strong>온도의 효과</strong><br>
                         온도가 높아지면 전자와 양공의 무작위 열운동이 활발해지고, 열로 생성되는 전자–양공 쌍도 늘어납니다. 그러나 무작위 열운동 자체는 특정 방향의 순전류가 아니며, 실제 전류 변화는 전압과 도핑 조건도 함께 보아야 합니다.</li>
 
                         <li><strong>애니메이션 읽기</strong><br>
-                        전압이 0 V이면 도선의 파란 전자는 평균적으로 한쪽 방향으로 이동하지 않습니다. 반도체 속 전자와 양공은 계속 무작위로 움직이지만, 평균 이동 방향이 없으므로 순전류는 0입니다. 전류가 흐를 때는 이러한 열운동에 평균적인 이동 방향이 더해집니다. P형에서 회색 공유결합 전자가 이웃 양공을 메우면 양공은 그 전자와 반대 방향으로 이동한 것처럼 보입니다. 재결합 때 나타나는 동심원은 실제로 퍼지는 전하의 물결이 아니라 재결합 위치를 잠시 강조하는 화면 표시입니다.</li>
+                        전압이 0 V이면 도선의 파란 전자는 평균적으로 한쪽 방향으로 이동하지 않습니다. 반도체 속 전자와 양공은 계속 무작위로 움직이지만, 평균 이동 방향이 없으므로 순전류는 0입니다. 전류가 흐를 때는 이러한 열운동에 평균적인 이동 방향이 더해집니다. p형에서 회색 공유결합 전자가 이웃 양공을 메우면 양공은 그 전자와 반대 방향으로 이동한 것처럼 보입니다. 재결합 때 나타나는 동심원은 실제로 퍼지는 전하의 물결이 아니라 재결합 위치를 잠시 강조하는 화면 표시입니다.</li>
 
                         <li><strong>수치 읽기</strong><br>
-                        n은 자유전자 농도, p는 양공 농도이며, nᵢ는 같은 온도의 도핑하지 않은 순수 실리콘에서 n=p가 되는 진성 캐리어 농도입니다. PN 접합의 n·p 계측값은 접합에서 떨어진 P형·N형 중성영역의 기준값이며, 접합 가까이의 소수 캐리어 농도는 전압에 따라 달라집니다. 전도도 σ가 클수록 전류가 잘 흐르며 비저항은 ρ=1/σ의 관계를 갖습니다. 밴드갭 E<sub>g</sub>는 원자가띠와 전도띠 사이의 에너지 차이입니다. 계측값은 실리콘 물성식과 화면에서 정한 소자 크기로 계산되므로 모든 다이오드의 고정값으로 외우기보다 조건에 따른 변화 방향과 상대적인 크기를 비교하세요.</li>
+                        n은 자유전자 농도, p는 양공 농도이며, nᵢ는 같은 온도의 도핑하지 않은 순수 실리콘에서 n=p가 되는 진성 나르개 농도입니다. p-n 접합의 n·p 계측값은 접합에서 떨어진 p형·n형 중성영역의 기준값이며, 접합 가까이의 소수 나르개 농도는 전압에 따라 달라집니다. 전도도 σ가 클수록 전류가 잘 흐르며 비저항은 ρ=1/σ의 관계를 갖습니다. 띠 간격 E<sub>g</sub>는 원자가 띠와 전도띠 사이의 에너지 차이입니다. 계측값은 실리콘 물성식과 화면에서 정한 소자 크기로 계산되므로 모든 다이오드의 고정값으로 외우기보다 조건에 따른 변화 방향과 상대적인 크기를 비교하세요.</li>
                     </ul>
                 </div>
             </div>
@@ -1631,7 +1631,7 @@
     <script>
     "use strict";
     /* =========================================================================
-       PN 접합 반도체 시뮬레이션 — 물리 엔진
+       p-n 접합 반도체 시뮬레이션 — 물리 엔진
        실리콘 실측 물성값 기반. 모든 계산은 cm·V·A·K 단위계.
        ========================================================================= */
 
@@ -1641,12 +1641,12 @@
     const EPS0    = 8.854188e-14;   // F/cm
     const EPS_SI  = 11.7 * EPS0;    // Si 유전율
     const NC300   = 2.86e19;        // cm^-3, 전도띠 유효상태밀도 @300K
-    const NV300   = 3.10e19;        // cm^-3, 원자가띠 유효상태밀도 @300K
-    const E_ION   = 0.045;          // eV, B(억셉터)·P(도너) 이온화 에너지
-    const TAU     = 1.0e-6;         // s, SRH 캐리어 수명
+    const NV300   = 3.10e19;        // cm^-3, 원자가 띠 유효상태밀도 @300K
+    const E_ION   = 0.045;          // eV, B(받개)·P(주개) 이온화 에너지
+    const TAU     = 1.0e-6;         // s, SRH 나르개 수명
     const AREA    = 1.0e-4;         // cm^2, 소자 단면적 (100µm × 100µm)
     const LEN     = 1.0e-2;         // cm, 각 영역 길이 (100 µm)
-    const NI_300  = 1.0700e10;      // cm^-3, 기준 진성 캐리어 농도
+    const NI_300  = 1.0700e10;      // cm^-3, 기준 진성 나르개 농도
 
     /* ── 온도 의존 기본량 ── */
     const EgT = T => 1.1700 - 4.730e-4 * T * T / (T + 636);          // Varshni
@@ -1657,7 +1657,7 @@
 
     /* ── 불완전 이온화 (freeze-out) ──
        N+ = N / (1 + (g·n/Nb)·exp(ΔE/kT)) 를 n에 대해 정확히 풀어낸 해.
-       도너 축퇴인자 g=2, 억셉터 g=4.                                    */
+       주개 축퇴인자 g=2, 받개 g=4.                                    */
     function ionizedDensity(N, T, isDonor) {
         /* 고등학교 관찰 범위(250~400 K)에서는 도펀트가 이온화되어 있다고 가정한다.
            저온 불완전 이온화는 이 수업용 화면의 범위 밖이다. */
@@ -1668,7 +1668,7 @@
         return (Math.sqrt(1 + 4 * beta * N) - 1) / (2 * beta);
     }
 
-    /* ── 전하 중성 + np = ni² 를 동시에 만족하는 캐리어 농도 ── */
+    /* ── 전하 중성 + np = ni² 를 동시에 만족하는 나르개 농도 ── */
     function carrierDensities(N, T, isDonor) {
         const ni   = niT(T);
         const Nion = ionizedDensity(N, T, isDonor);
@@ -1735,8 +1735,8 @@
         const cn = carrierDensities(Nd, T, true);
         const ni = cp.ni;
         const mP = mobility(Na, T), mN = mobility(Nd, T);
-        /* 전자는 P형 중성영역, 양공은 N형 중성영역의 소수캐리어이므로
-           각 확산계수에는 그 캐리어가 실제로 확산하는 영역의 이동도를 쓴다. */
+        /* 전자는 p형 중성영역, 양공은 n형 중성영역의 소수 나르개이므로
+           각 확산계수에는 그 나르개가 실제로 확산하는 영역의 이동도를 쓴다. */
         const Dn = mP.mn * Vt, Dp = mN.mp * Vt;
         const Ln = Math.sqrt(Dn * TAU), Lp = Math.sqrt(Dp * TAU);
         /* 순방향 확산전류를 전자·양공 성분으로 따로 보존한다.
@@ -1849,7 +1849,7 @@
                 /* 교육용 장벽 높이는 음수가 될 수 없는 크기다.
                    큰 순방향 전압에서 단순 공핍 근사가 한계에 닿으면 0으로 둔다. */
                 barrier: Math.max(d.Vbi - (junctionJoined ? d.Vj : 0), 0),
-                /* P형 영역 Ef−Ev, N형 영역 Ec−Ef (eV) — 밴드 그림의 기준 */
+                /* p형 영역 Ef−Ev, n형 영역 Ec−Ef (eV) — 밴드 그림의 기준 */
                 dEfP: Vt * Math.log(NvT(T) / Math.max(cp.p, 1)),
                 dEfN: Vt * Math.log(NcT(T) / Math.max(cn.n, 1))
             };
@@ -1869,7 +1869,7 @@
                 I: sig * (AREA / LEN) * Vapp,        // 옴 법칙 (저항체)
                 Rs: LEN / (AREA * sig),
                 Vbi: 0, Vj: Vapp, barrier: 0, Wcm: 0,
-                /* Ef 위치: N형은 Ec 아래, P형은 Ev 위 (eV) */
+                /* Ef 위치: n형은 Ec 아래, p형은 Ev 위 (eV) */
                 dEf: isD ? Vt * Math.log(NcT(T) / Math.max(c.n, 1))
                          : Vt * Math.log(NvT(T) / Math.max(c.p, 1))
             };
@@ -1906,12 +1906,12 @@
          ① 저온  (kT ≪ ΔE)        → 동결(freeze-out). 온도축의 저온쪽 구간.
          ② 고농도 (E_F가 도펀트 준위에 접근) → 불완전 이온화. 상온에서도 일어난다.
        ②를 "동결"이라 부르면 "상온 실리콘이 얼어 있다"는 오개념이 된다. 그래서
-       원인을 갈라서 이름 붙인다. 판정은 낮은 쪽(억셉터, g=4) 이온화율을 쓴다. */
+       원인을 갈라서 이름 붙인다. 판정은 낮은 쪽(받개, g=4) 이온화율을 쓴다. */
     function classifyRegime(ph) {
         if (ph.ionRatio < 0.90) {
             /* ── 원인 판정: 고정 온도 임계값을 쓰지 않는다 ──
                동결이 풀리는 온도는 도핑에 따라 크게 달라진다. 이 코드의 이온화식으로
-               '이온화율 90% 도달 온도'를 직접 계산하면 (억셉터 붕소, g=4):
+               '이온화율 90% 도달 온도'를 직접 계산하면 (받개 붕소, g=4):
                    3×10¹⁴ → 85 K,  3×10¹⁵ → 120 K,  1×10¹⁶ → 149 K,
                    5×10¹⁶ → 214 K, 3×10¹⁷ → 363 K
                10배 넘게 흩어지므로 "몇 K 미만이면 동결" 같은 상수는 물리적 근거가 없다.
@@ -1935,7 +1935,7 @@
                     color: '#38bdf8' };
         }
         if (ph.ni >= ph.Nion)   return { key: 'intrinsic', label: '진성 영역',
-            note: '열로 생긴 나르개가 도핑을 넘어서 P/N 차이가 작아짐', color: '#ef4444' };
+            note: '열로 생긴 나르개가 도핑을 넘어서 p형·n형 차이가 작아짐', color: '#ef4444' };
         if (ph.ni >= 0.05 * ph.Nion) return { key: 'transition', label: '진성 영역 전이 구간',
             note: '불순물 영역에서 진성 영역으로 넘어가는 중', color: '#f59e0b' };
         return { key: 'extrinsic', label: '불순물 영역',
@@ -2188,7 +2188,7 @@
 
     /* PN에서 forDrift = true 면 나르개 이동 판정용 표시 기울기,
        false 면 소자 내부 전위 계산용 실제 I·R_s 분포를 반환한다.
-       교과서형 전위·에너지 띠 그림은 아래 textbookJunctionPotentialAt을 사용한다. */
+       교과서형 전위·에너지띠 그림은 아래 textbookJunctionPotentialAt을 사용한다. */
     function potentialAt(xFrac, forDrift, carrierType) {
         if (currentMode !== 'PN') {
             /* 나르개 판정용 기울기는 전자·양공의 μE를 각각 화면 척도로 바꾼 값이다.
@@ -2211,7 +2211,7 @@
         /* 중성영역의 옴 강하 = I·R_s. V_인가 = V_j + I·R_s 이므로 이 항이 있어야
            그래프 양끝 전위차가 V_bi − V_인가 로 정확히 맞는다(전에는 I·R_s가 빠져 있었다).
            그래프는 비저항 비로 나누고, 애니메이션은 각 나르개의 국소 μE에서 얻은
-           P형·N형 영역의 표시 기울기를 따로 사용한다. */
+           p형·n형 영역의 표시 기울기를 따로 사용한다. */
         let ohmP, ohmN;
         if (forDrift) {
             const tp = carrierType || 'electron';
@@ -2225,12 +2225,12 @@
             ohmN = RX.ohm * rN / rSum;
         }
 
-        /* N형 중성영역: x=R 에서 ohmN, 오른쪽 단자(x=1)에서 0 */
+        /* n형 중성영역: x=R 에서 ohmN, 오른쪽 단자(x=1)에서 0 */
         if (xFrac >= R) {
             const u = R < 1 ? (xFrac - R) / (1 - R) : 1;
             return ohmN * (1 - u);
         }
-        /* P형 중성영역: x=L 에서 ohmN−step, 왼쪽 단자(x=0)에서 ohmN−step+ohmP */
+        /* p형 중성영역: x=L 에서 ohmN−step, 왼쪽 단자(x=0)에서 ohmN−step+ohmP */
         if (xFrac <= L) {
             const u = L > 0 ? xFrac / L : 0;
             return ohmN - step + ohmP * (1 - u);
@@ -2246,9 +2246,9 @@
         return ohmN - step * nShare * (1 - u) * (1 - u);
     }
 
-    /* 고등학생용 PN 접합 전위:
+    /* 고등학생용 p-n 접합 전위:
        중성영역의 작은 I·R_s 기울기는 생략하고 공핍층의 전위 장벽만 나타낸다.
-       전류 계산에는 위의 실제 소자 모형을 그대로 사용하며, 이 함수는 에너지 띠와
+       전류 계산에는 위의 실제 소자 모형을 그대로 사용하며, 이 함수는 에너지띠와
        전위 그래프를 교과서형으로 단순하게 그릴 때만 사용한다. */
     function textbookJunctionPotentialAt(xFrac) {
         if (currentMode !== 'PN' || !junctionJoined) return 0;
@@ -2256,8 +2256,8 @@
         if (!(step > 0)) return 0;
         const dg = depletionDisplayGeometry();
         const left = 0.5 - dg.pFrac, right = 0.5 + dg.nFrac;
-        if (xFrac <= left) return -step;                 // P형 중성영역
-        if (xFrac >= right) return 0;                    // N형 중성영역
+        if (xFrac <= left) return -step;                 // p형 중성영역
+        if (xFrac >= right) return 0;                    // n형 중성영역
 
         const total = Math.max(dg.pFrac + dg.nFrac, 1e-12);
         const pShare = dg.pFrac / total, nShare = dg.nFrac / total;
@@ -2272,10 +2272,10 @@
     const colToFrac = c => (c + 1) / (GRID_COLS + 1);
 
     /* =========================================================================
-       캐리어
+       나르개
        kind: 'majority' (이온화 도펀트가 내놓은 것)
-             'minority' (열평형 소수캐리어)
-             'injected' (순방향·접합 형성 때 반대쪽에 주입된 소수캐리어)
+             'minority' (열평형 소수 나르개)
+             'injected' (순방향·접합 형성 때 반대쪽에 주입된 소수 나르개)
              'thermal'  (공핍층 등에서 열적으로 쌍생성된 것 → 접점에서 수집되어 소멸)
        ========================================================================= */
     class Carrier {
@@ -2471,7 +2471,7 @@
         });
     }
 
-    /* ── 이온화 상태 + 캐리어 수를 물리값에 맞춰 조정 (전체 리셋 없이) ── */
+    /* ── 이온화 상태 + 나르개 수를 물리값에 맞춰 조정 (전체 리셋 없이) ── */
     function syncDopantIonization() {
         if (!PH) return;
 
@@ -2486,15 +2486,15 @@
             a.ionized = (a.rank < count);
         });
 
-        /* 공핍층에서는 이동 가능한 다수캐리어가 빠져나가고 이온화 도펀트만 남는다. */
+        /* 공핍층에서는 이동 가능한 다수 나르개가 빠져나가고 이온화 도펀트만 남는다. */
         particles.forEach(p => {
             if (p.kind === 'majority' && isInDisplayedDepletion(p.gridX)) p.dead = true;
         });
         particles = particles.filter(p => !p.dead);
 
-        /* 다수캐리어 목표 수.
-           PN 접합에서는 공핍층에 들어간 이온화 도펀트만큼 이동 캐리어 총수를 줄인다.
-           이전처럼 공핍층에서 지운 점을 중성영역에 다시 채우면 캐리어가 바깥에
+        /* 다수 나르개 목표 수.
+           p-n 접합에서는 공핍층에 들어간 이온화 도펀트만큼 이동 나르개 총수를 줄인다.
+           이전처럼 공핍층에서 지운 점을 중성영역에 다시 채우면 나르개가 바깥에
            압축된 것처럼 보이므로, 실제로 이동 가능한 중성영역 도펀트 수를 센다. */
         const targets = {};
         if (currentMode === 'P')      targets.hole = ionCountA;
@@ -2537,7 +2537,7 @@
             }
         });
 
-        /* 소수캐리어: P형에서는 전자, N형에서는 양공. PN에서는 양쪽에 각각 */
+        /* 소수 나르개: p형에서는 전자, n형에서는 양공. PN에서는 양쪽에 각각 */
         const minorTypes = (currentMode === 'P') ? ['electron']
                          : (currentMode === 'N') ? ['hole']
                          : ['electron', 'hole'];
@@ -2546,11 +2546,11 @@
             const list = particles.filter(p => p.type === tp && p.kind === 'minority');
             if (list.length > minorTarget) list.slice(minorTarget).forEach(p => { p.dead = true; });
             else for (let i = list.length; i < minorTarget; i++) {
-                /* 소수캐리어는 자신이 소수인 영역에서 생성 */
+                /* 소수 나르개는 자신이 소수인 영역에서 생성 */
                 let cLo = 0, cHi = GRID_COLS;
                 if (currentMode === 'PN') {
-                    if (tp === 'electron') { cLo = 0; cHi = GRID_MID; }       // P형 영역의 소수 = 전자
-                    else { cLo = GRID_MID; cHi = GRID_COLS; }                 // N형 영역의 소수 = 양공
+                    if (tp === 'electron') { cLo = 0; cHi = GRID_MID; }       // p형 영역의 소수 = 전자
+                    else { cLo = GRID_MID; cHi = GRID_COLS; }                 // n형 영역의 소수 = 양공
                 }
                 particles.push(new Carrier(
                     cLo + Math.floor(Math.random() * (cHi - cLo)),
@@ -2564,7 +2564,7 @@
     /* ── 열적 쌍생성 (SRH): 생성률 ∝ ni(T)·W ── */
     let genAccumulator = 0;
     const GEN_VISUAL_CAP = 26;     // 초당 최대 표시 이벤트 (애니메이션 한계)
-    const THERMAL_CAP = 12;        // 동시 표시 열생성 캐리어 상한 (화면 가독성)
+    const THERMAL_CAP = 12;        // 동시 표시 열생성 나르개 상한 (화면 가독성)
     function trueGenRateRatio() {
         return PH ? PH.ni / NI_300 : 1;                       // 300K 대비 실제 생성률 배율
     }
@@ -2586,9 +2586,9 @@
         const full = 0.3 + (GEN_VISUAL_CAP - 0.3) * norm;
 
         if (currentMode !== 'PN') {
-            /* 단일 반도체: 상온·외인성 조건에서 소수캐리어는 다수의 10⁻¹²배로
+            /* 단일 반도체: 상온·외인성 조건에서 소수 나르개는 다수의 10⁻¹²배로
                사실상 존재하지 않는다. 그때 열생성 쌍을 화면에 띄우면 '도핑된 반도체에도
-               두 캐리어가 비슷하게 있다'는 오개념을 심는다. 그래서 소수캐리어 비율이
+               두 나르개가 비슷하게 있다'는 오개념을 심는다. 그래서 소수 나르개 비율이
                유의미해지는 진성 전이 구간부터만 표시한다.                        */
             const ratioMin = (PH.maj > 0) ? PH.min / PH.maj : 0;
             if (ratioMin < 1e-4) return 0;
@@ -2633,7 +2633,7 @@
                 c = Math.floor(Math.random() * GRID_COLS);
             }
             /* 생성 직후 전기장이 즉시 둘을 반대로 떼어놓는다.
-               전자는 전위가 높은 쪽(N형), 양공은 전위가 낮은 쪽(P형)으로 밀린다.
+               전자는 전위가 높은 쪽(n형), 양공은 전위가 낮은 쪽(p형)으로 밀린다.
                전기장이 없으면(평형·단독) 임의 방향으로 갈라진 뒤 다시 만나 재결합할 수 있다. */
             const dV = potentialAt(colToFrac(Math.min(c + 1, GRID_COLS - 1)), false) -
                        potentialAt(colToFrac(Math.max(c - 1, 0)), false);
@@ -2654,8 +2654,8 @@
     }
 
     /* ── 접합 형성 과도상태 ───────────────────────────────────────────
-       확산은 한 입자가 접합면을 향해 직진하는 운동이 아니다. 개별 캐리어는 무작위
-       열운동을 하지만, N형에는 전자가 많고 P형에는 양공이 많기 때문에 앙상블의
+       확산은 한 입자가 접합면을 향해 직진하는 운동이 아니다. 개별 나르개는 무작위
+       열운동을 하지만, n형에는 전자가 많고 p형에는 양공이 많기 때문에 앙상블의
        순플럭스가 전자 N→P, 양공 P→N이 된다. 내부 전기장이 자라면 반대 방향 표류가
        확산을 상쇄한다. Si 원자는 이 과정에서 이동하지 않는다. */
     function updateJunctionFormation(dt) {
@@ -2664,7 +2664,7 @@
                         PH && PH.Vj > 0.01;
         if (forming || forward) {
             /* 형성 중에는 장벽이 자랄수록 순확산이 줄고, 순방향에서는 전류가 클수록
-               다수캐리어 주입 사건이 자주 보인다(표시 속도는 √압축). */
+               다수 나르개 주입 사건이 자주 보인다(표시 속도는 √압축). */
             let rate = 10 * Math.max(1 - depletionProgress, 0.05);
             if (forward) {
                 /* 문턱 아래의 매우 작은 전류가 활발한 도통처럼 보이지 않도록,
@@ -2701,7 +2701,7 @@
         formationEvents.forEach(e => {
             e.age += dt;
             /* 무작위 열운동을 매 프레임 떨림이 아닌 부드러운 지그재그로 표시한다.
-               속도는 일반 캐리어와 똑같이 √(T/m*)를 따르고 평균 이동 방향은 없다. */
+               속도는 일반 나르개와 똑같이 √(T/m*)를 따르고 평균 이동 방향은 없다. */
             e.turn = (e.turn || 0) - dt;
             if (e.turn <= 0) {
                 const angle = Math.random() * Math.PI * 2;
@@ -2714,7 +2714,7 @@
             e.y += e.vy * dt;
 
             /* 내부 전기장은 확산과 반대인 표류를 만든다.
-               전자는 N형(오른쪽), 양공은 P형(왼쪽)으로 되민다. */
+               전자는 n형(오른쪽), 양공은 p형(왼쪽)으로 되민다. */
             const driftDir = e.type === 'electron' ? 1 : -1;
             const fieldStrength = forming
                 ? depletionProgress
@@ -2733,7 +2733,7 @@
                 : e.x > V_WIDTH / 2 + 4;
             if (crossed) {
                 /* 접합을 넘었다고 곧바로 재결합시키지 않는다.
-                   반대쪽 중성영역의 소수캐리어로 전환한 뒤 실제 다수캐리어 점과 만나야
+                   반대쪽 중성영역의 소수 나르개로 전환한 뒤 실제 다수 나르개 점과 만나야
                    handleRecombination()에서 두 점이 함께 사라지고 재결합 위치 표시가 생긴다. */
                 const row = Math.min(GRID_ROWS - 1,
                     Math.max(0, Math.round((e.y - LATTICE_TOP) / SPACING_Y)));
@@ -2835,7 +2835,7 @@
         ctx.lineWidth = 2.4;
 
         if (currentMode === 'PN' && !junctionJoined) {
-            /* 접합 전에는 P형과 N형이 떨어진 두 반도체 조각임을 테두리로 보여준다. */
+            /* 접합 전에는 p형과 n형이 떨어진 두 반도체 조각임을 테두리로 보여준다. */
             roundRectPath(ctx, DEVICE_LEFT, DEVICE_TOP,
                           V_WIDTH / 2 - 20 - DEVICE_LEFT, DEVICE_BOTTOM - DEVICE_TOP, 9);
             ctx.stroke();
@@ -3043,7 +3043,7 @@
     }
 
     /* =========================================================================
-       에너지 띠 캔버스
+       에너지띠 캔버스
        위로 갈수록 전자 에너지 높음. 국소 midgap = −qV(x) 를 기준으로 그린다.
        평형에서 Ef가 자동으로 완전히 평탄해지는 것이 이 구성의 핵심.
        ========================================================================= */
@@ -3060,7 +3060,7 @@
         const Eg = PH.Eg;
 
         /* 자동 확대를 쓰면 장벽이 줄어도 띠 굽힘이 비슷하게 보일 수 있다.
-           단일 반도체와 PN 접합 각각에서 모든 슬라이더 조건에 같은 배율을 사용한다.
+           단일 반도체와 p-n 접합 각각에서 모든 슬라이더 조건에 같은 배율을 사용한다.
            PN의 3.40 eV 범위는 Eg와 최대 역방향 장벽을 모두 여백 안에 포함한다. */
         const span = currentMode === 'PN' ? 3.40 : 1.50;
         const pxPerEV = usable / span;
@@ -3068,8 +3068,8 @@
         const toY = E => yc - E * pxPerEV;
 
         /* 고등학생용 띠 그림:
-           - 단일 P/N형은 평형 기준도이므로 수평
-           - PN 접합은 중성영역의 작은 I·R_s 기울기를 생략하고 공핍층 장벽만 표시
+           - 단일 p/n형은 평형 기준도이므로 수평
+           - p-n 접합은 중성영역의 작은 I·R_s 기울기를 생략하고 공핍층 장벽만 표시
            - 인가 전압·접합 전압·I·R_s는 계측 카드에서 수치로 구분 */
         const off = (-textbookJunctionPotentialAt(0) + -textbookJunctionPotentialAt(1)) / 2;
         const emAt = xf => currentMode === 'PN' ? -textbookJunctionPotentialAt(xf) - off : 0;
@@ -3150,7 +3150,7 @@
             ctx.fillRect(depL, topPad - 6, pDep + nDep, usable + 12);
         }
 
-        /* 단일 P/N형에서만 도너·억셉터 준위를 표시한다. */
+        /* 단일 p/n형에서만 주개·받개 준위를 표시한다. */
         if (currentMode !== 'PN' && showBandDetails) {
             stroke(curves.lvl, currentMode === 'N' ? 'rgba(59,130,246,0.45)' : 'rgba(239,68,68,0.45)', 1.4, [4, 5]);
         }
@@ -3171,10 +3171,10 @@
             if (lEf) leftItems.push({ key: 'Ef', y: lEf.y + 3 });
             const lab = resolveLabelOverlap(leftItems, 13);
             ctx.fillStyle = '#7dd3fc'; ctx.fillText('전도띠', L + 4, lab['Ec']);
-            ctx.fillStyle = '#fda4af'; ctx.fillText('원자가띠', L + 4, lab['Ev']);
+            ctx.fillStyle = '#fda4af'; ctx.fillText('원자가 띠', L + 4, lab['Ev']);
             if (lEf) {
                 ctx.fillStyle = '#eab308'; ctx.font = '10px Outfit';
-                ctx.fillText(junctionJoined ? 'E_F (평형)' : 'E_F (P형)', L + 30, lab['Ef']);
+                ctx.fillText(junctionJoined ? 'E_F (평형)' : 'E_F (p형)', L + 30, lab['Ef']);
             }
 
             const rightItems = [{ key: 'Ec', y: rEc.y - 6 }, { key: 'Ev', y: rEv.y + 13 }];
@@ -3182,23 +3182,23 @@
             const labR = resolveLabelOverlap(rightItems, 13);
             ctx.textAlign = 'right'; ctx.font = 'bold 15px Noto Sans KR';
             ctx.fillStyle = '#7dd3fc'; ctx.fillText('전도띠', R - 4, labR['Ec']);
-            ctx.fillStyle = '#fda4af'; ctx.fillText('원자가띠', R - 4, labR['Ev']);
+            ctx.fillStyle = '#fda4af'; ctx.fillText('원자가 띠', R - 4, labR['Ev']);
             if (rEf && !junctionJoined) {
                 ctx.fillStyle = '#eab308'; ctx.font = '10px Outfit';
-                ctx.fillText('E_F (N형)', R - 30, labR['Ef']);
+                ctx.fillText('E_F (n형)', R - 30, labR['Ef']);
             }
 
             /* 고등학교 과정에 필요한 상태만 짧게 주석한다. */
             ctx.textAlign = 'center'; ctx.font = 'bold 10.5px Noto Sans KR';
             if (!junctionJoined) {
                 ctx.fillStyle = 'rgba(234,179,8,0.95)';
-                ctx.fillText('접합 전: 서로 떨어진 P형과 N형 — 각자의 에너지 띠는 평평함',
+                ctx.fillText('접합 전: 서로 떨어진 p형과 n형 — 각자의 에너지띠는 평평함',
                              midX, V_CHART_HEIGHT - 12);
             } else if (Math.abs(PH.Vj) >= 0.004) {
                 ctx.fillStyle = 'rgba(234,179,8,0.95)';
                 const txt = PH.Vj > 0
-                    ? '순방향: 전위 장벽이 낮아져 캐리어가 더 쉽게 넘어감'
-                    : '역방향: 전위 장벽이 높아져 다수캐리어의 이동이 억제됨';
+                    ? '순방향: 전위 장벽이 낮아져 나르개가 더 쉽게 넘어감'
+                    : '역방향: 전위 장벽이 높아져 다수 나르개의 이동이 억제됨';
                 ctx.fillText(txt + ' · 장벽 ' + Math.max(RX.barrier, 0).toFixed(3) + ' eV',
                              midX, V_CHART_HEIGHT - 12);
             }
@@ -3208,25 +3208,25 @@
             const lab = resolveLabelOverlap(rightItems, 13);
             ctx.textAlign = 'right';
             ctx.fillStyle = '#7dd3fc'; ctx.fillText('전도띠', R - 4, lab['Ec']);
-            ctx.fillStyle = '#fda4af'; ctx.fillText('원자가띠', R - 4, lab['Ev']);
+            ctx.fillStyle = '#fda4af'; ctx.fillText('원자가 띠', R - 4, lab['Ev']);
             if (rEf) {
                 ctx.fillStyle = '#eab308'; ctx.font = '10px Outfit';
                 ctx.fillText('E_F', R - 34, lab['Ef']);
             }
             ctx.textAlign = 'left'; ctx.font = '9.5px Outfit';
             ctx.fillStyle = isDonorMode() ? 'rgba(59,130,246,0.85)' : 'rgba(239,68,68,0.85)';
-            if (showBandDetails) ctx.fillText(isDonorMode() ? 'E_d (도너, E_c−0.045 eV)' : 'E_a (억셉터, E_v+0.045 eV)',
+            if (showBandDetails) ctx.fillText(isDonorMode() ? 'E_d (주개, E_c−0.045 eV)' : 'E_a (받개, E_v+0.045 eV)',
                          L + 12, topPad - 14);
 
             ctx.textAlign = 'center'; ctx.font = 'bold 10.5px Noto Sans KR';
             ctx.fillStyle = 'rgba(148,163,184,0.9)';
-            ctx.fillText('단일 ' + currentMode + '형 · 평형 에너지 띠 기준도 (인가 전압은 전위 그래프에서 확인)',
+            ctx.fillText('단일 ' + currentMode.toLowerCase() + '형 · 평형 에너지띠 기준도 (인가 전압은 전위 그래프에서 확인)',
                          midX, V_CHART_HEIGHT - 12);
         }
 
         ctx.textAlign = 'left'; ctx.font = '9.5px Outfit';
         ctx.fillStyle = 'rgba(148,163,184,0.6)';
-        ctx.fillText('띠틈 = ' + Eg.toFixed(2) + ' eV (' + PH.T + ' K)', L + 4, V_CHART_HEIGHT - 24);
+        ctx.fillText('띠 간격 = ' + Eg.toFixed(2) + ' eV (' + PH.T + ' K)', L + 4, V_CHART_HEIGHT - 24);
         /* 같은 위치의 두 띠 사이를 표시해 접합 장벽과 혼동하지 않게 한다. */
         const gapX = L + 175, gapTop = toY(emAt(xToFrac(gapX)) + Eg / 2), gapBottom = toY(emAt(xToFrac(gapX)) - Eg / 2);
         ctx.strokeStyle = '#fde68a'; ctx.lineWidth = 1.6;
@@ -3234,7 +3234,7 @@
         ctx.moveTo(gapX - 4, gapTop + 10); ctx.lineTo(gapX, gapTop + 5); ctx.lineTo(gapX + 4, gapTop + 10);
         ctx.moveTo(gapX - 4, gapBottom - 10); ctx.lineTo(gapX, gapBottom - 5); ctx.lineTo(gapX + 4, gapBottom - 10); ctx.stroke();
         ctx.font = 'bold 14px Noto Sans KR'; ctx.fillStyle = '#fde68a';
-        ctx.fillText('띠틈', gapX + 9, (gapTop + gapBottom) / 2 + 5);
+        ctx.fillText('띠 간격', gapX + 9, (gapTop + gapBottom) / 2 + 5);
     }
 
     /* =========================================================================
@@ -3295,10 +3295,10 @@
                 const step = Math.max(RX.barrier, 0);
                 /* 교과서형 근사: 양쪽 중성영역은 평평하고 공핍층에서만 전위가 변한다. */
                 ctx.textAlign = 'left'; ctx.fillStyle = '#f87171';
-                ctx.fillText('P형 중성영역  V = ' + graphPotentialAt(0).toFixed(3) + ' V',
+                ctx.fillText('p형 중성영역  V = ' + graphPotentialAt(0).toFixed(3) + ' V',
                              L + 4, toY(graphPotentialAt(0)) + 18);
                 ctx.textAlign = 'right'; ctx.fillStyle = '#60a5fa';
-                ctx.fillText('N형 중성영역 (기준)  V = ' + graphPotentialAt(1).toFixed(3) + ' V',
+                ctx.fillText('n형 중성영역 (기준)  V = ' + graphPotentialAt(1).toFixed(3) + ' V',
                              R - 4, toY(graphPotentialAt(1)) - 10);
 
                 if (depletionProgress > 0.7 && step > 0.005) {
@@ -3417,8 +3417,8 @@
             /* 문장 단위로 줄을 나눈다: 첫 줄은 "누가 어디로 움직이나", 둘째 줄은 "그래서 전류는". */
             if (Math.abs(Vapp) < 0.004) {
                 flow.innerHTML = currentMode === 'P'
-                    ? 'P형에는 양공이 많고 자유전자는 소수입니다.<br>둘 다 무작위 열운동을 하지만 평균 이동 방향이 없어 순전류는 0입니다.'
-                    : 'N형에는 자유전자가 많고 양공은 소수입니다.<br>둘 다 무작위 열운동을 하지만 평균 이동 방향이 없어 순전류는 0입니다.';
+                    ? 'p형에는 양공이 많고 자유전자는 소수입니다.<br>둘 다 무작위 열운동을 하지만 평균 이동 방향이 없어 순전류는 0입니다.'
+                    : 'n형에는 자유전자가 많고 양공은 소수입니다.<br>둘 다 무작위 열운동을 하지만 평균 이동 방향이 없어 순전류는 0입니다.';
             } else {
                 flow.innerHTML = currentMode === 'P'
                     ? '무작위 열운동은 계속되며, 양공은 평균적으로 (+)극에서 (−)극으로, 소수 자유전자는 반대로 이동합니다.<br>두 이동이 만드는 전류는 모두 (+)극에서 (−)극 방향입니다.'
@@ -3429,23 +3429,23 @@
 
         if (!junctionJoined) {
             badge.innerText = '접합 전';
-            flow.textContent = '아직 접합하지 않아 P형과 N형 사이에는 전류가 흐르지 않습니다.';
+            flow.textContent = '아직 접합하지 않아 p형과 n형 사이에는 전류가 흐르지 않습니다.';
         } else if (depletionProgress < 1) {
             badge.innerText = '공핍층 형성 중';
             badge.style.background = 'linear-gradient(135deg,#d97706 0%,#7c3aed 100%)';
-            flow.textContent = '접촉 뒤 전자는 N형에서 P형으로, 양공은 P형에서 N형으로 무작위 확산합니다.';
+            flow.textContent = '접촉 뒤 전자는 n형에서 p형으로, 양공은 p형에서 n형으로 무작위 확산합니다.';
         } else if (Math.abs(PH.Vj) < 0.01) {
-            badge.innerText = 'PN 평형';
+            badge.innerText = 'p-n 접합 평형';
             badge.style.background = 'linear-gradient(135deg,#059669 0%,#4f46e5 100%)';
             flow.textContent = '전자와 양공은 계속 움직이지만, 확산과 내부 전기장에 의한 평균 이동이 균형을 이루어 순전류가 0입니다.';
         } else if (PH.Vj > 0) {
-            badge.innerText = 'PN 순방향';
+            badge.innerText = 'p-n 접합 순방향';
             badge.style.background = 'linear-gradient(135deg,#059669 0%,#2563eb 100%)';
-            flow.innerHTML = '무작위 열운동 위에 평균 이동이 더해져 P형 영역의 양공은 N형 영역으로, N형 영역의 자유전자는 P형 영역으로 넘어갑니다.<br>전압이 커질수록 같은 시간에 더 많이 넘어가며, 전류는 P형에서 N형 방향으로 흐릅니다.';
+            flow.innerHTML = '무작위 열운동 위에 평균 이동이 더해져 p형 영역의 양공은 n형 영역으로, n형 영역의 자유전자는 p형 영역으로 넘어갑니다.<br>전압이 커질수록 같은 시간에 더 많이 넘어가며, 전류는 p형에서 n형 방향으로 흐릅니다.';
         } else {
-            badge.innerText = 'PN 역방향';
+            badge.innerText = 'p-n 접합 역방향';
             badge.style.background = 'linear-gradient(135deg,#d97706 0%,#7c3aed 100%)';
-            flow.innerHTML = '무작위 열운동 위에 평균 이동이 더해져 N형 영역의 소수 양공은 P형 영역으로, P형 영역의 소수 자유전자는 N형 영역으로 이동합니다.<br>현재 범위의 매우 작은 역방향 전류는 N형에서 P형 방향입니다.';
+            flow.innerHTML = '무작위 열운동 위에 평균 이동이 더해져 n형 영역의 소수 양공은 p형 영역으로, p형 영역의 소수 자유전자는 n형 영역으로 이동합니다.<br>현재 범위의 매우 작은 역방향 전류는 n형에서 p형 방향입니다.';
         }
     }
 
@@ -3470,18 +3470,18 @@
         put('voltage-positive', pn ? '순방향 (+0.8 V)' : '왼쪽 + / 오른쪽 −');
         put('connection-summary', !ready ? (forming ? '접합 형성 중 · 인가 전압 ' + Vapp.toFixed(2) + ' V' : '접합 전 · 전압을 걸지 않은 상태')
             : zero ? '0 V · 양쪽 단자에 외부 전압을 걸지 않음'
-            : pn ? (right ? '순방향: P형에 +극 / N형에 −극' : '역방향: P형에 −극 / N형에 +극')
+            : pn ? (right ? '순방향: p형에 +극 / n형에 −극' : '역방향: p형에 −극 / n형에 +극')
             : (right ? '왼쪽에 +극 / 오른쪽에 −극' : '왼쪽에 −극 / 오른쪽에 +극'));
 
         let e, h, i;
         if (forming) {
-            e = '확산: 전자 P형 ← N형'; h = '확산: 양공 P형 → N형'; i = '외부 순전류 0';
+            e = '확산: 전자 p형 ← n형'; h = '확산: 양공 p형 → n형'; i = '외부 순전류 0';
         } else if (!ready || zero) {
             e = '전자: 무작위 열운동'; h = '양공: 무작위 열운동'; i = '순전류 0';
         } else if (pn) {
-            e = right ? '전자: P형 ← N형' : '소수 전자: P형 → N형';
-            h = right ? '양공: P형 → N형' : '소수 양공: P형 ← N형';
-            i = right ? '전류: P형 → N형' : '미소 전류: P형 ← N형';
+            e = right ? '전자: p형 ← n형' : '소수 전자: p형 → n형';
+            h = right ? '양공: p형 → n형' : '소수 양공: p형 ← n형';
+            i = right ? '전류: p형 → n형' : '미소 전류: p형 ← n형';
         } else {
             e = right ? '전자: 왼쪽 ← 오른쪽' : '전자: 왼쪽 → 오른쪽';
             h = right ? '양공: 왼쪽 → 오른쪽' : '양공: 왼쪽 ← 오른쪽';
@@ -3490,8 +3490,8 @@
         put('direction-electron', e); put('direction-hole', h); put('direction-current', i);
         put('junction-lesson', pn && junctionJoined
             ? '공핍층: 이동 가능한 전자·양공이 적어진 영역입니다. 제자리에 남은 B⁻·P⁺ 이온이 내부 전기장을 만듭니다.'
-            : pn ? '접합 전: P형과 N형은 각각 전체적으로 전기적 중성입니다. PN 접합 실행을 눌러 변화를 관찰하세요.'
-            : currentMode + '형도 전체적으로 전기적 중성입니다. 전압 방향을 바꾸면 전류 방향도 바뀝니다.');
+            : pn ? '접합 전: p형과 n형은 각각 전체적으로 전기적 중성입니다. p-n 접합 실행을 눌러 변화를 관찰하세요.'
+            : currentMode.toLowerCase() + '형도 전체적으로 전기적 중성입니다. 전압 방향을 바꾸면 전류 방향도 바뀝니다.');
 
         const currentTitle = !ready ? (forming ? '공핍층 형성 중 · 외부 순전류 0' : '접합 전 · 전류 없음')
             : zero ? '평형 · 순전류 0'
@@ -3503,12 +3503,12 @@
             : zero ? '전자와 양공의 열운동은 계속됩니다.'
             : pn && !right ? '작은 누설전류는 있습니다. 현재 ' + fmtCurrent(PH.I)
             : '현재 ' + fmtCurrent(PH.I) + (pn ? ' · 전압을 높이면 전류가 빠르게 증가합니다.' : ' · 전자는 전류와 반대 방향으로 이동합니다.'));
-        put('lesson-depletion', !pn ? 'PN 접합 공핍층 없음'
+        put('lesson-depletion', !pn ? 'p-n 접합 공핍층 없음'
             : !junctionJoined ? '접합하면 공핍층이 생깁니다'
             : forming ? '공핍층이 형성되고 있습니다'
             : zero ? '전압이 없어도 공핍층이 있습니다'
             : right ? '순방향 · 공핍층이 좁아짐' : '역방향 · 공핍층이 넓어짐');
-        put('lesson-depletion-note', !pn ? '지금은 균일한 단일 ' + currentMode + '형 반도체입니다.'
+        put('lesson-depletion-note', !pn ? '지금은 균일한 단일 ' + currentMode.toLowerCase() + '형 반도체입니다.'
             : !junctionJoined || forming ? '전하가 확산하면서 접합 근처에 고정된 이온이 남습니다.'
             : zero ? '확산과 내부 전기장에 의한 이동이 균형을 이룹니다.'
             : '같은 온도·도핑 농도의 0 V 상태와 비교한 변화입니다.');
@@ -3542,7 +3542,7 @@
         } else {
             if (currentMode === 'PN' && !junctionJoined) {
                 currentText = '0 A';
-                currentSub = '아직 P형과 N형을 접합하지 않았습니다.';
+                currentSub = '아직 p형과 n형을 접합하지 않았습니다.';
             } else if (I === 0 || Math.abs(Vapp) < 0.004) {
                 currentText = '0 A';
             } else if (currentMode === 'PN' && I < 0) {
@@ -3569,7 +3569,7 @@
                 (Vapp - PH.Vj).toFixed(3) + ' V');
         } else if (currentMode === 'PN') {
             set('status-vj', '접합 대기', '#64748b');
-            set('status-vj-sub', 'PN 접합 실행 버튼을 누르세요');
+            set('status-vj-sub', 'p-n 접합 실행 버튼을 누르세요');
         } else {
             set('status-vj', 'ΔV = ' + Vapp.toFixed(2) + ' V', '#a78bfa');
             set('status-vj-sub', 'R<sub>s</sub> = ' + PH.Rs.toPrecision(3) + ' Ω');
@@ -3600,7 +3600,7 @@
             }
         } else {
             set('status-depletion', '해당 없음', '#64748b');
-            set('status-depletion-sub', '이 모형의 균일한 단일 반도체 내부에는 PN 접합 공핍층이 없음');
+            set('status-depletion-sub', '이 모형의 균일한 단일 반도체 내부에는 p-n 접합 공핍층이 없음');
         }
 
         /* 장벽 */
@@ -3621,7 +3621,7 @@
             }
         } else {
             set('status-barrier', '—', '#64748b');
-            set('status-barrier-sub', 'PN 접합에서만 형성');
+            set('status-barrier-sub', 'p-n 접합에서만 형성');
         }
 
         /* 이온화율 */
@@ -3630,7 +3630,7 @@
         if (currentMode === 'PN') {
             set('status-ionization', 'B ' + (PH.ionRatioA * 100).toFixed(1) +
                 '% · P ' + (PH.ionRatioD * 100).toFixed(1) + '%', irColor);
-            set('status-ionization-sub', '붕소(P형) · 인(N형) 이온화율');
+            set('status-ionization-sub', '붕소(p형) · 인(n형) 이온화율');
         } else {
             set('status-ionization', ir.toFixed(2) + ' %', irColor);
             set('status-ionization-sub', '이온화 도펀트 ' + fmtConc(PH.Nion) +
@@ -3639,10 +3639,10 @@
 
         /* 전자·양공 농도: 다수와 소수의 계산값을 함께 표시한다. */
         if (currentMode === 'PN') {
-            set('status-carriers', 'P형 p=' + fmtConc(PH.majP) + ' cm' + sup(-3) +
-                ' · N형 n=' + fmtConc(PH.maj) + ' cm' + sup(-3), '#e2e8f0');
-            set('status-carriers-sub', '중성영역 소수: P형 n=' + fmtConc(PH.minP) + ' cm' + sup(-3) +
-                ' · N형 p=' + fmtConc(PH.min) + ' cm' + sup(-3));
+            set('status-carriers', 'p형 p=' + fmtConc(PH.majP) + ' cm' + sup(-3) +
+                ' · n형 n=' + fmtConc(PH.maj) + ' cm' + sup(-3), '#e2e8f0');
+            set('status-carriers-sub', '중성영역 소수: p형 n=' + fmtConc(PH.minP) + ' cm' + sup(-3) +
+                ' · n형 p=' + fmtConc(PH.min) + ' cm' + sup(-3));
         } else {
             set('status-carriers',
                 currentMode === 'P'
@@ -3656,7 +3656,7 @@
         }
 
         /* 전도도 σ와 비저항 ρ = 1/σ
-           σ, ρ는 온도와 나르개 농도가 정해진 균일한 영역의 상태값이다. PN 접합은 P 중성영역·공핍층·
+           σ, ρ는 온도와 나르개 농도가 정해진 균일한 영역의 상태값이다. p-n 접합은 P 중성영역·공핍층·
            N 중성영역이 성질이 다른 세 구간이므로 값을 하나로 묶을 수 없다. 그래서 두 중성
            영역의 값을 나란히 보여주고, 공핍층은 따로라고 못박는다. */
         const sig  = PH.sigma;
@@ -3667,10 +3667,10 @@
         const sgm = '<span style="color:#34d399">σ</span>';
         if (currentMode === 'PN') {
             set('status-conductivity',
-                sgm + ' = N형 ' + approx + sig.toPrecision(3) + ' S/cm' +
-                ' · P형 ' + approx + PH.sigmaP.toPrecision(3) + ' S/cm<br>' +
-                rho + ' = N형 ' + (1 / sig).toPrecision(3) + ' Ω·cm' +
-                ' · P형 ' + (1 / PH.sigmaP).toPrecision(3) + ' Ω·cm', '#e2e8f0');
+                sgm + ' = n형 ' + approx + sig.toPrecision(3) + ' S/cm' +
+                ' · p형 ' + approx + PH.sigmaP.toPrecision(3) + ' S/cm<br>' +
+                rho + ' = n형 ' + (1 / sig).toPrecision(3) + ' Ω·cm' +
+                ' · p형 ' + (1 / PH.sigmaP).toPrecision(3) + ' Ω·cm', '#e2e8f0');
             set('status-conductivity-sub', 'ρ = 1/σ · 공핍층은 움직이는 전하가 거의 없어 별도');
         } else {
             set('status-conductivity',
@@ -3740,12 +3740,12 @@
         lastDt = dt;
 
         if (isPlaying) {
-            /* 접촉 후 캐리어 확산과 함께 공핍층이 자란다. */
+            /* 접촉 후 나르개 확산과 함께 공핍층이 자란다. */
             if (currentMode === 'PN' && junctionJoined && depletionProgress < 1) {
                 depletionProgress = Math.min(1, depletionProgress + dt / DEPLETION_SEC);
                 if (depletionProgress >= 1) {
                     const badge = document.getElementById('lattice-badge');
-                    badge.innerText = 'PN 접합 다이오드';
+                    badge.innerText = 'p-n 접합 다이오드';
                     badge.style.background = 'linear-gradient(135deg,#10b981 0%,#8b5cf6 100%)';
                 }
             }
@@ -3768,7 +3768,7 @@
             animTime += dt;
             atoms.forEach(a => a.update(animTime));
 
-            /* 캐리어 이동 */
+            /* 나르개 이동 */
             particles.forEach(p => p.update(dt));
             updateJunctionFormation(dt);
 
@@ -3777,7 +3777,7 @@
                 spawnThermalPairs(dt);
             }
 
-            /* 재결합 — 반대 부호 캐리어가 같은 자리에서 만나면 항상 일어난다.
+            /* 재결합 — 반대 부호 나르개가 같은 자리에서 만나면 항상 일어난다.
                (순방향에서 활발, 역방향에서는 전기장이 갈라놓아 거의 일어나지 않음 → 창발적) */
             handleRecombination(dt);
 
@@ -3830,7 +3830,7 @@
             const cc = cellOf(p).split(',');
             recombEvents.push({ x: gridToX(+cc[0]),
                                 y: gridToY(+cc[1]), life: 1.0 });
-            /* 바이어스 상태에서는 다수캐리어가 소멸하면 상류 접점이 보충한다.
+            /* 바이어스 상태에서는 다수 나르개가 소멸하면 상류 접점이 보충한다.
                평형에서는 접점 주입처럼 보이지 않도록 아래에서 평형 농도만 복원한다. */
             [p, q].forEach(c => {
                 if (equilibrium || c.kind !== 'majority') return;
@@ -3849,9 +3849,9 @@
         const last = GRID_COLS - 1;
         let changed = false;
 
-        /* 비평형 PN 접합: 공핍층에서 생성된 캐리어가 자기 '다수' 영역의 중성부에 도달하면
-           다수 캐리어 바다에 합류하며, 그 순간 외부 회로로 전하 전달이 완료된다.
-           (실제 소자에서도 개별 캐리어가 접점까지 걸어갈 필요가 없다 — 전기적 중성이
+        /* 비평형 p-n 접합: 공핍층에서 생성된 나르개가 자기 '다수' 영역의 중성부에 도달하면
+           다수 나르개 바다에 합류하며, 그 순간 외부 회로로 전하 전달이 완료된다.
+           (실제 소자에서도 개별 나르개가 접점까지 걸어갈 필요가 없다 — 전기적 중성이
             거의 즉시 전달된다.) 따라서 접점까지 확산을 기다리지 않고 여기서 수집한다. */
         if (currentMode === 'PN' && junctionJoined && PH && Math.abs(PH.Vj) > 0.01) {
             const dg = depletionDisplayGeometry();
@@ -3875,7 +3875,7 @@
             if (p.gridX !== 0 && p.gridX !== last) return;
 
             if (p.kind === 'thermal') {
-                /* 순 생성으로 표시한 캐리어는 비평형에서 접점에 수집된다.
+                /* 순 생성으로 표시한 나르개는 비평형에서 접점에 수집된다.
                    전압을 0 V로 바꾼 직후 남아 있는 점은 새 전류로 계산하지 않고 반사한다. */
                 const bias = (currentMode === 'PN') ? (PH ? PH.Vj : 0) : Vapp;
                 if (Math.abs(bias) > 0.01 && (currentMode !== 'PN' || junctionJoined)) {
@@ -3884,7 +3884,7 @@
                 return;
             }
             if (p.kind === 'injected') {
-                /* 접합을 넘은 소수캐리어가 재결합하지 않고 접점까지 도달하면 수집한다.
+                /* 접합을 넘은 소수 나르개가 재결합하지 않고 접점까지 도달하면 수집한다.
                    새 주입 사건은 전류에 따른 formation rate가 따로 만들므로 여기서
                    반대편 접점으로 순간이동시켜 재사용하지 않는다. */
                 p.dead = true; changed = true;
@@ -3892,7 +3892,7 @@
             }
             if (currentMode === 'PN' && !junctionJoined) return;
 
-            /* 각 캐리어를 공급하는 접점은 그 캐리어가 '다수'인 쪽이다.
+            /* 각 나르개를 공급하는 접점은 그 나르개가 '다수'인 쪽이다.
                PN: 양공 ← 왼쪽(P) 접점,  전자 ← 오른쪽(N) 접점 (바이어스 부호와 무관)
                단독: 표류 방향이 인가전압 부호로 정해진다 (양공은 고전위→저전위) */
             let entryCol;
@@ -3938,21 +3938,21 @@
 
         if (mode === 'P') {
             document.getElementById('btn-p-type').classList.add('active');
-            badge.innerText = 'P형: 양공 다수 · 전자 소수';
+            badge.innerText = 'p형: 양공 다수 · 전자 소수';
             badge.style.background = '#ef4444';
             badge.style.boxShadow = '0 2px 8px rgba(239,68,68,0.2)';
             overlay.classList.add('hidden');
             vc.style.opacity = '1.0'; vc.style.pointerEvents = 'auto';
         } else if (mode === 'N') {
             document.getElementById('btn-n-type').classList.add('active');
-            badge.innerText = 'N형: 전자 다수 · 양공 소수';
+            badge.innerText = 'n형: 전자 다수 · 양공 소수';
             badge.style.background = '#3b82f6';
             badge.style.boxShadow = '0 2px 8px rgba(59,130,246,0.2)';
             overlay.classList.add('hidden');
             vc.style.opacity = '1.0'; vc.style.pointerEvents = 'auto';
         } else {
             document.getElementById('btn-pn-junction').classList.add('active');
-            badge.innerText = '접합 전: P형 · N형';
+            badge.innerText = '접합 전: p형 · n형';
             badge.style.background = 'linear-gradient(135deg,#10b981 0%,#8b5cf6 100%)';
             badge.style.boxShadow = '0 2px 8px rgba(16,185,129,0.2)';
             overlay.classList.remove('hidden');
@@ -4018,7 +4018,7 @@
     function updateTemperature(val) {
         temperature = parseInt(val, 10);
         document.getElementById('temp-value').innerText = temperature + ' K';
-        recomputePhysics();          // 이온화율·캐리어 수만 조정, 흐름 유지
+        recomputePhysics();          // 이온화율·나르개 수만 조정, 흐름 유지
         updateInstruments(true);
     }
 

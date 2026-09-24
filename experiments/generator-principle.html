@@ -77,7 +77,7 @@
 <div class="wrap">
   <header class="hero">
     <h1>발전기의 원리</h1>
-    <p>코일이 회전하면 자기 선속이 변하고 교류 전류가 유도됩니다.</p>
+    <p>코일이 회전하면 자기선속이 변하고 교류 전류가 유도됩니다.</p>
   </header>
 
   <div class="controls">
@@ -97,18 +97,18 @@
   </div>
 
   <section class="section">
-    <div class="sec-head"><span class="num">실험 1</span><h2>발전기와 자기 선속의 변화</h2>
+    <div class="sec-head"><span class="num">실험 1</span><h2>발전기와 자기선속의 변화</h2>
       <span class="hint">코일 앞면의 법선이 자기장 B와 같은 방향인 상태를 θ=0°로 합니다.</span></div>
     <div class="views">
       <div class="view-box">
         <div class="vtitle"><span class="dot" style="background:var(--n-pole)"></span>발전기 — 회전 코일 · 브러시 · 회로</div>
         <canvas id="gen"></canvas>
-        <div class="vsub" id="genSub">코일면이 자기장과 수직(0°·180°)이면 자속의 크기 최대, 나란하면(90°·270°) 0</div>
+        <div class="vsub" id="genSub">코일면이 자기장과 수직(0°·180°)이면 자기선속의 크기 최대, 나란하면(90°·270°) 0</div>
       </div>
       <div class="view-box">
-        <div class="vtitle"><span class="dot" style="background:var(--face-f)"></span>정면으로 펼친 코일면 — 통과 자속 관찰</div>
+        <div class="vtitle"><span class="dot" style="background:var(--face-f)"></span>정면으로 펼친 코일면 — 통과 자기선속 관찰</div>
         <canvas id="flux"></canvas>
-        <div class="vsub" id="fluxSub">같은 코일 앞면 · 기호 개수 ∝ |자속|</div>
+        <div class="vsub" id="fluxSub">같은 코일 앞면 · 기호 개수 ∝ |자기선속|</div>
       </div>
     </div>
     <div class="legend">
@@ -118,19 +118,19 @@
       <span><i style="background:var(--face-b)"></i>코일 뒷면(파랑)</span>
       <span><i style="background:var(--face-f);border-radius:50%"></i>A·B·C·D 앞쪽 도선</span>
       <span><i style="background:var(--face-b);border-radius:50%;opacity:.5"></i>A·B·C·D 뒤쪽 도선(점선)</span>
-      <span><i style="background:var(--flux)"></i>자속 (⊗ 들어감− / ⊙ 나옴+)</span>
+      <span><i style="background:var(--flux)"></i>자기선속 (⊗ 들어감− / ⊙ 나옴+)</span>
     </div>
 
     <div class="graph-wrap">
       <div class="graph-label">
-        <span class="sw" style="background:var(--flux)"></span>자속 Φ/Φ₀
+        <span class="sw" style="background:var(--flux)"></span>자기선속 Φ/Φ₀
         <span class="sw" style="background:var(--emf);margin-left:10px;"></span>외부 회로 전류 I/I₀
-        <span class="eq" style="margin-left:auto;">자속 0일 때 전류의 크기 최대 (90° 위상차)</span></div>
+        <span class="eq" style="margin-left:auto;">자기선속 0일 때 전류의 크기 최대 (90° 위상차)</span></div>
       <canvas id="mainGraph"></canvas>
       <div class="graph-label" style="margin-top:2px;font-weight:600;color:var(--muted);font-size:11.5px;">
         <span id="graphMode">교류 발전 — 전류는 sin 형태로 방향이 주기적으로 바뀜</span></div>
     </div>
-    <p class="model-note">오른쪽은 회전 코일의 같은 앞면을 정면으로 펼친 보기입니다. ⊙·⊗는 코일면에 수직인 외부 자기장 성분을 나타내며, 기호 개수는 자속 크기의 근사 표현입니다.<br>전류는 현재 속도의 최댓값 I₀로 정규화했습니다. 실제 최대 유도 기전력은 회전 속도에 비례합니다. 저항성 부하를 가정하며 전구·검류계 반응은 단순화했습니다.<br>고리 안쪽의 연결선은 절연되어 있으며 각 고리에만 고정 접합됩니다. 회전축과 지지대는 생략했습니다.</p>
+    <p class="model-note">오른쪽은 회전 코일의 같은 앞면을 정면으로 펼친 보기입니다. ⊙·⊗는 코일면에 수직인 외부 자기장 성분을 나타내며, 기호 개수는 자기선속 크기의 근사 표현입니다.<br>전류는 현재 속도의 최댓값 I₀로 정규화했습니다. 실제 최대 유도 기전력은 회전 속도에 비례합니다. 저항성 부하를 가정하며 전구·검류계 반응은 단순화했습니다.<br>고리 안쪽의 연결선은 절연되어 있으며 각 고리에만 고정 접합됩니다. 회전축과 지지대는 생략했습니다.</p>
   </section>
 
   <section class="section">
@@ -165,7 +165,7 @@ const MAXLINES=9;
 const DICE={0:[],1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],
   6:[0,2,3,5,6,8],7:[0,2,3,4,5,6,8],8:[0,1,2,3,5,6,7,8],9:[0,1,2,3,4,5,6,7,8]};
 const COILW=62,COILH=52;   // 코일 반폭/반높이 (좌·우 동일)
-// 평면 통과 자속을 '자기력선(화살표) 개수'로 표현.
+// 평면 통과 자기선속을 '자기력선(화살표) 개수'로 표현.
 //  위치는 고정. 개수가 줄어도 남은 화살표가 고르게 분포하도록 farthest-point 순서로 정렬
 //  → 개수가 변할 때 '자리바꿈' 없이 전체에서 균일하게 솎이고/채워짐.
 const FLUX_PTS=(()=>{
@@ -557,8 +557,8 @@ function drawGalvo(ctx,x,y,L,sc){
 
 /* ============================================================
    기준면 고정 : 같은 코일 면을 오른쪽에 크게 펼쳐서 표시.
-   이 면을 지나는 자속(자기력선 개수 ∝ |cosθ|)만 변화.
-   90°/270°에서 자속 0, 그 전후로 방향이 안↔밖으로 뒤집힘.
+   이 면을 지나는 자기선속(자기력선 개수 ∝ |cosθ|)만 변화.
+   90°/270°에서 자기선속 0, 그 전후로 방향이 안↔밖으로 뒤집힘.
    ============================================================ */
 function drawFlux(c,theta){
   const {ctx,w,h}=c;ctx.clearRect(0,0,w,h);
@@ -566,13 +566,13 @@ function drawFlux(c,theta){
   const coilL=coilCurrentState(theta,L.mag);
   const cx=w/2,cy=h*0.45;
   ctx.fillStyle=COL.muted;ctx.font='600 11.5px '+FONT;ctx.textAlign='center';ctx.textBaseline='alphabetic';
-  ctx.fillText('같은 코일 앞면 · 자속과 코일 전류 방향',w/2,18);
+  ctx.fillText('같은 코일 앞면 · 자기선속과 코일 전류 방향',w/2,18);
   // 기준면: 위치·크기·색 모두 고정
   const fixedW=COILW*1.60,fixedH=COILH*1.46;
   const bx=cx-fixedW,by=cy-fixedH,bw=fixedW*2,bh=fixedH*2,refRGB=COL.faceF;
   ctx.fillStyle=`rgba(${refRGB},0.10)`;roundRect(ctx,bx,by,bw,bh,12);ctx.fill();
   ctx.lineJoin='round';ctx.strokeStyle=`rgb(${refRGB})`;ctx.lineWidth=2.8;roundRect(ctx,bx,by,bw,bh,12);ctx.stroke();
-  // 자속 = 면을 통과하는 자기력선 '개수'로 표현(정식). 개수 ∝ |cosθ|, 위치 고정·고른 분포.
+  // 자기선속 = 면을 통과하는 자기력선 '개수'로 표현(정식). 개수 ∝ |cosθ|, 위치 고정·고른 분포.
   //  ⊗=면으로 들어감(−) / ⊙=면에서 나옴(+). 90°·270°에서 0개.
   const N=Math.round(FLUX_MAX*mag),R=8.5;
   ctx.strokeStyle=COL.flux;ctx.fillStyle=COL.flux;ctx.lineWidth=2.6;
@@ -590,16 +590,16 @@ function drawFlux(c,theta){
     {ch:'A',p:{x:bx,y:by+bh},front:null},{ch:'B',p:{x:bx,y:by},front:null},
     {ch:'C',p:{x:bx+bw,y:by},front:null},{ch:'D',p:{x:bx+bw,y:by+bh},front:null}
   ],1);
-  // 상단 상태 (개수 아님 — 방향 + 자속 세기)
+  // 상단 상태 (개수 아님 — 방향 + 자기선속 세기)
   ctx.font='800 14px '+FONT;ctx.textAlign='center';ctx.textBaseline='alphabetic';
   ctx.fillStyle=zero?COL.muted:COL.flux;
-  ctx.fillText(zero?'자속 0 (면이 자기장과 나란함)':(into?'⊗ 자기장 수직 성분: 들어감(−)':'⊙ 자기장 수직 성분: 나옴(+)'),cx,by-24);
+  ctx.fillText(zero?'자기선속 0 (면이 자기장과 나란함)':(into?'⊗ 자기장 수직 성분: 들어감(−)':'⊙ 자기장 수직 성분: 나옴(+)'),cx,by-24);
   ctx.fillStyle=`rgb(${curRGB(coilL)})`;ctx.font='800 13px '+FONT;
   ctx.fillText('코일 전류 경로: '+(coilL.mag<1e-8?'0':coilSeq(coilL.pos)),cx,by-7);
-  // 자속 값(연속) + 막대
+  // 자기선속 값(연속) + 막대
   const barY=by+bh+28, barW=bw, bx0=cx-barW/2;
   ctx.fillStyle=COL.muted;ctx.font='700 12px '+FONT;ctx.textAlign='center';
-  ctx.fillText('자속 Φ = '+(phi>=0?'+':'')+phi.toFixed(2)+' Φ₀',cx,barY-8);
+  ctx.fillText('자기선속 Φ = '+(phi>=0?'+':'')+phi.toFixed(2)+' Φ₀',cx,barY-8);
   ctx.strokeStyle=COL.line;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(cx,barY);ctx.lineTo(cx,barY+12);ctx.stroke();   // 0 기준선
   ctx.fillStyle=`rgba(123,77,255,.85)`;const pw2=(barW/2)*phi;
   if(Math.abs(pw2)>0.5)ctx.fillRect(Math.min(cx,cx+pw2),barY+2,Math.abs(pw2),8);

@@ -70,8 +70,8 @@ for (const engine of [chromium, webkit]) test(`PN classroom controls, polarity a
       assert.ok(drawing.segments.some(([x,y,x2,y2]) => x2 === 538 && y2 === 28 && y === 28));
       assert.ok(drawing.segments.some(([x,y,x2,y2]) => x === 562 && y === 28 && y2 === 28));
       assert.ok(value > 0 ? drawing.width < eq.width && drawing.I > 0 : drawing.width > eq.width && drawing.I < 0);
-      assert.match(await text('direction-electron'), value > 0 ? /P형 ← N형/ : /P형 → N형/);
-      assert.match(await text('connection-summary'), value > 0 ? /P형에 \+극/ : /P형에 −극/);
+      assert.match(await text('direction-electron'), value > 0 ? /p형 ← n형/ : /p형 → n형/);
+      assert.match(await text('connection-summary'), value > 0 ? /p형에 \+극/ : /p형에 −극/);
     }
     await page.locator('#canvas-tab-energy').click();
     assert.equal(await page.locator('#show-band-details').isChecked(), false);

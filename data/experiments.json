@@ -53,7 +53,7 @@
         "question": "같은 양을 접두어가 다른 단위로 나타내면 수치는 어떻게 달라질까요?",
         "focus": "킬로와 밀리 등 크기가 다른 접두어로 단위를 변환하고, 나타내는 양은 그대로인지 확인해 보세요."
       },
-      "path": "experiments/si-prefixes.html?v=3305d63d66",
+      "path": "experiments/si-prefixes.html?v=0eb5b4f4f4",
       "date": "2026-07-28",
       "tags": [
         "단위",
@@ -70,7 +70,7 @@
         "question": "알짜힘에 따라 물체의 운동은 어떻게 달라지고, 두 물체가 주고받는 힘은 어떤 관계일까요?",
         "focus": "제1법칙에서는 알짜힘이 0일 때의 운동을, 제2법칙에서는 알짜힘과 질량을 하나씩 바꾸며 가속도를 살펴보세요. 제3법칙에서는 두 물체가 주고받는 힘의 크기와 방향을 비교해 보세요."
       },
-      "path": "experiments/newton-laws.html?v=1830f25642",
+      "path": "experiments/newton-laws.html?v=74526c0e24",
       "date": "2026-07-28",
       "tags": [
         "뉴턴",
@@ -87,7 +87,7 @@
         "question": "흰빛을 프리즘으로 나누고, 나뉜 빛을 다시 굴절시키거나 모으면 어떤 색이 나타날까요?",
         "focus": "흰빛이 분산되는 모습을 본 뒤, 한 색으로 보이는 빛을 두 번째 프리즘에 통과시켜 보세요. ‘반원 유리로 모으기’에서는 스크린을 움직여 여러 색의 빛이 겹치는 모습도 확인해 보세요."
       },
-      "path": "experiments/newton-prism.html?v=746507b7cd",
+      "path": "experiments/newton-prism.html?v=fff0483a3a",
       "date": "2026-07-28",
       "tags": [
         "프리즘",
@@ -101,10 +101,10 @@
       "category": "mechanics",
       "description": "등속 원운동과 단진동의 관계를 시뮬레이션으로 비교합니다.",
       "lessonNote": {
-        "question": "등속 원운동하는 공에 평행광선을 비추면, 그림자는 어떻게 움직일까요?",
-        "focus": "평행광선을 켜고 ‘같이 출발’을 눌러, 공의 그림자와 용수철에 매단 추의 주기를 비교해 보세요."
+        "question": "등속 원운동하는 공에 평행 광선을 비추면, 그림자는 어떻게 움직일까요?",
+        "focus": "평행 광선을 켜고 ‘같이 출발’을 눌러, 공의 그림자와 용수철에 매단 추가 같은 주기로 함께 움직이는지 비교해 보세요."
       },
-      "path": "experiments/shm-circular-motion.html?v=43ce65f9a0",
+      "path": "experiments/shm-circular-motion.html?v=e49ae22f1d",
       "date": "2026-07-28",
       "tags": [
         "단진동",
@@ -138,7 +138,7 @@
         "question": "같은 시간 간격으로 위치를 기록하면 운동의 차이가 어떻게 드러날까요?",
         "focus": "용수철에 밀려 나온 뒤 일정한 속도로 움직이는 구간과, 바닥에 닿기 전의 자유 낙하 구간을 골라 위치-시간 그래프를 비교해 보세요."
       },
-      "path": "experiments/motion-analysis.html?v=6153456833",
+      "path": "experiments/motion-analysis.html?v=9b18c2647c",
       "date": "2026-07-28",
       "tags": [
         "운동분석",
@@ -150,17 +150,17 @@
       "id": "generator-principle",
       "title": "발전기의 원리 — 교류 발전 시뮬레이션",
       "category": "electromagnetism",
-      "description": "코일의 회전 속도를 바꾸며 교류가 생기는 원리를 확인합니다.",
+      "description": "코일과 자석의 상대 운동으로 교류가 발생하는 원리를 코일의 회전 속도를 바꾸며 확인합니다.",
       "lessonNote": {
         "question": "코일을 더 빠르게 돌리면 유도 전류는 어떻게 달라질까요?",
         "focus": "회전 속도를 바꾸며 전구의 밝기와 검류계의 움직임을 비교해 보세요."
       },
-      "path": "experiments/generator-principle.html?v=cde9f8cf35",
+      "path": "experiments/generator-principle.html?v=5523af0328",
       "date": "2026-07-28",
       "tags": [
         "발전기",
         "교류",
-        "전자기유도"
+        "전자기 유도"
       ]
     },
     {
@@ -172,7 +172,7 @@
         "question": "광원과 스크린의 위치를 재면 렌즈의 초점 거리를 알아낼 수 있을까요?",
         "focus": "먼 물체의 상으로 초점 거리를 어림해 보세요. 광원 위치를 고정하고 스크린만 움직여 선명한 상의 위치를 기록하세요. 여러 광원 위치에서 측정을 반복하고, 그래프로 초점 거리를 구해 보세요."
       },
-      "path": "experiments/convex-lens-focus.html?v=b74396b5b9",
+      "path": "experiments/convex-lens-focus.html?v=7815ecc82d",
       "date": "2026-07-28",
       "tags": [
         "볼록렌즈",
@@ -182,18 +182,18 @@
     },
     {
       "id": "rgb-cmy-light",
-      "title": "빛과 물감의 3원색",
+      "title": "빛과 물감의 삼원색",
       "category": "waves-optics",
-      "description": "빛의 3원색(RGB)과 색의 3원색(CMY)의 혼합 원리를 비교합니다.",
+      "description": "빛의 삼원색(RGB)과 색의 삼원색(CMY)의 혼합 원리를 비교합니다.",
       "lessonNote": {
         "question": "여러 색을 섞을 때 빛과 물감은 왜 서로 다른 결과를 낼까요?",
         "focus": "RGB와 CMY 슬라이더를 각각 움직여, 색을 섞을수록 밝아지는지 어두워지는지 비교해 보세요."
       },
-      "path": "experiments/rgb-cmy-light.html?v=ea30cf2d82",
+      "path": "experiments/rgb-cmy-light.html?v=f8e3ba79e3",
       "date": "2026-07-28",
       "tags": [
-        "빛의 3원색",
-        "색의 3원색",
+        "빛의 삼원색",
+        "색의 삼원색",
         "RGB",
         "CMY"
       ]
@@ -207,7 +207,7 @@
         "question": "충돌 전과 후에 두 물체의 운동량을 더한 값은 어떻게 될까요?",
         "focus": "운동 방향(+, −)을 생각하며, 충돌 전후에 각 물체의 운동량과 두 물체의 전체 운동량을 비교해 보세요."
       },
-      "path": "experiments/momentum-conservation.html?v=407c5e8380",
+      "path": "experiments/momentum-conservation.html?v=9ede299e53",
       "date": "2026-07-28",
       "tags": [
         "운동량 보존",
@@ -217,18 +217,18 @@
     },
     {
       "id": "free-fall-projectile",
-      "title": "자유낙하 vs 수평 투사 비교 실험",
+      "title": "자유 낙하 vs 수평으로 던진 물체 비교 실험",
       "category": "mechanics",
-      "description": "자유낙하와 수평으로 던진 물체의 운동을 비교합니다.",
+      "description": "자유 낙하와 수평으로 던진 물체의 운동을 비교합니다.",
       "lessonNote": {
-        "question": "같은 높이에서 동시에 출발하면, 수평으로 던진 물체와 놓아준 물체 중 어느 쪽이 먼저 바닥에 닿을까요?",
-        "focus": "가로 방향의 움직임이 달라도 세로 방향의 위치 변화는 같은지 살펴보세요."
+        "question": "같은 높이에서 동시에 출발하면, 수평으로 던진 물체와 가만히 놓은 물체 중 어느 쪽이 먼저 바닥에 닿을까요?",
+        "focus": "수평 방향의 운동이 달라도 연직 방향의 위치 변화는 같은지 살펴보세요."
       },
-      "path": "experiments/free-fall-projectile.html?v=2fad7b01c8",
+      "path": "experiments/free-fall-projectile.html?v=e36f223d88",
       "date": "2026-07-28",
       "tags": [
-        "자유낙하",
-        "수평투사",
+        "자유 낙하",
+        "포물선 운동",
         "포물선운동"
       ]
     },
@@ -252,67 +252,67 @@
     },
     {
       "id": "electromagnetic-induction",
-      "title": "전자기 유도 탐구: 코일, 자석, 상대운동",
+      "title": "전자기 유도 탐구: 코일, 자석, 상대 운동",
       "category": "electromagnetism",
       "description": "코일과 자석의 상대 운동에 따른 전자기 유도 현상을 탐구합니다.",
       "lessonNote": {
         "question": "어떤 조건에서 유도 전류가 생기며, 전류의 방향과 세기는 어떻게 달라질까요?",
-        "focus": "다른 조건은 일정하게 두고, 자석과 코일의 운동 방식·자석의 극·자석의 세기·코일의 길이·감은 수를 하나씩 바꿔 보세요. 간격과 방향을 유지하며 함께 움직이는 경우도 비교해, 자기선속의 변화와 전류의 관계를 살펴보세요."
+        "focus": "다른 조건은 일정하게 두고, 자석과 코일의 운동 방식·자석의 극·자석의 세기·코일의 길이·감은 수를 하나씩 바꿔 보세요. ‘둘 다 같은 방향’을 골라 간격을 유지한 채 함께 움직이는 경우도 비교해, 자기선속의 변화와 전류의 관계를 살펴보세요."
       },
-      "path": "experiments/electromagnetic-induction.html?v=018dfc25a2",
+      "path": "experiments/electromagnetic-induction.html?v=d1df1a424a",
       "date": "2026-07-28",
       "tags": [
-        "전자기유도",
+        "전자기 유도",
         "코일",
         "자석"
       ]
     },
     {
       "id": "pn-junction",
-      "title": "PN 접합 반도체 시뮬레이션",
+      "title": "p-n 접합 반도체 시뮬레이션",
       "category": "modern-physics",
-      "description": "전압 방향에 따라 PN 접합의 공핍층과 전자·양공의 움직임이 어떻게 달라지는지 확인합니다.",
+      "description": "p형과 n형 반도체가 만나 만들어지는 공핍층을 관찰하고, 순방향·역방향 바이어스에서 전자와 양공의 움직임, 에너지띠와 전위 분포가 어떻게 달라지는지 확인합니다.",
       "lessonNote": {
-        "question": "PN 접합에 거는 전압의 방향을 바꾸면 전류의 흐름은 어떻게 달라질까요?",
-        "focus": "‘PN 접합’과 ‘PN 접합 실행’을 차례로 선택한 뒤, 순방향과 역방향에서 공핍층과 전자·양공의 움직임을 비교해 보세요."
+        "question": "p-n 접합에 거는 전압의 방향을 바꾸면 전류의 흐름은 어떻게 달라질까요?",
+        "focus": "‘p-n 접합’과 ‘p-n 접합 실행’을 차례로 선택한 뒤, 순방향과 역방향에서 공핍층과 전자·양공의 움직임을 비교해 보세요."
       },
-      "path": "experiments/pn-junction.html?v=636682a19e",
+      "path": "experiments/pn-junction.html?v=c2f6d5dd17",
       "date": "2026-09-13",
       "tags": [
         "반도체",
-        "PN 접합",
+        "p-n 접합",
         "다이오드",
         "공핍층"
       ]
     },
     {
       "id": "proper-time-length",
-      "title": "특수 상대성 이론: 고유시간과 고유길이",
+      "title": "특수 상대성 이론: 고유 시간과 고유 길이",
       "category": "relativity",
-      "description": "행성 관찰자와 로켓 관찰자의 관점을 오가며 고유시간·고유길이·시간 팽창·길이 수축을 비교합니다.",
+      "description": "행성 관찰자와 로켓 관찰자의 관점을 오가며 고유 시간·고유 길이·시간 팽창·길이 수축을 비교합니다.",
       "lessonNote": {
         "question": "로켓이 두 행성을 차례로 통과하는 시간 간격과 두 행성 사이의 거리는 관찰자에 따라 어떻게 달라질까요?",
-        "focus": "각 기준계에서 두 통과 사건의 시간 간격과 같은 시각에 측정한 두 행성 사이의 거리를 비교해 보세요."
+        "focus": "각 기준틀에서 두 통과 사건 사이의 시간 간격, 그리고 같은 시각에 잰 두 행성 사이의 거리를 비교해 보세요."
       },
-      "path": "experiments/proper-time-length.html?v=952f56d830",
+      "path": "experiments/proper-time-length.html?v=60c4222b8d",
       "date": "2026-07-31",
       "tags": [
         "특수상대성",
-        "고유시간",
-        "고유길이",
+        "고유 시간",
+        "고유 길이",
         "길이수축"
       ]
     },
     {
       "id": "ideal-gas-law",
-      "title": "이상 기체 상태 방정식",
+      "title": "이상 기체 방정식",
       "category": "thermal",
-      "description": "압력·부피·온도·기체의 양을 바꾸며 이상 기체 상태 방정식 PV = nRT를 확인합니다.",
+      "description": "보일 법칙·샤를 법칙·아보가드로 법칙을 단계별 가상 실험으로 확인하고 이상 기체 방정식 PV = nRT로 종합합니다.",
       "lessonNote": {
         "question": "기체의 압력, 부피, 온도, 몰수 사이에는 어떤 관계가 있을까요?",
-        "focus": "각 단계에서 일정하게 유지되는 변인을 확인하고, 나머지 두 변인의 관계를 비교해 보세요. 세 실험의 기록을 모아 PV = nRT가 성립하는지 확인해 보세요."
+        "focus": "각 단계에서 일정하게 유지되는 변인을 확인하고, 나머지 두 변인 사이의 관계를 알아보세요. 세 실험의 기록을 모아 PV = nRT가 성립하는지 확인해 보세요."
       },
-      "path": "experiments/ideal-gas-law.html?v=9d4c9eba4a",
+      "path": "experiments/ideal-gas-law.html?v=81991c652e",
       "date": "2026-08-01",
       "tags": [
         "이상기체",
@@ -325,12 +325,12 @@
       "id": "simultaneity-relativity",
       "title": "동시성의 상대성 — 번개와 두 관찰자",
       "category": "relativity",
-      "description": "같은 두 번개 사건을 지면과 기차의 기준계에서 살펴보고, 발생 시각을 비교합니다.",
+      "description": "달리는 기차 양 끝에 친 번개를 지면과 기차의 기준틀에서 비교하며 동시성이 상대적임을 확인합니다.",
       "lessonNote": {
         "question": "지면에서 동시에 친 두 번개는 기차에서도 동시에 친 것일까요?",
         "focus": "두 관점에서 번개가 친 시각과 빛이 관찰자에게 도착한 시각을 구분해 보세요."
       },
-      "path": "experiments/simultaneity-relativity.html?v=fd55f796b3",
+      "path": "experiments/simultaneity-relativity.html?v=018bb02f3f",
       "date": "2026-08-01",
       "tags": [
         "특수상대성",
@@ -343,7 +343,7 @@
       "id": "pascal-hydraulic",
       "title": "유압 장치와 파스칼 법칙",
       "category": "mechanics",
-      "description": "작은 피스톤으로 무거운 물체를 들어 올리며 힘과 이동 거리의 관계를 확인합니다.",
+      "description": "작은 피스톤을 눌러 무거운 물체를 들어 올리며, 압력이 그대로 전달되어 힘은 커지지만 일은 그대로임을 확인합니다.",
       "lessonNote": {
         "question": "작은 피스톤을 눌러 무거운 물체를 들어 올릴 수 있는 까닭은 무엇일까요?",
         "focus": "피스톤의 지름을 바꾸며 필요한 힘과 두 피스톤이 움직인 거리를 함께 비교해 보세요."
@@ -359,32 +359,32 @@
     },
     {
       "id": "rutherford-scattering",
-      "title": "러더퍼드 산란 실험 — 톰슨 모형과의 비교",
+      "title": "러더퍼드 산란 실험 — 톰슨 원자 모형과의 비교",
       "category": "modern-physics",
-      "description": "톰슨 모형과 원자핵 모형에서 알파입자의 궤적을 비교하고 큰 각도 산란을 확인합니다.",
+      "description": "같은 알파 입자를 톰슨 원자 모형과 러더퍼드 원자 모형에 동시에 쏘아 궤적을 비교합니다. 핵을 겨눠 크게 튕겨 나오는 경우를 만들어 보고, 대부분의 알파 입자는 거의 휘지 않고 통과한다는 사실도 함께 확인합니다.",
       "lessonNote": {
-        "question": "알파입자 대부분은 지나가는데, 일부는 왜 크게 꺾일까요?",
-        "focus": "같은 조건으로 쏜 알파입자의 궤적을 톰슨 모형과 원자핵 모형에서 비교해 보세요."
+        "question": "알파 입자 대부분은 거의 그대로 지나가는데, 일부는 왜 크게 휘어질까요?",
+        "focus": "같은 조건으로 쏜 알파 입자의 궤적을 톰슨 원자 모형과 러더퍼드 원자 모형에서 비교해 보세요."
       },
-      "path": "experiments/rutherford-scattering.html?v=727afffd68",
+      "path": "experiments/rutherford-scattering.html?v=edc0f0ae4c",
       "date": "2026-08-20",
       "tags": [
         "러더퍼드",
         "원자 모형",
-        "알파입자",
+        "알파 입자",
         "원자핵"
       ]
     },
     {
       "id": "bernoulli-principle",
-      "title": "베르누이의 원리",
+      "title": "베르누이 정리",
       "category": "mechanics",
-      "description": "관을 따라 흐르는 공기의 속력이 커질 때 압력과 분자의 움직임이 어떻게 달라지는지 관찰합니다.",
+      "description": "압력과 운동 에너지 항의 합(P + ½ρv²)이 일정할 때, 관을 따라 흐르는 공기의 속력이 커지면 압력이 낮아지는 베르누이 정리를 분자의 움직임과 함께 관찰합니다.",
       "lessonNote": {
         "question": "같은 관을 따라 흐르는 공기의 속력이 커지면, 압력은 어떻게 달라질까요?",
         "focus": "빨라진 정도를 바꾸며 속력과 압력 값을 읽고, 분자가 벽에 부딪히는 횟수와 세기가 어떻게 달라지는지도 살펴보세요."
       },
-      "path": "experiments/bernoulli-principle.html?v=d345187ad3",
+      "path": "experiments/bernoulli-principle.html?v=00c246e31c",
       "date": "2026-09-09",
       "tags": [
         "베르누이",
@@ -397,12 +397,12 @@
       "id": "photoelectric-effect",
       "title": "광전효과 원리 이해하기",
       "category": "modern-physics",
-      "description": "빛의 진동수와 광자 수, 전압을 바꾸며 광전자의 방출과 에너지 변화를 관찰합니다.",
+      "description": "빛의 파장, 들어오는 광자 수와 전압을 바꾸며 광전자의 운동을 관찰합니다. 일함수와 한계 진동수, 최대 운동 에너지, 광전류와 정지 전압의 관계를 탐구합니다.",
       "lessonNote": {
         "question": "광전자는 어떤 조건에서 방출되며, 방출된 광전자의 에너지와 광전류는 무엇에 따라 달라질까요?",
-        "focus": "진동수를 일정하게 두고, 단위 시간당 광자 수만 바꿔 보세요. 별도의 실험에서는 단위 시간당 광자 수를 일정하게 두고, 진동수만 바꿔 보세요. 방출 여부·최대 운동 에너지·광전류를 비교하고, 금속별 한계 진동수와, 광전류가 0이 되는 정지 전압도 찾아보세요."
+        "focus": "빛의 파장을 일정하게 두고 들어오는 광자 수만 바꿔 보세요. 이어서 광자 수를 일정하게 두고 파장만 바꿔 보세요. 방출 여부·최대 운동 에너지·광전류를 비교하고, 금속별 한계 진동수(한계 파장)와 광전류가 0이 되는 정지 전압도 찾아보세요."
       },
-      "path": "experiments/photoelectric-effect.html?v=df621cf927",
+      "path": "experiments/photoelectric-effect.html?v=395a81a0dc",
       "date": "2026-09-13",
       "tags": [
         "광전효과",
@@ -418,8 +418,8 @@
       "id": "hero-maker",
       "title": "히어로 만들기",
       "icon": "🛡️",
-      "description": "실험 원리로 나만의 히어로를 만들고 포스터를 완성합니다.",
-      "path": "plays/hero-maker.html?v=986cb4bd7b",
+      "description": "실험실을 돌며 고른 물리 원리로 나만의 과학 히어로를 설계하고, 사진을 찍어 히어로 포스터까지 완성하는 활동입니다.",
+      "path": "plays/hero-maker.html?v=0c8bd193dc",
       "date": "2026-09-02",
       "tags": [
         "히어로",
@@ -432,8 +432,8 @@
       "id": "newton-rush",
       "title": "뉴턴 러시",
       "icon": "💎",
-      "description": "뉴턴과 다섯 세계를 달리며 과학 이야기를 만나고 기록에 도전합니다.",
-      "path": "plays/newton-rush.html?v=962e444db0",
+      "description": "뉴턴과 함께 다섯 세계를 달리며 프리즘 보석을 모아보세요. 점프와 슬라이드로 장애물을 피하고, 배경 속 과학 이야기를 만나며 모두의 TOP10 기록에 도전하는 게임입니다.",
+      "path": "plays/newton-rush.html?v=591f5cbb2d",
       "date": "2026-09-08",
       "tags": [
         "뉴턴",
@@ -447,8 +447,8 @@
       "id": "physics-fighter",
       "title": "물리학자 대전",
       "icon": "🥊",
-      "description": "물리학자 8인의 기술로 대전하고 캐릭터별 이야기를 만납니다.",
-      "path": "plays/physics-fighter.html?v=5549d3114f",
+      "description": "뉴턴·아인슈타인·호킹·하위헌스 등 물리학자 8인의 공식 필살기 대전! 손발 콤보와 전용 기술로 평평 지구 교주를 이기고, 캐릭터별 논문 강의 엔딩을 만나보세요. 키보드와 모바일 조이스틱을 지원합니다.",
+      "path": "plays/physics-fighter.html?v=3df039a24c",
       "date": "2026-09-09",
       "tags": [
         "물리학자",
@@ -462,8 +462,8 @@
       "id": "giants-shoulders",
       "title": "거인의 어깨: 프린키피아의 탄생",
       "icon": "🍎",
-      "description": "선배 과학자들의 연구를 만나고 네 가지 실험으로 운동 법칙을 탐험합니다.",
-      "path": "plays/giants-shoulders.html?v=49cf8feb41",
+      "description": "뉴턴과 함께 탐험하고 보스를 상대하며 갈릴레오·데카르트·하위헌스의 연구를 만나보세요. 네 가지 실험을 관찰하고 기록을 모아 세 운동 법칙을 정리하는 횡스크롤 액션 게임입니다.",
+      "path": "plays/giants-shoulders.html?v=1611cbd2a3",
       "date": "2026-09-11",
       "tags": [
         "뉴턴",
@@ -479,7 +479,7 @@
       "id": "faraday-flight",
       "title": "패러데이: 스파크 항해",
       "icon": "⚡",
-      "description": "패러데이의 이야기를 따라 비행하며 코일·자석·축전기로 비행기를 강화합니다.",
+      "description": "코일과 자석으로 비행기를 강화하고, 축전기의 스파크 폭풍으로 돌파하세요. 패러데이의 삶에서 만난 다섯 어려움이 다섯 보스로 등장하는 비행 슈팅. 자동 공격, 모바일 드래그 조작, 이어하기와 작은 발명 노트를 지원합니다.",
       "path": "plays/faraday-flight.html?v=a05edac374",
       "date": "2026-09-13",
       "tags": [
@@ -494,7 +494,7 @@
       "id": "afterlight",
       "title": "잔광: 마지막 신호",
       "icon": "🌌",
-      "description": "거울·편광판·간섭계를 조작해 빛이 끊긴 도시의 신호를 복구합니다.",
+      "description": "빛이 끊긴 도시의 마지막 신호를 복구하세요. 거울·편광판·간섭계를 직접 조작하는 4막 16개 구역의 SF 퍼즐 어드벤처. 자동 저장, 단계별 힌트, 별 기록과 오늘의 회선 도전을 지원합니다.",
       "path": "plays/afterlight.html?v=35035f2817",
       "date": "2026-09-12",
       "tags": [
@@ -511,7 +511,7 @@
       "id": "hanbut",
       "title": "한붓 실험실",
       "icon": "✏️",
-      "description": "도형을 그려 한붓그리기 가능 여부를 예측하고 원리를 확인합니다.",
+      "description": "도형을 직접 그리고 지우며 한붓그리기 가능 여부를 O/X로 예측하는 과학·수학 놀이입니다. 서로 다른 20문제를 마치면 채점과 홀수점 원리, 실제 한붓 경로를 확인할 수 있습니다.",
       "path": "plays/hanbut.html?v=f5768f4ade",
       "date": "2026-09-09",
       "tags": [
@@ -526,7 +526,7 @@
       "id": "jjomuldak-factory",
       "title": "쪼물딱 공장",
       "icon": "🫧",
-      "description": "말랑이와 팝잇을 누르고 당기며 색 도감을 채웁니다.",
+      "description": "뽁뽁이, 말랑이, 팝잇처럼 손으로 조물조물 만지는 장난감을 모아 둔 놀이터입니다. 누르고 당기고 터뜨리며 색 도감을 채워보세요.",
       "path": "plays/jjomuldak-factory.html?v=1ce4d14fa9",
       "date": "2026-09-05",
       "tags": [
@@ -541,7 +541,7 @@
       "id": "bamti-escape",
       "title": "밤티 방탈출 게임",
       "icon": "🔓",
-      "description": "여섯 이야기 속 단서를 연결해 마지막 문을 여는 3D 방탈출을 즐깁니다.",
+      "description": "학교·해적선·우주정거장·저택·신전·금지구역, 여섯 이야기 속 단서를 연결해 마지막 문을 여는 3D 방탈출 게임입니다. 테마별 힌트와 PC·모바일 조작을 지원합니다.",
       "path": "plays/bamti-escape.html?v=e199f8dd9e",
       "date": "2026-09-12",
       "tags": [

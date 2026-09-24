@@ -3,7 +3,7 @@
 <head><script src="../assets/js/browser-compat.js?v=9e1028454f"></script><script defer src="../assets/js/visit-entry.js?v=dcaa1fcbb5"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>이상 기체 상태 방정식</title>
+<title>이상 기체 방정식</title>
 <link rel="stylesheet" href="../assets/css/experiment-ui-icons.css?v=d364a62055">
 <style>
 :root{
@@ -250,7 +250,7 @@ td.d{font-weight:800;color:var(--acd);}
 <body>
 <div class="app">
   <header class="hd">
-    <h1>이상 기체 상태 방정식</h1>
+    <h1>이상 기체 방정식</h1>
     <div class="steps" id="steps"></div>
     <button class="gbtn" id="bInfo" style="padding:5px 11px">ℹ️ 실험 설명</button>
   </header>
@@ -269,7 +269,7 @@ td.d{font-weight:800;color:var(--acd);}
 
     <section class="pane card gpane">
       <div class="ttl"><span id="gtitle">그래프</span><span class="sp" id="glegend">● 기록값 · ○ 현재 조건</span><span id="gax"></span></div>
-      <div class="cvbox"><canvas id="graph" role="img" aria-label="이상 기체 상태 방정식 탐구 결과 그래프"></canvas></div>
+      <div class="cvbox"><canvas id="graph" role="img" aria-label="이상 기체 방정식 탐구 결과 그래프"></canvas></div>
       <div class="res" id="res"></div>
     </section>
 
@@ -346,7 +346,7 @@ const STEP={
    law:'V ∝ n',  eq:'V / n = 일정',
    labNote:'외부 절대 압력 100.0 kPa · 항온조 320.0 K · 밸브 열림',
    cap:'<span class="k">3단계</span><b>P = 100.0 kPa</b>, <b>T = 320.0 K</b>는 그대로 두고 물질량에 따라 부피가 어떻게 달라지는지 살펴본다.'},
-4:{name:'이상 기체 상태 방정식', ctrl:[], meas:null, fix:{}, rng:{},
+4:{name:'이상 기체 방정식', ctrl:[], meas:null, fix:{}, rng:{},
    axes:[{x:'nT',y:'PV',lab:'P·V – n·T'}],
    der:{h:'(P·V)/(n·T)',u:'kPa·L·mol⁻¹·K⁻¹',fn:r=>r.P*r.V/(r.n*r.T),d:3},
    law:'P·V ∝ n·T', eq:'P V = n R T',
@@ -631,7 +631,7 @@ function drawGraph(){
   const X=v=>L+(v-ax.min)/(ax.max-ax.min)*pw, Y=v=>T+ph-(v-ay.min)/(ay.max-ay.min)*ph;
 
   c.fillStyle='#fff'; c.fillRect(L,T,pw,ph);
-  /* 섭씨 축에서 절대영도 아래는 물리적으로 의미 없는 영역임을 분리한다. */
+  /* 섭씨 축에서 절대 영도 아래는 물리적으로 의미 없는 영역임을 분리한다. */
   if(sel.x==='t'){
     const xa=X(-273.15);
     const invalidW=Math.max(0,xa-L);
@@ -735,7 +735,7 @@ function drawGraph(){
       c.fillStyle='#c9622b'; c.beginPath(); c.arc(xOrigin,yIntercept,4.3,0,6.2832); c.fill();
       c.strokeStyle='#fff'; c.lineWidth=1.2; c.stroke();
 
-      /* 절대영도 x절편 */
+      /* 절대 영도 x절편 */
       c.strokeStyle='#98a3b4'; c.lineWidth=1; c.setLineDash([3,3]);
       c.beginPath(); c.moveTo(X(xAbs),Y(0)); c.lineTo(X(xAbs),T); c.stroke(); c.setLineDash([]);
       c.fillStyle='#c9622b'; c.beginPath(); c.arc(X(xAbs),Y(0),4.5,0,6.2832); c.fill();
@@ -748,7 +748,7 @@ function drawGraph(){
       c.fillStyle='#c9622b'; c.textBaseline='middle';
       c.fillText('0 °C에서도 V ≠ 0',xOrigin+8,(yOrigin+yIntercept)/2);
       c.textBaseline='bottom';
-      c.fillText('절대영도(외삽)',Math.min(X(xAbs)+6,L+pw-82),Y(0)-5);
+      c.fillText('절대 영도(외삽)',Math.min(X(xAbs)+6,L+pw-82),Y(0)-5);
       c.fillStyle='#66758c'; c.font='700 8.8px system-ui,sans-serif'; c.textBaseline='bottom';
       c.fillText('원점을 지나는 비교 직선',Math.min(X(42),L+pw-112),Math.min(Y(fi.a*42)-5,T+ph-4));
       c.fillStyle='#7d8ba1'; c.textBaseline='top';
@@ -883,7 +883,7 @@ function renderTable(){
     if(!rs.length){ el.innerHTML='<div class="thint">앞의 세 실험에서 기록한 값이 여기에 표시된다.</div>'; return; }
     let h='<table><colgroup><col style="width:26%"><col style="width:26%"><col style="width:26%"><col style="width:22%"></colgroup>'+
       '<thead><tr><th>출처</th><th>n·T<span class="unit">mol·K</span></th><th>P·V<span class="unit">kPa·L</span></th><th>(P·V)/(n·T)<span class="unit">kPa·L/(mol·K)</span></th></tr></thead><tbody>';
-    rs.forEach(r=>{ h+=`<tr><td style="color:${COL[r.src]};font-weight:800">${STEP[r.src].name.replace(' 법칙','').replace('이상 기체 상태 방정식','추가')}</td>`+
+    rs.forEach(r=>{ h+=`<tr><td style="color:${COL[r.src]};font-weight:800">${STEP[r.src].name.replace(' 법칙','').replace('이상 기체 방정식','추가')}</td>`+
       `<td>${f(r.n*r.T,3)}</td><td>${f(r.P*r.V,3)}</td><td class="d">${f(r.P*r.V/(r.n*r.T),3)}</td></tr>`; });
     el.innerHTML=h+'</tbody></table>';
     return;
@@ -1204,7 +1204,7 @@ document.getElementById('bAnal').addEventListener('click',()=>{
     h+='<h3>통제 변인</h3><p>절대 압력 100.0 kPa · 물질량 0.300 mol. 피스톤 마찰을 무시하고 변화가 충분히 느릴 때, 각 평형 상태에서 기체 압력은 외부 압력과 거의 같다.</p>'+
      `<h3>결과</h3><p>V/T는 <b>${f(vt,5)} L·K⁻¹</b>로 일정하고, 절대 온도 축에서 <b>원점을 지나는 직선</b>으로 외삽된다. T = 0 K는 실제 측정점이 아니다.</p>`+
      '<div class="kbox"><div class="eq">V / T = 일정 &nbsp;(P, n 일정)</div></div>'+
-     `<h3>절대 영도</h3><p>섭씨 온도 축에서는 직선이지만 원점을 지나지 않는다. 직선을 부피 0까지 외삽하면 <b>${fi?f(-fi.b/fi.a,1):'–'} °C</b>, 즉 절대 영도에 해당한다. 실제 기체는 그 전에 응축하고 이상 기체 모형에서도 T = 0 K에 도달할 수 없으므로 실제로 부피 0을 측정한다는 뜻은 아니다. 따라서 정비례는 <b>절대 온도(K)</b>에서 표현한다. 20 °C를 40 °C로 올려도 293 K에서 313 K로 변할 뿐 부피가 두 배가 되지 않는다.</p>`+
+     `<h3>절대 영도</h3><p>섭씨 온도 축에서는 직선이지만 원점을 지나지 않는다. 직선을 부피 0까지 외삽하면 <b>${fi?f(-fi.b/fi.a,1):'–'} °C</b>, 즉 절대 영도에 해당한다. 실제 기체는 그 전에 응축하고 절대 영도에는 도달할 수 없으므로, 실제로 부피 0을 측정한다는 뜻은 아니다. 따라서 정비례는 <b>절대 온도(K)</b>에서 표현한다. 20 °C를 40 °C로 올려도 293 K에서 313 K로 변할 뿐 부피가 두 배가 되지 않는다.</p>`+
      '<h3>왜 부피가 커질까</h3><p>온도를 조금 올리면 기체 입자가 벽에 전달하는 운동량의 평균이 커진다. 피스톤이 올라가 부피가 커지면 입자 수 밀도와 벽의 단위 면적당 충돌 빈도가 줄어들고, 새로운 평형에서 기체 압력이 외부 압력과 다시 같아진다.</p>';
   }else if(step===3){
     const vn=d.rec[0].V/d.rec[0].n, nn=d.rec.map(r=>r.n);

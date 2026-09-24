@@ -3,7 +3,7 @@
 <head><script src="../assets/js/browser-compat.js?v=9e1028454f"></script><script defer src="../assets/js/visit-entry.js?v=dcaa1fcbb5"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>전자기 유도 탐구: 코일, 자석, 상대운동</title>
+<title>전자기 유도 탐구: 코일, 자석, 상대 운동</title>
 <link rel="stylesheet" href="../assets/css/experiment-ui-icons.css?v=d364a62055">
 <style>
 :root{
@@ -66,8 +66,8 @@ button:disabled{opacity:.4;cursor:default}
 </head>
 <body>
 <header>
-  <h1>전자기 유도 탐구: 코일, 자석, 상대운동</h1>
-  <p>자석과 코일의 상대운동이 자속을 변화시키면 유도 전류가 생깁니다.</p>
+  <h1>전자기 유도 탐구: 코일, 자석, 상대 운동</h1>
+  <p>자석과 코일의 상대 운동이 자기선속을 변화시키면 유도 전류가 생깁니다.</p>
 </header>
 <main>
   <section id="stage-wrap">
@@ -206,7 +206,7 @@ function magB(d){
   return state.polarity * B0() / Math.pow(1 + u*u, 1.5);
 }
 
-/* 자속 결합량 lambda:
+/* 자기선속 결합량 lambda:
    단위길이당 감은수 n = N/L (촘촘함),
    lambda ≈ n × ∫ B(x − xMagnet) dx  (코일 구간 수치적분) */
 function lambdaAt(xMagnet){
@@ -226,7 +226,7 @@ function startAuto(){
   var target, start, amp = RM ? 55 : 75;
   state.autoT = 0;
   /* 새 운동은 현재 위치에서 시작한다. 앞선 운동의 속도 추정값을 이어받으면
-     함께 움직이는 모드로 바꾼 직후에도 가짜 상대속도가 남을 수 있다. */
+     함께 움직이는 모드로 바꾼 직후에도 가짜 상대 속도가 남을 수 있다. */
   state.prevXM = state.xM; state.prevXC = state.xC;
   state.vM = 0; state.vC = 0;
   if (state.mode === 'magnet'){
@@ -257,7 +257,7 @@ function applyAuto(){
   } else if (r.kind === 'c'){
     state.xC = r.mid - r.amp * Math.cos(OMEGA * state.spdF * t);
   } else if (r.kind === 'b'){
-    /* 같은 방향·같은 속도 → 상대속도 0 → 유도 전류 없음 */
+    /* 같은 방향·같은 속도 → 상대 속도 0 → 유도 전류 없음 */
     var d = r.amp * Math.sin(OMEGA * state.spdF * t);
     /* 두 물체를 따로 멈추면 가장자리에서 간격이 달라진다.
        둘 모두 이동할 수 있는 공통 변위만 허용하여 상대 위치를 유지한다. */
@@ -265,7 +265,7 @@ function applyAuto(){
                  Math.min(Math.min(W - 40 - r.xM0, W - 70 - r.xC0), d));
     state.xM = r.xM0 + d; state.xC = r.xC0 + d;
   } else if (r.kind === 'o'){
-    /* 반대 방향 → 상대속도 2배 → 유도 효과 커짐 */
+    /* 반대 방향 → 상대 속도 2배 → 유도 효과 커짐 */
     var d2 = r.amp * Math.sin(OMEGA * state.spdF * t);
     d2 = Math.max(Math.max(40 - r.xM0, r.xC0 - (W - 70)),
                   Math.min(Math.min(W - 40 - r.xM0, r.xC0 - 70), d2));
@@ -571,7 +571,7 @@ function drawCoilFront(g){
    +전류: 앞면 도선 ↘ / −전류: ↖. 전류 0이면 없음. */
 function drawCoilCurrentArrows(g){
   var ii = state.I * R_CIRCUIT;
-  // 미세한 유도 전류도 표시하여 멀리서 움직일 때 자속 변화가 없다는 오개념 방지
+  // 미세한 유도 전류도 표시하여 멀리서 움직일 때 자기선속 변화가 없다는 오개념 방지
   var alpha = Math.min(1, Math.abs(ii)/60);
   if (alpha < 0.05) return;
   var size = 9 + Math.min(1, Math.abs(ii)/500)*4;
@@ -847,7 +847,7 @@ function updateCoilLabels(){
   $('nPerCm').textContent = npc.toFixed(1);
   var dl = $('densLabel');
   if (npc >= 8){ dl.textContent = '촘촘한 코일'; dl.className = 'badge dense'; }
-  else if (npc <= 4){ dl.textContent = '성근 코일'; dl.className = 'badge sparse'; }
+  else if (npc <= 4){ dl.textContent = '성긴 코일'; dl.className = 'badge sparse'; }
   else { dl.textContent = '보통 코일'; dl.className = 'badge'; }
 }
 
