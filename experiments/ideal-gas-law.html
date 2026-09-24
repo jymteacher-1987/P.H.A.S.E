@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head><script src="../assets/js/browser-compat.js?v=iphone-20260911"></script><script defer src="../assets/js/visit-entry.js?v=visits-20260909"></script>
+<head><script src="../assets/js/browser-compat.js?v=9e1028454f"></script><script defer src="../assets/js/visit-entry.js?v=dcaa1fcbb5"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>기체 법칙 가상실험</title>
-<link rel="stylesheet" href="../assets/css/experiment-ui-icons.css">
+<title>이상 기체 상태 방정식</title>
+<link rel="stylesheet" href="../assets/css/experiment-ui-icons.css?v=d364a62055">
 <style>
 :root{
   --bg:#f8f1ed;--card:#fff;--line:#e8ddd7;--line2:#f1e7e2;
@@ -27,7 +27,8 @@ button{font-family:inherit;word-break:keep-all;}
 .hd{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:8px 14px;}
 .hd h1{margin:0;font-size:15px;font-weight:800;letter-spacing:-.2px;white-space:nowrap;line-height:1.3;}
 .hd h1 small{display:block;font-size:11px;font-weight:600;color:var(--ink3);margin-top:1px;}
-.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;min-width:0;}
+/* 긴 단계명에 더 넓은 칸을 주어 제목을 줄이거나 글자를 잘라내지 않는다. */
+.steps{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.25fr) minmax(max-content,1.6fr);gap:5px;min-width:0;}
 .chip{width:100%;min-width:0;border:1px solid var(--line);background:#fff;color:var(--ink2);border-radius:999px;
  padding:6px 9px;font-size:11.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .chip .st{font-size:9.5px;font-weight:800;padding:1px 6px;border-radius:999px;background:#eef2f8;color:var(--ink3);}
@@ -210,10 +211,10 @@ td.d{font-weight:800;color:var(--acd);}
 @media (max-width:999px){
   .app{padding:9px;gap:9px;}
   .hd{grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:8px;}
-  .hd h1{grid-column:1;grid-row:1;min-width:0;font-size:16px;white-space:normal;}
+  .hd h1{grid-column:1;grid-row:1;min-width:0;font-size:16px;white-space:nowrap;}
   .hd h1 small{font-size:10.5px;}
   .hd>#bInfo{grid-column:2;grid-row:1;align-self:start;min-height:36px;padding:6px 10px!important;font-size:11px;}
-  .steps{grid-column:1/-1;grid-row:2;width:100%;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;}
+  .steps{grid-column:1/-1;grid-row:2;width:100%;gap:6px;}
   .chip{min-height:38px;padding:6px 6px;font-size:11px;}
   .chip .st{flex:0 0 auto;padding:1px 5px;}
   .wrap>.col:first-child{display:contents;}
@@ -232,7 +233,7 @@ td.d{font-weight:800;color:var(--acd);}
   .hd h1{font-size:15px;}
   .hd h1 small{font-size:10px;}
   .hd>#bInfo{font-size:10.5px;padding:6px 8px!important;}
-  .steps{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;}
+  .steps{grid-template-columns:minmax(0,.95fr) minmax(max-content,1.05fr);gap:5px;}
   .chip{min-height:37px;font-size:11px;letter-spacing:-.15px;}
   .ttl{font-size:11.5px;}
   .ttl .sp{font-size:10.5px;}
@@ -249,7 +250,7 @@ td.d{font-weight:800;color:var(--acd);}
 <body>
 <div class="app">
   <header class="hd">
-    <h1>기체 법칙 가상실험</h1>
+    <h1>이상 기체 상태 방정식</h1>
     <div class="steps" id="steps"></div>
     <button class="gbtn" id="bInfo" style="padding:5px 11px">ℹ️ 실험 설명</button>
   </header>
@@ -268,7 +269,7 @@ td.d{font-weight:800;color:var(--acd);}
 
     <section class="pane card gpane">
       <div class="ttl"><span id="gtitle">그래프</span><span class="sp" id="glegend">● 기록값 · ○ 현재 조건</span><span id="gax"></span></div>
-      <div class="cvbox"><canvas id="graph" role="img" aria-label="기체 법칙 측정 결과 그래프"></canvas></div>
+      <div class="cvbox"><canvas id="graph" role="img" aria-label="이상 기체 상태 방정식 탐구 결과 그래프"></canvas></div>
       <div class="res" id="res"></div>
     </section>
 
@@ -345,7 +346,7 @@ const STEP={
    law:'V ∝ n',  eq:'V / n = 일정',
    labNote:'외부 절대 압력 100.0 kPa · 항온조 320.0 K · 밸브 열림',
    cap:'<span class="k">3단계</span><b>P = 100.0 kPa</b>, <b>T = 320.0 K</b>는 그대로 두고 물질량에 따라 부피가 어떻게 달라지는지 살펴본다.'},
-4:{name:'이상 기체 상태방정식', ctrl:[], meas:null, fix:{}, rng:{},
+4:{name:'이상 기체 상태 방정식', ctrl:[], meas:null, fix:{}, rng:{},
    axes:[{x:'nT',y:'PV',lab:'P·V – n·T'}],
    der:{h:'(P·V)/(n·T)',u:'kPa·L·mol⁻¹·K⁻¹',fn:r=>r.P*r.V/(r.n*r.T),d:3},
    law:'P·V ∝ n·T', eq:'P V = n R T',
@@ -882,7 +883,7 @@ function renderTable(){
     if(!rs.length){ el.innerHTML='<div class="thint">앞의 세 실험에서 기록한 값이 여기에 표시된다.</div>'; return; }
     let h='<table><colgroup><col style="width:26%"><col style="width:26%"><col style="width:26%"><col style="width:22%"></colgroup>'+
       '<thead><tr><th>출처</th><th>n·T<span class="unit">mol·K</span></th><th>P·V<span class="unit">kPa·L</span></th><th>(P·V)/(n·T)<span class="unit">kPa·L/(mol·K)</span></th></tr></thead><tbody>';
-    rs.forEach(r=>{ h+=`<tr><td style="color:${COL[r.src]};font-weight:800">${STEP[r.src].name.replace(' 법칙','').replace('이상 기체 상태방정식','추가')}</td>`+
+    rs.forEach(r=>{ h+=`<tr><td style="color:${COL[r.src]};font-weight:800">${STEP[r.src].name.replace(' 법칙','').replace('이상 기체 상태 방정식','추가')}</td>`+
       `<td>${f(r.n*r.T,3)}</td><td>${f(r.P*r.V,3)}</td><td class="d">${f(r.P*r.V/(r.n*r.T),3)}</td></tr>`; });
     el.innerHTML=h+'</tbody></table>';
     return;

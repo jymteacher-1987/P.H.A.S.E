@@ -516,9 +516,7 @@ body.page-view .site-nav .cat-tag{
    1px은 .site-nav의 border-bottom 몫. */
 .viewer-frame-wrap{ height: calc(var(--viewer-height, 100dvh) - var(--nav-h) - 1px); background: var(--bg); }
 iframe.viewer-frame{ display:block; width:100%; height:100%; border:none; background:#fff; }
-.viewer-app-back{display:none}
-/* Home Screen apps have no browser Back button; reserve an exit only there. */
-.standalone-viewer .viewer-app-back{display:grid;place-items:center;position:fixed;bottom:max(3px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:100;width:44px;height:36px;border-radius:14px;border:1px solid #ffffff88;background:#152335c9;color:#fff;text-decoration:none;font-size:22px;touch-action:manipulation}
+/* Home Screen's return control shares the reserved guide row (lesson-notes.css). */
 /* Phone/tablet detection is independent of desktop window size. */
 html.phone-tablet:has(body.page-view){scrollbar-gutter:auto;overflow:hidden}
 .phone-tablet body.page-view{height:var(--viewer-height,100dvh);min-height:0;overflow:hidden}

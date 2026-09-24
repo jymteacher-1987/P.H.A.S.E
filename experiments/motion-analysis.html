@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head><script src="../assets/js/browser-compat.js?v=iphone-20260911"></script><script defer src="../assets/js/visit-entry.js?v=visits-20260909"></script>
+<head><script src="../assets/js/browser-compat.js?v=9e1028454f"></script><script defer src="../assets/js/visit-entry.js?v=dcaa1fcbb5"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>물체 운동 분석 실험실</title>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="../assets/vendor/chartjs-4.4.1/chart.umd.min.js?v=d2af8974e9"></script>
 
 <style>
 /* ====================================================================
@@ -161,7 +161,7 @@ tbody tr:hover{background:var(--accent-soft);}
 <header>
   <div>
     <h1><span class="dot"></span>물체 운동 분석 실험실</h1>
-    <p>실제 물체의 운동을 추적해 위치 데이터로부터 속도·가속도를 도출하고, 원하는 구간만 골라 분석합니다.</p>
+    <p>화면 속 물체의 운동을 추적해 위치 데이터로부터 속도·가속도를 구하고, 원하는 구간을 골라 분석합니다.</p>
   </div>
   <div class="howto"><b>①</b> 운동 선택 → <b>②</b> 물체를 클릭하면 점이 찍히고 다음 프레임으로 이동(또는 자동 추적) → <b>③</b> 막대 양끝 핸들로 분석 구간 선택 · <b>구간 재생</b>으로 반복</div>
 </header>
@@ -174,7 +174,7 @@ tbody tr:hover{background:var(--accent-soft);}
         <div class="t">등속도 운동</div>
       </button>
       <button class="scn" data-mode="freefall">
-        <div class="t">자유낙하</div>
+        <div class="t">자유 낙하</div>
       </button>
     </div>
 
@@ -586,26 +586,42 @@ function drawTarget(x,y){
 function sortedTracked(){return [...tracked.values()].sort((a,b)=>a.frame-b.frame);}
 function getActivePoints(){return sortedTracked().filter(inRange);}
 
-/* 위치로부터 속도·가속도를 '직접' 도출(유한 차분).
-   - 가속도 = 위치의 2차 차분(중앙), 속도 = 1차 차분(중앙). 양 끝은 2차 정확도 단방향.
-   - 같은 운동 구간 안의 프레임은 정확히 이론값(낙하 9.8 등). 충돌·튕김 같은 급변 '직전/직후'
-     프레임은 자연히 튀어서 그 자리에 충돌이 있었음이 그대로 드러남(인위적으로 감추지 않음). */
+/* 실제 기록 시각으로 보간 다항식의 미분을 구한다. 프레임을 건너뛰어도
+   0.1초로 간주하지 않는다. 속도는 최대 3점, 가속도는 내부 3점/끝 4점 차분이다.
+   충돌·튕김을 가로지르는 차분은 평균적인 급변을 보여 주므로 단일 운동 구간을 골라 분석한다. */
+function sampleDerivative(samples, component, at, order){
+  if(samples.length<=order) return null;
+  let result=0;
+  for(let j=0;j<samples.length;j++){
+    const others=samples.filter((_,k)=>k!==j);
+    const denominator=others.reduce((p,s)=>p*(samples[j].t-s.t),1);
+    if(Math.abs(denominator)<1e-15) return null;
+    let numerator=0;
+    for(let a=0;a<others.length;a++){
+      if(order===1){
+        numerator+=others.reduce((p,s,k)=>k===a?p:p*(at-s.t),1);
+      }else{
+        for(let b=0;b<others.length;b++) if(b!==a){
+          numerator+=others.reduce((p,s,k)=>k===a||k===b?p:p*(at-s.t),1);
+        }
+      }
+    }
+    result+=samples[j][component]*numerator/denominator;
+  }
+  return result;
+}
 function computeKinematicsFull(){
   const rows=sortedTracked().map(p=>({frame:p.frame,t:p.t,x:p.x,y:p.y,vx:null,vy:null,ax:null,ay:null}));
-  const n=rows.length, dt=DT;
+  const n=rows.length;
   if(n<2) return rows;
-  const X=i=>rows[i].x, Y=i=>rows[i].y;
   for(let i=0;i<n;i++){
-    if(n>=3){
-      if(i===0){rows[i].vx=(-3*X(0)+4*X(1)-X(2))/(2*dt); rows[i].vy=(-3*Y(0)+4*Y(1)-Y(2))/(2*dt);}
-      else if(i===n-1){rows[i].vx=(3*X(n-1)-4*X(n-2)+X(n-3))/(2*dt); rows[i].vy=(3*Y(n-1)-4*Y(n-2)+Y(n-3))/(2*dt);}
-      else {rows[i].vx=(X(i+1)-X(i-1))/(2*dt); rows[i].vy=(Y(i+1)-Y(i-1))/(2*dt);}
-    } else { rows[i].vx=(X(1)-X(0))/dt; rows[i].vy=(Y(1)-Y(0))/dt; }
-    if(n>=4){
-      if(i===0){rows[i].ax=(2*X(0)-5*X(1)+4*X(2)-X(3))/(dt*dt); rows[i].ay=(2*Y(0)-5*Y(1)+4*Y(2)-Y(3))/(dt*dt);}
-      else if(i===n-1){rows[i].ax=(2*X(n-1)-5*X(n-2)+4*X(n-3)-X(n-4))/(dt*dt); rows[i].ay=(2*Y(n-1)-5*Y(n-2)+4*Y(n-3)-Y(n-4))/(dt*dt);}
-      else {rows[i].ax=(X(i+1)-2*X(i)+X(i-1))/(dt*dt); rows[i].ay=(Y(i+1)-2*Y(i)+Y(i-1))/(dt*dt);}
-    } else if(n===3){ rows[i].ax=(X(2)-2*X(1)+X(0))/(dt*dt); rows[i].ay=(Y(2)-2*Y(1)+Y(0))/(dt*dt); }
+    const start=Math.max(0,Math.min(i-1,n-3));
+    const velocitySamples=rows.slice(start,start+3);
+    const accelerationSamples=i===0?rows.slice(0,4):i===n-1?rows.slice(-4):velocitySamples;
+    for(const component of ['x','y']){
+      rows[i]['v'+component]=sampleDerivative(velocitySamples,component,rows[i].t,1);
+      rows[i]['a'+component]=sampleDerivative(accelerationSamples,component,rows[i].t,2);
+    }
   }
   const snap=v=>(v!==null && Math.abs(v)<5e-4)?0:v;
   rows.forEach(r=>{r.vx=snap(r.vx);r.vy=snap(r.vy);r.ax=snap(r.ax);r.ay=snap(r.ay);});
@@ -750,12 +766,11 @@ function updateTable(){
   updateAnalysis(rows);updateHud();
 }
 function updateAnalysis(rows){
-  const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
   const fmt=v=>v===null?'–':(Math.abs(v)<5e-4?'0.00':(v+0).toFixed(2));
-  const mVx=avg(rows.map(r=>r.vx).filter(v=>v!==null));
-  const mVy=avg(rows.map(r=>r.vy).filter(v=>v!==null));
-  const mAx=avg(rows.map(r=>r.ax).filter(v=>v!==null));
-  const mAy=avg(rows.map(r=>r.ay).filter(v=>v!==null));
+  const first=rows[0],last=rows[rows.length-1],duration=rows.length>1?last.t-first.t:0;
+  const changeRate=key=>duration>0&&first[key]!==null&&last[key]!==null?(last[key]-first[key])/duration:null;
+  const mVx=changeRate('x'),mVy=changeRate('y');
+  const mAx=rows.length>=3?changeRate('vx'):null,mAy=rows.length>=3?changeRate('vy'):null;
   $('an-v').innerHTML=`<span class="comp-x">v<sub>x</sub> ${fmt(mVx)}</span> <span class="comp-y">v<sub>y</sub> ${fmt(mVy)}</span>`;
   $('an-a').innerHTML=`<span class="comp-x">a<sub>x</sub> ${fmt(mAx)}</span> <span class="comp-y">a<sub>y</sub> ${fmt(mAy)}</span>`;
   $('an-v-ref').textContent='단위 m/s';

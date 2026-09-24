@@ -12,18 +12,30 @@
 }
 .page-lab .exp-card .meta{justify-content:flex-end}
 .page-view .viewer-frame-wrap{display:flex;flex-direction:column}
+.page-view .viewer-tools{display:flex;align-items:stretch;flex:0 0 auto;background:#fffaf6}
+.page-view .viewer-app-back{display:none}
+.phone-tablet.standalone-viewer .viewer-app-back{
+  display:flex;align-items:center;justify-content:center;flex:0 0 44px;min-height:44px;
+  border-right:1px solid #e0d0c8;border-bottom:1px solid #e0d0c8;color:#6f4d43;
+}
+.page-view .viewer-app-back svg{width:21px;height:21px}
+.page-view .viewer-app-back:hover{background:#f4e8e1}
+.page-view .viewer-app-back:focus-visible{outline:3px solid #875a49;outline-offset:-3px}
 .page-view iframe.viewer-frame{flex:1 1 0;min-height:0;height:auto}
 .page-view .viewer-feedback{flex:1 1 0;min-height:0;height:auto}
 .page-view .viewer-note-toggle[hidden],.page-view .viewer-note-panel[hidden]{display:none!important}
 .page-view .viewer-note-toggle{
-  flex:0 0 auto;display:flex;align-items:center;gap:8px;width:100%;min-height:36px;
+  flex:1 1 auto;display:flex;align-items:center;gap:8px;min-width:0;min-height:36px;
   padding:7px 22px;border:0;border-bottom:1px solid #e0d0c8;
   background:#fffaf6;color:#6f4d43;text-align:left;
   font:700 12px/1.4 "Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
   letter-spacing:.02em;cursor:pointer;
 }
-.page-view .viewer-note-toggle::after{content:"⌄";margin-left:auto;font-size:18px;line-height:1}
-.page-view .viewer-note-toggle[aria-expanded="true"]::after{content:"⌃"}
+.page-view .viewer-note-toggle::after{
+  content:"";flex:none;width:7px;height:7px;margin:-3px 2px 0 auto;
+  border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);
+}
+.page-view .viewer-note-toggle[aria-expanded="true"]::after{transform:rotate(225deg);margin-top:3px}
 .page-view .viewer-note-toggle:hover,.page-view .viewer-note-toggle[aria-expanded="true"]{
   background:#f4e8e1;color:#583e36;
 }
@@ -37,9 +49,10 @@
   background:#fffaf6;box-shadow:0 18px 44px #211b1844;color:#342d2a;
   font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
 }
-.page-view .viewer-note-heading{display:flex;align-items:start;justify-content:space-between;gap:16px}
+.page-view .viewer-note-heading{display:flex;align-items:center;justify-content:space-between;gap:16px}
 .page-view .viewer-note-heading h2{margin:0;font-size:15px;line-height:1.35;letter-spacing:-.03em}
 .page-view .viewer-note-heading button{
+  display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;margin:-10px -10px -10px 0;
   border:0;background:none;color:#715f58;font-size:21px;line-height:1;cursor:pointer;
 }
 .page-view .viewer-note-panel dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin:12px 0 0}

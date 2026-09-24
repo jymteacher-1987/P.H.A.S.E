@@ -6,10 +6,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>실험 보기 — 가상 물리 실험실</title>
 <link rel="icon" href="assets/phase-mark.svg" type="image/svg+xml" />
-<link rel="stylesheet" href="assets/css/style.css?v=0567cb0f5f" />
-<link rel="stylesheet" href="assets/css/view-feedback.css?v=20260924d" />
-<link rel="stylesheet" href="assets/css/lesson-notes.css?v=20260924c" />
-<link rel="stylesheet" href="assets/css/phase-icons.css?v=20260924a" />
+<link rel="stylesheet" href="assets/css/style.css?v=ae46211184" />
+<link rel="stylesheet" href="assets/css/view-feedback.css?v=3c32ec8f44" />
+<link rel="stylesheet" href="assets/css/lesson-notes.css?v=1a45c7c801" />
+<link rel="stylesheet" href="assets/css/phase-icons.css?v=8e348eb896" />
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="P.H.A.S.E">
@@ -33,7 +33,12 @@
   </div>
 </nav>
 <div class="viewer-frame-wrap">
-  <button class="viewer-note-toggle" id="viewerNoteToggle" type="button" aria-controls="viewerNotePanel" aria-expanded="false" hidden>실험 길잡이</button>
+  <div class="viewer-tools">
+    <a class="viewer-app-back" data-viewer-return href="lab.html" aria-label="실험 목록으로 돌아가기" title="실험 목록으로 돌아가기">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12H4m6-6-6 6 6 6"/></svg>
+    </a>
+    <button class="viewer-note-toggle" id="viewerNoteToggle" type="button" aria-controls="viewerNotePanel" aria-expanded="false" hidden>실험 길잡이</button>
+  </div>
   <aside class="viewer-note-panel" id="viewerNotePanel" aria-labelledby="viewerNoteTitle" hidden>
     <div class="viewer-note-heading">
       <h2 id="viewerNoteTitle" tabindex="-1">실험 길잡이</h2>
@@ -59,10 +64,10 @@
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="assets/js/experiments-data.js?v=guide-20260924b"></script>
-<script src="assets/js/firebase-config.js"></script>
-<script src="assets/js/data.js?v=notes-20260924b"></script>
-<script src="assets/js/visit-entry.js?v=visits-20260909"></script>
+<script src="assets/js/experiments-data.js?v=59c87b774c"></script>
+<script src="assets/js/firebase-config.js?v=b9092ce985"></script>
+<script src="assets/js/data.js?v=7416c85a79"></script>
+<script src="assets/js/visit-entry.js?v=dcaa1fcbb5"></script>
 <script src="assets/js/view.js?v=a54c5c54ba"></script>
 </body>
 </html>

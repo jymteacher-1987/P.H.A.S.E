@@ -50,12 +50,12 @@
 
 /* Muted category inks sit with the site's paper and terracotta palette. */
 :is(.page-lab .exp-card .tag,.page-view .cat-tag)[data-cat="fundamentals"]{color:#56727d;background:#eef3f2;border-color:#cfdbd9}
-:is(.page-lab .exp-card .tag,.page-view .cat-tag)[data-cat="mechanics"]{color:#936b45;background:#f7efe5;border-color:#e6d7bf}
-:is(.page-lab .exp-card .tag,.page-view .cat-tag)[data-cat="thermal"]{color:#a65c52;background:#faeeea;border-color:#e8cfc8}
-:is(.page-lab .exp-card .tag,.page-view .cat-tag)[data-cat="waves-optics"]{color:#5a7e8a;background:#edf4f5;border-color:#cedde0}
+:is(.page-lab .exp-card .tag,.page-view .cat-tag)[data-cat="mechanics"]{color:#8a6241;background:#f7efe5;border-color:#e6d7bf}
+:is(.page-lab .exp-card .tag,.page-view .cat-tag)[data-cat="thermal"]{color:#995248;background:#faeeea;border-color:#e8cfc8}
+:is(.page-lab .exp-card .tag,.page-view .cat-tag)[data-cat="waves-optics"]{color:#536e7a;background:#edf4f5;border-color:#cedde0}
 :is(.page-lab .exp-card .tag,.page-view .cat-tag)[data-cat="electromagnetism"]{color:#77667f;background:#f3eef5;border-color:#dfd3e3}
-:is(.page-lab .exp-card .tag,.page-view .cat-tag)[data-cat="relativity"]{color:#986e79;background:#f8eff2;border-color:#e7d5dc}
-:is(.page-lab .exp-card .tag,.page-view .cat-tag)[data-cat="modern-physics"]{color:#617866;background:#edf3ed;border-color:#d1ded1}
+:is(.page-lab .exp-card .tag,.page-view .cat-tag)[data-cat="relativity"]{color:#875d68;background:#f8eff2;border-color:#e7d5dc}
+:is(.page-lab .exp-card .tag,.page-view .cat-tag)[data-cat="modern-physics"]{color:#566e5b;background:#edf3ed;border-color:#d1ded1}
 :is(.page-lab .exp-card .tag,.page-view .cat-tag)[data-cat="play"]{color:#9b645f;background:#f9efec;border-color:#e7d3ce}
 @media(max-width:640px){
   .page-lab .side-item .name::before{width:16px;height:16px}

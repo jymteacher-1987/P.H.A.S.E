@@ -1,10 +1,10 @@
 ﻿<!DOCTYPE html>
 <html lang="ko">
-<head><script src="../assets/js/browser-compat.js?v=iphone-20260911"></script><script defer src="../assets/js/visit-entry.js?v=visits-20260909"></script>
+<head><script src="../assets/js/browser-compat.js?v=9e1028454f"></script><script defer src="../assets/js/visit-entry.js?v=dcaa1fcbb5"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SI 단위 접두어 탐험 — 통합과학1 · 과학의 기초</title>
-<link rel="stylesheet" href="../assets/css/experiment-ui-icons.css">
+<link rel="stylesheet" href="../assets/css/experiment-ui-icons.css?v=d364a62055">
 <style>
   :root{
     --bg:#ffffff; --ink:#342d2a; --sub:#6d625e; --line:#e8ddd7; --soft:#f8f1ed;
@@ -318,7 +318,7 @@ const SVG = {
 /* ══════════ 접두어별 상세 (예시마다 SVG 아이콘 + 검증된 수치) ══════════ */
 const DETAIL = {
   12:{icon:"ssd",
-    real:`노트북 SSD <b>1&nbsp;TB</b> =&nbsp;1,000,000&nbsp;MB.<br>4&nbsp;MB 사진이 정확히 <b>25만 장</b> 들어갑니다.`,
+    real:`노트북 SSD <b>1&nbsp;TB</b> =&nbsp;1,000,000&nbsp;MB.<br>사진 저장에만 쓴다고 계산하면 4&nbsp;MB 사진 <b>25만 장</b> 분량입니다.`,
     exs:[
       ["ssd","SSD 저장 용량","1&nbsp;TB =&nbsp;1000&nbsp;GB — 영화&nbsp;수백&nbsp;편 분량"],
       ["server","슈퍼컴퓨터 속도","1 테라플롭스 =&nbsp;1초에 1조&nbsp;번 계산"],
@@ -354,31 +354,31 @@ const DETAIL = {
     tip:{known:"1&nbsp;km =&nbsp;1000&nbsp;m, 1&nbsp;kg =&nbsp;1000&nbsp;g", so:"킬로(k)는 1000배 → <b>10³</b>"},
     meta:"1&nbsp;km는 400&nbsp;m 운동장 트랙 두 바퀴 반."},
   0:{icon:"person",
-    real:`사람의 키 ≈&nbsp;<b>1.6~1.8&nbsp;m</b>.<br>모든 접두어는 이 기준 단위에 붙습니다.`,
+    real:`사람의 키 ≈&nbsp;<b>1.6~1.8&nbsp;m</b>.<br>접두어가 붙지 않은 단위를 변환의 기준으로 삼습니다.`,
     exs:[
       ["ruler","길이","m (미터)"],
       ["bottle","부피","L (리터) — 큰 생수병이 2&nbsp;L"],
       ["clock","시간","s (초)"],
     ],
-    tip:{known:"접두어가 없으면 그냥 기준 단위", so:"10⁰ =&nbsp;<b>1</b>. 여기서 1000배씩 오르내릴 때마다 접두어가 하나씩 바뀝니다"},
-    meta:"1&nbsp;m는 성인의 큰 한 걸음 정도."},
+    tip:{known:"접두어가 없으면 배율은 1", so:"10⁰ =&nbsp;<b>1</b>. 이 화면에 나열한 접두어는 1000배 간격입니다. 데시(d)·센티(c) 등 다른 접두어도 있습니다"},
+    meta:"여기서 말하는 변환 기준은 SI 기본 단위와 다릅니다. 질량의 SI 기본 단위는 kg이며, 질량의 접두어는 g 앞에 붙입니다. 1&nbsp;m는 성인의 큰 한 걸음 정도입니다."},
   "-3":{icon:"ant",
     real:`개미&nbsp;몸길이&nbsp;수&nbsp;mm, 쌀알&nbsp;약&nbsp;5&nbsp;mm,<br>샤프심&nbsp;굵기&nbsp;<b>0.5&nbsp;mm</b>.`,
     exs:[
       ["milk","우유·물약","우유 200&nbsp;mL, 물약&nbsp;5&nbsp;mL"],
       ["rain","강수량","'비 10&nbsp;mm' = 빗물이 1 cm 쌓인 것"],
-      ["pill","약 성분","타이레놀 1정 =&nbsp;500&nbsp;mg"],
+      ["pill","약 성분","유효 성분 500&nbsp;mg =&nbsp;0.5&nbsp;g"],
       ["stopwatch","짧은 시간","1&nbsp;ms =&nbsp;1000분의 1초"],
     ],
     tip:{known:"우유 1&nbsp;L =&nbsp;1000&nbsp;mL", so:"1&nbsp;mL는 1&nbsp;L의 1000분의 1 → 밀리(m) =&nbsp;<b>10⁻³</b>"},
     meta:"1&nbsp;mm는 샤프심(0.5&nbsp;mm) 두 개를 나란히 붙인 굵기."},
   "-6":{icon:"cell",
-    real:`적혈구 지름 ≈&nbsp;<b>7~8&nbsp;μm</b>.<br>머리카락 단면에 약&nbsp;10개가 들어갑니다.`,
+    real:`적혈구 지름 ≈&nbsp;<b>7~8&nbsp;μm</b>.<br>머리카락 지름(약 80&nbsp;μm)에 걸쳐 약&nbsp;10개를 나란히 놓을 수 있습니다.`,
     exs:[
       ["hair","머리카락 굵기","약&nbsp;80&nbsp;μm — 1&nbsp;μm는 그 80분의 1"],
       ["mask","미세먼지","초미세먼지 PM2.5 = 지름 2.5&nbsp;μm 이하"],
       ["bacteria","세균","대장균 길이 약&nbsp;2&nbsp;μm"],
-      ["rain","구름 속 물방울","지름 약&nbsp;10~20&nbsp;μm — 가벼워서 떠 있어요"],
+      ["rain","구름 속 물방울","지름 약&nbsp;10~20&nbsp;μm — 천천히 떨어져 상승 기류에 머물 수 있어요"],
     ],
     tip:{known:"1&nbsp;mm =&nbsp;1000&nbsp;μm", so:"마이크로(μ)는 밀리(m)의 1000분의 1 → 10⁻³&nbsp;÷&nbsp;1000 =&nbsp;<b>10⁻⁶</b>"},
     meta:"1&nbsp;μm를 1&nbsp;mm로 1000배 확대하면, 사람 키는 1.7&nbsp;km — 한라산 높이만큼 커집니다."},
@@ -387,7 +387,7 @@ const DETAIL = {
     exs:[
       ["hair","1&nbsp;nm는 얼마나 작을까?","머리카락 굵기(약&nbsp;80&nbsp;μm)의 8만분의 1"],
       ["dna","DNA 폭","이중나선의 폭 약&nbsp;2&nbsp;nm"],
-      ["chip","반도체 공정","최신 공정을 '3&nbsp;nm 공정'이라 불러요"],
+      ["chip","반도체 공정","'3&nbsp;nm 공정'은 공정 이름 — 소자 크기 자체를 뜻하지는 않아요"],
       ["hex","나노 소재","나노 입자·나노 코팅 신소재"],
     ],
     tip:{known:"1&nbsp;μm =&nbsp;1000&nbsp;nm", so:"나노(n)는 마이크로(μ)의 1000분의 1 → 10⁻⁶&nbsp;÷&nbsp;1000 =&nbsp;<b>10⁻⁹</b>"},
@@ -435,7 +435,7 @@ function showPrefix(exp){
   detail.style.setProperty("--pc", p.color);
 
   const head = exp===0
-    ? `<div class="symBig">1</div><span class="nm">기준 단위</span><span class="en">base unit — m,&nbsp;g,&nbsp;s,&nbsp;L …</span><span class="pow">= ${supHtml(0)} =&nbsp;1</span>`
+    ? `<div class="symBig">1</div><span class="nm">접두어 없음</span><span class="en">no prefix — m,&nbsp;g,&nbsp;s,&nbsp;L …</span><span class="pow">= ${supHtml(0)} =&nbsp;1</span>`
     : `<div class="symBig">${p.sym}</div><span class="nm">${p.ko}</span><span class="en">${p.en}</span><span class="pow">= ${supHtml(exp)}</span><span class="mult">기준의 ${p.mult}</span>`;
 
   detail.innerHTML =
@@ -569,10 +569,10 @@ const QUIZ_POOL = [
    fb:"메가(M) =&nbsp;10⁶ =&nbsp;100만 배. 12&nbsp;MP 카메라 =&nbsp;1200만 화소."},
   {q:"1&nbsp;kg은 몇 g일까?", opts:["10&nbsp;g","100&nbsp;g","1000&nbsp;g","10,000&nbsp;g"], ans:2,
    fb:"킬로(k) =&nbsp;1000배이므로 1&nbsp;kg =&nbsp;1000&nbsp;g."},
-  {q:"타이레놀 1정 =&nbsp;500&nbsp;mg. 이것을 g으로 바꾸면?", opts:["0.05&nbsp;g","0.5&nbsp;g","5&nbsp;g","50&nbsp;g"], ans:1,
+  {q:"알약의 유효 성분이 500&nbsp;mg일 때, 이것을 g으로 바꾸면?", opts:["0.05&nbsp;g","0.5&nbsp;g","5&nbsp;g","50&nbsp;g"], ans:1,
    fb:"1000&nbsp;mg =&nbsp;1&nbsp;g이므로 500&nbsp;mg =&nbsp;0.5&nbsp;g."},
   {q:"적혈구의 지름은 약&nbsp;7~8 ___. 빈칸에 알맞은 단위는?", opts:["mm","μm","nm","pm"], ans:1,
-   fb:"적혈구는 약&nbsp;7~8&nbsp;μm — 머리카락 단면에 약&nbsp;10개가 들어가는 크기."},
+   fb:"적혈구 지름은 약&nbsp;7~8&nbsp;μm — 머리카락 지름(약 80&nbsp;μm)에 걸쳐 약&nbsp;10개를 나란히 놓을 수 있는 크기."},
   {q:"DNA 이중나선의 폭은 약&nbsp;2 ___. 빈칸은?", opts:["mm","μm","nm","pm"], ans:2,
    fb:"DNA 폭은 약&nbsp;2&nbsp;nm. 나노 세계의 대표 주자예요."},
   {q:"초미세먼지 PM2.5는 지름 2.5 ___ 이하의 먼지. 빈칸은?", opts:["mm","μm","nm","cm"], ans:1,

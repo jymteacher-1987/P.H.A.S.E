@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head><script src="../assets/js/browser-compat.js?v=iphone-20260911"></script><script defer src="../assets/js/visit-entry.js?v=visits-20260909"></script>
+<head><script src="../assets/js/browser-compat.js?v=9e1028454f"></script><script defer src="../assets/js/visit-entry.js?v=dcaa1fcbb5"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>전자기 유도 탐구: 코일, 자석, 상대운동</title>
-<link rel="stylesheet" href="../assets/css/experiment-ui-icons.css">
+<link rel="stylesheet" href="../assets/css/experiment-ui-icons.css?v=d364a62055">
 <style>
 :root{
   --bg:#f8f1ed; --card:#ffffff; --ink:#342d2a; --sub:#756963;
@@ -225,13 +225,19 @@ var OMEGA = RM ? 0.9 : 1.7;
 function startAuto(){
   var target, start, amp = RM ? 55 : 75;
   state.autoT = 0;
+  /* 새 운동은 현재 위치에서 시작한다. 앞선 운동의 속도 추정값을 이어받으면
+     함께 움직이는 모드로 바꾼 직후에도 가짜 상대속도가 남을 수 있다. */
+  state.prevXM = state.xM; state.prevXC = state.xC;
+  state.vM = 0; state.vC = 0;
   if (state.mode === 'magnet'){
     start = state.xM; target = state.xC;
-    if (Math.abs(target - start) < 80) start = target - 190;
+    if (Math.abs(target - start) < 80) target = start <= target ? target + 190 : target - 190;
+    target = Math.max(40, Math.min(W - 40, target));
     state.autoRef = { kind:'m', mid:(start+target)/2, amp:(target-start)/2 };
   } else if (state.mode === 'coil'){
     start = state.xC; target = state.xM;
-    if (Math.abs(target - start) < 80) start = target + 190;
+    if (Math.abs(target - start) < 80) target = start >= target ? target - 190 : target + 190;
+    target = Math.max(70, Math.min(W - 70, target));
     state.autoRef = { kind:'c', mid:(start+target)/2, amp:(target-start)/2 };
   } else if (state.mode === 'both'){
     state.autoRef = { kind:'b', xM0: state.xM, xC0: state.xC, amp: amp };
@@ -253,10 +259,16 @@ function applyAuto(){
   } else if (r.kind === 'b'){
     /* 같은 방향·같은 속도 → 상대속도 0 → 유도 전류 없음 */
     var d = r.amp * Math.sin(OMEGA * state.spdF * t);
+    /* 두 물체를 따로 멈추면 가장자리에서 간격이 달라진다.
+       둘 모두 이동할 수 있는 공통 변위만 허용하여 상대 위치를 유지한다. */
+    d = Math.max(Math.max(40 - r.xM0, 70 - r.xC0),
+                 Math.min(Math.min(W - 40 - r.xM0, W - 70 - r.xC0), d));
     state.xM = r.xM0 + d; state.xC = r.xC0 + d;
   } else if (r.kind === 'o'){
     /* 반대 방향 → 상대속도 2배 → 유도 효과 커짐 */
     var d2 = r.amp * Math.sin(OMEGA * state.spdF * t);
+    d2 = Math.max(Math.max(40 - r.xM0, r.xC0 - (W - 70)),
+                  Math.min(Math.min(W - 40 - r.xM0, r.xC0 - 70), d2));
     state.xM = r.xM0 + d2; state.xC = r.xC0 - d2;
   }
 }
@@ -942,7 +954,14 @@ bindRadios('dev', function(v){
   else if (v === 'led') note.textContent = 'LED는 순방향 전류만 통과시킵니다. 역방향이면 회로에 전류가 흐르지 않습니다.';
   else note.textContent = '검류계는 전류의 방향(+/−)과 세기를 바늘로 보여줍니다.';
 });
-bindRadios('mode', function(v){ state.mode = v; });
+bindRadios('mode', function(v){
+  state.mode = v;
+  if (state.auto){
+    var wasPaused = state.paused;
+    startAuto();
+    setPaused(wasPaused);
+  }
+});
 bindRadios('spd', function(v){
   var f = (v === 'slow') ? 0.55 : (v === 'fast') ? 1.9 : 1;
   /* 위상 연속: 진동 중에 속도를 바꿔도 위치가 튀지 않게 t를 보정 */
@@ -975,6 +994,13 @@ function resize(){
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   state.xM = relM * W; state.xC = relC * W;
   clampPositions();
+  state.prevXM = state.xM; state.prevXC = state.xC;
+  state.vM = 0; state.vC = 0;
+  if (state.auto){
+    var wasPaused = state.paused;
+    startAuto();
+    setPaused(wasPaused);
+  }
   skipEmf = true;
   state.prevLambda = computeLambda();
   inited = true;

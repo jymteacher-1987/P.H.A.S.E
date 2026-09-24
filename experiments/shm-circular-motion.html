@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head><script src="../assets/js/browser-compat.js?v=iphone-20260911"></script><script defer src="../assets/js/visit-entry.js?v=visits-20260909"></script>
+<head><script src="../assets/js/browser-compat.js?v=9e1028454f"></script><script defer src="../assets/js/visit-entry.js?v=dcaa1fcbb5"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>원운동과 단진동</title>
+<title>등속 원운동과 단진동</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -231,9 +231,9 @@
 
 <div class="app">
   <div class="head">
-    <div class="title">물리 시뮬레이션 <span class="eq">원운동과 단진동</span></div>
+    <div class="title"><span class="eq">등속 원운동과 단진동</span></div>
     <div class="tabs">
-      <div class="tab on" data-mode="concept">원운동과 단진동</div>
+      <div class="tab on" data-mode="concept">등속 원운동과 단진동</div>
       <div class="tab" data-mode="game">주기 맞추기 게임</div>
     </div>
   </div>
@@ -258,7 +258,7 @@
           <li>추를 <b>최고점이나 최하점</b>까지 끝까지 당긴다</li>
           <li>그림자가 다가올 때 타이밍 맞춰 놓는다<br><span style="color:var(--muted);font-size:12px">(또는 하단의 ‘같이 출발’ 버튼)</span></li>
         </ol>
-        <p class="concept-note"><b>등속 원운동의 그림자(1차원 투영)가 곧 단진동입니다.</b> 타이밍에 맞춰 놓으면 자석처럼 완벽하게 겹쳐서 진동합니다!</p>
+        <p class="concept-note"><b>등속 원운동을 한 축에 투영한 그림자는 단진동합니다.</b> 주기와 진폭이 같고 위상도 맞으면, 그림자와 용수철 추의 움직임이 겹칩니다.</p>
         <div class="note" id="cnote">추를 위나 아래로 끝까지 당겨보세요</div>
       </div>
 
@@ -489,7 +489,7 @@
     }
 
     sctx.fillStyle=C.muted;sctx.font="500 12px 'IBM Plex Mono',monospace";sctx.textAlign='center';
-    sctx.fillText('등속원운동',g.cx,botR+18);
+    sctx.fillText('등속 원운동',g.cx,botR+18);
     sctx.fillText('용수철',g.springX,topR-9);sctx.textAlign='left';
 
     drawGraph(sh,sp);
