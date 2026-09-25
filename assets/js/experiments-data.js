@@ -70,7 +70,7 @@ window.EXPERIMENTS_DATA = {
         "question": "알짜힘에 따라 물체의 운동은 어떻게 달라지고, 두 물체가 주고받는 힘은 어떤 관계일까요?",
         "focus": "제1법칙에서는 알짜힘이 0일 때의 운동을, 제2법칙에서는 알짜힘과 질량을 하나씩 바꾸며 가속도를 살펴보세요. 제3법칙에서는 두 물체가 주고받는 힘의 크기와 방향을 비교해 보세요."
       },
-      "path": "experiments/newton-laws.html?v=6743c2c5ae",
+      "path": "experiments/newton-laws.html?v=c12f74436c",
       "date": "2026-07-28",
       "tags": [
         "뉴턴",
