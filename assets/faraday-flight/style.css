@@ -715,11 +715,18 @@ kbd {
 }
 .start-links {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  gap: 15px;
+  gap: 0 clamp(6px, 1.5vw, 15px);
   margin-top: 18px;
   color: #7aa7a5;
+}
+/* Fullscreen can cross the 600px height breakpoint on a narrow phone.
+   Keep each menu label intact; let whole buttons wrap if space is limited. */
+.start-links .text-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 .touch-tip {
   font-size: 10px;
@@ -1219,7 +1226,7 @@ kbd {
   }
   .start-links {
     margin-top: 9px;
-    gap: 12px;
+    column-gap: clamp(6px, 1.5vw, 12px);
   }
   .start-links .text-btn {
     font-size: 10px;
@@ -1350,7 +1357,7 @@ kbd {
     font-size: 11px;
   }
   .start-links {
-    gap: 10px;
+    column-gap: clamp(6px, 1.5vw, 10px);
   }
   .mode-choice button span {
     display: none;
