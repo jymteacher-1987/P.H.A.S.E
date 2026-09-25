@@ -10,32 +10,20 @@
 .report-inline-copy{flex:1;min-width:0}
 .report-inline-copy strong{display:block;font-size:15px;font-weight:800;letter-spacing:-.03em;line-height:1.4}
 .report-inline-copy span{display:block;margin-top:4px;color:#725d52;font-size:12px;line-height:1.55;word-break:keep-all}
-.report-inline button,.page-view .viewer-report-btn{
+.report-inline button{
   display:inline-flex;align-items:center;justify-content:center;gap:7px;flex:none;
   min-height:44px;padding:10px 16px;border:1px solid #875a49;border-radius:3px;
   background:#875a49;color:#fff;font:700 13px/1.4 "Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
   white-space:nowrap;cursor:pointer;
 }
 .report-inline button svg{width:15px;height:15px}
-.report-inline button:hover,.page-view .viewer-report-btn:hover{background:#704535;border-color:#704535}
-.report-inline button:focus-visible,.viewer-report-btn:focus-visible{outline:3px solid #bf716a;outline-offset:2px}
+.report-inline button:hover{background:#704535;border-color:#704535}
+.report-inline button:focus-visible{outline:3px solid #bf716a;outline-offset:2px}
 @media(max-width:640px){
   .report-inline{gap:12px;padding:14px;margin-bottom:20px}
   .report-inline-icon{display:none}
   .report-inline-copy strong{font-size:13px}
   .report-inline button{padding:9px 11px;font-size:12px}
-}
-
-/* 길잡이와 같은 줄에 공간을 확보한다. 실험 위에 겹치는 고정 버튼은 두지 않는다. */
-.page-view .viewer-report-btn{
-  margin:4px 8px;min-height:36px;padding:7px 13px;font-size:12px;
-}
-.page-view .viewer-report-btn svg{width:17px;height:17px}
-.page-view .viewer-tools[data-report]{border-bottom:1px solid #e0d0c8}
-.page-view .viewer-tools[data-report] .viewer-note-toggle{border-bottom:0}
-.page-view .viewer-tools[data-report="alone"]{justify-content:flex-end}
-@media(pointer:coarse){
-  .page-view .viewer-report-btn{min-height:44px;margin:0 6px;border-radius:0;padding:9px 12px}
 }
 
 /* 신고 창 */

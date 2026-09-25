@@ -1,6 +1,6 @@
 // ================================================================
 // 시뮬레이션 오류 신고
-// 실험실 왼쪽 메뉴 밑과 실험 보기 화면에서 여는 신고 창이다.
+// 실험과 게임을 모아놓은 목록 페이지에서 여는 신고 창이다.
 // 보내기를 누르면 아래 주소의 Google Apps Script 웹 앱이 메일을 보낸다.
 // 받는 사람은 스크립트 안에 jymteacher@naver.com 으로 고정돼 있어서
 // 이 파일에서 무엇을 보내든 다른 주소로는 가지 않는다(tools/error-report 참고).
@@ -179,15 +179,6 @@
         <button type="button" aria-haspopup="dialog">신고하기 <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12m-5-5 5 5-5 5"/></svg></button>`;
       inline.querySelector("button").addEventListener("click", () => open());
       shell.before(inline);
-    }
-    // 실험 보기 화면: 보고 있는 활동을 미리 골라 둔다.
-    const viewButton = document.querySelector("[data-report-open]");
-    if (viewButton) {
-      const tools = viewButton.closest(".viewer-tools"), toggle = document.getElementById("viewerNoteToggle");
-      const mark = () => { if (tools) tools.dataset.report = toggle && !toggle.hidden ? "with-note" : "alone"; };
-      mark();
-      if (toggle && typeof MutationObserver === "function") new MutationObserver(mark).observe(toggle, { attributes: true, attributeFilter: ["hidden"] });
-      viewButton.addEventListener("click", () => open({ activityId: new URLSearchParams(location.search).get("id") || "" }));
     }
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mountPage);
