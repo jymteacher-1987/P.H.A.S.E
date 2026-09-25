@@ -34,9 +34,9 @@
       "bytes": 14890
     },
     "generator-principle": {
-      "src": "assets/previews/generator-principle-2f380355c2.webp",
-      "sourceHash": "e61ca57bd22dcc5fc0bdd383b1ec9d6c3dadd712c8fab078ae50619520f2ad5a",
-      "bytes": 23382
+      "src": "assets/previews/generator-principle-c366574219.webp",
+      "sourceHash": "f16072206a855900d1606296fc2611e6140dbb733f8f586360f79e025654a6c0",
+      "bytes": 23062
     },
     "convex-lens-focus": {
       "src": "assets/previews/convex-lens-focus-1e0b4bb069.webp",
@@ -119,9 +119,9 @@
       "bytes": 38208
     },
     "physics-fighter": {
-      "src": "assets/previews/physics-fighter-e576b47194.webp",
-      "sourceHash": "f87dbe89e6fe8f597de0e8909ec1a8f212a417720f8675176f7c4b2449a1ca88",
-      "bytes": 53362
+      "src": "assets/previews/physics-fighter-6b8c649603.webp",
+      "sourceHash": "f562a042ae3908fe94d4473c6fba4fc35c657f8319a967c4c7519b87c307c266",
+      "bytes": 53524
     },
     "giants-shoulders": {
       "src": "assets/previews/giants-shoulders-0f8b8349d5.webp",
@@ -129,14 +129,14 @@
       "bytes": 30432
     },
     "faraday-flight": {
-      "src": "assets/previews/faraday-flight-24f7a5f60a.webp",
-      "sourceHash": "df2d9da484b654b8ab972952f7df34a7ba8d04d00679d50687e2bbdc1147cd4b",
-      "bytes": 31064
+      "src": "assets/previews/faraday-flight-006b90e7c0.webp",
+      "sourceHash": "da25eb1fefa39fcac6c204161cad443567f8e81b3d3efb055f112e1c319d6f2c",
+      "bytes": 30808
     },
     "afterlight": {
-      "src": "assets/previews/afterlight-b9f08650ed.webp",
-      "sourceHash": "1044a617864ab8b895d0bfcd8cb22eebc577a3111bfd923e23ae29b63f952634",
-      "bytes": 20140
+      "src": "assets/previews/afterlight-da8f4e81fe.webp",
+      "sourceHash": "0cb2636d235d1f13a56fcbdac3e7743c9ccf07f68752516c02645a3cf810a928",
+      "bytes": 21362
     },
     "hanbut": {
       "src": "assets/previews/hanbut-09e1174feb.webp",
@@ -149,9 +149,9 @@
       "bytes": 26052
     },
     "bamti-escape": {
-      "src": "assets/previews/bamti-escape-3d3e8cc9de.webp",
-      "sourceHash": "aa2698bd6d58e240bb33c362711daf92bf493d8dc977088a8ba4046b1e8e129b",
-      "bytes": 23254
+      "src": "assets/previews/bamti-escape-5aa9cc906d.webp",
+      "sourceHash": "c37fc87513dac892328c39ddd7130a2a465ee3e2fc24392be930cc3211266dca",
+      "bytes": 23044
     }
   }
 }

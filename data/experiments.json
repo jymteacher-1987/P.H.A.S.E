@@ -155,7 +155,7 @@
         "question": "코일을 더 빠르게 돌리면 유도 전류는 어떻게 달라질까요?",
         "focus": "회전 속도를 바꾸며 전구의 밝기와 검류계의 움직임을 비교해 보세요."
       },
-      "path": "experiments/generator-principle.html?v=2e7a078941",
+      "path": "experiments/generator-principle.html?v=ba3d1a2aa4",
       "date": "2026-07-28",
       "tags": [
         "발전기",
@@ -447,7 +447,7 @@
       "title": "물리학자 대전",
       "icon": "🥊",
       "description": "뉴턴·아인슈타인·호킹·하위헌스 등 물리학자 8인의 공식 필살기 대전! 손발 콤보와 전용 기술로 평평 지구 교주를 이기고, 캐릭터별 논문 강의 엔딩을 만나보세요. 키보드와 모바일 조이스틱을 지원합니다.",
-      "path": "plays/physics-fighter.html?v=bc66c3c06e",
+      "path": "plays/physics-fighter.html?v=2b29f72297",
       "date": "2026-09-09",
       "tags": [
         "물리학자",
@@ -479,7 +479,7 @@
       "title": "패러데이: 스파크 항해",
       "icon": "⚡",
       "description": "코일과 자석으로 비행기를 강화하고, 축전기의 스파크 폭풍으로 돌파하세요. 패러데이의 삶에서 만난 다섯 어려움이 다섯 보스로 등장하는 비행 슈팅. 자동 공격, 모바일 드래그 조작, 이어하기와 작은 발명 노트를 지원합니다.",
-      "path": "plays/faraday-flight.html?v=aff1d960ea",
+      "path": "plays/faraday-flight.html?v=5cbd93b89b",
       "date": "2026-09-13",
       "tags": [
         "전자기 유도",
@@ -494,7 +494,7 @@
       "title": "잔광: 마지막 신호",
       "icon": "🌌",
       "description": "빛이 끊긴 도시의 마지막 신호를 복구하세요. 거울·편광판·간섭계를 직접 조작하는 4막 16개 구역의 SF 퍼즐 어드벤처. 자동 저장, 단계별 힌트, 별 기록과 오늘의 회선 도전을 지원합니다.",
-      "path": "plays/afterlight.html?v=d22fbe62e2",
+      "path": "plays/afterlight.html?v=a5a97ada30",
       "date": "2026-09-12",
       "tags": [
         "빛",
@@ -541,7 +541,7 @@
       "title": "밤티 방탈출 게임",
       "icon": "🔓",
       "description": "학교·해적선·우주정거장·저택·신전·금지구역, 여섯 이야기 속 단서를 연결해 마지막 문을 여는 3D 방탈출 게임입니다. 테마별 힌트와 PC·모바일 조작을 지원합니다.",
-      "path": "plays/bamti-escape.html?v=65735ff45a",
+      "path": "plays/bamti-escape.html?v=6eb6d2a4b4",
       "date": "2026-09-12",
       "tags": [
         "밤티",

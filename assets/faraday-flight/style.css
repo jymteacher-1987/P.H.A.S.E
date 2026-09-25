@@ -901,6 +901,8 @@ kbd {
   margin: 18px 0;
 }
 .map-stage {
+  word-break: keep-all;
+  overflow-wrap: break-word;
   background: #ffffff05;
   border: 1px solid #83cebf33;
   border-radius: 9px;
@@ -930,6 +932,8 @@ kbd {
   padding: 12px 0;
   font-size: 14px;
   line-height: 1.65;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 .help-row strong {
   display: block;
