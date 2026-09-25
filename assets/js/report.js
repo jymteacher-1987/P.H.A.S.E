@@ -15,7 +15,7 @@
 
   const activities = () => {
     const data = window.EXPERIMENTS_DATA || {};
-    const experiments = (data.experiments || []).map(e => ({ id: e.id, title: e.title }));
+    const experiments = (data.experiments || []).map(e => ({ id: e.id, title: e.title, category: e.category }));
     const plays = (data.plays || []).map(p => ({ id: p.id, title: p.title }));
     return { experiments, plays };
   };
@@ -65,12 +65,22 @@
   }
 
   let dialog, lastFocus;
-  function optionList(selected) {
+  function activityTree(selected) {
     const { experiments, plays } = activities();
-    const option = a => `<option value="${a.id}"${a.id === selected ? " selected" : ""}>${escapeHTML(a.title)}</option>`;
-    return `<option value="">사이트 전체 · 기타</option>`
-      + (experiments.length ? `<optgroup label="물리 가상실험">${experiments.map(option).join("")}</optgroup>` : "")
-      + (plays.length ? `<optgroup label="과학 놀이">${plays.map(option).join("")}</optgroup>` : "");
+    const categories = (window.EXPERIMENTS_DATA || {}).categories || [];
+    const groups = categories.map(category => ({
+      id: category.id, name: category.name,
+      items: experiments.filter(activity => activity.category === category.id)
+    }));
+    const uncategorized = experiments.filter(activity => !categories.some(category => category.id === activity.category));
+    if (uncategorized.length) groups.push({ id: "other-experiments", name: "기타 실험", items: uncategorized });
+    if (plays.length) groups.push({ id: "plays", name: "과학 놀이", items: plays });
+    const choice = activity => `<label class="report-activity-choice"><input type="radio" name="activity" value="${escapeHTML(activity.id)}"${activity.id === selected ? " checked" : ""}><span>${escapeHTML(activity.title)}</span></label>`;
+    return choice({ id: "", title: "사이트 전체 · 기타" })
+      + groups.filter(group => group.items.length).map(group => `<details class="report-activity-group" data-category="${escapeHTML(group.id)}"${group.items.some(activity => activity.id === selected) ? " open" : ""}>
+        <summary><span>${escapeHTML(group.name)}</span><span class="report-activity-count">${group.items.length}</span><span class="report-activity-chevron" aria-hidden="true"></span></summary>
+        <div class="report-activity-options">${group.items.map(choice).join("")}</div>
+      </details>`).join("");
   }
   function escapeHTML(text) {
     return String(text).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -87,8 +97,12 @@
           <button type="button" class="report-close" aria-label="신고 창 닫기">×</button>
         </div>
         <form class="report-form" novalidate>
-          <label for="reportActivity">어떤 활동인가요?</label>
-          <select id="reportActivity" name="activity"></select>
+          <fieldset class="report-activity-picker">
+            <legend>어떤 활동인가요?</legend>
+            <p class="report-activity-help">영역을 누르면 활동 목록이 펼쳐져요.</p>
+            <div class="report-activity-tree" id="reportActivity"></div>
+            <p class="report-activity-selected" aria-live="polite"></p>
+          </fieldset>
           <label for="reportMessage">어떤 문제가 있었나요?</label>
           <textarea id="reportMessage" name="message" rows="5" maxlength="${LIMITS.message}" required
             placeholder="예: 광원을 옮기면 상이 사라져요. 어떤 조작을 했는지 적어 주면 고치기 쉬워요."></textarea>
@@ -105,13 +119,21 @@
     document.body.append(dialog);
     const form = dialog.querySelector("form"), status = dialog.querySelector(".report-status"),
       sendButton = dialog.querySelector(".report-send");
+    const tree = dialog.querySelector(".report-activity-tree");
+    tree.addEventListener("toggle", event => {
+      if (!event.target.matches("details[open]")) return;
+      tree.querySelectorAll("details[open]").forEach(group => { if (group !== event.target) group.open = false; });
+    }, true);
+    tree.addEventListener("change", () => {
+      dialog.querySelector(".report-activity-selected").textContent = "선택: " + (titleOf(form.activity.value) || "사이트 전체 · 기타");
+    });
     dialog.querySelector(".report-close").addEventListener("click", close);
     dialog.addEventListener("click", event => { if (event.target === dialog) close(); });
     dialog.addEventListener("keydown", event => {
       if (event.key === "Escape") { event.preventDefault(); close(); }
       if (event.key === "Tab") {
-        const items = Array.from(dialog.querySelectorAll("button,select,textarea,input:not([tabindex='-1']),a[href]"))
-          .filter(el => !el.hidden && el.offsetParent !== null);
+        const items = Array.from(dialog.querySelectorAll("button,summary,select,textarea,input:not([tabindex='-1']),a[href]"))
+          .filter(el => !el.hidden && el.getClientRects().length > 0 && el.offsetParent !== null);
         const first = items[0], last = items[items.length - 1];
         if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
         else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
@@ -144,12 +166,16 @@
     if (!dialog) build();
     lastFocus = document.activeElement;
     const form = dialog.querySelector("form");
-    form.activity.innerHTML = optionList(options.activityId || "");
+    const selected = titleOf(options.activityId) ? options.activityId : "";
+    const tree = dialog.querySelector(".report-activity-tree");
+    tree.innerHTML = activityTree(selected);
+    tree.scrollTop = 0;
+    dialog.querySelector(".report-activity-selected").textContent = "선택: " + (titleOf(selected) || "사이트 전체 · 기타");
     dialog.querySelector(".report-status").textContent = "";
     dialog.querySelector(".report-send").textContent = "보내기";
     dialog.hidden = false;
     document.documentElement.classList.add("report-open");
-    (options.activityId ? form.message : form.activity).focus();
+    (selected ? form.message : tree.querySelector('input:checked')).focus();
   }
   function close() {
     dialog.hidden = true;

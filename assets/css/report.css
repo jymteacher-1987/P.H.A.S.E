@@ -46,6 +46,26 @@
   border:0;background:none;color:#715f58;font-size:22px;line-height:1;
 }
 .report-form{display:grid;gap:6px;margin-top:10px}
+.report-activity-picker{min-width:0;margin:8px 0 0;padding:0;border:0}
+.report-activity-picker legend{padding:0;color:#6f4d43;font-size:12px;font-weight:800}
+.report-activity-help{margin:5px 0 9px;color:#8a7a72;font-size:12px;line-height:1.5}
+.report-activity-tree{max-height:260px;max-height:min(260px,38dvh);overflow:auto;overscroll-behavior:contain;border:1px solid #d9c3b9;border-radius:3px;background:#fff}
+.report-activity-group{border-top:1px solid #eadfd9}
+.report-activity-group summary{display:flex;align-items:center;gap:10px;min-height:44px;padding:9px 12px;box-sizing:border-box;list-style:none;cursor:pointer;color:#5b3e32;font-size:13px;font-weight:700}
+.report-activity-group summary::-webkit-details-marker{display:none}
+.report-activity-group summary:hover,.report-activity-group[open] summary{background:#f5ece5}
+.report-activity-count{margin-left:auto;color:#998478;font-size:11px;font-weight:500}
+.report-activity-chevron{width:7px;height:7px;flex:none;margin:0 2px 3px;border:solid #987666;border-width:0 1.5px 1.5px 0;transform:rotate(45deg)}
+.report-activity-group[open] .report-activity-chevron{margin-top:5px;transform:rotate(225deg)}
+.report-form .report-activity-choice{display:flex;align-items:center;gap:10px;min-height:44px;box-sizing:border-box;margin:0;padding:9px 12px;color:#50443c;font-size:13px;font-weight:500;line-height:1.5;cursor:pointer}
+.report-activity-options{padding:3px 0 5px;background:#fffcf8}
+.report-activity-options .report-activity-choice{padding-left:18px}
+.report-activity-choice span{min-width:0;overflow-wrap:anywhere;word-break:keep-all}
+.report-activity-choice input[type=radio]{flex:none;width:16px;height:16px;margin:0;padding:0;accent-color:#875a49}
+.report-activity-choice:hover{background:#f5ece5}
+.report-activity-group summary,.report-activity-choice{-webkit-tap-highlight-color:rgba(135,90,73,.12)}
+.report-activity-group summary:focus-visible{outline:2px solid #bf716a;outline-offset:-3px}
+.report-activity-selected{margin:7px 0 2px;color:#795342;font-size:12px;line-height:1.5;word-break:keep-all}
 .report-form label{margin-top:8px;color:#6f4d43;font-size:12px;font-weight:800}
 .report-form label small{color:#9a8880;font-weight:600}
 .report-form select,.report-form textarea,.report-form input{
