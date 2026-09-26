@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head><script src="../assets/js/browser-compat.js?v=9e1028454f"></script><script defer src="../assets/js/visit-entry.js?v=dcaa1fcbb5"></script>
+<head><script src="../assets/js/device.js?v=af021ac293"></script><script src="../assets/js/browser-compat.js?v=9e1028454f"></script><script defer src="../assets/js/visit-entry.js?v=dcaa1fcbb5"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>전자기 유도 탐구: 코일, 자석, 상대 운동</title>
@@ -988,6 +988,9 @@ $('indBChk').addEventListener('change', function(){ state.showIndB = this.checke
 function resize(){
   var w = wrap.clientWidth || 600;
   var h = Math.max(280, Math.min(460, Math.round(w * 0.5)));
+  if (window.PHASE_DEVICE?.isPhoneOrTablet && innerWidth > innerHeight && innerHeight <= 520) {
+    h = Math.min(h, Math.max(240, innerHeight - 12));
+  }
   var relM = inited ? state.xM / W : 0.20;
   var relC = inited ? state.xC / W : 0.62;
   W = w; H = h;

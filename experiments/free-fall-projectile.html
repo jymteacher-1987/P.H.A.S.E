@@ -3,6 +3,7 @@
 <head><script src="../assets/js/browser-compat.js?v=9e1028454f"></script><script defer src="../assets/js/visit-entry.js?v=dcaa1fcbb5"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="../assets/js/device.js?v=af021ac293"></script>
 <title>자유 낙하 vs 수평으로 던진 물체 비교 실험</title>
 <style>
   * { box-sizing: border-box; }
@@ -53,6 +54,19 @@
   .readout b { color:#875a49; }
   .dotA { color:#e5484d; } .dotB { color:#0e9bb0; }
   .land { color:#e0912a; font-weight:800; }
+  /* Phone/tablet landscape keeps the experiment beside its controls; each pane can scroll. */
+  @media (orientation:landscape) and (max-height:550px){
+    .phone-tablet body{height:100dvh;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(220px,1fr);grid-template-rows:auto minmax(0,1fr);gap:6px;padding:6px;align-items:stretch;}
+    .phone-tablet h1{grid-column:1/-1;margin:0;font-size:15px;}
+    .phone-tablet .stageRow{display:flex;flex-direction:column;flex-wrap:nowrap;justify-content:flex-start;min-width:0;min-height:0;padding:0;gap:6px;overflow-y:auto;overscroll-behavior:contain;}
+    .phone-tablet .stage{flex:none;min-width:0;padding:6px;}
+    .phone-tablet .stage canvas{width:min(100%,calc((100dvh - 68px)*44/30));height:auto;margin:0 auto;}
+    .phone-tablet .controls{display:flex;flex-direction:column;flex-wrap:nowrap;justify-content:flex-start;min-width:0;min-height:0;padding:0;gap:6px;overflow-y:auto;overscroll-behavior:contain;}
+    .phone-tablet .grp{flex:none;padding:8px;}
+    .phone-tablet .ctrlBtn{min-height:38px;}
+    .phone-tablet .modeBtn{min-height:34px;}
+    .phone-tablet input[type=range]{height:26px;}
+  }
 </style>
 </head>
 <body>

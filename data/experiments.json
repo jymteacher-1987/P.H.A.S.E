@@ -121,7 +121,7 @@
         "question": "같은 추력으로 추진할 때, 질량이 줄어드는 로켓의 가속도는 어떻게 달라질까요?",
         "focus": "두 로켓의 질량과 가속도를 비교하고, 속도–시간 그래프에서 속도 차이가 어떻게 달라지는지 살펴보세요."
       },
-      "path": "experiments/rocket-motion.html?v=d37b71ad5b",
+      "path": "experiments/rocket-motion.html?v=fbe3f7a9a0",
       "date": "2026-07-28",
       "tags": [
         "로켓",
@@ -138,7 +138,7 @@
         "question": "같은 시간 간격으로 위치를 기록하면 운동의 차이가 어떻게 드러날까요?",
         "focus": "용수철에 밀려 나온 뒤 일정한 속도로 움직이는 구간과, 바닥에 닿기 전의 자유 낙하 구간을 골라 위치-시간 그래프를 비교해 보세요."
       },
-      "path": "experiments/motion-analysis.html?v=02f5f6aeb2",
+      "path": "experiments/motion-analysis.html?v=08edaa4335",
       "date": "2026-07-28",
       "tags": [
         "운동 분석",
@@ -155,7 +155,7 @@
         "question": "코일을 더 빠르게 돌리면 유도 전류는 어떻게 달라질까요?",
         "focus": "회전 속도를 바꾸며 전구의 밝기와 검류계의 움직임을 비교해 보세요."
       },
-      "path": "experiments/generator-principle.html?v=ba3d1a2aa4",
+      "path": "experiments/generator-principle.html?v=33c11f667a",
       "date": "2026-07-28",
       "tags": [
         "발전기",
@@ -207,7 +207,7 @@
         "question": "충돌 전과 후에 두 물체의 운동량을 더한 값은 어떻게 될까요?",
         "focus": "운동 방향(+, −)을 생각하며, 충돌 전후에 각 물체의 운동량과 두 물체의 전체 운동량을 비교해 보세요."
       },
-      "path": "experiments/momentum-conservation.html?v=3cff73064e",
+      "path": "experiments/momentum-conservation.html?v=9261184712",
       "date": "2026-07-28",
       "tags": [
         "운동량 보존",
@@ -224,7 +224,7 @@
         "question": "같은 높이에서 동시에 출발하면, 수평으로 던진 물체와 가만히 놓은 물체 중 어느 쪽이 먼저 바닥에 닿을까요?",
         "focus": "수평 방향의 운동이 달라도 연직 방향의 위치 변화는 같은지 살펴보세요."
       },
-      "path": "experiments/free-fall-projectile.html?v=6c086715f6",
+      "path": "experiments/free-fall-projectile.html?v=c03b98414a",
       "date": "2026-07-28",
       "tags": [
         "자유 낙하",
@@ -258,7 +258,7 @@
         "question": "어떤 조건에서 유도 전류가 생기며, 전류의 방향과 세기는 어떻게 달라질까요?",
         "focus": "다른 조건은 일정하게 두고, 자석과 코일의 운동 방식·자석의 극·자석의 세기·코일의 길이·감은 수를 하나씩 바꿔 보세요. ‘둘 다 같은 방향’을 골라 간격을 유지한 채 함께 움직이는 경우도 비교해, 자기선속의 변화와 전류의 관계를 살펴보세요."
       },
-      "path": "experiments/electromagnetic-induction.html?v=addcd78d61",
+      "path": "experiments/electromagnetic-induction.html?v=d6c93d408d",
       "date": "2026-07-28",
       "tags": [
         "전자기 유도",
@@ -365,7 +365,7 @@
         "question": "알파 입자 대부분은 거의 그대로 지나가는데, 일부는 왜 크게 휘어질까요?",
         "focus": "같은 조건으로 쏜 알파 입자의 궤적을 톰슨 원자 모형과 러더퍼드 원자 모형에서 비교해 보세요."
       },
-      "path": "experiments/rutherford-scattering.html?v=7a003794e2",
+      "path": "experiments/rutherford-scattering.html?v=0ec115c068",
       "date": "2026-08-20",
       "tags": [
         "러더퍼드",

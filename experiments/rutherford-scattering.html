@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head><script src="../assets/js/browser-compat.js?v=9e1028454f"></script><script defer src="../assets/js/visit-entry.js?v=dcaa1fcbb5"></script>
+<head><script src="../assets/js/device.js?v=af021ac293"></script><script src="../assets/js/browser-compat.js?v=9e1028454f"></script><script defer src="../assets/js/visit-entry.js?v=dcaa1fcbb5"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>러더퍼드 산란 실험</title>
@@ -314,6 +314,12 @@ const deg = r => r * 180 / Math.PI;
 // ---------------------------------------------------------- 배치와 캔버스
 function computeLayout() {
   const cw = Math.max(260, Math.min(document.getElementById('sketch').clientWidth, 980));
+  // Only the phone/tablet presentation changes; scattering coordinates stay in model units.
+  if (window.PHASE_DEVICE?.isPhoneOrTablet && innerWidth > innerHeight && innerHeight <= 520) {
+    const h = Math.max(240, innerHeight - 12);
+    return { w:cw, h:h, stacked:false,
+             panels:[{ox:0,oy:0,pw:cw/2,ph:h}, {ox:cw/2,oy:0,pw:cw/2,ph:h}] };
+  }
   if (cw >= 700) {
     const h = 500;
     return { w:cw, h:h, stacked:false,

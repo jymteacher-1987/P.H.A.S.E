@@ -3,6 +3,7 @@
 <head><script src="../assets/js/browser-compat.js?v=9e1028454f"></script><script defer src="../assets/js/visit-entry.js?v=dcaa1fcbb5"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<script src="../assets/js/device.js?v=af021ac293"></script>
 <title>로켓 운동 비교 — 질량 고정 vs 질량 변화</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -153,6 +154,28 @@ body{word-break:keep-all;overflow-wrap:break-word}  /* 어절 단위 줄바꿈 *
   }
   .countdown.pop{animation:cdpop .55s cubic-bezier(.2,.9,.3,1.2);}
   @keyframes cdpop{0%{transform:scale(.25);opacity:0;}45%{opacity:1;}100%{transform:scale(1);opacity:1;}}
+  /* Keep the flight visible while the data panel scrolls on short landscape screens. */
+  @media (orientation:landscape) and (max-height:550px){
+    .phone-tablet #app{padding:6px;gap:6px;}
+    .phone-tablet header{gap:3px 10px;}
+    .phone-tablet header h1{font-size:16px;letter-spacing:.2px;}
+    .phone-tablet header .sub{font-size:10px;}
+    .phone-tablet main{grid-template-columns:minmax(0,1fr) minmax(270px,1.15fr);grid-template-rows:minmax(0,1fr);gap:6px;}
+    .phone-tablet .right{overflow-y:auto;overscroll-behavior:contain;gap:7px;padding-right:2px;}
+    .phone-tablet .right>*{flex:none;}
+    .phone-tablet .controls{order:-1;position:sticky;top:0;z-index:6;padding:4px;background:var(--bg);border-radius:10px;flex-wrap:wrap;gap:5px;}
+    .phone-tablet button.ctl{min-height:36px;padding:7px;font-size:12px;}
+    .phone-tablet .speeds{gap:4px;}
+    .phone-tablet .speeds span{font-size:10px;}
+    .phone-tablet .spd{min-height:34px;padding:5px 6px;}
+    .phone-tablet .rk{padding:6px;}
+    .phone-tablet .rk .name{flex-wrap:wrap;font-size:10px;gap:2px 5px;}
+    .phone-tablet .row{font-size:11px;gap:3px;}
+    .phone-tablet .row .val{font-size:13px;letter-spacing:0;}
+    .phone-tablet .row .val small{font-size:9px;margin-left:1px;}
+    .phone-tablet .graph{height:160px;min-height:160px;}
+    .phone-tablet .stagehint{padding:0 6px;font-size:9px;}
+  }
 </style>
 </head>
 <body>
