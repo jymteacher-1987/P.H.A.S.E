@@ -20,6 +20,18 @@ async function reachable(locator, label) {
   assert.ok(hit, label + ': button is clipped, covered or disabled');
 }
 
+async function activityViewport(page, width, height) {
+  const bounds = await page.locator('#expFrame').boundingBox();
+  const toolbar = await page.locator('#viewerOrientationToggle').boundingBox();
+  assert.ok(toolbar && toolbar.y >= 0 && toolbar.y + toolbar.height < height,
+    'Orientation control must remain visible above the activity');
+  const top = toolbar.y + toolbar.height;
+  assert.ok(bounds && Math.abs(bounds.x) <= 1 && Math.abs(bounds.width - width) <= 1
+    && Math.abs(bounds.y - top) <= 1 && Math.abs(bounds.y + bounds.height - height) <= 1,
+    'Activity must fill the visible area below the orientation toolbar');
+  return bounds;
+}
+
 test('WebKit: all activities on small iPhone screens, older APIs, game start and rotation', { timeout: 600000 }, async t => {
   const server = http.createServer((req, res) => {
     const relative = decodeURIComponent(new URL(req.url, 'http://localhost').pathname).replace(/^\/+/, '') || 'index.html';
@@ -123,8 +135,7 @@ test('WebKit: all activities on small iPhone screens, older APIs, game start and
               if (needsLandscape && height > width) continue;
               await page.setViewportSize({ width, height });
               await page.waitForTimeout(150);
-              const bounds = await page.locator('#expFrame').boundingBox();
-              assert.ok(Math.abs(bounds.width - width) <= 1 && Math.abs(bounds.height - height) <= 1, 'Viewer must fill the visible screen');
+              await activityViewport(page, width, height);
               await reachable(start, entry.id + ' ' + width + '×' + height);
               if (entry.id === 'giants-shoulders' && height === 210 && process.env.SAFARI_SCREENSHOTS === '1') {
                 await page.screenshot({ path: path.join(resultsDir, 'giants-se-address-bar-start.png') });
@@ -141,8 +152,10 @@ test('WebKit: all activities on small iPhone screens, older APIs, game start and
               for (const [width, height] of [[568, 260], [667, 310], [568, 210]]) {
                 await page.setViewportSize({ width, height });
                 await page.waitForTimeout(180);
+                const viewport = await activityViewport(page, width, height);
                 const stage = await frame.locator('#stage').boundingBox();
-                assert.ok(stage.height >= height * .9 && stage.y >= 0 && stage.y + stage.height <= height,
+                assert.ok(stage.height >= viewport.height * .9 && stage.y >= viewport.y
+                  && stage.y + stage.height <= viewport.y + viewport.height,
                   `Runner at ${width}×${height} must fill the visible height; got ${stage.height}px`);
                 for (const control of ['#jump', '#slide', '#pause']) await reachable(frame.locator(control), control);
               }
@@ -150,7 +163,9 @@ test('WebKit: all activities on small iPhone screens, older APIs, game start and
               await frame.locator('#lore-card').waitFor({ state: 'visible' });
               await page.waitForTimeout(1150); // Let the actual science note slide into view.
               const note = await frame.locator('#lore-idea').boundingBox();
-              assert.ok(note.width > 0 && note.x >= 0 && note.x + note.width <= 568 && note.y + note.height < 120,
+              const viewport = await activityViewport(page, 568, 210);
+              assert.ok(note.width > 0 && note.x >= viewport.x && note.x + note.width <= viewport.x + viewport.width
+                && note.y + note.height < viewport.y + 120,
                 'Science clue must remain readable above the runner');
               assert.equal((await frame.locator('#stage').boundingBox()).height, stageBeforeLore.height,
                 'Science notes must not shrink gameplay');
