@@ -1,0 +1,24 @@
+/* A reserved toolbar control, never an overlay on activity controls. */
+.viewer-orientation-toggle[hidden]{display:none!important}
+.page-view .viewer-orientation-toggle{
+  display:flex;align-items:center;justify-content:center;gap:6px;flex:none;margin-left:auto;
+  min-height:36px;padding:7px 12px;border:0;border-left:1px solid #e0d0c8;border-bottom:1px solid #e0d0c8;
+  background:#fffaf6;color:#6f4d43;cursor:pointer;touch-action:manipulation;
+  font:700 12px/1.4 "Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;white-space:nowrap;
+}
+.page-view .viewer-orientation-toggle svg{width:18px;height:18px;flex:none}
+.page-view .viewer-orientation-toggle:hover{background:#f4e8e1}
+.page-view .viewer-orientation-toggle:focus-visible{outline:3px solid #875a49;outline-offset:-3px}
+.phone-tablet body.page-view{
+  --viewer-safe-top:env(safe-area-inset-top,0px);--viewer-safe-right:env(safe-area-inset-right,0px);
+  --viewer-safe-bottom:env(safe-area-inset-bottom,0px);--viewer-safe-left:env(safe-area-inset-left,0px);
+}
+/* Rotating the iframe's parent preserves the iframe's own input coordinates.
+   Swap its layout dimensions too, so activity media queries see landscape. */
+.phone-tablet body.page-view.viewer-rotated .viewer-frame-wrap{
+  width:var(--viewer-rotated-width);height:var(--viewer-rotated-height);
+  transform-origin:0 0;transform:translateX(var(--viewer-rotated-shift)) rotate(90deg);
+}
+.page-view.viewer-rotated .viewer-note-panel{
+  position:absolute;left:14px;top:50%;width:min(540px,calc(100% - 28px));max-height:calc(100% - 28px);
+}

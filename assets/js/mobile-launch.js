@@ -29,6 +29,7 @@
   }
   function hide() {
     if (!layer) return;
+    try { screen.orientation?.unlock?.(); } catch (_) {}
     layer.remove(); layer = null;
     document.documentElement.classList.remove('mobile-activity-open');
     document.title = savedTitle;

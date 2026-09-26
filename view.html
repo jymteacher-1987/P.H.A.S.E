@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="assets/css/style.css?v=ae46211184" />
 <link rel="stylesheet" href="assets/css/view-feedback.css?v=3c32ec8f44" />
 <link rel="stylesheet" href="assets/css/lesson-notes.css?v=1a45c7c801" />
+<link rel="stylesheet" href="assets/css/view-orientation.css?v=18ae820611" />
 <link rel="stylesheet" href="assets/css/phase-icons.css?v=8e348eb896" />
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -38,6 +39,10 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12H4m6-6-6 6 6 6"/></svg>
     </a>
     <button class="viewer-note-toggle" id="viewerNoteToggle" type="button" aria-controls="viewerNotePanel" aria-expanded="false" hidden>실험 길잡이</button>
+    <button class="viewer-orientation-toggle" id="viewerOrientationToggle" type="button" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="7" width="12" height="8" rx="1.5"/><path d="M3 9a9 9 0 0 1 15-5m0-3v3h-3M21 15a9 9 0 0 1-15 5m0 3v-3h3"/></svg>
+      <span>가로 보기</span>
+    </button>
   </div>
   <aside class="viewer-note-panel" id="viewerNotePanel" aria-labelledby="viewerNoteTitle" hidden>
     <div class="viewer-note-heading">
@@ -69,5 +74,6 @@
 <script src="assets/js/data.js?v=5d76ee4a80"></script>
 <script src="assets/js/visit-entry.js?v=dcaa1fcbb5"></script>
 <script src="assets/js/view.js?v=a54c5c54ba"></script>
+<script src="assets/js/view-orientation.js?v=fe522c8ca0"></script>
 </body>
 </html>
