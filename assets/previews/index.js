@@ -9,9 +9,9 @@ window.PHASE_PREVIEWS = {
       "bytes": 24482
     },
     "newton-laws": {
-      "src": "assets/previews/newton-laws-1b6ed35691.webp",
-      "sourceHash": "d5977caf7d4566d1a09bd65cc87476e4caccb98bd8aa6dee5a7ec2adf7e03789",
-      "bytes": 12892
+      "src": "assets/previews/newton-laws-26d79e7a79.webp",
+      "sourceHash": "e299bc917459a73b4fd5e52d11278d027e0f8bc2efdb9a56eb4efe0a2f9611d8",
+      "bytes": 12730
     },
     "newton-prism": {
       "src": "assets/previews/newton-prism-828e779c0a.webp",

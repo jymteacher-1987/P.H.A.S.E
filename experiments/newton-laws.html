@@ -156,6 +156,8 @@ body{word-break:keep-all;overflow-wrap:break-word}  /* 어절 단위 줄바꿈 *
   button.primary{flex:2 1 0;color:#fff;font-size:16px;background:#875a49;border-color:#875a49;
     box-shadow:0 6px 16px -8px rgba(134,75,68,.5);}
   button.primary.active{background:#684537;}
+  .hold-label{display:flex;flex-direction:column;align-items:center;gap:3px;line-height:1.1;white-space:nowrap;}
+  .hold-label .hold-hint{font-size:11px;font-weight:500;line-height:1.15;white-space:nowrap;}
   button.ghost{color:var(--ink-soft);}
   button.ghost.active{background:#f4f7fc;color:var(--navy);border-color:var(--line);}
 
@@ -190,6 +192,9 @@ body{word-break:keep-all;overflow-wrap:break-word}  /* 어절 단위 줄바꿈 *
     .chips{top:12px;left:6px;gap:4px;}
     .chip{min-width:65px;padding:4px 6px;}
     .chip .v{font-size:14px;}
+    #law3 .controls>.row:last-child{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));}
+    #law3 .controls>.row:last-child button{min-width:0;}
+    #l3-push{grid-column:1/-1;}
   }
   @media(min-height:740px){ .note{min-height:66px;} .note .txt{font-size:14px;} }
 </style>
@@ -226,7 +231,7 @@ body{word-break:keep-all;overflow-wrap:break-word}  /* 어절 단위 줄바꿈 *
          <button class="seg-btn" data-floor="none"><span class="ic ui-icon" data-ui-icon="sparkle" aria-hidden="true"></span>마찰 없는<br>바닥</button>
       </div>
       <div class="row">
-         <button class="act primary" id="l1-push"><span class="ic ui-icon" data-ui-icon="arrow" aria-hidden="true"></span> 밀기 (꾹 누르기)</button>
+         <button class="act primary" id="l1-push" aria-label="밀기 (꾹 누르기)"><span class="ic ui-icon" data-ui-icon="arrow" aria-hidden="true"></span><span class="hold-label"><span>밀기</span><span class="hold-hint">꾹 누르기</span></span></button>
         <button class="act ghost" id="l1-reset"><span class="ic">↺</span> 다시</button>
       </div>
     </div>
@@ -287,7 +292,7 @@ body{word-break:keep-all;overflow-wrap:break-word}  /* 어절 단위 줄바꿈 *
         </div>
       </div>
       <div class="row">
-         <button class="act primary" id="l3-push"><span class="ic ui-icon" data-ui-icon="arrow" aria-hidden="true"></span> 밀기 (꾹 누르기)</button>
+         <button class="act primary" id="l3-push" aria-label="밀기 (꾹 누르기)"><span class="ic ui-icon" data-ui-icon="arrow" aria-hidden="true"></span><span class="hold-label"><span>밀기</span><span class="hold-hint">꾹 누르기</span></span></button>
         <button class="act ghost" id="l3-pause"><span class="ic">⏸</span> 일시정지</button>
         <button class="act ghost" id="l3-reset"><span class="ic">↺</span> 다시</button>
       </div>
