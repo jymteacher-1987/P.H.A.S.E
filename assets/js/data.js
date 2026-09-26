@@ -222,10 +222,10 @@ const SITE = (function () {
   let visitRecorded = false;
   let visitInFlight = null;
 
-  // 로컬 미리보기와 자동 검사 브라우저(GitHub 검사·미리보기 촬영)의 방문은
-  // 실제 방문자 수에 넣지 않는다. 방문자 수를 읽어 보여 주는 것은 그대로 한다.
-  function isTestVisit() {
-    return navigator.webdriver === true || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+  // 개발 중인 로컬 미리보기만 제외한다. 공개 사이트에서는 자동화 브라우저도
+  // 일반 브라우저와 동일하게 세션당 한 번 집계한다.
+  function isLocalPreview() {
+    return /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
   }
 
   // 기존과 동일하게 같은 탭의 세션 동안 한 번 집계한다.
@@ -235,7 +235,7 @@ const SITE = (function () {
       return { configured: false, skipped: true };
     }
     if (!initFirebase()) return { configured: false };
-    if (isTestVisit()) return { configured: true, skipped: true };
+    if (isLocalPreview()) return { configured: true, skipped: true };
     try {
       visitRecorded = visitRecorded || sessionStorage.getItem("visit_counted") === "1";
     } catch (_) { /* 저장소를 사용할 수 없어도 현재 문서에서는 중복을 막는다. */ }

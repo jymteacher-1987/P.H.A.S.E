@@ -28,7 +28,7 @@
         if (!window.firebase?.initializeApp) await loadScript("https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js");
         if (!window.firebase?.firestore) await loadScript("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js");
         await loadScript(new URL("firebase-config.js", base).href);
-        await loadScript(new URL("data.js?v=visits-20260909", base).href);
+        await loadScript(new URL("data.js?v=8a345be4f3", base).href);
       }
       await SITE.recordVisit();
     })().catch((error) => console.warn("방문 집계 연결 실패:", error))

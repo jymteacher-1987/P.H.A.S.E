@@ -4,104 +4,104 @@ window.PHASE_PREVIEWS = {
   "height": 540,
   "items": {
     "si-prefixes": {
-      "src": "assets/previews/si-prefixes-ae8e3490d8.webp",
-      "sourceHash": "84837b85319cc9a640fca62a227cf8b431f04af45083c618ba06468bb64321af",
-      "bytes": 24482
+      "src": "assets/previews/si-prefixes-13b1773a0b.webp",
+      "sourceHash": "47ee2473d099d35ed87ec9de16803f9b600b0fb29fbddddb7a0a7c472f0db6d0",
+      "bytes": 24576
     },
     "newton-laws": {
       "src": "assets/previews/newton-laws-26d79e7a79.webp",
-      "sourceHash": "e299bc917459a73b4fd5e52d11278d027e0f8bc2efdb9a56eb4efe0a2f9611d8",
+      "sourceHash": "15135c32955d6fc5cc94be544fb451e0d7308e52e74ea6148ae3945069e94753",
       "bytes": 12730
     },
     "newton-prism": {
-      "src": "assets/previews/newton-prism-828e779c0a.webp",
-      "sourceHash": "be16dc406f7666eb6dd64383c2a49a25ae531b8c40cc2e877868e4c49d4016de",
-      "bytes": 20228
+      "src": "assets/previews/newton-prism-0d118927b3.webp",
+      "sourceHash": "26374000353a0aad4dabf942b3a7d8397f6ac7838993d2019ad15bdfe410c461",
+      "bytes": 20448
     },
     "shm-circular-motion": {
-      "src": "assets/previews/shm-circular-motion-749d37a796.webp",
-      "sourceHash": "bccc0af74ba35f926c2383141a8e934d8f5c55de8f3e023f145acef42d4a0ecc",
-      "bytes": 22182
+      "src": "assets/previews/shm-circular-motion-2390cde66d.webp",
+      "sourceHash": "31bc89673595bdfb8eec9f4fd25180a5648b56b5250624aeb5748deff12ae38b",
+      "bytes": 22560
     },
     "rocket-motion": {
-      "src": "assets/previews/rocket-motion-fe6a722f1a.webp",
-      "sourceHash": "9db3963aabd7c0052b45add446f2c060c0add9890511f698aab7542b45afdf3f",
-      "bytes": 14866
+      "src": "assets/previews/rocket-motion-a8744cbcef.webp",
+      "sourceHash": "3ddebb27bf6c27f2301086407b1372cf524826c47d7227fd94f86b3b981265fb",
+      "bytes": 14956
     },
     "motion-analysis": {
       "src": "assets/previews/motion-analysis-7c58a1c6f7.webp",
-      "sourceHash": "5aa31d477c69fd7f84521eda12a9b1d747168a7ea949f8c01d943fbb268edb3f",
+      "sourceHash": "cc78176fcfac283a69bdfcf815cc16d0d3e9b0f819bc52ef50b42e1af96c36ae",
       "bytes": 15090
     },
     "generator-principle": {
-      "src": "assets/previews/generator-principle-ec1087d73b.webp",
-      "sourceHash": "27ce00e6669121ac8f34f965d019dd395bbcfdeeb4a321dae5f0650cb5614581",
-      "bytes": 23076
+      "src": "assets/previews/generator-principle-1a23212a06.webp",
+      "sourceHash": "7288bfd51c3451ef668102fa13d1774929117dc978dbb2bc2393ad4313298637",
+      "bytes": 23092
     },
     "convex-lens-focus": {
       "src": "assets/previews/convex-lens-focus-1e0b4bb069.webp",
-      "sourceHash": "4a6c42d30dbf11eeeaef417d28d7858a93dae3fac38604710e2e8c77a947c5d8",
+      "sourceHash": "22a7ee831c33e81bb9dd553ee098e0385cfef8acef33ea770c0c25bef4fadc1e",
       "bytes": 23728
     },
     "rgb-cmy-light": {
-      "src": "assets/previews/rgb-cmy-light-5e2d16cbd1.webp",
-      "sourceHash": "7e26a5436bff77656b7bc694278ddbdaa8a1b5e5b0422964d80227af897a02eb",
-      "bytes": 20784
+      "src": "assets/previews/rgb-cmy-light-4bd88813e1.webp",
+      "sourceHash": "2b381a54969d6fb1bb236ecbb7076d060a872e9442e28b114466b410a9eb741a",
+      "bytes": 20586
     },
     "momentum-conservation": {
       "src": "assets/previews/momentum-conservation-dc82ed7cd3.webp",
-      "sourceHash": "2a35c327359028a56d04e99ea389cd6f89d25b35a2d2379f9d7c8da46855e0b7",
+      "sourceHash": "479085d60b24d71e4296e042a3d05b925486d4816c93055429129be33b248653",
       "bytes": 23598
     },
     "free-fall-projectile": {
-      "src": "assets/previews/free-fall-projectile-c1a6b9e880.webp",
-      "sourceHash": "add15b038e186deed9fceb6926b34a55a86a525f215e8037e22150522d088646",
-      "bytes": 19360
+      "src": "assets/previews/free-fall-projectile-a32119483d.webp",
+      "sourceHash": "7094d742ea8ebe0c6186fef6163a6af9e2daad59c856072d12609651a4fc671c",
+      "bytes": 19498
     },
     "resistor-series-parallel": {
-      "src": "assets/previews/resistor-series-parallel-620760fe37.webp",
-      "sourceHash": "b3e6cfd9c842a0440258c2f5bf79f30fcd0c15a239ac5d902ca9a743b4cb72fe",
-      "bytes": 23150
+      "src": "assets/previews/resistor-series-parallel-232585d126.webp",
+      "sourceHash": "5cbc2ed428381a1d6b6e0c5f788fcb7f49b59589f19f2b61ee5cca89b02a3388",
+      "bytes": 23980
     },
     "electromagnetic-induction": {
       "src": "assets/previews/electromagnetic-induction-75b0c0960c.webp",
-      "sourceHash": "087c104915cf4cf34dbe58b80663f48b431f0df1c7ed920c7758407ae6ad5edc",
+      "sourceHash": "27c5b406ae398395001415ef4294f9a954e39f7c6500d891cda16fab272698fa",
       "bytes": 24774
     },
     "pn-junction": {
-      "src": "assets/previews/pn-junction-4dbd8e1088.webp",
-      "sourceHash": "9a79c0e384198854b5ec9883a5fd237f28fa4bab13f764091ea7e6596ba81d24",
-      "bytes": 33246
+      "src": "assets/previews/pn-junction-ed55a42686.webp",
+      "sourceHash": "773d7d3b4e86ff1ae3a8dd47c534f478efad3d7962bea2778abc4cac573279d6",
+      "bytes": 33644
     },
     "proper-time-length": {
-      "src": "assets/previews/proper-time-length-1fa1983ed1.webp",
-      "sourceHash": "5c76342cb79f241ec5e287f2a22cb08741e1b332bb1925abbbbcc2fc185633d7",
-      "bytes": 24456
+      "src": "assets/previews/proper-time-length-f4343451d1.webp",
+      "sourceHash": "80fa6df8948c6a836283ac33687623e59599e26b9824b82cc906f844d75e279c",
+      "bytes": 25418
     },
     "ideal-gas-law": {
-      "src": "assets/previews/ideal-gas-law-0ed8786238.webp",
-      "sourceHash": "860412543cd844cdc65b771596fc7381515efd63b14b8114e59931e2bdf231f6",
-      "bytes": 10740
+      "src": "assets/previews/ideal-gas-law-ea92602c00.webp",
+      "sourceHash": "013d28f94873d14bbbb96886caff230e240dd2d3e7e9509722eef8177a60b9cf",
+      "bytes": 10554
     },
     "simultaneity-relativity": {
-      "src": "assets/previews/simultaneity-relativity-d145c6c6a1.webp",
-      "sourceHash": "cde6440d0cd1852ae3de4eea1eecf28a44b792f56f4ab051790c7ad74326b637",
-      "bytes": 18748
+      "src": "assets/previews/simultaneity-relativity-a11325efc1.webp",
+      "sourceHash": "60d6fcd2ce9d7443ed6027291b5375ca230c5234ac824331112fd4ea86a42218",
+      "bytes": 20334
     },
     "pascal-hydraulic": {
-      "src": "assets/previews/pascal-hydraulic-f4b9f46891.webp",
-      "sourceHash": "b30fa3173484b68d13097baa620a6b382bc406d51ee4ad8a7a0c2921338b72f1",
-      "bytes": 16958
+      "src": "assets/previews/pascal-hydraulic-ec680a88e6.webp",
+      "sourceHash": "c57939116bd72f653b8d9f6e956ed45fb5a036f2713c521319c34dc540697216",
+      "bytes": 16776
     },
     "rutherford-scattering": {
-      "src": "assets/previews/rutherford-scattering-5e5f5c4c6b.webp",
-      "sourceHash": "cb273a280e3a5940c4b166c785c5765b0f979f574f839f4ce35e30ddb41b0642",
-      "bytes": 21426
+      "src": "assets/previews/rutherford-scattering-bccd7b2d25.webp",
+      "sourceHash": "bfc612d7d77c5401405b8e9d8e33e8a5e598a2ba492ed89b53af662d42e488ad",
+      "bytes": 21464
     },
     "bernoulli-principle": {
-      "src": "assets/previews/bernoulli-principle-ad7932b15a.webp",
-      "sourceHash": "09a46e5ceb5c20fe58f8dc04eee926ed797b2924db420f44e6576032f9e4620b",
-      "bytes": 18028
+      "src": "assets/previews/bernoulli-principle-fa9195edc7.webp",
+      "sourceHash": "9a4650c12e30eb98f30af228b525774cc141bfce9ed369594cffbf3b52d3b663",
+      "bytes": 17848
     },
     "photoelectric-effect": {
       "src": "assets/previews/photoelectric-effect-f2354bd8e7.webp",
@@ -109,24 +109,24 @@ window.PHASE_PREVIEWS = {
       "bytes": 21916
     },
     "hero-maker": {
-      "src": "assets/previews/hero-maker-15e2667ef3.webp",
-      "sourceHash": "61e8b944e7cef4dae8802b102f51d8a5c718051ab41fa560a5e8f455e564c69d",
-      "bytes": 23214
+      "src": "assets/previews/hero-maker-e8f9e2cea7.webp",
+      "sourceHash": "218c4647be8c283e6c947b1e0c15450cedbceb23e81d8052f6c16cea90abdc1d",
+      "bytes": 23144
     },
     "newton-rush": {
-      "src": "assets/previews/newton-rush-ba99bf92a4.webp",
-      "sourceHash": "d8d669be5ff3153a6eaacdf70979aa73b29ff7952e5222ac7dd85fffb880e7b0",
-      "bytes": 38208
+      "src": "assets/previews/newton-rush-f1caab7d24.webp",
+      "sourceHash": "1a52106717e57762ffa0ab9748cf00b40842fa5314d0fa134e61a042f000fc98",
+      "bytes": 39672
     },
     "physics-fighter": {
-      "src": "assets/previews/physics-fighter-6b8c649603.webp",
-      "sourceHash": "f562a042ae3908fe94d4473c6fba4fc35c657f8319a967c4c7519b87c307c266",
-      "bytes": 53524
+      "src": "assets/previews/physics-fighter-1dddd7741f.webp",
+      "sourceHash": "be5196fff1f89260da0ea0cb1670ef5e1ca30dfe91659ce56541cfd5a3cb45b8",
+      "bytes": 53420
     },
     "giants-shoulders": {
-      "src": "assets/previews/giants-shoulders-0f8b8349d5.webp",
-      "sourceHash": "cf0523f7373ca76a6465be8ab9f95e46e0d096980b6826953b6bf30dbb18b3aa",
-      "bytes": 30432
+      "src": "assets/previews/giants-shoulders-b6bb234182.webp",
+      "sourceHash": "f80532637856065f64c33259e1be7bccca4840de7e1dc8151f6ba6c17bea75f7",
+      "bytes": 31882
     },
     "faraday-flight": {
       "src": "assets/previews/faraday-flight-006b90e7c0.webp",
@@ -144,9 +144,9 @@ window.PHASE_PREVIEWS = {
       "bytes": 20718
     },
     "jjomuldak-factory": {
-      "src": "assets/previews/jjomuldak-factory-80692117de.webp",
-      "sourceHash": "90800f0eb7100631fb7d3ba038abb65bc87f8df21e29da87d81e4554c1098b00",
-      "bytes": 26052
+      "src": "assets/previews/jjomuldak-factory-24bd89e7c6.webp",
+      "sourceHash": "d51066a74c7662395293d2d72aec883ec88ba20c89a14ffbb628086e0c65cb7d",
+      "bytes": 26234
     },
     "bamti-escape": {
       "src": "assets/previews/bamti-escape-5aa9cc906d.webp",

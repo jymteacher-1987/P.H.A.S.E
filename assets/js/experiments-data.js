@@ -53,7 +53,7 @@ window.EXPERIMENTS_DATA = {
         "question": "같은 양을 접두어가 다른 단위로 나타내면 수치는 어떻게 달라질까요?",
         "focus": "킬로와 밀리 등 크기가 다른 접두어로 단위를 변환하고, 나타내는 양은 그대로인지 확인해 보세요."
       },
-      "path": "experiments/si-prefixes.html?v=992352a412",
+      "path": "experiments/si-prefixes.html?v=8720dc8934",
       "date": "2026-07-28",
       "tags": [
         "단위",
@@ -70,7 +70,7 @@ window.EXPERIMENTS_DATA = {
         "question": "알짜힘에 따라 물체의 운동은 어떻게 달라지고, 두 물체가 주고받는 힘은 어떤 관계일까요?",
         "focus": "제1법칙에서는 알짜힘이 0일 때의 운동을, 제2법칙에서는 알짜힘과 질량을 하나씩 바꾸며 가속도를 살펴보세요. 제3법칙에서는 두 물체가 주고받는 힘의 크기와 방향을 비교해 보세요."
       },
-      "path": "experiments/newton-laws.html?v=1121884d31",
+      "path": "experiments/newton-laws.html?v=bd49965693",
       "date": "2026-07-28",
       "tags": [
         "뉴턴",
@@ -87,7 +87,7 @@ window.EXPERIMENTS_DATA = {
         "question": "흰빛을 프리즘으로 나누고, 나뉜 빛을 다시 굴절시키거나 모으면 어떤 색이 나타날까요?",
         "focus": "흰빛이 분산되는 모습을 본 뒤, 한 색으로 보이는 빛을 두 번째 프리즘에 통과시켜 보세요. ‘반원 유리로 모으기’에서는 스크린을 움직여 여러 색의 빛이 겹치는 모습도 확인해 보세요."
       },
-      "path": "experiments/newton-prism.html?v=ef12ee3c89",
+      "path": "experiments/newton-prism.html?v=0c22ae078d",
       "date": "2026-07-28",
       "tags": [
         "프리즘",
@@ -104,7 +104,7 @@ window.EXPERIMENTS_DATA = {
         "question": "등속 원운동하는 공에 평행 광선을 비추면, 그림자는 어떻게 움직일까요?",
         "focus": "평행 광선을 켜고 ‘같이 출발’을 눌러, 공의 그림자와 용수철에 매단 추가 같은 주기로 함께 움직이는지 비교해 보세요."
       },
-      "path": "experiments/shm-circular-motion.html?v=e49ae22f1d",
+      "path": "experiments/shm-circular-motion.html?v=41ae41312b",
       "date": "2026-07-28",
       "tags": [
         "단진동",
@@ -121,7 +121,7 @@ window.EXPERIMENTS_DATA = {
         "question": "같은 추력으로 추진할 때, 질량이 줄어드는 로켓의 가속도는 어떻게 달라질까요?",
         "focus": "두 로켓의 질량과 가속도를 비교하고, 속도–시간 그래프에서 속도 차이가 어떻게 달라지는지 살펴보세요."
       },
-      "path": "experiments/rocket-motion.html?v=fbe3f7a9a0",
+      "path": "experiments/rocket-motion.html?v=733f4930f1",
       "date": "2026-07-28",
       "tags": [
         "로켓",
@@ -138,7 +138,7 @@ window.EXPERIMENTS_DATA = {
         "question": "같은 시간 간격으로 위치를 기록하면 운동의 차이가 어떻게 드러날까요?",
         "focus": "용수철에 밀려 나온 뒤 일정한 속도로 움직이는 구간과, 바닥에 닿기 전의 자유 낙하 구간을 골라 위치-시간 그래프를 비교해 보세요."
       },
-      "path": "experiments/motion-analysis.html?v=08edaa4335",
+      "path": "experiments/motion-analysis.html?v=8711904bee",
       "date": "2026-07-28",
       "tags": [
         "운동 분석",
@@ -155,7 +155,7 @@ window.EXPERIMENTS_DATA = {
         "question": "코일을 더 빠르게 돌리면 유도 전류는 어떻게 달라질까요?",
         "focus": "회전 속도를 바꾸며 전구의 밝기와 검류계의 움직임을 비교해 보세요."
       },
-      "path": "experiments/generator-principle.html?v=33c11f667a",
+      "path": "experiments/generator-principle.html?v=dcbf1e074d",
       "date": "2026-07-28",
       "tags": [
         "발전기",
@@ -172,7 +172,7 @@ window.EXPERIMENTS_DATA = {
         "question": "광원과 스크린의 위치를 재면 렌즈의 초점 거리를 알아낼 수 있을까요?",
         "focus": "먼 물체의 상으로 초점 거리를 어림해 보세요. 광원 위치를 고정하고 스크린만 움직여 선명한 상의 위치를 기록하세요. 여러 광원 위치에서 측정을 반복하고, 그래프로 초점 거리를 구해 보세요."
       },
-      "path": "experiments/convex-lens-focus.html?v=da72e9ac7f",
+      "path": "experiments/convex-lens-focus.html?v=e23453e4a3",
       "date": "2026-07-28",
       "tags": [
         "볼록렌즈",
@@ -189,7 +189,7 @@ window.EXPERIMENTS_DATA = {
         "question": "여러 색을 섞을 때 빛과 물감은 왜 서로 다른 결과를 낼까요?",
         "focus": "RGB와 CMY 슬라이더를 각각 움직여, 색을 섞을수록 밝아지는지 어두워지는지 비교해 보세요."
       },
-      "path": "experiments/rgb-cmy-light.html?v=f8e3ba79e3",
+      "path": "experiments/rgb-cmy-light.html?v=5645623a91",
       "date": "2026-07-28",
       "tags": [
         "빛의 삼원색",
@@ -207,7 +207,7 @@ window.EXPERIMENTS_DATA = {
         "question": "충돌 전과 후에 두 물체의 운동량을 더한 값은 어떻게 될까요?",
         "focus": "운동 방향(+, −)을 생각하며, 충돌 전후에 각 물체의 운동량과 두 물체의 전체 운동량을 비교해 보세요."
       },
-      "path": "experiments/momentum-conservation.html?v=9261184712",
+      "path": "experiments/momentum-conservation.html?v=c7f7b0d29e",
       "date": "2026-07-28",
       "tags": [
         "운동량 보존",
@@ -224,7 +224,7 @@ window.EXPERIMENTS_DATA = {
         "question": "같은 높이에서 동시에 출발하면, 수평으로 던진 물체와 가만히 놓은 물체 중 어느 쪽이 먼저 바닥에 닿을까요?",
         "focus": "수평 방향의 운동이 달라도 연직 방향의 위치 변화는 같은지 살펴보세요."
       },
-      "path": "experiments/free-fall-projectile.html?v=c03b98414a",
+      "path": "experiments/free-fall-projectile.html?v=fa74bc20f7",
       "date": "2026-07-28",
       "tags": [
         "자유 낙하",
@@ -240,7 +240,7 @@ window.EXPERIMENTS_DATA = {
         "question": "저항을 직렬과 병렬로 연결할 때, 각 저항의 전류와 전압은 어떻게 달라질까요?",
         "focus": "직렬에서는 전류가 같고 각 저항의 전압을 더하면 전체 전압이 되는지, 병렬에서는 전압이 같고 각 가지의 전류를 더하면 전체 전류가 되는지 확인해 보세요."
       },
-      "path": "experiments/resistor-series-parallel.html?v=9a6603e886",
+      "path": "experiments/resistor-series-parallel.html?v=78de50d475",
       "date": "2026-07-28",
       "tags": [
         "저항",
@@ -258,7 +258,7 @@ window.EXPERIMENTS_DATA = {
         "question": "어떤 조건에서 유도 전류가 생기며, 전류의 방향과 세기는 어떻게 달라질까요?",
         "focus": "다른 조건은 일정하게 두고, 자석과 코일의 운동 방식·자석의 극·자석의 세기·코일의 길이·감은 수를 하나씩 바꿔 보세요. ‘둘 다 같은 방향’을 골라 간격을 유지한 채 함께 움직이는 경우도 비교해, 자기선속의 변화와 전류의 관계를 살펴보세요."
       },
-      "path": "experiments/electromagnetic-induction.html?v=d6c93d408d",
+      "path": "experiments/electromagnetic-induction.html?v=4b9f484326",
       "date": "2026-07-28",
       "tags": [
         "전자기 유도",
@@ -275,7 +275,7 @@ window.EXPERIMENTS_DATA = {
         "question": "p-n 접합에 거는 전압의 방향을 바꾸면 전류의 흐름은 어떻게 달라질까요?",
         "focus": "‘p-n 접합’과 ‘p-n 접합 실행’을 차례로 선택한 뒤, 순방향과 역방향에서 공핍층과 전자·양공의 움직임을 비교해 보세요."
       },
-      "path": "experiments/pn-junction.html?v=954b264876",
+      "path": "experiments/pn-junction.html?v=d6f9a90404",
       "date": "2026-09-13",
       "tags": [
         "반도체",
@@ -293,7 +293,7 @@ window.EXPERIMENTS_DATA = {
         "question": "로켓이 두 행성을 차례로 통과하는 시간 간격과 두 행성 사이의 거리는 관찰자에 따라 어떻게 달라질까요?",
         "focus": "각 기준틀에서 두 통과 사건 사이의 시간 간격, 그리고 같은 시각에 잰 두 행성 사이의 거리를 비교해 보세요."
       },
-      "path": "experiments/proper-time-length.html?v=7ad53dd5a9",
+      "path": "experiments/proper-time-length.html?v=4fd6d96c9a",
       "date": "2026-07-31",
       "tags": [
         "특수 상대성",
@@ -311,7 +311,7 @@ window.EXPERIMENTS_DATA = {
         "question": "기체의 압력, 부피, 온도, 물질량 사이에는 어떤 관계가 있을까요?",
         "focus": "각 단계에서 일정하게 유지되는 변인을 확인하고, 나머지 두 변인 사이의 관계를 알아보세요. 세 실험의 기록을 모아 PV = nRT가 성립하는지 확인해 보세요."
       },
-      "path": "experiments/ideal-gas-law.html?v=f33d93bb22",
+      "path": "experiments/ideal-gas-law.html?v=2a36b65002",
       "date": "2026-08-01",
       "tags": [
         "이상 기체",
@@ -329,7 +329,7 @@ window.EXPERIMENTS_DATA = {
         "question": "지면에서 동시에 친 두 번개는 기차에서도 동시에 친 것일까요?",
         "focus": "두 관점에서 번개가 친 시각과 빛이 관찰자에게 도착한 시각을 구분해 보세요."
       },
-      "path": "experiments/simultaneity-relativity.html?v=138e3c08fa",
+      "path": "experiments/simultaneity-relativity.html?v=9cfe542767",
       "date": "2026-08-01",
       "tags": [
         "특수 상대성",
@@ -347,7 +347,7 @@ window.EXPERIMENTS_DATA = {
         "question": "작은 피스톤을 눌러 무거운 물체를 들어 올릴 수 있는 까닭은 무엇일까요?",
         "focus": "피스톤의 지름을 바꾸며 필요한 힘과 두 피스톤이 움직인 거리를 함께 비교해 보세요."
       },
-      "path": "experiments/pascal-hydraulic.html?v=3435568476",
+      "path": "experiments/pascal-hydraulic.html?v=80240fa7a1",
       "date": "2026-08-07",
       "tags": [
         "파스칼 법칙",
@@ -365,7 +365,7 @@ window.EXPERIMENTS_DATA = {
         "question": "알파 입자 대부분은 거의 그대로 지나가는데, 일부는 왜 크게 휘어질까요?",
         "focus": "같은 조건으로 쏜 알파 입자의 궤적을 톰슨 원자 모형과 러더퍼드 원자 모형에서 비교해 보세요."
       },
-      "path": "experiments/rutherford-scattering.html?v=2d4291dfa4",
+      "path": "experiments/rutherford-scattering.html?v=debf1f73c0",
       "date": "2026-08-20",
       "tags": [
         "러더퍼드",
@@ -383,7 +383,7 @@ window.EXPERIMENTS_DATA = {
         "question": "같은 관을 따라 흐르는 공기의 속력이 커지면, 압력은 어떻게 달라질까요?",
         "focus": "빨라진 정도를 바꾸며 속력과 압력 값을 읽고, 분자가 벽에 부딪히는 횟수와 세기가 어떻게 달라지는지도 살펴보세요."
       },
-      "path": "experiments/bernoulli-principle.html?v=df536321a7",
+      "path": "experiments/bernoulli-principle.html?v=e170b75469",
       "date": "2026-09-09",
       "tags": [
         "베르누이",
@@ -418,7 +418,7 @@ window.EXPERIMENTS_DATA = {
       "title": "히어로 만들기",
       "icon": "🛡️",
       "description": "실험실을 돌며 고른 물리 원리로 나만의 과학 히어로를 설계하고, 사진을 찍어 히어로 포스터까지 완성하는 활동입니다.",
-      "path": "plays/hero-maker.html?v=9efc629ff5",
+      "path": "plays/hero-maker.html?v=9888c67ab1",
       "date": "2026-09-02",
       "tags": [
         "히어로",
@@ -432,7 +432,7 @@ window.EXPERIMENTS_DATA = {
       "title": "뉴턴 러시",
       "icon": "💎",
       "description": "뉴턴과 함께 다섯 세계를 달리며 프리즘 보석을 모아보세요. 점프와 슬라이드로 장애물을 피하고, 배경 속 과학 이야기를 만나며 모두의 TOP10 기록에 도전하는 게임입니다.",
-      "path": "plays/newton-rush.html?v=ae3db4ea28",
+      "path": "plays/newton-rush.html?v=8e7e172633",
       "date": "2026-09-08",
       "tags": [
         "뉴턴",
@@ -447,7 +447,7 @@ window.EXPERIMENTS_DATA = {
       "title": "물리학자 대전",
       "icon": "🥊",
       "description": "뉴턴·아인슈타인·호킹·하위헌스 등 물리학자 8인의 공식 필살기 대전! 손발 콤보와 전용 기술로 평평 지구 교주를 이기고, 캐릭터별 논문 강의 엔딩을 만나보세요. 키보드와 모바일 조이스틱을 지원합니다.",
-      "path": "plays/physics-fighter.html?v=2b29f72297",
+      "path": "plays/physics-fighter.html?v=1d36c36042",
       "date": "2026-09-09",
       "tags": [
         "물리학자",
@@ -462,7 +462,7 @@ window.EXPERIMENTS_DATA = {
       "title": "거인의 어깨: 프린키피아의 탄생",
       "icon": "🍎",
       "description": "뉴턴과 함께 탐험하고 보스를 상대하며 갈릴레오·데카르트·하위헌스의 연구를 만나보세요. 네 가지 실험을 관찰하고 기록을 모아 세 운동 법칙을 정리하는 횡스크롤 액션 게임입니다.",
-      "path": "plays/giants-shoulders.html?v=1c160c0045",
+      "path": "plays/giants-shoulders.html?v=9e5fb887cc",
       "date": "2026-09-11",
       "tags": [
         "뉴턴",
@@ -526,7 +526,7 @@ window.EXPERIMENTS_DATA = {
       "title": "쪼물딱 공장",
       "icon": "🫧",
       "description": "뽁뽁이, 말랑이, 팝잇처럼 손으로 조물조물 만지는 장난감을 모아 둔 놀이터입니다. 누르고 당기고 터뜨리며 색 도감을 채워보세요.",
-      "path": "plays/jjomuldak-factory.html?v=263c520870",
+      "path": "plays/jjomuldak-factory.html?v=16206b581f",
       "date": "2026-09-05",
       "tags": [
         "뽁뽁이",
