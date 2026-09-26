@@ -365,7 +365,7 @@ window.EXPERIMENTS_DATA = {
         "question": "알파 입자 대부분은 거의 그대로 지나가는데, 일부는 왜 크게 휘어질까요?",
         "focus": "같은 조건으로 쏜 알파 입자의 궤적을 톰슨 원자 모형과 러더퍼드 원자 모형에서 비교해 보세요."
       },
-      "path": "experiments/rutherford-scattering.html?v=0ec115c068",
+      "path": "experiments/rutherford-scattering.html?v=2d4291dfa4",
       "date": "2026-08-20",
       "tags": [
         "러더퍼드",

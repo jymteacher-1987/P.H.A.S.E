@@ -94,9 +94,9 @@ window.PHASE_PREVIEWS = {
       "bytes": 16958
     },
     "rutherford-scattering": {
-      "src": "assets/previews/rutherford-scattering-bccd7b2d25.webp",
-      "sourceHash": "53961508c5a9e382a0d93847ccd9b059ecd1154e7f49f6679d1248d7a9b8a79f",
-      "bytes": 21464
+      "src": "assets/previews/rutherford-scattering-5e5f5c4c6b.webp",
+      "sourceHash": "cb273a280e3a5940c4b166c785c5765b0f979f574f839f4ce35e30ddb41b0642",
+      "bytes": 21426
     },
     "bernoulli-principle": {
       "src": "assets/previews/bernoulli-principle-ad7932b15a.webp",

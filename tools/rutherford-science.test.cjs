@@ -24,7 +24,7 @@ for(const engine of [chromium,webkit]){
     const rows=[];
     for(const mode of [0,1]){
       await page.locator(`button[data-v="${mode}"]`).click();
-      await page.locator('#bHead').click();
+      await page.evaluate(()=>fire(D/2));
       rows.push(await page.evaluate(()=>{
         const p=particles.at(-1);
         const initial={energy:.5*(p.vx*p.vx+p.vy*p.vy)+K/Math.hypot(p.x,p.y),
@@ -78,6 +78,54 @@ for(const engine of [chromium,webkit]){
       assert.ok(row.n<20000,'particle must turn around');
       near(row.minOverD,row.expected,2e-4,'closest approach must agree with conserved energy and angular momentum');
       assert.ok(row.minOverD>=1-2e-4,'particle cannot cross the head-on approach limit');
+    }
+    assert.deepEqual(errors,[]);
+  });
+
+  test(`Rutherford aimed shot and off-axis scattering agree with the controls (${engine.name()})`,{timeout:90000},async t=>{
+    const browser=await engine.launch({headless:true});t.after(()=>browser.close());
+    const {page,errors}=await open(browser,'rutherford-scattering');
+    await page.addInitScript(()=>{window.requestAnimationFrame=()=>1;});
+    await page.goto('https://phase-rutherford.test/');
+    const finishShot=()=>page.evaluate(()=>{
+      let frames=0;
+      while(particles.some(p=>!p.done)&&frames++<1300)step();
+      return {frames,particles:particles.map(p=>({model:p.model,done:p.done,theta:p.theta})),stats};
+    });
+
+    // The actual button must keep aiming at the centre in either view,
+    // independently of the random values used by continuous firing.
+    for(const mode of [0,1])for(const random of [0,.5,.999999]){
+      await page.locator(`button[data-v="${mode}"]`).click();
+      await page.locator('#bReset').click();
+      await page.evaluate(value=>{Math.random=()=>value;},random);
+      await page.locator('#bHead').click();
+      const result=await finishShot();
+      assert.equal(result.particles.length,2,'one aimed shot launches the same pair of particles');
+      assert.ok(result.frames<1300&&result.particles.every(p=>p.done),'both particles finish naturally');
+      for(const p of result.particles){
+        near(p.theta,p.model==='rutherford'?180:0,.03,'a centre-directed alpha returns only in the concentrated-charge model');
+      }
+      assert.deepEqual(result.stats.rutherford,{n:1,pass:0,big:1,max:180},'head-on scattering is counted once');
+      assert.deepEqual(result.stats.thomson,{n:1,pass:1,big:0,max:0},'the Thomson particle passes without backscattering');
+    }
+
+    // Rutherford (1911), p.673: cot(theta/2)=2b/D. Off-axis shots must
+    // remain different from head-on shots, including angles below 90 degrees.
+    await page.locator('button[data-v="1"]').click();
+    for(const ratio of [0,-.25,.25,-.6,.6]){
+      await page.locator('#bReset').click();
+      await page.evaluate(value=>{
+        const pn=LAY.panels[1],pl=plotOf(pn);
+        shootAt(pn.ox+pn.pw/2,pl.cy+value*D*pl.S);
+      },ratio);
+      const result=await finishShot(),p=result.particles.find(p=>p.model==='rutherford');
+      const expected=ratio===0?180:2*Math.atan(1/(2*Math.abs(ratio)))*180/Math.PI;
+      assert.ok(result.frames<1300&&result.particles.every(p=>p.done),'off-axis shots finish naturally');
+      near(p.theta,expected,.03,'the selected impact parameter determines the scattering angle');
+      assert.equal(result.stats.rutherford.n,1);
+      assert.equal(result.stats.rutherford.big,Math.abs(ratio)<.5?1:0,'off-axis forward scattering must not be counted as backscattering');
+      assert.equal(result.stats.thomson.big,0);
     }
     assert.deepEqual(errors,[]);
   });
