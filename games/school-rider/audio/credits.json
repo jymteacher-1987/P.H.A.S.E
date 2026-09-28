@@ -1,0 +1,69 @@
+{
+  "author": "MintoDog",
+  "title": "School Rider lobby and race music",
+  "sourcePage": "https://opengameart.org/content/pure-raceway",
+  "license": "CC0 1.0 Universal",
+  "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "checkedAt": "2026-09-28",
+  "cost": 0,
+  "processing": "Original complete loop; -4 dB gain, stereo 44.1 kHz MP3 at 160 kbps, no tempo changes.",
+  "tracks": [
+    {
+      "file": "lobby-theme.mp3",
+      "title": "Sci-fi Puzzle Stage Select",
+      "bpm": 105,
+      "sourcePage": "https://opengameart.org/content/sci-fi-puzzle-stage-select",
+      "sourceUrl": "https://opengameart.org/sites/default/files/sci-fi_puzzle_stage_select_bpm105.mp3",
+      "sourceSha256": "9ef7f3ba85a11720de9e07d9f4cc3a55159be0f5cc5780308e269b4620bc090b",
+      "sha256": "343975ae48edb31b8bc5595a9e629afd15f920b7f4b6968a882434197bdff272",
+      "bytes": 1281178,
+      "probe": { "streams": [{ "sample_rate": "44100", "channels": 2 }], "format": { "duration": "63.999977" } }
+    },
+    {
+      "file": "race-theme.mp3",
+      "title": "Pure Raceway",
+      "sourcePage": "https://opengameart.org/content/pure-raceway",
+      "bpm": 160,
+      "sourceUrl": "https://opengameart.org/sites/default/files/pure_raceway_bpm160.mp3",
+      "sourceSha256": "71cb719a40738b9c63ef120301f73cdd1b658e5c83133710d61c007952fff7f3",
+      "sha256": "0e41aad3f3de617202c03bd18539b3f3baf0037c476928da8ccc6966791881fa",
+      "bytes": 1921164,
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "sample_rate": "44100",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "96.000000"
+        }
+      }
+    },
+    {
+      "file": "race-final.mp3",
+      "title": "Pure Raceway (Climax)",
+      "sourcePage": "https://opengameart.org/content/pure-raceway",
+      "bpm": 175,
+      "sourceUrl": "https://opengameart.org/sites/default/files/pure_raceway_climax_bpm175.mp3",
+      "sourceSha256": "6394df5430ef3d430386fe562926b0cbf2dd4b3a9e38ecc1981e505cad0802e6",
+      "sha256": "e6f8fb835749bdcf8ada7f9b2c377092785a89414b39d4e9462f6583c5c78e2a",
+      "bytes": 1756602,
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "sample_rate": "44100",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "87.771429"
+        }
+      }
+    }
+  ]
+}

@@ -152,6 +152,11 @@
       "src": "assets/previews/bamti-escape-5aa9cc906d.webp",
       "sourceHash": "c37fc87513dac892328c39ddd7130a2a465ee3e2fc24392be930cc3211266dca",
       "bytes": 23044
+    },
+    "school-rider": {
+      "src": "assets/previews/school-rider-f9efe10893.webp",
+      "sourceHash": "70c34a0e634c1e97e2f151be3af5ddbff26835a20ada8425319b97a6a4471057",
+      "bytes": 41200
     }
   }
 }

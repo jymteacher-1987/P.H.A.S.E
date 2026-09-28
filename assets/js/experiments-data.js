@@ -550,6 +550,21 @@ window.EXPERIMENTS_DATA = {
         "추리",
         "탐험"
       ]
+    },
+    {
+      "id": "school-rider",
+      "title": "스쿨 카트라이더",
+      "icon": "🏁",
+      "description": "학교를 무대로 AI와 달리는 카트 레이싱입니다. 아이템전과 스피드전에서 드리프트와 부스터를 활용해 우승에 도전해 보세요.",
+      "path": "games/school-rider/index.html",
+      "date": "2026-09-28",
+      "tags": [
+        "카트",
+        "레이싱",
+        "혼자하기",
+        "아이템전",
+        "스피드전"
+      ]
     }
   ]
 };

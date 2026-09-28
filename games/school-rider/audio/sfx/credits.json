@@ -1,0 +1,91 @@
+{
+  "author": "Kenney",
+  "license": "CC0 1.0 Universal",
+  "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "checkedAt": "2026-09-27",
+  "cost": 0,
+  "processing": "Complete source effects, -4dB gain, mono44.1kHz96kbpsMP3 for broad browser support; original durations retained.",
+  "tracks": [
+    {
+      "file": "ui-select.mp3",
+      "original": "Audio/select_001.ogg",
+      "sourcePage": "https://kenney.nl/assets/interface-sounds",
+      "archiveUrl": "https://kenney.nl/media/pages/assets/interface-sounds/fa43c1dd4d-1677589452/kenney_interface-sounds.zip",
+      "sourceSha256": "aec0c31ea934a35936ae0d2ab8fac8123c93aa5647f935853a58dbaf90278b7a",
+      "sha256": "86342c250d823095b8048eaf791176ed33506ed33db4598ddf5e63f3ef85fc61",
+      "bytes": 1298,
+      "duration": 0.040385
+    },
+    {
+      "file": "ui-confirm.mp3",
+      "original": "Audio/confirmation_002.ogg",
+      "sourcePage": "https://kenney.nl/assets/interface-sounds",
+      "archiveUrl": "https://kenney.nl/media/pages/assets/interface-sounds/fa43c1dd4d-1677589452/kenney_interface-sounds.zip",
+      "sourceSha256": "33b17a9a9a2397c62b285c52c33a907fdffb476909c99e42dde603f6a7a8b12c",
+      "sha256": "410c5a08e25601d0808cb6a8a25194c58ea6dfa8df175c1d6dae8341819b8b1d",
+      "bytes": 7254,
+      "duration": 0.539002
+    },
+    {
+      "file": "ui-back.mp3",
+      "original": "Audio/back_001.ogg",
+      "sourcePage": "https://kenney.nl/assets/interface-sounds",
+      "archiveUrl": "https://kenney.nl/media/pages/assets/interface-sounds/fa43c1dd4d-1677589452/kenney_interface-sounds.zip",
+      "sourceSha256": "07db973f79f6ae0f2edc34561e7592e24d0577455919fb602cb8ecc0da991dcf",
+      "sha256": "fdcae93bc9b001047776a0f1c083d062d97ca20a4fe3fd6a6e3789ce73e32fac",
+      "bytes": 1612,
+      "duration": 0.060975
+    },
+    {
+      "file": "pickup.mp3",
+      "original": "Audio/pluck_001.ogg",
+      "sourcePage": "https://kenney.nl/assets/interface-sounds",
+      "archiveUrl": "https://kenney.nl/media/pages/assets/interface-sounds/fa43c1dd4d-1677589452/kenney_interface-sounds.zip",
+      "sourceSha256": "be97ec4893a02d6eccfb678daa76c83e34cb2583b834ec2593d2641def739fa4",
+      "sha256": "92f236812a5398129a8d20f218f9b58c28f39d96cfedd54fa6a2e6968b1455e3",
+      "bytes": 1925,
+      "duration": 0.099524
+    },
+    {
+      "file": "drop.mp3",
+      "original": "Audio/drop_002.ogg",
+      "sourcePage": "https://kenney.nl/assets/interface-sounds",
+      "archiveUrl": "https://kenney.nl/media/pages/assets/interface-sounds/fa43c1dd4d-1677589452/kenney_interface-sounds.zip",
+      "sourceSha256": "4ac4d1cef7e936965cbf795852ca2020300b9e2ba7daa59f2bf4f1f7bf416218",
+      "sha256": "d6e16d2d50a7707cba54af71711488c39b144312813568165953d4ff2313e9a5",
+      "bytes": 3179,
+      "duration": 0.188186
+    },
+    {
+      "file": "metal.mp3",
+      "original": "Audio/impactMetal_medium_001.ogg",
+      "sourcePage": "https://kenney.nl/assets/impact-sounds",
+      "archiveUrl": "https://kenney.nl/media/pages/assets/impact-sounds/87b4ddecda-1677589768/kenney_impact-sounds.zip",
+      "sourceSha256": "e8a9eaba7c4d27422e4eeb3e6c7100d5d7dc0f83e005efc98c960adcc5265337",
+      "sha256": "70541bc38b9ec1c007dca4412f65861d2d6f159602d8c193464959959951d581",
+      "bytes": 2552,
+      "duration": 0.140544
+    },
+    {
+      "file": "thump.mp3",
+      "original": "Audio/impactSoft_heavy_001.ogg",
+      "sourcePage": "https://kenney.nl/assets/impact-sounds",
+      "archiveUrl": "https://kenney.nl/media/pages/assets/impact-sounds/87b4ddecda-1677589768/kenney_impact-sounds.zip",
+      "sourceSha256": "4d0096364ba9e46119d2ff6df493fdc101bd2e1efae061da5e5f77a53b3fdcb6",
+      "sha256": "e101c1f2fc00ccd34dbcf645e596e13ca7c626a8af45bcd1315a3266d10a2cd4",
+      "bytes": 7568,
+      "duration": 0.569138
+    },
+    {
+      "file": "bell.mp3",
+      "original": "Audio/impactBell_heavy_000.ogg",
+      "sourcePage": "https://kenney.nl/assets/impact-sounds",
+      "archiveUrl": "https://kenney.nl/media/pages/assets/impact-sounds/87b4ddecda-1677589768/kenney_impact-sounds.zip",
+      "sourceSha256": "94b8bb5f2d43ab65e4bcc32b28562416e9bc2c51d9fd4be1e333660ee52f977f",
+      "sha256": "393220e063e9e3f22b4845eb666e3d92988e2ef1054f80f3b0ed0354224d1266",
+      "bytes": 18539,
+      "duration": 1.480181
+    }
+  ],
+  "totalBytes": 43927
+}

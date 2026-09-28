@@ -1,0 +1,561 @@
+{
+  "version": 1,
+  "format": "glTF 2.0 binary",
+  "coordinateSystem": "+Y up, +Z forward",
+  "units": "meters",
+  "attachmentPosition": [
+    0,
+    0,
+    0
+  ],
+  "attachmentRotation": [
+    0,
+    0,
+    0
+  ],
+  "attachmentScale": [
+    1,
+    1,
+    1
+  ],
+  "animation": {
+    "steering": {
+      "name": "Steering",
+      "axis": "Z"
+    },
+    "frontPivots": {
+      "names": [
+        "Pivot_FL",
+        "Pivot_FR"
+      ],
+      "axis": "Y"
+    },
+    "wheels": {
+      "names": [
+        "Wheel_FL",
+        "Wheel_FR",
+        "Wheel_RL",
+        "Wheel_RR"
+      ],
+      "axis": "X",
+      "tireRadiusMeters": 0.505
+    },
+    "head": {
+      "name": "Head",
+      "axes": [
+        "Y",
+        "Z"
+      ]
+    },
+    "ponytail": {
+      "name": "Ponytail",
+      "axes": [
+        "X",
+        "Z"
+      ]
+    },
+    "arms": {
+      "upper": [
+        "UpperArm_L",
+        "UpperArm_R"
+      ],
+      "forearm": [
+        "Forearm_L",
+        "Forearm_R"
+      ],
+      "hand": [
+        "Hand_L",
+        "Hand_R"
+      ],
+      "rig": "sibling joints under Driver_<id>, local joint origins, hand grip follows Steering"
+    }
+  },
+  "vehicles": [
+    {
+      "id": "sport",
+      "path": "models/vehicles/sport.glb",
+      "rootNode": "Vehicle_sport",
+      "byteLength": 2295624,
+      "meshCount": 40,
+      "vertexCount": 56648,
+      "triangleCount": 72218,
+      "tireRadiusMeters": 0.505,
+      "bounds": {
+        "min": [
+          -1.584000000372529,
+          -0.010098755359649658,
+          -2.1600000858306885
+        ],
+        "max": [
+          1.584000000372529,
+          1.8899999856948853,
+          2.259999990463257
+        ],
+        "size": [
+          3.168000000745058,
+          1.900098741054535,
+          4.420000076293945
+        ]
+      }
+    },
+    {
+      "id": "bus",
+      "path": "models/vehicles/bus.glb",
+      "rootNode": "Vehicle_bus",
+      "byteLength": 2231728,
+      "meshCount": 41,
+      "vertexCount": 56119,
+      "triangleCount": 64118,
+      "tireRadiusMeters": 0.505,
+      "bounds": {
+        "min": [
+          -1.584000000372529,
+          -0.010098755359649658,
+          -2.140000104904175
+        ],
+        "max": [
+          1.584000000372529,
+          2.059999942779541,
+          2.1976330280303955
+        ],
+        "size": [
+          3.168000000745058,
+          2.0700986981391907,
+          4.33763313293457
+        ]
+      }
+    },
+    {
+      "id": "classic",
+      "path": "models/vehicles/classic.glb",
+      "rootNode": "Vehicle_classic",
+      "byteLength": 2073916,
+      "meshCount": 40,
+      "vertexCount": 50660,
+      "triangleCount": 67026,
+      "tireRadiusMeters": 0.505,
+      "bounds": {
+        "min": [
+          -1.584000000372529,
+          -0.010098755359649658,
+          -1.9670000076293945
+        ],
+        "max": [
+          1.584000000372529,
+          1.8899999856948853,
+          2.1976330280303955
+        ],
+        "size": [
+          3.168000000745058,
+          1.900098741054535,
+          4.16463303565979
+        ]
+      }
+    },
+    {
+      "id": "rally",
+      "path": "models/vehicles/rally.glb",
+      "rootNode": "Vehicle_rally",
+      "byteLength": 2045888,
+      "meshCount": 40,
+      "vertexCount": 50574,
+      "triangleCount": 62962,
+      "tireRadiusMeters": 0.6464,
+      "bounds": {
+        "min": [
+          -1.7375200004768372,
+          -0.006926406860351508,
+          -1.9670000076293945
+        ],
+        "max": [
+          1.7375200004768372,
+          2.3138606548309326,
+          2.1976330280303955
+        ],
+        "size": [
+          3.4750400009536744,
+          2.3207870616912842,
+          4.16463303565979
+        ]
+      }
+    },
+    {
+      "id": "formula",
+      "path": "models/vehicles/formula.glb",
+      "rootNode": "Vehicle_formula",
+      "byteLength": 2748684,
+      "meshCount": 38,
+      "vertexCount": 69382,
+      "triangleCount": 80162,
+      "tireRadiusMeters": 0.505,
+      "bounds": {
+        "min": [
+          -1.78743999004364,
+          -0.009999990463256947,
+          -2.444999933242798
+        ],
+        "max": [
+          1.78743999004364,
+          1.8899999856948853,
+          2.575000047683716
+        ],
+        "size": [
+          3.57487998008728,
+          1.899999976158142,
+          5.019999980926514
+        ]
+      }
+    },
+    {
+      "id": "future",
+      "path": "models/vehicles/future.glb",
+      "rootNode": "Vehicle_future",
+      "byteLength": 1911640,
+      "meshCount": 49,
+      "vertexCount": 46283,
+      "triangleCount": 61514,
+      "tireRadiusMeters": 0.505,
+      "bounds": {
+        "min": [
+          -1.5884999930858612,
+          -0.010098755359649658,
+          -2.1572272777557373
+        ],
+        "max": [
+          1.5884999930858612,
+          1.8899999856948853,
+          2.1976330280303955
+        ],
+        "size": [
+          3.1769999861717224,
+          1.900098741054535,
+          4.354860305786133
+        ]
+      }
+    },
+    {
+      "id": "prototype",
+      "path": "models/vehicles/prototype.glb",
+      "rootNode": "Vehicle_prototype",
+      "byteLength": 1242416,
+      "meshCount": 37,
+      "vertexCount": 29716,
+      "triangleCount": 41940,
+      "tireRadiusMeters": 0.505,
+      "bounds": {
+        "min": [
+          -1.6074999998509885,
+          -0.009999990463256836,
+          -2.2950000762939453
+        ],
+        "max": [
+          1.6074999998509885,
+          1.840000033378601,
+          2.4200000762939453
+        ],
+        "size": [
+          3.214999999701977,
+          1.850000023841858,
+          4.715000152587891
+        ]
+      }
+    },
+    {
+      "id": "gt",
+      "path": "models/vehicles/gt.glb",
+      "rootNode": "Vehicle_gt",
+      "byteLength": 1298244,
+      "meshCount": 36,
+      "vertexCount": 31471,
+      "triangleCount": 42116,
+      "tireRadiusMeters": 0.505,
+      "bounds": {
+        "min": [
+          -1.6074999998509885,
+          -0.009999990463256836,
+          -2.3499999046325684
+        ],
+        "max": [
+          1.6074999998509885,
+          1.840000033378601,
+          2.359999895095825
+        ],
+        "size": [
+          3.214999999701977,
+          1.850000023841858,
+          4.7099997997283936
+        ]
+      }
+    },
+    {
+      "id": "hyper",
+      "path": "models/vehicles/hyper.glb",
+      "rootNode": "Vehicle_hyper",
+      "byteLength": 1290596,
+      "meshCount": 36,
+      "vertexCount": 31481,
+      "triangleCount": 40792,
+      "tireRadiusMeters": 0.505,
+      "bounds": {
+        "min": [
+          -1.6074999998509885,
+          -0.009999990463256836,
+          -2.2850000858306885
+        ],
+        "max": [
+          1.6074999998509885,
+          1.840000033378601,
+          2.575000047683716
+        ],
+        "size": [
+          3.214999999701977,
+          1.850000023841858,
+          4.860000133514404
+        ]
+      }
+    }
+  ],
+  "drivers": [
+    {
+      "id": "vice",
+      "path": "models/drivers/vice.glb",
+      "rootNode": "Avatar_vice",
+      "byteLength": 4469168,
+      "meshCount": 30,
+      "vertexCount": 47945,
+      "triangleCount": 81416,
+      "bounds": {
+        "min": [
+          -0.8526165008544923,
+          0.5550000071525574,
+          -0.7726933708190918
+        ],
+        "max": [
+          0.6668807983398438,
+          3.1886495863330717,
+          1.2621500301361084
+        ],
+        "size": [
+          1.519497299194336,
+          2.6336495791805143,
+          2.0348434009552
+        ]
+      },
+      "sha256": "42958f7fe63641c9d64d13c3e4138b56bc48ec8420f01b057ecad9ac6c099097",
+      "activeMeshCount": 22,
+      "activeVertexCount": 38232,
+      "activeTriangleCount": 65200
+    },
+    {
+      "id": "academic",
+      "path": "models/drivers/academic.glb",
+      "rootNode": "Avatar_academic",
+      "byteLength": 4561200,
+      "meshCount": 35,
+      "vertexCount": 47719,
+      "triangleCount": 82244,
+      "bounds": {
+        "min": [
+          -0.6290067397213048,
+          0.5550000071525574,
+          -0.6997649898529054
+        ],
+        "max": [
+          0.6290067397213048,
+          3.2409936831762263,
+          1.2621500301361084
+        ],
+        "size": [
+          1.2580134794426097,
+          2.685993676023669,
+          1.9619150199890139
+        ]
+      },
+      "sha256": "83f248f8257caca1a6b63a43829c8a50d21f7347259fe197eb0ae26a4e41af38",
+      "activeMeshCount": 26,
+      "activeVertexCount": 39144,
+      "activeTriangleCount": 67932
+    },
+    {
+      "id": "discipline",
+      "path": "models/drivers/discipline.glb",
+      "rootNode": "Avatar_discipline",
+      "byteLength": 4153372,
+      "meshCount": 29,
+      "vertexCount": 44703,
+      "triangleCount": 77392,
+      "bounds": {
+        "min": [
+          -0.6290067397213048,
+          0.5550000071525574,
+          -0.6998946418762207
+        ],
+        "max": [
+          0.6290067397213048,
+          3.169353106501807,
+          1.2621500301361084
+        ],
+        "size": [
+          1.2580134794426097,
+          2.6143530993492496,
+          1.962044672012329
+        ]
+      },
+      "sha256": "80db26f168a6fc7b304e62676cac5043d09cb7546157738cea71803e8dc895b0",
+      "activeMeshCount": 21,
+      "activeVertexCount": 36606,
+      "activeTriangleCount": 63840
+    },
+    {
+      "id": "research",
+      "path": "models/drivers/research.glb",
+      "rootNode": "Avatar_research",
+      "byteLength": 4743368,
+      "meshCount": 36,
+      "vertexCount": 52863,
+      "triangleCount": 90676,
+      "bounds": {
+        "min": [
+          -0.7230261325836183,
+          0.5550000071525574,
+          -0.8614378204345704
+        ],
+        "max": [
+          0.6290067397213048,
+          3.2931062331986625,
+          1.2621500301361084
+        ],
+        "size": [
+          1.352032872304923,
+          2.738106226046105,
+          2.123587850570679
+        ]
+      },
+      "sha256": "b5d751da147f5b91d78a3032e38f842c928bf55e2b90b757617abef087292291",
+      "activeMeshCount": 27,
+      "activeVertexCount": 42172,
+      "activeTriangleCount": 72764
+    },
+    {
+      "id": "grade",
+      "path": "models/drivers/grade.glb",
+      "rootNode": "Avatar_grade",
+      "byteLength": 4355804,
+      "meshCount": 28,
+      "vertexCount": 46756,
+      "triangleCount": 79864,
+      "bounds": {
+        "min": [
+          -1.1263118743896485,
+          0.5550000071525574,
+          -0.7397241821289063
+        ],
+        "max": [
+          0.6988811492919922,
+          3.1081266756583403,
+          1.2621500301361084
+        ],
+        "size": [
+          1.8251930236816407,
+          2.553126668505783,
+          2.001874212265015
+        ]
+      },
+      "sha256": "2bc1a75a3406661b4d2f787098fb33756c2a4e9f491ec7608668957958fc0c25",
+      "activeMeshCount": 20,
+      "activeVertexCount": 36995,
+      "activeTriangleCount": 63512
+    },
+    {
+      "id": "boy",
+      "path": "models/drivers/boy.glb",
+      "rootNode": "Avatar_boy",
+      "byteLength": 4324172,
+      "meshCount": 30,
+      "vertexCount": 45817,
+      "triangleCount": 77436,
+      "bounds": {
+        "min": [
+          -0.7605059051513672,
+          0.5550000071525574,
+          -0.7142940700531005
+        ],
+        "max": [
+          0.6427021670341492,
+          3.2375896353413376,
+          1.2621500301361084
+        ],
+        "size": [
+          1.4032080721855165,
+          2.68258962818878,
+          1.9764441001892088
+        ]
+      },
+      "sha256": "9264e1022d6e4c1966768add555e2cef5448fce201c2645964581f21a9c4027e",
+      "activeMeshCount": 21,
+      "activeVertexCount": 37720,
+      "activeTriangleCount": 63884
+    },
+    {
+      "id": "girl",
+      "path": "models/drivers/girl.glb",
+      "rootNode": "Avatar_girl",
+      "byteLength": 4474440,
+      "meshCount": 33,
+      "vertexCount": 50362,
+      "triangleCount": 85412,
+      "bounds": {
+        "min": [
+          -0.9054557037353516,
+          0.5550000071525574,
+          -1.0128604639053345
+        ],
+        "max": [
+          0.6290067397213048,
+          3.228280866389519,
+          1.2621500301361084
+        ],
+        "size": [
+          1.5344624434566563,
+          2.6732808592369617,
+          2.275010494041443
+        ]
+      },
+      "sha256": "904222c916a282ddce64597b4c23dec59b865a3c444ea41ce0dcf9905f7c4b90",
+      "activeMeshCount": 22,
+      "activeVertexCount": 41392,
+      "activeTriangleCount": 70432
+    },
+    {
+      "id": "principal",
+      "path": "models/drivers/principal.glb",
+      "rootNode": "Avatar_principal",
+      "byteLength": 8935476,
+      "meshCount": 21,
+      "vertexCount": 89171,
+      "triangleCount": 136838,
+      "bounds": {
+        "min": [
+          -0.7159441837393423,
+          0.574999988079071,
+          -0.5822874675547636
+        ],
+        "max": [
+          0.7159831545378438,
+          2.991961216187642,
+          1.2604826502501965
+        ],
+        "size": [
+          1.4319273382771862,
+          2.416961228108571,
+          1.84277011780496
+        ]
+      },
+      "sha256": "a00a271f64f4bb34a4f20a0a3c8adbba01bf1d46cc53d6aa46e148817db9406b",
+      "activeMeshCount": 21,
+      "activeVertexCount": 89171,
+      "activeTriangleCount": 136838
+    }
+  ],
+  "totalBytes": 57155736
+}

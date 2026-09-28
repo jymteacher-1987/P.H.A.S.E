@@ -1,0 +1,12 @@
+Car engine recordings: Creative Commons Zero 1.0 Universal (CC0).
+License: https://creativecommons.org/publicdomain/zero/1.0/
+
+racing car engine sound loops — domasx2
+https://opengameart.org/content/racing-car-engine-sound-loops
+https://opengameart.org/sites/default/files/loop_0.wav
+Original recorded motor; 20 ms complementary loop crossfade, -4 dB, mono 44.1 kHz PCM16. Author reports remaking with public-domain recording on 2011-07-24.
+
+Car engine start 01 — looneybits
+https://opengameart.org/content/car-engine-start-01
+https://opengameart.org/sites/default/files/generic_car_startengine.wav
+Complete recording; -4 dB, mono 44.1 kHz 96 kbps MP3.

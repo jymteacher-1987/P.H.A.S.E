@@ -1,0 +1,27 @@
+[
+  {
+    "file": "engine-loop.wav",
+    "title": "racing car engine sound loops",
+    "author": "domasx2",
+    "license": "CC0 1.0",
+    "page": "https://opengameart.org/content/racing-car-engine-sound-loops",
+    "source": "https://opengameart.org/sites/default/files/loop_0.wav",
+    "sourceSha256": "69d74b106509037ce547429e4c3f9ae906b0fffe88d0bb8b3b5a8b0cfc239048",
+    "sha256": "e9ae6010bf6e53532a14dda5989035b041e1bcfa0516ac49f96522ce6034d214",
+    "processing": "Original recorded motor; 20 ms complementary loop crossfade, -4 dB, mono 44.1 kHz PCM16. Author reports remaking with public-domain recording on 2011-07-24.",
+    "duration": 0.8440816326530612,
+    "bytes": 74492
+  },
+  {
+    "file": "engine-start.mp3",
+    "title": "Car engine start 01",
+    "author": "looneybits",
+    "license": "CC0 1.0",
+    "page": "https://opengameart.org/content/car-engine-start-01",
+    "source": "https://opengameart.org/sites/default/files/generic_car_startengine.wav",
+    "sourceSha256": "fa9c199daf6b06a53267f32d764fb19522fc364304ad009bf8b6e392adbe5654",
+    "sha256": "f57783e721637777049a6ec57362359ebfecbffdd5a1bb6eac62cc975804ca6a",
+    "processing": "Complete recording; -4 dB, mono 44.1 kHz 96 kbps MP3.",
+    "bytes": 21027
+  }
+]
