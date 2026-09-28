@@ -80,8 +80,10 @@ test('WebKit: all activities on small iPhone screens, older APIs, game start and
             const frame = document.querySelector('#expFrame');
             return frame?.contentDocument?.body?.textContent.trim().length > 20 && frame.src.includes(id);
           }, entry.id);
-          const frame = page.frames().find(frame => /\/(plays|experiments)\/.+\.html/.test(frame.url()));
+          const frame = await (await page.locator('#expFrame').elementHandle()).contentFrame();
           assert.ok(frame, 'Activity document was not loaded');
+          assert.equal(new URL(frame.url()).pathname, new URL(entry.path, origin + '/').pathname,
+            'Viewer must load the catalog activity path');
           await frame.evaluate(() => Promise.race([
             Promise.all([document.fonts.ready, ...Array.from(document.images, image => image.decode().catch(() => {}))]),
             new Promise(resolve => setTimeout(resolve, 8000))
