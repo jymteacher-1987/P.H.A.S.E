@@ -38,6 +38,11 @@
       "sourceHash": "7288bfd51c3451ef668102fa13d1774929117dc978dbb2bc2393ad4313298637",
       "bytes": 23092
     },
+    "solar-pv-vs-thermal": {
+      "src": "assets/previews/solar-pv-vs-thermal-454f0c6711.webp",
+      "sourceHash": "2f6227fef06074f8b7916cc45213dcd965817390e220783ed3ccb845f480622f",
+      "bytes": 33986
+    },
     "convex-lens-focus": {
       "src": "assets/previews/convex-lens-focus-1e0b4bb069.webp",
       "sourceHash": "22a7ee831c33e81bb9dd553ee098e0385cfef8acef33ea770c0c25bef4fadc1e",
@@ -157,11 +162,6 @@
       "src": "assets/previews/school-rider-46a180f5c1.webp",
       "sourceHash": "01af2936b437a3df64c91b14b228ef1ab197bfd86f36b4626cf3b924e5a6a3e8",
       "bytes": 63480
-    },
-    "solar-pv-vs-thermal": {
-      "src": "assets/previews/solar-pv-vs-thermal-c9f0a3d185.webp",
-      "sourceHash": "3c75910585992ece44cf6875ac4320549671efb01f73762e0781a7d998ec7211",
-      "bytes": 36450
     }
   }
 }
