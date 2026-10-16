@@ -154,9 +154,14 @@ window.PHASE_PREVIEWS = {
       "bytes": 23044
     },
     "school-rider": {
-      "src": "assets/previews/school-rider-f9efe10893.webp",
-      "sourceHash": "70c34a0e634c1e97e2f151be3af5ddbff26835a20ada8425319b97a6a4471057",
-      "bytes": 41200
+      "src": "assets/previews/school-rider-46a180f5c1.webp",
+      "sourceHash": "01af2936b437a3df64c91b14b228ef1ab197bfd86f36b4626cf3b924e5a6a3e8",
+      "bytes": 63480
+    },
+    "solar-pv-vs-thermal": {
+      "src": "assets/previews/solar-pv-vs-thermal-c9f0a3d185.webp",
+      "sourceHash": "3c75910585992ece44cf6875ac4320549671efb01f73762e0781a7d998ec7211",
+      "bytes": 36450
     }
   }
 };
