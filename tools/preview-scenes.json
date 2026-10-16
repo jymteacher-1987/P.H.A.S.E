@@ -282,9 +282,9 @@
   "solar-pv-vs-thermal": {
     "viewport": {
       "width": 1100,
-      "height": 825
+      "height": 1100
     },
-    "target": ".section",
+    "target": ".section:has(.views)",
     "steps": [
       {
         "click": "#playBtn"
