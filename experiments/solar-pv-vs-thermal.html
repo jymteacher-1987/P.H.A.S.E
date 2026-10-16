@@ -153,7 +153,7 @@
     <table class="cmp">
       <thead><tr><th></th><th class="pv">태양광 발전</th><th class="th">태양열 발전</th></tr></thead>
       <tbody>
-        <tr><th>원리</th><td class="pv">광전효과로 생긴 전자–양공 쌍을 p-n 접합의 전기장이 분리 → 전류</td><td class="th">빛을 모아 물을 끓임 → 증기가 터빈을 돌림 → 발전기 (증기는 응축기에서 식어 물로 돌아감)</td></tr>
+        <tr><th>원리</th><td class="pv">빛으로 생긴 전자–양공 쌍을 전기장이 분리 → n형에 전자, p형에 양공이 모여 (−)극과 (+)극이 생김 → 두 극 사이 전압으로 외부 회로에 전류</td><td class="th">빛을 모아 물을 끓임 → 증기가 터빈을 돌림 → 발전기 (증기는 응축기에서 식어 물로 돌아감)</td></tr>
         <tr><th>에너지 전환</th><td class="pv">빛 → 전기 (직접, 1단계)</td><td class="th">빛 → 열 → 운동 → 전기 (3단계)</td></tr>
         <tr><th>핵심 장치</th><td class="pv">반도체 태양전지 (n형 (−)극, p형 (+)극)</td><td class="th">반사경, 집열관, 증기 터빈, 응축기, 발전기</td></tr>
         <tr><th>이용하는 빛</th><td class="pv">띠틈(1.1 eV) 이상의 에너지를 가진 빛 (파장 약 1100 nm 이하). 흐린 날 흩어진 빛으로도 발전함</td><td class="th">반사경으로 모을 수 있는 곧게 오는 햇빛만 이용 (흐린 날 흩어진 빛은 거의 못 씀). 흡수된 빛은 파장과 관계없이 열이 됨</td></tr>
@@ -231,27 +231,36 @@ function pvLayout(H){const dy=(H-420)*0.4,nTop=128+dy,dTop=nTop+50,dBot=dTop+66,
   for(let i=1;i<wire.length;i++){a+=Math.hypot(wire[i][0]-wire[i-1][0],wire[i][1]-wire[i-1][1]);wlen.push(a);}
   return {H,sunY:42+dy*0.2,nTop,dTop,dBot,pBot,bulbY,wire,wlen,wTotal:a};}
 function wirePos(L,s){const{wire,wlen}=L;let prev=0;for(let i=0;i<wlen.length;i++){if(s<=wlen[i]){const f=(s-prev)/(wlen[i]-prev);return[wire[i][0]+(wire[i+1][0]-wire[i][0])*f,wire[i][1]+(wire[i+1][1]-wire[i][1])*f];}prev=wlen[i];}return wire[wire.length-1];}
-let ph1=[],pairs=[],holes=[],acc1=0,pops=[],wPhase=0,wPassed=0,holeClear=0;
+let ph1=[],pairs=[],acc1=0,pops=[],wPhase=0,wPassed=0,gath=0,wasLit=false,recombs=[];
 const NWIRE=9;                                  // 도선 속 전자(표시용). 도선에는 원래 전자가 가득 차 있다
 const GEN=2.6;                                  // 햇빛 100 %일 때 초당 생기는 전자–양공 쌍(표시용)
+const NROW=5, rowX=k=>colX(k)+20;               // n형 윗부분·p형 아랫부분에 모인 전자·양공 줄(격자 전극 틈 아래)
+function seedPV(L){                             // 빛이 들어오는 순간: 분리가 이미 진행 중인 모습으로 시작(실제 분리는 순식간)
+  for(let i=0;i<4;i++){const k=Math.floor(rnd(0,NCOL-1)),x=colX(k)+20+rnd(-3,3),y0=rnd(L.dTop+14,L.dBot-14),age=rnd(0.35,1.1);
+    const d=(age>0.25?6*Math.min(1,(age-0.25)/0.3):0)+Math.max(0,age-0.55)*55;
+    pairs.push({x,y0,ye:y0-d,yh:y0+d,age});}
+  for(let i=0;i<2;i++){const k=Math.floor(rnd(0,NCOL-1));ph1.push({x:colX(k)+20+rnd(-3,3),y:rnd(L.sunY+30,L.nTop-10),yabs:rnd(L.dTop+14,L.dBot-14)});}
+}
 function updPV(dt){
   if(!L1||Math.abs(L1.H-cpv.H)>0.5){L1=pvLayout(cpv.H);ph1=[];pairs=[];pops=[];}
-  const L=L1;
+  const L=L1, lit=S.G>0;
+  if(lit&&!wasLit)seedPV(L); wasLit=lit;
   acc1+=dt*(S.G/G0)*GEN;while(acc1>=1){acc1-=1;const k=Math.floor(rnd(0,NCOL-1));ph1.push({x:colX(k)+20+rnd(-3,3),y:L.sunY+26,yabs:rnd(L.dTop+14,L.dBot-14)});}
-  if(S.G===0){ph1=[];pairs=[];pops=[];}                         // 빛이 없으면 새 전자·양공 쌍도 없다
+  if(!lit){ph1=[];pairs=[];pops=[];}                            // 빛이 없으면 새 전자·양공 쌍도 없다
   for(const p of ph1){p.y+=dt*200;if(p.y>=p.yabs){p.dead=true;pairs.push({x:p.x,y0:p.yabs,ye:p.yabs,yh:p.yabs,age:0});pops.push({x:p.x,y:p.yabs,age:0});}}
   ph1=ph1.filter(p=>!p.dead);
   for(const q of pairs){q.age+=dt;
     if(q.age>0.25&&q.age<=0.55){const f=(q.age-0.25)/0.3;q.ye=q.y0-6*f;q.yh=q.y0+6*f;}   // 쌍이 갈라지기 시작
     else if(q.age>0.55){q.ye-=dt*55;q.yh+=dt*55;}                                   // 전기장에 의해 전자 ↑ n형, 양공 ↓ p형
-    if(q.ye<=L.nTop+10&&!q.eOut)q.eOut=true;                                         // 전자는 n형 쪽 전극으로 들어감
-    if(q.yh>=L.pBot-11&&!q.hOut){q.hOut=true;holes.push({x:q.x,y:L.pBot-11,ph:rnd(0,6)});}}
+    if(q.ye<=L.nTop+12&&!q.eOut)q.eOut=true;                                         // 전자는 n형 윗부분의 '모인 전자' 줄에 합류
+    if(q.yh>=L.pBot-13&&!q.hOut)q.hOut=true;}                                        // 양공은 p형 아랫부분의 '모인 양공' 줄에 합류
   pairs=pairs.filter(q=>!(q.eOut&&q.hOut));
-  // 도선 속 전자: 빛이 있으면 다 함께 이동(속도 ∝ 빛 세기 = 전류), 없으면 그 자리에서 멈춤
-  const sp=L.wTotal/NWIRE, v=GEN*(S.G/G0)*sp;
-  wPhase+=v*dt; while(wPhase-wPassed*sp>=sp){wPassed++; if(holes.length)holes.shift();}  // p형 끝에 도착한 전자 1개가 양공 1개와 재결합
-  if(S.G===0&&holes.length){holeClear+=dt;if(holeClear>0.12){holeClear=0;holes.shift();}}  // 빛이 없으면 남은 양공도 곧 재결합
-  if(holes.length>8)holes.shift();
+  // 모인 전하(0~1): 빛이 있으면 곧 차서 두 극이 생기고, 빛이 없으면 곧 사라진다
+  gath=lit?Math.min(1,gath+dt*4):Math.max(0,gath-dt*6);
+  // 도선 속 전자: 두 극 사이 전압 때문에 다 함께 이동(속도 ∝ 빛 세기 = 전류). 극이 사라지면 멈춤
+  const sp=L.wTotal/NWIRE, v=GEN*(S.G/G0)*sp*gath;
+  wPhase+=v*dt; while(wPhase-wPassed*sp>=sp){wPassed++; recombs.push({age:0});}       // (+)극에 도착한 전자가 양공과 재결합
+  for(const r of recombs)r.age+=dt; recombs=recombs.filter(r=>r.age<0.45);
   for(const p of pops)p.age+=dt;pops=pops.filter(p=>p.age<0.5);
 }
 function electron(ctx,x,y,r=7.5){ctx.fillStyle='#2f63e6';ctx.strokeStyle='#1e3a8a';ctx.lineWidth=1.3;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();ctx.stroke();txt(ctx,'−',x,y+0.5,r*1.5,'#fff','center','800');}
@@ -280,19 +289,19 @@ function drawPV(){
     ctx.beginPath();ctx.moveTo(x,y0);ctx.lineTo(x,y1-d*6);ctx.stroke();ctx.beginPath();ctx.moveTo(x,y1);ctx.lineTo(x-4.5,y1-d*8);ctx.lineTo(x+4.5,y1-d*8);ctx.fill();};
   for(let k=0;k<NCOL;k++){const x=colX(k);ion(x,dTop+13,'+');ion(x,dBot-13,'−');
     arrow(x,dTop+23,dBot-23,'#7b4dff');}
-  // 다수 운반자: n형의 전자, p형의 양공 (제자리에서 흔들림)
-  for(let i=0;i<6;i++){const x=cL+24+i*40+Math.sin(T*1.3+i)*3,y=nTop+25+Math.cos(T*1.1+i*2)*6;
-    ctx.fillStyle='rgba(47,99,230,.5)';ctx.beginPath();ctx.arc(x,y,5.5,0,7);ctx.fill();txt(ctx,'−',x,y+0.5,9,'#fff','center','800');}
-  for(let i=0;i<6;i++){const x=cL+36+i*40+Math.sin(T*1.2+i*1.7)*3,y=dBot+14+Math.cos(T*0.9+i)*4;
-    ctx.fillStyle='rgba(253,164,175,.7)';ctx.strokeStyle='rgba(190,18,60,.55)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(x,y,5.5,0,7);ctx.fill();ctx.stroke();txt(ctx,'+',x,y+0.5,9,'#fff','center','800');}
+  // 빛을 받는 동안 모인 전하: n형 윗부분에 전자, p형 아랫부분에 양공 → n형 (−)극, p형 (+)극
+  if(gath>0.01){ctx.save();ctx.globalAlpha=gath;
+    for(let k=0;k<NROW;k++){electron(ctx,rowX(k),nTop+10,6.5);hole(ctx,rowX(k),pBot-11,6.5);}
+    ctx.restore();}
   // 라벨 (왼쪽 바깥)
   txt(ctx,'n형',cL-12,(nTop+dTop)/2,15,'#1e3a8a','right','800');
   txt(ctx,'공핍층',cL-12,(dTop+dBot)/2,15,'#5b21b6','right','800');
   txt(ctx,'p형',cL-12,(dBot+pBot)/2,15,'#9f1239','right','800');
-  txt(ctx,'(−)극',cR-6,nTop-21,13,'#1e3a8a','right','800');txt(ctx,'(+)극',cR-6,pBot+22,13,'#9f1239','right','800');
+  if(gath>0.01){ctx.save();ctx.globalAlpha=gath;                                       // 두 극은 전하가 모였을 때만 생긴다
+    txt(ctx,'(−)극',cR-6,nTop-21,13,'#1e3a8a','right','800');txt(ctx,'(+)극',cR-6,pBot+22,13,'#9f1239','right','800');ctx.restore();}
   txt(ctx,'태양전지 단면 (확대)',cL,nTop-24,11,'#5d6e8c','left','600');
   // 전류 방향(바깥): (+)극 → 전구 → (−)극. 전자 이동은 그 반대
-  if(S.Ppv>1){
+  if(S.Ppv>1&&gath>0.5){
     ctx.strokeStyle='#e23b4e';ctx.fillStyle='#e23b4e';ctx.lineWidth=2;ctx.lineCap='round';
     ctx.beginPath();ctx.moveTo(398,nTop-22);ctx.lineTo(362,nTop-22);ctx.stroke();ctx.beginPath();ctx.moveTo(356,nTop-22);ctx.lineTo(365,nTop-27);ctx.lineTo(365,nTop-17);ctx.fill();
     ctx.beginPath();ctx.moveTo(356,pBot+22);ctx.lineTo(392,pBot+22);ctx.stroke();ctx.beginPath();ctx.moveTo(398,pBot+22);ctx.lineTo(389,pBot+17);ctx.lineTo(389,pBot+27);ctx.fill();
@@ -300,18 +309,19 @@ function drawPV(){
     txt(ctx,'전자 이동 →',377,nTop+6,9.5,'#2f63e6','center','700');txt(ctx,'← 전자 이동',377,pBot-6,9.5,'#2f63e6','center','700');
   }
   ctx.strokeStyle='#13233f';ctx.lineWidth=3.5;ctx.lineJoin='round';ctx.beginPath();ctx.moveTo(wire[0][0],wire[0][1]);for(const p of wire)ctx.lineTo(p[0],p[1]);ctx.stroke();
-  bulb(ctx,412,bulbY,S.Ppv/200);
+  bulb(ctx,412,bulbY,S.Ppv/200*gath);
   // 광자 · 생성된 쌍 · 이동
   for(const p of ph1){ctx.fillStyle='#f59e0b';ctx.beginPath();ctx.arc(p.x,p.y,4,0,7);ctx.fill();}
   for(const p of pops){ctx.strokeStyle=`rgba(245,158,11,${1-p.age*2})`;ctx.lineWidth=2;ctx.beginPath();ctx.arc(p.x,p.y,6+p.age*44,0,7);ctx.stroke();}
   for(const q of pairs){
     if(q.age>0.55){if(!q.eOut)trail(ctx,q.x,q.ye,1,'rgba(47,99,230,.55)');if(!q.hOut)trail(ctx,q.x,q.yh,-1,'rgba(190,18,60,.5)');}
     if(!q.hOut)hole(ctx,q.x,q.yh);if(!q.eOut)electron(ctx,q.x,q.ye);}
-  for(const h of holes)hole(ctx,h.x+Math.sin(T*1.5+h.ph)*3,h.y);
+  for(const r of recombs){const a=1-r.age/0.45;ctx.strokeStyle=`rgba(124,58,237,${0.7*a})`;ctx.lineWidth=2;ctx.beginPath();ctx.arc(rowX(NROW-1),pBot-11,7+r.age*28,0,7);ctx.stroke();}  // 재결합 표시
   {const sp=L.wTotal/NWIRE;for(let i=0;i<NWIRE;i++){const s=((wPhase+i*sp)%L.wTotal+L.wTotal)%L.wTotal;const[x,y]=wirePos(L,s);electron(ctx,x,y,6.5);}}
-  txt(ctx,'① 빛(광자)이 공핍층 근처에서 흡수되어 전자(−)·양공(+) 쌍이 생긴다 — 광전효과',30,H-50,11,'#13233f','left','600');
-  txt(ctx,'② 전기장 E(⊕→⊖) 때문에 전자는 ↑ n형으로, 양공은 ↓ p형으로 모인다',30,H-32,11,'#13233f','left','600');
-  txt(ctx,'③ 전자가 외부 회로를 돌아 전구를 켜고, p형으로 돌아와 양공과 재결합한다',30,H-14,11,'#13233f','left','600');
+  txt(ctx,'① 빛(광자)이 공핍층 근처에서 흡수되어 전자(−)·양공(+) 쌍이 생긴다 — 광전효과',30,H-62,11,'#13233f','left','600');
+  txt(ctx,'② 공핍층의 전기장 E 때문에 전자는 n형으로, 양공은 p형으로 이동한다',30,H-46,11,'#13233f','left','600');
+  txt(ctx,'③ n형에 전자, p형에 양공이 모여 n형은 (−)극, p형은 (+)극이 된다 (전압 발생)',30,H-30,11,'#13233f','left','600');
+  txt(ctx,'④ 이 전압으로 도선의 전자가 (−)극 → 전구 → (+)극으로 흘러 양공과 재결합한다',30,H-14,11,'#13233f','left','600');
 }
 
 // ───── 태양열 ─────
@@ -400,9 +410,9 @@ function thState(){const hot=S.Pq>0;
 const $=id=>document.getElementById(id);let lastObs='',explainReady=false;
 function updUI(){
   const hot=S.Pq>0;
-  $('f1a').classList.toggle('on',S.G>0);$('f1b').classList.toggle('on',S.Ppv>1);
+  $('f1a').classList.toggle('on',S.G>0);$('f1b').classList.toggle('on',S.Ppv>1&&gath>0.5);
   $('f2a').classList.toggle('on',S.G>0);$('f2b').classList.toggle('on',S.Tth>Ta+1);$('f2c').classList.toggle('on',hot);$('f2d').classList.toggle('on',S.Pth>0.5);
-  $('pvSub').textContent=!S.started?'대기 중':S.G>0?'빛이 닿는 즉시 전류가 흐른다 · 빛이 셀수록 전류가 크다':'빛이 없으면 즉시 멈춘다';
+  $('pvSub').textContent=!S.started?'대기 중':S.G>0?'빛이 닿는 즉시 두 극이 생겨 전류가 흐른다 · 빛이 셀수록 전류가 크다':'빛이 없으면 두 극이 사라져 전류가 멈춘다';
   $('thSub').textContent=thState();
   let m;
   if(!S.started)m='시작 버튼을 누르면 두 장치의 반응을 비교할 수 있습니다.';
@@ -420,7 +430,7 @@ $('lightSeg').addEventListener('click',e=>{const b=e.target.closest('button');if
 $('playBtn').addEventListener('click',()=>{
   if(!S.started){S.started=true;S.playing=true;$('playBtn').textContent='⏸ 일시정지';$('playBtn').classList.add('running');$('idleHint').hidden=true;$('explainBtn').hidden=false;return;}
   S.playing=!S.playing;$('playBtn').textContent=S.playing?'⏸ 일시정지':'▶ 계속';});
-$('resetBtn').addEventListener('click',()=>{S.started=false;S.playing=false;S.t=0;S.Tth=Ta;S.Pq=0;S.Pth=0;S.dT=0;S.thEver=false;ph1=[];pairs=[];holes=[];pops=[];steam=[];acc1=0;accS=0;ang=0;wPhase=0;wPassed=0;holeClear=0;
+$('resetBtn').addEventListener('click',()=>{S.started=false;S.playing=false;S.t=0;S.Tth=Ta;S.Pq=0;S.Pth=0;S.dT=0;S.thEver=false;ph1=[];pairs=[];pops=[];steam=[];acc1=0;accS=0;ang=0;wPhase=0;wPassed=0;gath=0;wasLit=false;recombs=[];
   S.blocked=false;[...$('lightSeg').children].forEach(x=>x.classList.toggle('on',x.dataset.light==='on'));S.sun=1;$('sun').value=100;
   $('playBtn').textContent='▶ 발전 비교 시작';$('playBtn').classList.remove('running');$('idleHint').hidden=false;
   explainReady=false;$('explainBtn').hidden=true;$('explainBtn').classList.remove('ready','open');$('explainSec').hidden=true;$('explainHint').textContent='두 장치가 모두 발전을 시작하면 결과를 정리해 볼 수 있습니다.';step(0);});
