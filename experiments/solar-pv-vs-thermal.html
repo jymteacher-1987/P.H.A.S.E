@@ -111,17 +111,11 @@
     </div>
     <div class="slider-group"><label for="sun">햇빛 세기</label>
       <input id="sun" type="range" min="10" max="100" value="100" step="10"></div>
-    <div class="readout">
-      <span>일사량 <b id="rG">0 W/m²</b></span>
-      <span>태양광 전기 출력 <b id="rPpv">0 W</b></span>
-      <span>태양열 전기 출력 <b id="rPth">0 W</b></span>
-      <span>가상 시간 <b id="rt">0분</b></span>
-    </div>
   </div>
 
   <section class="section">
     <div class="sec-head"><span class="num">비교</span><h2>같은 태양빛, 두 가지 발전</h2>
-      <span class="hint">두 장치가 같은 1 m² 넓이로 같은 세기의 태양빛을 받습니다. 화면의 1초는 가상 시간 1분입니다.</span></div>
+      <span class="hint">두 장치가 같은 1 m² 넓이로 같은 세기의 태양빛을 받습니다.</span></div>
     <p class="idle-hint" id="idleHint">‘▶ 발전 비교 시작’을 누르면 두 장치에 동시에 태양빛이 비칩니다.</p>
     <div class="views">
       <div class="view-box">
@@ -175,10 +169,10 @@
 
 <script>
 "use strict";
-// ───── 물리 모델 (1 m² 기준, 화면 1초 = 가상 1분) ─────
+// ───── 물리 모델 (1 m² 기준, 화면 1초 = 모형 시간 60초) ─────
 const G0=1000, Ta=25, PV_ETA=0.20;
 // 태양열: 집열관 속 물을 데워 끓인다(고압이라 끓는점 Tboil, 화면에 온도는 표시하지 않음). 터빈 효율은 증기 온도 기준 카르노 효율의 60 %
-const TH={opt:0.72, U:0.5, k:4, Tboil:250, fCarnot:0.60, C:5000};
+const TH={opt:0.72, U:0.5, k:4, Tboil:250, fCarnot:0.60, C:530};   // C: 시작 후 약 3초에 물이 끓도록 정한 열용량
 const ETA_ENG=TH.fCarnot*(1-(Ta+273.15)/(TH.Tboil+273.15));
 const S={started:false, playing:false, sun:1, blocked:false, t:0, Tth:Ta, G:0, Ppv:0, Pq:0, Pth:0, dT:0, canBoil:true, thEver:false};
 function step(dt){
@@ -293,9 +287,9 @@ function drawPV(){
   for(let i=0;i<6;i++){const x=cL+36+i*40+Math.sin(T*1.2+i*1.7)*3,y=dBot+14+Math.cos(T*0.9+i)*4;
     ctx.fillStyle='rgba(253,164,175,.7)';ctx.strokeStyle='rgba(190,18,60,.55)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(x,y,5.5,0,7);ctx.fill();ctx.stroke();txt(ctx,'+',x,y+0.5,9,'#fff','center','800');}
   // 라벨 (왼쪽 바깥)
-  txt(ctx,'n형',cL-12,nTop+16,15,'#1e3a8a','right','800');txt(ctx,'전자 많음',cL-12,nTop+33,10,'#1e3a8a','right','600');
+  txt(ctx,'n형',cL-12,(nTop+dTop)/2,15,'#1e3a8a','right','800');
   txt(ctx,'공핍층',cL-12,(dTop+dBot)/2,15,'#5b21b6','right','800');
-  txt(ctx,'p형',cL-12,pBot-32,15,'#9f1239','right','800');txt(ctx,'양공 많음',cL-12,pBot-15,10,'#9f1239','right','600');
+  txt(ctx,'p형',cL-12,(dBot+pBot)/2,15,'#9f1239','right','800');
   txt(ctx,'(−)극',cR-6,nTop-21,13,'#1e3a8a','right','800');txt(ctx,'(+)극',cR-6,pBot+22,13,'#9f1239','right','800');
   txt(ctx,'태양전지 단면 (확대)',cL,nTop-24,11,'#5d6e8c','left','600');
   // 전류 방향(바깥): (+)극 → 전구 → (−)극. 전자 이동은 그 반대
@@ -406,8 +400,6 @@ function thState(){const hot=S.Pq>0;
 // ───── UI ─────
 const $=id=>document.getElementById(id);let lastObs='',explainReady=false;
 function updUI(){
-  $('rG').textContent=Math.round(S.G)+' W/m²';$('rPpv').textContent=Math.round(S.Ppv)+' W';$('rPth').textContent=Math.round(S.Pth)+' W';
-  $('rt').textContent=S.t<3600?Math.round(S.t/60)+'분':(S.t/3600).toFixed(1)+'시간';
   $('oPv').textContent=Math.round(S.Ppv)+' W';$('oTh').textContent=Math.round(S.Pth)+' W';
   const hot=S.Pq>0;
   $('f1a').classList.toggle('on',S.G>0);$('f1b').classList.toggle('on',S.Ppv>1);

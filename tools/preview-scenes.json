@@ -290,7 +290,7 @@
         "click": "#playBtn"
       },
       {
-        "wait": 34000
+        "wait": 8000
       }
     ]
   }
