@@ -164,6 +164,25 @@ window.EXPERIMENTS_DATA = {
       ]
     },
     {
+      "id": "solar-pv-vs-thermal",
+      "title": "태양광 발전과 태양열 발전 비교",
+      "category": "electromagnetism",
+      "description": "같은 태양빛을 받는 태양전지와 집광형 태양열 발전 장치를 나란히 놓고, 광전효과와 p-n 접합으로 빛을 바로 전기로 바꾸는 태양광과 물을 끓여 증기 터빈을 돌리는 태양열의 에너지 전환 과정과 반응 속도를 비교합니다.",
+      "lessonNote": {
+        "question": "같은 태양빛을 받는데, 태양광 발전과 태양열 발전은 전기를 만드는 과정이 어떻게 다를까요?",
+        "focus": "‘발전 비교 시작’을 누른 뒤 공핍층에서 전자와 양공이 갈라지는 모습과 태양열 터빈이 돌기 시작하기까지 걸리는 시간을 비교해 보세요. 차광판으로 빛을 가렸을 때 어느 쪽이 먼저 멈추는지, 햇빛을 약하게 했을 때 두 방식이 어떻게 달라지는지도 확인해 보세요."
+      },
+      "path": "experiments/solar-pv-vs-thermal.html?v=efca604df1",
+      "date": "2026-10-16",
+      "tags": [
+        "태양광",
+        "태양열",
+        "광전효과",
+        "p-n 접합",
+        "에너지 전환"
+      ]
+    },
+    {
       "id": "convex-lens-focus",
       "title": "볼록 렌즈 초점 거리 찾기",
       "category": "waves-optics",

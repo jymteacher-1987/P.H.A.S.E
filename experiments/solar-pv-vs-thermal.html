@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head><script src="../assets/js/device.js?v=af021ac293"></script><script src="../assets/js/browser-compat.js?v=9e1028454f"></script><script defer src="../assets/js/visit-entry.js?v=f0ad5bcfab"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>태양광 발전과 태양열 발전 비교 — 에너지 전환 시뮬레이션</title>
+<style>
+  :root{
+    --bg:#e9eef5; --surface:#fff; --surface-2:#f4f7fb;
+    --ink:#13233f; --muted:#5d6e8c; --line:#d6dfeb;
+    --pv:#2f63e6; --th:#e8833a; --heat:#e23b4e; --field:#7b4dff; --bulb:#ffc233; --emf:#0fae9c;
+    --shadow:0 8px 26px rgba(19,35,63,.10);
+    --font:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{background:radial-gradient(1200px 600px at 50% -10%, #f3f7fd 0%, var(--bg) 60%) fixed;
+    color:var(--ink);font-family:var(--font);line-height:1.5;padding:16px 12px 56px;word-break:keep-all;overflow-wrap:break-word;}
+  .wrap{max-width:1040px;margin:0 auto;}
+  header.hero{text-align:center;padding:6px 6px 14px;}
+  header.hero .eyebrow{font-size:12px;letter-spacing:.18em;font-weight:700;color:var(--emf);text-transform:uppercase;}
+  header.hero h1{margin:6px 0 4px;font-size:clamp(24px,5.5vw,38px);font-weight:800;letter-spacing:-.02em;}
+  header.hero p{margin:0;color:var(--muted);font-size:14.5px;}
+  .controls{position:sticky;top:6px;z-index:30;display:flex;flex-wrap:wrap;align-items:center;gap:10px;
+    background:rgba(255,255,255,.9);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:16px;
+    padding:11px 14px;box-shadow:var(--shadow);margin-bottom:18px;}
+  .btn{appearance:none;border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:15px;border-radius:11px;
+    padding:11px 15px;background:var(--ink);color:#fff;display:inline-flex;align-items:center;gap:7px;transition:transform .08s,box-shadow .15s;}
+  .btn:hover{box-shadow:0 6px 16px rgba(19,35,63,.22);}
+  .btn:active{transform:translateY(1px);}
+  .btn.ghost{background:var(--surface-2);color:var(--ink);border:1px solid var(--line);}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:11px;overflow:hidden;background:var(--surface-2);}
+  .seg button{appearance:none;border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:13.5px;padding:10px 12px;background:transparent;color:var(--muted);}
+  .seg button.on{background:var(--emf);color:#fff;}
+  .slider-group{display:flex;align-items:center;gap:9px;flex:1;min-width:160px;}
+  .slider-group label{font-size:13px;font-weight:700;color:var(--muted);white-space:nowrap;}
+  input[type=range]{-webkit-appearance:none;appearance:none;height:6px;flex:1;min-width:80px;border-radius:99px;background:linear-gradient(90deg,var(--emf),#9be4dc);outline:none;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid var(--emf);box-shadow:0 2px 6px rgba(0,0,0,.2);cursor:pointer;}
+  input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#fff;border:3px solid var(--emf);cursor:pointer;}
+  .readout{font-family:ui-monospace,monospace;font-size:13px;color:var(--muted);display:flex;gap:13px;flex-wrap:wrap;width:100%;}
+  .readout b{color:var(--ink);}
+  .section{background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:16px 16px 18px;margin-bottom:20px;}
+  .sec-head{display:flex;align-items:baseline;gap:11px;margin-bottom:13px;flex-wrap:wrap;}
+  .sec-head .num{font-family:ui-monospace,monospace;font-size:12.5px;font-weight:700;color:#fff;background:var(--emf);border-radius:8px;padding:3px 9px;}
+  .sec-head h2{margin:0;font-size:18px;font-weight:800;letter-spacing:-.01em;}
+  .sec-head .hint{font-size:13px;color:var(--muted);}
+  .views{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start;}
+  .view-box{background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:10px 10px 8px;}
+  .view-box .vtitle{font-size:13.5px;font-weight:800;margin:2px 4px 8px;display:flex;align-items:center;gap:7px;}
+  .view-box .vtitle .dot{width:9px;height:9px;border-radius:50%;}
+  .view-box .vsub{font-size:12px;color:var(--muted);margin:6px 4px 0;font-family:ui-monospace,monospace;min-height:16px;}
+  canvas{display:block;width:100%;border-radius:10px;touch-action:none;}
+  .flow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:8px 4px 2px;}
+  .flow .st{font-size:12.5px;font-weight:700;padding:4px 9px;border-radius:8px;border:1.5px solid var(--line);background:#fff;color:#9aa7bf;transition:all .25s;white-space:nowrap;}
+  .flow .st.on{color:#fff;border-color:transparent;}
+  .flow.pv .st.on{background:var(--pv);} .flow.th .st.on{background:var(--th);}
+  .flow .ar{color:#aab5c8;font-weight:700;}
+  .flow .out{margin-left:auto;font-family:ui-monospace,monospace;font-size:15px;font-weight:800;}
+  .flow.pv .out{color:var(--pv);} .flow.th .out{color:var(--th);}
+  .model-note{font-size:11.5px;color:var(--muted);line-height:1.65;margin:12px 2px 0;word-break:keep-all;}
+  .graph-wrap{margin-top:16px;padding-top:14px;border-top:1px dashed var(--line);}
+  .graph-label{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800;margin:2px 2px -2px;flex-wrap:wrap;}
+  .graph-label .sw{width:18px;height:4px;border-radius:99px;}
+  .graph-label .eq{font-family:ui-monospace,monospace;font-weight:600;color:var(--muted);font-size:12px;}
+  .plant-explain{font-size:14.5px;background:#fff;border:1px solid var(--line);border-left:4px solid var(--emf);border-radius:10px;padding:13px 15px;margin-top:12px;}
+  .plant-explain b{color:var(--emf);}
+  .plant-explain .pvw{color:var(--pv);font-weight:800;} .plant-explain .thw{color:var(--th);font-weight:800;}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:10px;}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .legend i{width:12px;height:12px;border-radius:3px;display:inline-block;}
+  table.cmp{width:100%;border-collapse:collapse;font-size:13.5px;}
+  table.cmp th,table.cmp td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;}
+  table.cmp th{width:18%;color:var(--muted);font-size:12.5px;font-weight:700;white-space:nowrap;}
+  table.cmp td.pv{color:#1e3a8a;} table.cmp td.th{color:#7c2d12;}
+  table.cmp thead th{font-size:14px;color:#fff;border-radius:8px 8px 0 0;}
+  table.cmp thead th.pv{background:var(--pv);} table.cmp thead th.th{background:var(--th);}
+  .btn.start{background:var(--emf);font-size:16px;padding:12px 18px;}
+  .btn.start.running{background:var(--ink);}
+  .explain-toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;appearance:none;cursor:pointer;font-family:inherit;
+    background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:15px 18px;margin-bottom:20px;text-align:left;}
+  .explain-toggle .tt{font-size:16px;font-weight:800;}
+  .explain-toggle .tt small{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-top:2px;}
+  .explain-toggle .chev{font-size:18px;color:var(--muted);transition:transform .2s;}
+  .explain-toggle.open .chev{transform:rotate(180deg);}
+  .explain-toggle.ready{border-color:var(--emf);box-shadow:0 0 0 3px rgba(15,174,156,.15),var(--shadow);}
+  .idle-hint{font-size:13px;color:var(--muted);text-align:center;margin:-4px 0 12px;}
+  footer{text-align:center;color:var(--muted);font-size:12px;margin-top:6px;}
+  @media (max-width:700px){.views{grid-template-columns:1fr;}.controls{position:static;}.sec-head .hint{width:100%;}}
+  @media (orientation:landscape) and (max-height:520px){
+   html.phone-tablet .controls{position:static}
+   html.phone-tablet .views{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+   html.phone-tablet .view-box{padding:6px}
+   html.phone-tablet .section{padding:10px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">Energy conversion</div>
+    <h1>태양광 발전과 태양열 발전 비교</h1>
+    <p>같은 태양빛으로 전기를 만드는 두 가지 방법 — 광전효과·p-n 접합으로 빛을 바로 전기로 바꾸는 태양광, 빛을 모아 물을 끓이고 증기로 터빈을 돌리는 태양열</p>
+  </header>
+
+  <div class="controls">
+    <button id="playBtn" class="btn start">▶ 발전 비교 시작</button>
+    <button id="resetBtn" class="btn ghost">↺ 처음으로</button>
+    <div class="seg" id="lightSeg">
+      <button data-light="on" class="on">☀ 햇빛</button>
+      <button data-light="off">▬ 차광판</button>
+    </div>
+    <div class="slider-group"><label for="sun">햇빛 세기</label>
+      <input id="sun" type="range" min="10" max="100" value="100" step="10"></div>
+    <div class="readout">
+      <span>일사량 <b id="rG">0 W/m²</b></span>
+      <span>태양광 전기 출력 <b id="rPpv">0 W</b></span>
+      <span>태양열 전기 출력 <b id="rPth">0 W</b></span>
+      <span>가상 시간 <b id="rt">0분</b></span>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="sec-head"><span class="num">비교</span><h2>같은 태양빛, 두 가지 발전</h2>
+      <span class="hint">두 장치가 같은 1 m² 넓이로 같은 세기의 태양빛을 받습니다. 화면의 1초는 가상 시간 1분입니다.</span></div>
+    <p class="idle-hint" id="idleHint">‘▶ 발전 비교 시작’을 누르면 두 장치에 동시에 태양빛이 비칩니다.</p>
+    <div class="views">
+      <div class="view-box">
+        <div class="vtitle"><span class="dot" style="background:var(--pv)"></span>태양광 발전 — 태양전지 (광전효과 + p-n 접합)</div>
+        <canvas id="cpv"></canvas>
+        <div class="flow pv"><span class="st" id="f1a">빛</span><span class="ar">→</span><span class="st" id="f1b">전기</span><span class="out" id="oPv">0 W</span></div>
+        <div class="vsub" id="pvSub">대기 중</div>
+      </div>
+      <div class="view-box">
+        <div class="vtitle"><span class="dot" style="background:var(--th)"></span>태양열 발전 — 집광 · 집열 · 증기 터빈</div>
+        <canvas id="cth"></canvas>
+        <div class="flow th"><span class="st" id="f2a">빛</span><span class="ar">→</span><span class="st" id="f2b">열</span><span class="ar">→</span><span class="st" id="f2c">증기·터빈</span><span class="ar">→</span><span class="st" id="f2d">전기</span><span class="out" id="oTh">0 W</span></div>
+        <div class="vsub" id="thSub">대기 중</div>
+      </div>
+    </div>
+    <div class="legend">
+      <span><i style="background:#f59e0b;border-radius:50%"></i>광자</span>
+      <span><i style="background:var(--pv);border-radius:50%"></i>전자 (−)</span>
+      <span><i style="background:#fda4af;border:1.5px solid #be123c;border-radius:50%"></i>양공 (+)</span>
+      <span><i style="background:var(--field)"></i>공핍층 안 보라 화살표 = 전기장 E (⊕→⊖, 빛이 없어도 항상 존재)</span>
+      <span><i style="background:linear-gradient(90deg,var(--pv) 50%,var(--heat) 50%);height:4px;border-radius:99px"></i>입자에 붙은 작은 화살표 = 이동 방향 (전자 ↑, 양공 ↓)</span>
+      <span><i style="background:var(--heat);height:4px;border-radius:99px"></i>전류 방향</span>
+      <span><i style="background:#f59e0b;border-radius:99px;height:4px"></i>태양 복사 (광선)</span>
+      <span><i style="background:#fff;border:1.5px solid #cbd5e1;border-radius:50%"></i>증기</span>
+    </div>
+    <div class="plant-explain" id="obs">시작 버튼을 누르면 두 장치의 반응을 비교할 수 있습니다.</div>
+  </section>
+
+  <button class="explain-toggle" id="explainBtn" hidden>
+    <span class="tt">설명 보기<small id="explainHint">두 장치가 모두 발전을 시작하면 결과를 정리해 볼 수 있습니다.</small></span>
+    <span class="chev">▾</span>
+  </button>
+
+  <section class="section" id="explainSec" hidden>
+    <div class="sec-head"><span class="num">정리</span><h2>두 발전 방식의 차이</h2></div>
+    <table class="cmp">
+      <thead><tr><th></th><th class="pv">태양광 발전</th><th class="th">태양열 발전</th></tr></thead>
+      <tbody>
+        <tr><th>원리</th><td class="pv">광전효과로 생긴 전자–양공 쌍을 p-n 접합의 전기장이 분리 → 전류</td><td class="th">빛을 모아 물을 끓임 → 증기가 터빈을 돌림 → 발전기 (증기는 응축기에서 식어 물로 돌아감)</td></tr>
+        <tr><th>에너지 전환</th><td class="pv">빛 → 전기 (직접, 1단계)</td><td class="th">빛 → 열 → 운동 → 전기 (3단계)</td></tr>
+        <tr><th>핵심 장치</th><td class="pv">반도체 태양전지 (n형 (−)극, p형 (+)극)</td><td class="th">반사경, 집열관, 증기 터빈, 응축기, 발전기</td></tr>
+        <tr><th>이용하는 빛</th><td class="pv">띠틈(1.1 eV) 이상의 에너지를 가진 빛 (파장 약 1100 nm 이하). 흐린 날 흩어진 빛으로도 발전함</td><td class="th">반사경으로 모을 수 있는 곧게 오는 햇빛만 이용 (흐린 날 흩어진 빛은 거의 못 씀). 흡수된 빛은 파장과 관계없이 열이 됨</td></tr>
+        <tr><th>반응 속도</th><td class="pv">즉시 켜지고 즉시 꺼짐</td><td class="th">가열에 시간이 걸리고, 빛이 사라져도 저장된 열로 잠시 발전</td></tr>
+      </tbody>
+    </table>
+    <p class="model-note">태양전지 그림의 공핍층은 실제보다 훨씬 두껍게 과장해 그렸습니다. 화면의 출력 숫자는 두 방식의 실제 효율을 비교하는 값이 아닙니다.</p>
+  </section>
+
+  <footer>에너지 전환 학습용 · 두 장치는 같은 태양빛을 같은 넓이로 받습니다.</footer>
+</div>
+
+<script>
+"use strict";
+// ───── 물리 모델 (1 m² 기준, 화면 1초 = 가상 1분) ─────
+const G0=1000, Ta=25, PV_ETA=0.20;
+// 태양열: 집열관 속 물을 데워 끓인다(고압이라 끓는점 Tboil, 화면에 온도는 표시하지 않음). 터빈 효율은 증기 온도 기준 카르노 효율의 60 %
+const TH={opt:0.72, U:0.5, k:4, Tboil:250, fCarnot:0.60, C:5000};
+const ETA_ENG=TH.fCarnot*(1-(Ta+273.15)/(TH.Tboil+273.15));
+const S={started:false, playing:false, sun:1, blocked:false, t:0, Tth:Ta, G:0, Ppv:0, Pq:0, Pth:0, dT:0, canBoil:true, thEver:false};
+function step(dt){
+  const G=(S.started&&!S.blocked)?S.sun*G0:0;
+  const Pq=TH.k*Math.max(0,S.Tth-TH.Tboil);
+  const dT=dt*(TH.opt*G-TH.U*(S.Tth-Ta)-Pq)/TH.C; S.Tth+=dT; if(dt>0)S.dT=dT/dt;
+  S.G=G; S.Ppv=PV_ETA*G; S.Pq=Pq; S.Pth=Pq>0?ETA_ENG*Pq:0;
+  S.canBoil=(Ta+TH.opt*G/TH.U)>TH.Tboil;                  // 이 빛 세기로 물이 끓을 수 있는가 (끓지 않을 때의 최종 온도로 판단)
+  if(Pq>0)S.thEver=true;
+}
+
+// ───── 캔버스 ─────
+const FONT='"Pretendard Variable",Pretendard,-apple-system,system-ui,sans-serif';
+let T=0;
+function makeCanvas(id,heightFn){
+  const el=document.getElementById(id),ctx=el.getContext('2d');const o={el,ctx,w:0,h:0,W:480,H:420,s:1,dpr:1};
+  o.resize=function(){const dpr=Math.min(window.devicePixelRatio||1,2.5);
+    const cssW=el.clientWidth||el.parentElement.clientWidth,cssH=heightFn(cssW);
+    o.w=cssW;o.h=cssH;el.style.height=cssH+'px';el.width=Math.round(cssW*dpr);el.height=Math.round(cssH*dpr);
+    o.s=cssW/o.W; o.H=cssH/o.s; o.dpr=dpr;};
+  o.begin=function(){ctx.setTransform(o.dpr*o.s,0,0,o.dpr*o.s,0,0); ctx.clearRect(0,0,o.W,o.H);};
+  return o;
+}
+// 그림 비율(논리 높이 ≥ 420)을 지키도록: 높이 ≥ 폭 × 0.875
+const cvH=w=>Math.round(Math.max(340,w*0.875,Math.min(480,w*0.92)));
+const cpv=makeCanvas('cpv',cvH);
+const cth=makeCanvas('cth',cvH);
+const allC=[cpv,cth];
+function resizeAll(){allC.forEach(c=>c.resize());}
+window.addEventListener('resize',resizeAll);
+const rnd=(a,b)=>a+Math.random()*(b-a);
+function txt(ctx,s,x,y,size,color,align='left',w='700'){ctx.font=w+' '+size+'px '+FONT;ctx.fillStyle=color;ctx.textAlign=align;ctx.textBaseline='middle';ctx.fillText(s,x,y);}
+function pill(ctx,s,x,y,size,color,align='center'){ctx.font='700 '+size+'px '+FONT;const w=ctx.measureText(s).width+12;
+  const x0=align==='left'?x-6:align==='right'?x-w+6:x-w/2;ctx.fillStyle='rgba(255,255,255,.9)';ctx.beginPath();ctx.roundRect(x0,y-size*0.8,w,size*1.6,6);ctx.fill();txt(ctx,s,x,y,size,color,align);}
+function drawSun(ctx,x,y,level,blocked){
+  const r=20,a=0.25+0.75*level;
+  ctx.save();ctx.translate(x,y);ctx.strokeStyle=`rgba(251,191,36,${a})`;ctx.lineWidth=3;ctx.lineCap='round';
+  for(let i=0;i<12;i++){ctx.rotate(Math.PI/6);ctx.beginPath();ctx.moveTo(r+6,0);ctx.lineTo(r+(i%2?12:18),0);ctx.stroke();}
+  ctx.restore();
+  const g=ctx.createRadialGradient(x,y,r*0.3,x,y,r);g.addColorStop(0,`rgba(255,230,120,${a})`);g.addColorStop(1,`rgba(250,170,30,${a})`);
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();
+  if(blocked){ctx.fillStyle='#5d6e8c';ctx.beginPath();ctx.roundRect(x-130,y+40,260,9,4);ctx.fill();txt(ctx,'차광판',x,y+62,11.5,'#5d6e8c','center');}
+}
+function bulb(ctx,x,y,frac){
+  frac=Math.max(0,Math.min(1,frac));const on=frac>0.02,r=15;
+  if(on){const g=ctx.createRadialGradient(x,y,3,x,y,44);g.addColorStop(0,`rgba(255,210,80,${frac})`);g.addColorStop(1,'rgba(255,210,80,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,44,0,7);ctx.fill();}
+  ctx.fillStyle=on?'#ffe066':'#e5e7eb';ctx.strokeStyle='#5d6e8c';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();ctx.stroke();
+  ctx.fillStyle='#7d8cab';ctx.beginPath();ctx.roundRect(x-7,y+r-3,14,8,2);ctx.fill();
+  ctx.strokeStyle='#92400e';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(x-5,y+10);ctx.lineTo(x-4,y-4);ctx.lineTo(x,y+1);ctx.lineTo(x+4,y-4);ctx.lineTo(x+5,y+10);ctx.stroke();
+}
+
+// ───── 태양광 ─────
+const cL=100,cR=344,NCOL=6,colX=k=>cL+22+k*40;            // 이온 열 6개, 입자는 그 사이 5개 열
+let L1=null;
+function pvLayout(H){const dy=(H-420)*0.4,nTop=128+dy,dTop=nTop+50,dBot=dTop+66,pBot=dBot+60,bulbY=nTop+84;
+  const wire=[[cR,nTop-7],[412,nTop-7],[412,bulbY],[412,pBot+7],[cR,pBot+7]];const wlen=[];let a=0;
+  for(let i=1;i<wire.length;i++){a+=Math.hypot(wire[i][0]-wire[i-1][0],wire[i][1]-wire[i-1][1]);wlen.push(a);}
+  return {H,sunY:42+dy*0.2,nTop,dTop,dBot,pBot,bulbY,wire,wlen,wTotal:a};}
+function wirePos(L,s){const{wire,wlen}=L;let prev=0;for(let i=0;i<wlen.length;i++){if(s<=wlen[i]){const f=(s-prev)/(wlen[i]-prev);return[wire[i][0]+(wire[i+1][0]-wire[i][0])*f,wire[i][1]+(wire[i+1][1]-wire[i][1])*f];}prev=wlen[i];}return wire[wire.length-1];}
+let ph1=[],pairs=[],holes=[],acc1=0,pops=[],wPhase=0,wPassed=0,holeClear=0;
+const NWIRE=9;                                  // 도선 속 전자(표시용). 도선에는 원래 전자가 가득 차 있다
+const GEN=2.6;                                  // 햇빛 100 %일 때 초당 생기는 전자–양공 쌍(표시용)
+function updPV(dt){
+  if(!L1||Math.abs(L1.H-cpv.H)>0.5){L1=pvLayout(cpv.H);ph1=[];pairs=[];pops=[];}
+  const L=L1;
+  acc1+=dt*(S.G/G0)*GEN;while(acc1>=1){acc1-=1;const k=Math.floor(rnd(0,NCOL-1));ph1.push({x:colX(k)+20+rnd(-3,3),y:L.sunY+26,yabs:rnd(L.dTop+14,L.dBot-14)});}
+  if(S.G===0){ph1=[];pairs=[];pops=[];}                         // 빛이 없으면 새 전자·양공 쌍도 없다
+  for(const p of ph1){p.y+=dt*200;if(p.y>=p.yabs){p.dead=true;pairs.push({x:p.x,y0:p.yabs,ye:p.yabs,yh:p.yabs,age:0});pops.push({x:p.x,y:p.yabs,age:0});}}
+  ph1=ph1.filter(p=>!p.dead);
+  for(const q of pairs){q.age+=dt;
+    if(q.age>0.25&&q.age<=0.55){const f=(q.age-0.25)/0.3;q.ye=q.y0-6*f;q.yh=q.y0+6*f;}   // 쌍이 갈라지기 시작
+    else if(q.age>0.55){q.ye-=dt*55;q.yh+=dt*55;}                                   // 전기장에 의해 전자 ↑ n형, 양공 ↓ p형
+    if(q.ye<=L.nTop+10&&!q.eOut)q.eOut=true;                                         // 전자는 n형 쪽 전극으로 들어감
+    if(q.yh>=L.pBot-11&&!q.hOut){q.hOut=true;holes.push({x:q.x,y:L.pBot-11,ph:rnd(0,6)});}}
+  pairs=pairs.filter(q=>!(q.eOut&&q.hOut));
+  // 도선 속 전자: 빛이 있으면 다 함께 이동(속도 ∝ 빛 세기 = 전류), 없으면 그 자리에서 멈춤
+  const sp=L.wTotal/NWIRE, v=GEN*(S.G/G0)*sp;
+  wPhase+=v*dt; while(wPhase-wPassed*sp>=sp){wPassed++; if(holes.length)holes.shift();}  // p형 끝에 도착한 전자 1개가 양공 1개와 재결합
+  if(S.G===0&&holes.length){holeClear+=dt;if(holeClear>0.12){holeClear=0;holes.shift();}}  // 빛이 없으면 남은 양공도 곧 재결합
+  if(holes.length>8)holes.shift();
+  for(const p of pops)p.age+=dt;pops=pops.filter(p=>p.age<0.5);
+}
+function electron(ctx,x,y,r=7.5){ctx.fillStyle='#2f63e6';ctx.strokeStyle='#1e3a8a';ctx.lineWidth=1.3;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();ctx.stroke();txt(ctx,'−',x,y+0.5,r*1.5,'#fff','center','800');}
+function hole(ctx,x,y,r=7.5){ctx.fillStyle='#fda4af';ctx.strokeStyle='#be123c';ctx.lineWidth=1.3;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();ctx.stroke();txt(ctx,'+',x,y+0.5,r*1.5,'#fff','center','800');}
+function trail(ctx,x,y,dir,col){ // 이동 방향 화살표: dir=1 위로(전자→n형), dir=-1 아래로(양공→p형). 화살촉이 진행 방향을 가리킨다
+  const y1=y-dir*10,y2=y-dir*19,tip=y-dir*26;
+  ctx.strokeStyle=col;ctx.lineWidth=2;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x,y1);ctx.lineTo(x,y2);ctx.stroke();
+  ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(x,tip);ctx.lineTo(x-4.5,y2);ctx.lineTo(x+4.5,y2);ctx.fill();}
+function drawPV(){
+  const{ctx}=cpv;cpv.begin();const L=L1;const{H,nTop,dTop,dBot,pBot,bulbY,wire}=L;
+  if(S.G>0){const g=ctx.createLinearGradient(0,L.sunY,0,nTop);g.addColorStop(0,`rgba(251,191,36,${0.05+0.25*S.G/G0})`);g.addColorStop(1,`rgba(251,191,36,${0.02+0.12*S.G/G0})`);
+    ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(200,L.sunY+14);ctx.lineTo(260,L.sunY+14);ctx.lineTo(cR,nTop-9);ctx.lineTo(cL,nTop-9);ctx.closePath();ctx.fill();}
+  drawSun(ctx,230,L.sunY,S.G>0?S.sun:0,S.started&&S.blocked);
+  // 태양전지 단면: n형 / 공핍층 / p형
+  ctx.fillStyle='#bfdbfe';ctx.fillRect(cL,nTop,cR-cL,dTop-nTop);
+  ctx.fillStyle='#fecdd3';ctx.fillRect(cL,dBot,cR-cL,pBot-dBot);
+  ctx.fillStyle='#efe9ff';ctx.fillRect(cL,dTop,cR-cL,dBot-dTop);
+  ctx.strokeStyle='#13233f';ctx.lineWidth=2.5;ctx.beginPath();ctx.roundRect(cL,nTop-9,cR-cL,pBot-nTop+18,6);ctx.stroke();
+  ctx.fillStyle='#13233f';for(let k=0;k<NCOL;k++)ctx.fillRect(colX(k)-7,nTop-9,14,9);ctx.fillRect(cR-10,nTop-9,10,9);  // 앞면: 격자 전극(틈으로 빛이 들어감)
+  ctx.fillRect(cL,pBot,cR-cL,9);                                                                                       // 뒷면: 전체 전극
+  // 공핍층: n쪽 ⊕, p쪽 ⊖ → 전기장 E는 ⊕에서 ⊖로 (n→p)
+  ctx.strokeStyle='rgba(91,33,182,.3)';ctx.lineWidth=1;ctx.setLineDash([4,3]);ctx.beginPath();ctx.moveTo(cL,(dTop+dBot)/2);ctx.lineTo(cR,(dTop+dBot)/2);ctx.stroke();ctx.setLineDash([]);
+  const ion=(x,y,sign)=>{ctx.fillStyle='#fff';ctx.strokeStyle='#5b21b6';ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(x,y,7,0,7);ctx.fill();ctx.stroke();txt(ctx,sign,x,y+0.5,11.5,'#5b21b6','center','800');};
+  // 공핍층 안 화살표는 모두 전기장 E (⊕ → ⊖, n → p). 이동 방향은 움직이는 입자에 붙은 작은 화살표로만 표시
+  const arrow=(x,y0,y1,col)=>{const d=y1>y0?1:-1;ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=2;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(x,y0);ctx.lineTo(x,y1-d*6);ctx.stroke();ctx.beginPath();ctx.moveTo(x,y1);ctx.lineTo(x-4.5,y1-d*8);ctx.lineTo(x+4.5,y1-d*8);ctx.fill();};
+  for(let k=0;k<NCOL;k++){const x=colX(k);ion(x,dTop+13,'+');ion(x,dBot-13,'−');
+    arrow(x,dTop+23,dBot-23,'#7b4dff');}
+  // 다수 운반자: n형의 전자, p형의 양공 (제자리에서 흔들림)
+  for(let i=0;i<6;i++){const x=cL+24+i*40+Math.sin(T*1.3+i)*3,y=nTop+25+Math.cos(T*1.1+i*2)*6;
+    ctx.fillStyle='rgba(47,99,230,.5)';ctx.beginPath();ctx.arc(x,y,5.5,0,7);ctx.fill();txt(ctx,'−',x,y+0.5,9,'#fff','center','800');}
+  for(let i=0;i<6;i++){const x=cL+36+i*40+Math.sin(T*1.2+i*1.7)*3,y=dBot+14+Math.cos(T*0.9+i)*4;
+    ctx.fillStyle='rgba(253,164,175,.7)';ctx.strokeStyle='rgba(190,18,60,.55)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(x,y,5.5,0,7);ctx.fill();ctx.stroke();txt(ctx,'+',x,y+0.5,9,'#fff','center','800');}
+  // 라벨 (왼쪽 바깥)
+  txt(ctx,'n형',cL-12,nTop+16,15,'#1e3a8a','right','800');txt(ctx,'전자 많음',cL-12,nTop+33,10,'#1e3a8a','right','600');
+  txt(ctx,'공핍층',cL-12,(dTop+dBot)/2,15,'#5b21b6','right','800');
+  txt(ctx,'p형',cL-12,pBot-32,15,'#9f1239','right','800');txt(ctx,'양공 많음',cL-12,pBot-15,10,'#9f1239','right','600');
+  txt(ctx,'(−)극',cR-6,nTop-21,13,'#1e3a8a','right','800');txt(ctx,'(+)극',cR-6,pBot+22,13,'#9f1239','right','800');
+  txt(ctx,'태양전지 단면 (확대)',cL,nTop-24,11,'#5d6e8c','left','600');
+  // 전류 방향(바깥): (+)극 → 전구 → (−)극. 전자 이동은 그 반대
+  if(S.Ppv>1){
+    ctx.strokeStyle='#e23b4e';ctx.fillStyle='#e23b4e';ctx.lineWidth=2;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(398,nTop-22);ctx.lineTo(362,nTop-22);ctx.stroke();ctx.beginPath();ctx.moveTo(356,nTop-22);ctx.lineTo(365,nTop-27);ctx.lineTo(365,nTop-17);ctx.fill();
+    ctx.beginPath();ctx.moveTo(356,pBot+22);ctx.lineTo(392,pBot+22);ctx.stroke();ctx.beginPath();ctx.moveTo(398,pBot+22);ctx.lineTo(389,pBot+17);ctx.lineTo(389,pBot+27);ctx.fill();
+    txt(ctx,'전류 I',377,nTop-34,10.5,'#e23b4e','center','800');txt(ctx,'전류 I',377,pBot+35,10.5,'#e23b4e','center','800');
+    txt(ctx,'전자 이동 →',377,nTop+6,9.5,'#2f63e6','center','700');txt(ctx,'← 전자 이동',377,pBot-6,9.5,'#2f63e6','center','700');
+  }
+  ctx.strokeStyle='#13233f';ctx.lineWidth=3.5;ctx.lineJoin='round';ctx.beginPath();ctx.moveTo(wire[0][0],wire[0][1]);for(const p of wire)ctx.lineTo(p[0],p[1]);ctx.stroke();
+  bulb(ctx,412,bulbY,S.Ppv/200);
+  // 광자 · 생성된 쌍 · 이동
+  for(const p of ph1){ctx.fillStyle='#f59e0b';ctx.beginPath();ctx.arc(p.x,p.y,4,0,7);ctx.fill();}
+  for(const p of pops){ctx.strokeStyle=`rgba(245,158,11,${1-p.age*2})`;ctx.lineWidth=2;ctx.beginPath();ctx.arc(p.x,p.y,6+p.age*44,0,7);ctx.stroke();}
+  for(const q of pairs){
+    if(q.age>0.55){if(!q.eOut)trail(ctx,q.x,q.ye,1,'rgba(47,99,230,.55)');if(!q.hOut)trail(ctx,q.x,q.yh,-1,'rgba(190,18,60,.5)');}
+    if(!q.hOut)hole(ctx,q.x,q.yh);if(!q.eOut)electron(ctx,q.x,q.ye);}
+  for(const h of holes)hole(ctx,h.x+Math.sin(T*1.5+h.ph)*3,h.y);
+  {const sp=L.wTotal/NWIRE;for(let i=0;i<NWIRE;i++){const s=((wPhase+i*sp)%L.wTotal+L.wTotal)%L.wTotal;const[x,y]=wirePos(L,s);electron(ctx,x,y,6.5);}}
+  txt(ctx,'① 빛(광자)이 공핍층 근처에서 흡수되어 전자(−)·양공(+) 쌍이 생긴다 — 광전효과',30,H-50,11,'#13233f','left','600');
+  txt(ctx,'② 전기장 E(⊕→⊖) 때문에 전자는 ↑ n형으로, 양공은 ↓ p형으로 모인다',30,H-32,11,'#13233f','left','600');
+  txt(ctx,'③ 전자가 외부 회로를 돌아 전구를 켜고, p형으로 돌아와 양공과 재결합한다',30,H-14,11,'#13233f','left','600');
+}
+
+// ───── 태양열 ─────
+let L2=null;
+function thLayout(H){const dy=(H-420)*0.5,vy=346+dy,F={x:230,y:vy-90};               // 포물면 초점 = 꼭짓점 위 90
+  const hy=158+dy*0.45;
+  return{H,sunY:42+dy*0.2,F,vy,mirrorY:x=>vy-(x-230)*(x-230)/360,turb:{x:366,y:118+dy*0.45,r:24},gen:{x:418,y:104+dy*0.45,w:46,h:30},bulb2:{x:441,y:200+dy*0.45},
+    sx:318,hy,cond:{x:344,y:hy+38,w:50,h:24}};}
+let steam=[],ang=0,accS=0;
+function updTH(dt){
+  if(!L2||Math.abs(L2.H-cth.H)>0.5)L2=thLayout(cth.H);
+  if(S.Pq>0){accS+=dt*(2+S.Pq/60);while(accS>=1){accS-=1;steam.push({t:0,o:rnd(-5,5)});}}
+  for(const s of steam)s.t+=dt*0.6;steam=steam.filter(s=>s.t<1);
+  if(S.Pq>0)ang+=dt*4;                                         // 증기가 있을 때 일정한 속도로 회전
+}
+function drawTH(){
+  const{ctx}=cth;cth.begin();const L=L2;const{H,F,vy,turb,gen,bulb2,cond,sx,hy}=L;const mirrorY=L.mirrorY;const hot=S.Pq>0;
+  const ty=turb.y-12, tx0=turb.x-Math.sqrt(turb.r*turb.r-144);   // 증기는 터빈 날개(축에서 벗어난 곳)에 닿는다
+  // 광선: 평행하게 내려와 반사경에서 반사되어 초점(집열관)으로 모인다
+  if(S.started){const a=0.25+0.55*S.sun;ctx.strokeStyle=`rgba(245,158,11,${a})`;ctx.lineWidth=1.8;ctx.lineCap='round';
+    for(const x of [170,200,260,290]){const y0=L.sunY+28;ctx.beginPath();
+      if(S.blocked){ctx.moveTo(x,y0);ctx.lineTo(x,L.sunY+40);ctx.stroke();continue;}
+      const ym=mirrorY(x);const d=Math.hypot(F.x-x,F.y-ym),fx=F.x+(x-F.x)/d*22,fy=F.y+(ym-F.y)/d*22;
+      ctx.moveTo(x,y0);ctx.lineTo(x,ym);ctx.lineTo(fx,fy);ctx.stroke();
+      rayHead(ctx,x,(y0+ym)/2,0,1);                                  // 내려오는 빛: 아래쪽
+      rayHead(ctx,fx,fy,(F.x-x)/d,(F.y-ym)/d);}}                     // 반사된 빛: 집열관 쪽
+  drawSun(ctx,230,L.sunY,S.G>0?S.sun:0,S.started&&S.blocked);
+  ctx.strokeStyle='#5d6e8c';ctx.lineWidth=7;ctx.lineCap='round';ctx.beginPath();for(let x=90;x<=370;x+=5){const y=mirrorY(x);x===90?ctx.moveTo(x,y):ctx.lineTo(x,y);}ctx.stroke();
+  ctx.strokeStyle='#eef2f8';ctx.lineWidth=2.5;ctx.beginPath();for(let x=94;x<=366;x+=5){const y=mirrorY(x)-2.2;x===94?ctx.moveTo(x,y):ctx.lineTo(x,y);}ctx.stroke();
+  ctx.strokeStyle='#8d9bb8';ctx.lineWidth=3.5;ctx.beginPath();ctx.moveTo(230,vy+2);ctx.lineTo(230,vy+22);ctx.moveTo(202,vy+22);ctx.lineTo(258,vy+22);ctx.stroke();
+  const heat=Math.max(0,Math.min(1,(S.Tth-25)/300));
+  ctx.lineCap='round';ctx.lineJoin='round';
+  // 증기관: 집열관 → 터빈 날개
+  ctx.strokeStyle='#5d6e8c';ctx.lineWidth=7;
+  ctx.beginPath();ctx.moveTo(F.x+12,F.y-16);ctx.lineTo(sx,hy);ctx.lineTo(sx,ty);ctx.lineTo(tx0-2,ty);ctx.stroke();
+  // 터빈 → 응축기
+  ctx.strokeStyle='#8d9bb8';ctx.lineWidth=5;
+  ctx.beginPath();ctx.moveTo(turb.x,turb.y+turb.r+1);ctx.lineTo(turb.x,cond.y);ctx.stroke();
+  // 응축기 → 물 → 집열관
+  ctx.strokeStyle='#7dd3fc';ctx.lineWidth=4.5;
+  ctx.beginPath();ctx.moveTo(cond.x,cond.y+cond.h/2);ctx.lineTo(cond.x-44,cond.y+cond.h/2);ctx.lineTo(cond.x-44,F.y+4);ctx.lineTo(F.x+20,F.y+4);ctx.stroke();  // 증기관과 떨어진 길로 집열관에 들어감
+  // 집열관 (속에 물)
+  if(heat>0){const g=ctx.createRadialGradient(F.x,F.y,8,F.x,F.y,46);g.addColorStop(0,`rgba(226,59,78,${0.6*heat})`);g.addColorStop(1,'rgba(226,59,78,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(F.x,F.y,46,0,7);ctx.fill();}
+  ctx.fillStyle='#13233f';ctx.beginPath();ctx.arc(F.x,F.y,20,0,7);ctx.fill();
+  ctx.fillStyle=hot?'#e2e8f0':'#7dd3fc';ctx.beginPath();ctx.arc(F.x,F.y,13,0,7);ctx.fill();
+  // 응축기 (증기를 식혀 물로 되돌림, 열 방출)
+  ctx.fillStyle='#e0f2fe';ctx.strokeStyle='#13233f';ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(cond.x,cond.y,cond.w,cond.h,6);ctx.fill();ctx.stroke();
+  txt(ctx,'응축기',cond.x+cond.w/2,cond.y+cond.h/2,10.5,'#0c4a6e','center','800');
+  if(hot){ctx.strokeStyle='rgba(226,59,78,.7)';ctx.fillStyle='rgba(226,59,78,.7)';ctx.lineWidth=1.8;
+    for(const dx of [12,25,38]){const x=cond.x+dx,y0=cond.y+cond.h+3,y1=y0+13;ctx.beginPath();ctx.moveTo(x,y0);ctx.lineTo(x,y1-4);ctx.stroke();ctx.beginPath();ctx.moveTo(x,y1);ctx.lineTo(x-3.5,y1-6);ctx.lineTo(x+3.5,y1-6);ctx.fill();}
+    txt(ctx,'열 방출',cond.x+cond.w/2,cond.y+cond.h+26,9.5,'#be123c','center','700');}
+  // 증기 흐름
+  const P=[[F.x+12,F.y-16],[sx,hy],[sx,ty],[tx0-4,ty]];const seg=[];let lt=0;
+  for(let i=1;i<P.length;i++){const l=Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]);seg.push(l);lt+=l;}
+  for(const st of steam){let d=st.t*lt,k=0;while(k<seg.length-1&&d>seg[k]){d-=seg[k];k++;}const f=Math.min(1,d/seg[k]);
+    const x=P[k][0]+(P[k+1][0]-P[k][0])*f+st.o*0.3,y=P[k][1]+(P[k+1][1]-P[k][1])*f+st.o*0.3;
+    ctx.fillStyle=`rgba(255,255,255,${0.95*(1-st.t*0.4)})`;ctx.beginPath();ctx.arc(x,y,4+st.t*2,0,7);ctx.arc(x+4,y-2,3+st.t*2,0,7);ctx.fill();}
+  // 터빈 · 발전기 · 전구
+  ctx.fillStyle='#e2e8f0';ctx.strokeStyle='#13233f';ctx.lineWidth=2;ctx.beginPath();ctx.arc(turb.x,turb.y,turb.r,0,7);ctx.fill();ctx.stroke();
+  ctx.save();ctx.translate(turb.x,turb.y);ctx.rotate(ang);ctx.fillStyle='#5d6e8c';
+  for(let i=0;i<6;i++){ctx.rotate(Math.PI/3);ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(turb.r-4,-5.5);ctx.lineTo(turb.r-4,5.5);ctx.closePath();ctx.fill();}
+  ctx.restore();ctx.fillStyle='#13233f';ctx.beginPath();ctx.arc(turb.x,turb.y,4.5,0,7);ctx.fill();
+  ctx.strokeStyle='#5d6e8c';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(turb.x+turb.r,turb.y);ctx.lineTo(gen.x,turb.y);ctx.stroke();
+  ctx.fillStyle='#fde68a';ctx.strokeStyle='#13233f';ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(gen.x,gen.y,gen.w,gen.h,7);ctx.fill();ctx.stroke();
+  txt(ctx,'발전기',gen.x+gen.w/2,gen.y+gen.h/2,11.5,'#78350f','center','800');
+  ctx.strokeStyle='#13233f';ctx.lineWidth=3.5;ctx.beginPath();ctx.moveTo(gen.x+gen.w/2-7,gen.y+gen.h);ctx.lineTo(gen.x+gen.w/2-7,bulb2.y-15);ctx.moveTo(gen.x+gen.w/2+7,gen.y+gen.h);ctx.lineTo(gen.x+gen.w/2+7,bulb2.y-15);ctx.stroke();
+  bulb(ctx,bulb2.x,bulb2.y,S.Pth/200);
+  // 라벨
+  pill(ctx,'반사경: 빛을 한 점에 모은다 (집광)',230,vy+42,11.5,'#5d6e8c');
+  pill(ctx,'집열관 (물)',F.x-30,F.y,12,'#7c2d12','right');
+  pill(ctx,'증기',sx-10,(hy+ty)/2,11,'#5d6e8c','right');
+  pill(ctx,'터빈',turb.x-turb.r-6,turb.y-turb.r+2,11.5,'#5d6e8c','right');
+  txt(ctx,'물',cond.x-30,cond.y+cond.h/2-10,10,'#0369a1','center','800');
+  if(S.G>0)pill(ctx,'태양 복사(광선)',92,L.sunY+86,10.5,'#b45309','left');
+  // 상태 문구는 그림 아래 줄(thSub)에만 표시 — 반사 광선을 가리지 않도록
+}
+function rayHead(ctx,x,y,ux,uy){const s=7;ctx.beginPath();ctx.moveTo(x+ux*2,y+uy*2);ctx.lineTo(x-ux*s-uy*s*0.6,y-uy*s+ux*s*0.6);ctx.lineTo(x-ux*s+uy*s*0.6,y-uy*s-ux*s*0.6);ctx.closePath();ctx.fillStyle=ctx.strokeStyle;ctx.fill();}
+function thState(){const hot=S.Pq>0;
+  if(!S.started)return '대기 중';
+  if(hot)return S.G>0?'물이 끓어 증기 → 터빈 회전':'남은 열로 잠시 더 회전';
+  if(S.G>0&&!S.canBoil)return '이 빛 세기로는 물이 끓지 않음';
+  if(S.G>0&&S.dT>0)return '물을 데우는 중 (끓어야 증기가 나옴)';
+  return S.Tth>Ta+1?'식는 중':'멈춤';}
+
+// ───── UI ─────
+const $=id=>document.getElementById(id);let lastObs='',explainReady=false;
+function updUI(){
+  $('rG').textContent=Math.round(S.G)+' W/m²';$('rPpv').textContent=Math.round(S.Ppv)+' W';$('rPth').textContent=Math.round(S.Pth)+' W';
+  $('rt').textContent=S.t<3600?Math.round(S.t/60)+'분':(S.t/3600).toFixed(1)+'시간';
+  $('oPv').textContent=Math.round(S.Ppv)+' W';$('oTh').textContent=Math.round(S.Pth)+' W';
+  const hot=S.Pq>0;
+  $('f1a').classList.toggle('on',S.G>0);$('f1b').classList.toggle('on',S.Ppv>1);
+  $('f2a').classList.toggle('on',S.G>0);$('f2b').classList.toggle('on',S.Tth>Ta+1);$('f2c').classList.toggle('on',hot);$('f2d').classList.toggle('on',S.Pth>0.5);
+  $('pvSub').textContent=!S.started?'대기 중':S.G>0?'빛이 닿는 즉시 전류가 흐른다 · 빛이 셀수록 전류가 크다':'빛이 없으면 즉시 멈춘다';
+  $('thSub').textContent=thState();
+  let m;
+  if(!S.started)m='시작 버튼을 누르면 두 장치의 반응을 비교할 수 있습니다.';
+  else if(S.G===0&&hot)m='빛을 가리자 <span class="pvw">태양광</span>은 <b>즉시 0 W</b>가 되었습니다. <span class="thw">태양열</span>은 집열관에 <b>남은 열</b>로 물이 계속 끓어 아직 터빈이 돕니다. 물이 더 이상 끓지 않으면 멈춥니다.';
+  else if(S.G===0)m=S.thEver?'빛이 없으면 둘 다 멈춥니다. 태양광은 <b>즉시</b>, 태양열은 남은 열이 빠져나가 물이 <b>더 이상 끓지 않을 때</b> 멈췄습니다.'
+                          :'빛이 없어 둘 다 발전하지 않습니다. 태양열은 아직 물이 끓기 전이었습니다.';
+  else if(!hot&&!S.canBoil)m='<span class="pvw">태양광</span>은 약한 빛에서도 빛의 세기에 비례해 전기를 만듭니다. <span class="thw">태양열</span>은 이 빛 세기로는 물이 끓을 만큼 뜨거워지지 않아 <b>발전하지 못합니다.</b>';
+  else if(!hot)m='<span class="pvw">태양광</span>은 빛이 닿는 <b>순간</b> 전류가 흐릅니다. <span class="thw">태양열</span>은 물이 끓어 증기가 나올 때까지 <b>기다려야</b> 합니다.';
+  else m='둘 다 전기를 만들고 있습니다. <span class="pvw">태양광</span>은 <b>빛 → 전기</b>의 한 단계, <span class="thw">태양열</span>은 <b>빛 → 열 → 운동 → 전기</b>의 세 단계를 거칩니다.'+(S.dT>0.01?' 태양열 출력은 충분히 데워질 때까지 조금씩 커집니다.':'')+' 차광판으로 빛을 가려 보세요.';
+  if(m!==lastObs){$('obs').innerHTML=m;lastObs=m;}
+  if(S.started&&hot&&!explainReady){explainReady=true;$('explainBtn').classList.add('ready');$('explainHint').textContent='두 장치가 모두 발전 중입니다. 눌러서 두 방식의 차이를 정리해 보세요.';}
+}
+$('sun').addEventListener('input',e=>{S.sun=+e.target.value/100;});
+$('lightSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;S.blocked=b.dataset.light==='off';[...$('lightSeg').children].forEach(x=>x.classList.toggle('on',x===b));});
+$('playBtn').addEventListener('click',()=>{
+  if(!S.started){S.started=true;S.playing=true;$('playBtn').textContent='⏸ 일시정지';$('playBtn').classList.add('running');$('idleHint').hidden=true;$('explainBtn').hidden=false;return;}
+  S.playing=!S.playing;$('playBtn').textContent=S.playing?'⏸ 일시정지':'▶ 계속';});
+$('resetBtn').addEventListener('click',()=>{S.started=false;S.playing=false;S.t=0;S.Tth=Ta;S.Pq=0;S.Pth=0;S.dT=0;S.thEver=false;ph1=[];pairs=[];holes=[];pops=[];steam=[];acc1=0;accS=0;ang=0;wPhase=0;wPassed=0;holeClear=0;
+  S.blocked=false;[...$('lightSeg').children].forEach(x=>x.classList.toggle('on',x.dataset.light==='on'));S.sun=1;$('sun').value=100;
+  $('playBtn').textContent='▶ 발전 비교 시작';$('playBtn').classList.remove('running');$('idleHint').hidden=false;
+  explainReady=false;$('explainBtn').hidden=true;$('explainBtn').classList.remove('ready','open');$('explainSec').hidden=true;$('explainHint').textContent='두 장치가 모두 발전을 시작하면 결과를 정리해 볼 수 있습니다.';step(0);});
+$('explainBtn').addEventListener('click',()=>{const open=$('explainSec').hidden;$('explainSec').hidden=!open;$('explainBtn').classList.toggle('open',open);$('explainBtn').classList.remove('ready');
+  if(open)$('explainSec').scrollIntoView({behavior:'smooth',block:'start'});});
+
+// ───── 루프 ─────
+const SIM_RATE=60;let last=performance.now();
+function frame(now){
+  const dt=Math.min(0.05,(now-last)/1000);last=now;T+=dt;
+  if(S.started&&S.playing){const sub=4,sdt=dt*SIM_RATE/sub;for(let i=0;i<sub;i++){step(sdt);S.t+=sdt;}updPV(dt);updTH(dt);}
+  else{step(0);updPV(0);updTH(0);}
+  drawPV();drawTH();updUI();
+  requestAnimationFrame(frame);
+}
+step(0);resizeAll();requestAnimationFrame(frame);setTimeout(resizeAll,350);
+</script>
+</body>
+</html>

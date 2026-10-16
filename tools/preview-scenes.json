@@ -278,5 +278,20 @@
         "click": "#pauseBtn"
       }
     ]
+  },
+  "solar-pv-vs-thermal": {
+    "viewport": {
+      "width": 1100,
+      "height": 825
+    },
+    "target": ".section",
+    "steps": [
+      {
+        "click": "#playBtn"
+      },
+      {
+        "wait": 34000
+      }
+    ]
   }
 }
