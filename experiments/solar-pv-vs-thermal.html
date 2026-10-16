@@ -114,20 +114,19 @@
   </div>
 
   <section class="section">
-    <div class="sec-head"><span class="num">비교</span><h2>같은 태양빛, 두 가지 발전</h2>
-      <span class="hint">두 장치가 같은 1 m² 넓이로 같은 세기의 태양빛을 받습니다.</span></div>
+    <div class="sec-head"><span class="num">비교</span><h2>같은 태양빛, 두 가지 발전</h2></div>
     <p class="idle-hint" id="idleHint">‘▶ 발전 비교 시작’을 누르면 두 장치에 동시에 태양빛이 비칩니다.</p>
     <div class="views">
       <div class="view-box">
         <div class="vtitle"><span class="dot" style="background:var(--pv)"></span>태양광 발전 — 태양전지 (광전효과 + p-n 접합)</div>
         <canvas id="cpv"></canvas>
-        <div class="flow pv"><span class="st" id="f1a">빛</span><span class="ar">→</span><span class="st" id="f1b">전기</span><span class="out" id="oPv">0 W</span></div>
+        <div class="flow pv"><span class="st" id="f1a">빛</span><span class="ar">→</span><span class="st" id="f1b">전기</span></div>
         <div class="vsub" id="pvSub">대기 중</div>
       </div>
       <div class="view-box">
         <div class="vtitle"><span class="dot" style="background:var(--th)"></span>태양열 발전 — 집광 · 집열 · 증기 터빈</div>
         <canvas id="cth"></canvas>
-        <div class="flow th"><span class="st" id="f2a">빛</span><span class="ar">→</span><span class="st" id="f2b">열</span><span class="ar">→</span><span class="st" id="f2c">증기·터빈</span><span class="ar">→</span><span class="st" id="f2d">전기</span><span class="out" id="oTh">0 W</span></div>
+        <div class="flow th"><span class="st" id="f2a">빛</span><span class="ar">→</span><span class="st" id="f2b">열</span><span class="ar">→</span><span class="st" id="f2c">증기·터빈</span><span class="ar">→</span><span class="st" id="f2d">전기</span></div>
         <div class="vsub" id="thSub">대기 중</div>
       </div>
     </div>
@@ -161,10 +160,10 @@
         <tr><th>반응 속도</th><td class="pv">즉시 켜지고 즉시 꺼짐</td><td class="th">가열에 시간이 걸리고, 빛이 사라져도 저장된 열로 잠시 발전</td></tr>
       </tbody>
     </table>
-    <p class="model-note">태양전지 그림의 공핍층은 실제보다 훨씬 두껍게 과장해 그렸습니다. 화면의 출력 숫자는 두 방식의 실제 효율을 비교하는 값이 아닙니다.</p>
+    <p class="model-note">태양전지 그림의 공핍층은 실제보다 훨씬 두껍게 과장해 그렸습니다.</p>
   </section>
 
-  <footer>에너지 전환 학습용 · 두 장치는 같은 태양빛을 같은 넓이로 받습니다.</footer>
+  <footer>에너지 전환 학습용 · 두 발전 방식의 원리 비교</footer>
 </div>
 
 <script>
@@ -400,7 +399,6 @@ function thState(){const hot=S.Pq>0;
 // ───── UI ─────
 const $=id=>document.getElementById(id);let lastObs='',explainReady=false;
 function updUI(){
-  $('oPv').textContent=Math.round(S.Ppv)+' W';$('oTh').textContent=Math.round(S.Pth)+' W';
   const hot=S.Pq>0;
   $('f1a').classList.toggle('on',S.G>0);$('f1b').classList.toggle('on',S.Ppv>1);
   $('f2a').classList.toggle('on',S.G>0);$('f2b').classList.toggle('on',S.Tth>Ta+1);$('f2c').classList.toggle('on',hot);$('f2d').classList.toggle('on',S.Pth>0.5);
@@ -408,7 +406,7 @@ function updUI(){
   $('thSub').textContent=thState();
   let m;
   if(!S.started)m='시작 버튼을 누르면 두 장치의 반응을 비교할 수 있습니다.';
-  else if(S.G===0&&hot)m='빛을 가리자 <span class="pvw">태양광</span>은 <b>즉시 0 W</b>가 되었습니다. <span class="thw">태양열</span>은 집열관에 <b>남은 열</b>로 물이 계속 끓어 아직 터빈이 돕니다. 물이 더 이상 끓지 않으면 멈춥니다.';
+  else if(S.G===0&&hot)m='빛을 가리자 <span class="pvw">태양광</span>은 <b>즉시 멈췄습니다.</b> <span class="thw">태양열</span>은 집열관에 <b>남은 열</b>로 물이 계속 끓어 아직 터빈이 돕니다. 물이 더 이상 끓지 않으면 멈춥니다.';
   else if(S.G===0)m=S.thEver?'빛이 없으면 둘 다 멈춥니다. 태양광은 <b>즉시</b>, 태양열은 남은 열이 빠져나가 물이 <b>더 이상 끓지 않을 때</b> 멈췄습니다.'
                           :'빛이 없어 둘 다 발전하지 않습니다. 태양열은 아직 물이 끓기 전이었습니다.';
   else if(!hot&&!S.canBoil)m='<span class="pvw">태양광</span>은 약한 빛에서도 빛의 세기에 비례해 전기를 만듭니다. <span class="thw">태양열</span>은 이 빛 세기로는 물이 끓을 만큼 뜨거워지지 않아 <b>발전하지 못합니다.</b>';
