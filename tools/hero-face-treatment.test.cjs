@@ -52,13 +52,34 @@ for (const engine of [chromium, webkit]) {
         }
       };
 
-      await t.test('initial default, API requirement and photo-free flow stay intact', async () => {
+      const confirmDialog = page.getByRole('dialog', {name:'API 키 없이 시작할까요?', exact:true});
+      const dialogFits = async () => {
+        const box = await confirmDialog.boundingBox();
+        const view = await page.evaluate(() => ({w:innerWidth, h:innerHeight}));
+        assert.ok(box && box.x >= 0 && box.y >= 0 && box.x + box.width <= view.w + 1 && box.y + box.height <= view.h + 1,
+          'the confirmation must fit on screen');
+      };
+
+      await t.test('initial default, no-key confirmation and photo-free flow stay intact', async () => {
         assert.equal(await page.evaluate(() => state.faceTreatment), 'original');
+        // Without a key the start button asks first; Escape and "아니요" stay on the first screen.
         await page.locator('#begin').click();
+        await confirmDialog.waitFor({state:'visible'});
+        assert.equal(await confirmDialog.getAttribute('aria-modal'), 'true');
+        assert.match(await confirmDialog.textContent(), /API 키가 입력되지 않아 히어로 사진은 완성할 수 없습니다\. 그래도 계속하시겠습니까\?/);
+        await dialogFits();
         assert.equal(await page.evaluate(() => state.page), 'intro');
-        assert.match(await page.locator('#introStatus').textContent(), /API 키/);
+        await page.keyboard.press('Escape');
+        assert.equal(await confirmDialog.count(), 0);
+        await page.locator('#begin').click();
+        await confirmDialog.getByRole('button', {name:'아니요', exact:true}).click();
+        assert.equal(await confirmDialog.count(), 0);
+        assert.equal(await page.evaluate(() => state.page), 'intro');
+        assert.equal(await page.evaluate(() => document.activeElement.id), 'key');
+        // With a key it starts without asking.
         await page.locator('#key').fill('test-only-no-real-api-key');
         await page.locator('#begin').click();
+        assert.equal(await confirmDialog.count(), 0);
         assert.equal(await page.evaluate(() => sessionStorage.getItem('or_key')), 'test-only-no-real-api-key');
         assert.equal(await original.count(), 0);
         await page.locator('#noPhoto').click();
@@ -134,6 +155,30 @@ for (const engine of [chromium, webkit]) {
         assert.equal(await retouch.isChecked(), true);
         assert.equal(await page.evaluate(() => !!state.photo), true);
         await noOverflow();
+      });
+
+      await t.test('"예" without a key keeps the activities, sends nothing at the end and starts the next student clean', async () => {
+        await page.evaluate(() => go('intro'));
+        await page.locator('#key').fill('');
+        await page.locator('#begin').click();
+        await confirmDialog.getByRole('button', {name:'예', exact:true}).click();
+        assert.equal(await page.evaluate(() => state.page), 'camera');
+        assert.equal(await page.evaluate(() => state.key), '');
+        // The final scene screen appears after the experiments; its button must not call OpenRouter.
+        await page.evaluate(() => { state.name = '테스트 학생'; state.station = 3; go('shot'); });
+        await page.locator('#make').click();
+        await page.getByRole('heading', {name:'히어로 사진은 완성하지 못했습니다', exact:true}).waitFor();
+        assert.equal(await page.evaluate(() => state.page), 'result');
+        assert.match(await page.locator('#screen').textContent(), /API 키가 입력되지 않아 사진 생성과 인화는 할 수 없습니다\./);
+        assert.equal(await page.locator('#download, #print, #retryImg, #againNow').count(), 0, 'nothing to save, print or retry');
+        await page.locator('#nextStudent').click();
+        assert.equal(await page.evaluate(() => state.page), 'camera');
+        assert.deepEqual(await page.evaluate(() => ({name:state.name, station:state.station, photo:state.photo})), {name:'', station:0, photo:''});
+        await page.evaluate(() => { state.name = '다른 학생'; go('shot'); });
+        await page.locator('#make').click();
+        await page.locator('#toIntro').click();
+        assert.equal(await page.evaluate(() => state.page), 'intro');
+        assert.equal(await page.evaluate(() => state.name), '');
       });
       assert.deepEqual(posts, [], 'no personal photos or paid requests may leave this test');
       assert.deepEqual(errors, []);
