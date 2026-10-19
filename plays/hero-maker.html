@@ -1091,7 +1091,7 @@ const ROLE_DATA = [
   job:'a seed-dispersal bandolier of transparent cylinders across the chest, and a soil probe carried at the calf',
   cut:'built to kneel and plant — reinforced knee pads, deep front pockets, natural fibre texture over the technical layer'},
  {ko:'로봇을 만드는 공학자', en:'a robotics engineer', t:['tech','precise'],
-  job:'an articulated assist arm folded against the back, and a diagnostic port panel on the forearm',
+  job:'one of the hero\'s own two forearms rebuilt as a servo-driven robotic gauntlet with exposed actuators and cable runs (still one of the two arms, never an added one), and a diagnostic port panel on the other forearm',
   cut:'built like the machines they make — visible mechanical joints at the elbows and knees, exposed cable runs, panel lines that look serviceable'},
  {ko:'별을 관측하는 천문학자', en:'an astronomer who watches the stars', t:['space','optic'],
   job:'a folding lens array that swings across one eye, and a star-chart plate on the inner forearm',
@@ -1347,6 +1347,13 @@ const allMotifs    = () => motifEntries().map(e=>e.ko);
 // 모델의 번역 순서나 추가 제안이 사용자의 선택을 바꾸지 못하게 한다.
 const motifListEn = () => [...new Set(motifEntries().map(e=>e.en).filter(Boolean))];
 const motifCueKey = value => String(value||'').trim().replace(/\s+/g,' ').toLowerCase();
+/* 팔·다리 개수 — 실제로 '개구리+로봇' 학생의 포스터에 사람 팔 둘에 로봇 팔 하나가 더 달려 나왔다.
+   로봇·기계 모티브는 팔을 더 다는 게 아니라 원래 두 팔·두 다리를 기계로 만드는 것이다.
+   문어 촉수·거미 다리·날개·꼬리처럼 모티브 생물에 원래 있는 부위는 그대로 허용한다. */
+function limbCountRule(){
+  return `THE HERO'S OWN BODY — EXACTLY TWO ARMS AND TWO LEGS. One human body: two arms ending in two five-fingered hands, two legs ending in two boots, and nothing added to that count. A robot, machine, engineer or any other mechanical motif or job NEVER adds an arm — it rebuilds the hero's own two arms and two legs as machinery (servo gauntlets, actuator joints, cable runs). Only a part the selected motif creature genuinely owns — octopus tentacles, spider legs, wings, a tail, antennae, a shell — may be built on as separate equipment, and even then it is never shaped, jointed or positioned like a third human arm, hand, leg or foot.`;
+}
+
 function motifSelectionRule(){
   const selected = motifEntries().map((e,i)=>`${i+1}. ${e.ko}${e.en!==e.ko ? ` (${e.en})` : ''}`).join('\n');
   return `SELECTED MOTIFS — CLOSED LIST, AUTHORITATIVE FOR EVERY SECTION
@@ -4525,6 +4532,8 @@ openingLine(isLegend() ? 5 : loadoutScore().ok),
 
 motifSelectionRule(),
 
+limbCountRule(),
+
 qualityCap(isLegend() ? 5 : loadoutScore().ok),
 
 /* '능력 발동' 은 프롬프트 절반쯤 아래에 있어서 계속 묻혔다. 앞의 정적 포즈 지시들과
@@ -5007,7 +5016,7 @@ HOW POLISHED any of this is — moulded or hand-cut, machined or taped, gleaming
   : 'The background is darker and simpler than the hero so the silhouette reads instantly.'}`,
 
 `AVOID
-${state.photo ? 'Blend the costume and background naturally around the unchanged source face; fix visible seams outside the facial region, never by redrawing, retouching or relighting the face.' : 'No cut-and-paste composite look. No head pasted onto a different body. No mismatched lighting between face and costume.'} No sticker-like edges or glow outlines around the person. No airbrushed plastic skin, no over-sharpening, no exaggerated muscles, and no muscles printed, quilted or shaded onto stretch fabric.${state.gender === 'girl' ? ' No muscle-sculpted armour of any kind on this hero — no moulded abs, no six-pack panelling, no anatomical cuirass, no sculpted pectorals.' : ''} No floating science icons, holograms, formulas, gears or symbols in the air. No glossy plastic covering the whole suit. No cartoon, anime, CGI-render or painterly finish. No text, letters, numbers, logos or watermarks anywhere. No extra people, duplicated limbs, extra fingers, cropped shoes, or a blurred or altered face.`,
+${state.photo ? 'Blend the costume and background naturally around the unchanged source face; fix visible seams outside the facial region, never by redrawing, retouching or relighting the face.' : 'No cut-and-paste composite look. No head pasted onto a different body. No mismatched lighting between face and costume.'} No sticker-like edges or glow outlines around the person. No airbrushed plastic skin, no over-sharpening, no exaggerated muscles, and no muscles printed, quilted or shaded onto stretch fabric.${state.gender === 'girl' ? ' No muscle-sculpted armour of any kind on this hero — no moulded abs, no six-pack panelling, no anatomical cuirass, no sculpted pectorals.' : ''} No floating science icons, holograms, formulas, gears or symbols in the air. No glossy plastic covering the whole suit. No cartoon, anime, CGI-render or painterly finish. No text, letters, numbers, logos or watermarks anywhere. No extra people, no third arm, hand, leg or foot (a robotic or mechanical arm counts as one), no duplicated limbs, extra fingers, cropped shoes, or a blurred or altered face.`,
 
 direction ? `ART DIRECTION FOR THIS SPECIFIC PERSON (use only details consistent with the selected motifs, role and earned equipment; discard any unselected theme)
 ${String(direction).replace(/\s+/g,' ').trim()}` : '',
@@ -5096,6 +5105,8 @@ async function askCinematographer(full){
 `Below is a very long costume-and-photography rulebook for ONE poster of ONE student. It is long because it covers every case, argues with itself about which rule wins, and repeats its warnings. Your job is to READ ALL OF IT, resolve every conflict, and write the single short shooting brief that the rulebook is actually asking for.
 
 ${motifSelectionRule()}
+
+${limbCountRule()}
 
 ${sourceFaceEditRule()}
 
@@ -5601,6 +5612,7 @@ function buildLeanPrompt(b){
     sourceFaceEditRule(),
     openingLine(n),
     motifSelectionRule(),
+    limbCountRule(),
     leanHeadline(),
     leanFace(),
     leanMotif(b),
@@ -5635,7 +5647,7 @@ ${state.photo ? `WHENEVER A HELMET IS BUILT IT IS OPEN-FACED, WORN THE WAY A CAP
     : ''}${state.signature ? `\nTHE MEMORABLE DETAIL (selected motifs and earned equipment only; ignore any unselected theme in this suggestion): ${state.signature} — a complete recognisable physical object whose workmanship follows the exact zone carrying it. ${gearList().some(x=>x.ok===false) ? 'If it sits in a ROUGH zone it has hand-cut edges, visible tape or simple fasteners, uneven motif-colour paint and honest classroom hand-work; only a FINISHED or SHOWCASE zone may give it clean engineered edges, and this line never upgrades a rough zone.' : 'It has clean engineered edges, proper fasteners and honest wear.'}` : ''}`,
     `COVERAGE: one opaque full-coverage bodysuit runs from a closed high neck to the wrists and the ankles, and every plate, harness, strap, cable and pouch is mounted on top of it. The only skin in this picture is the face and the neck above the collar. Nothing sleeveless, nothing cut away, nothing sheer, nothing rolled up.`,
     `A REAL PHOTOGRAPH: fabric with real weight and wrinkles, panels with visible thickness and honest edges, functional seams, used boots and gloves, believable contact shadows, shallow depth of field, faint grain, one light direction and one white balance throughout. The whole figure is in frame, from clear air above the head to the soles of both boots.
-NOT IN IT: text, letters, initials, monograms or the hero's name anywhere including on the chest emblem; card suits (spade, heart, diamond, club), stars, lightning bolts, shields or any abstract geometric badge on the chest; logos or watermarks; floating icons, holograms or formulas; plastic airbrushed skin; cartoon, anime or CG-render finish; extra people, duplicated limbs, extra fingers, cropped shoes; bare skin other than the face and neck.${state.shot === 'activate' ? `
+NOT IN IT: text, letters, initials, monograms or the hero's name anywhere including on the chest emblem; card suits (spade, heart, diamond, club), stars, lightning bolts, shields or any abstract geometric badge on the chest; logos or watermarks; floating icons, holograms or formulas; plastic airbrushed skin; cartoon, anime or CG-render finish; extra people, a third arm, hand, leg or foot (a robotic or mechanical arm counts as one), duplicated limbs, extra fingers, cropped shoes; bare skin other than the face and neck.${state.shot === 'activate' ? `
 THE ACTION EFFECT IS SCORE-AWARE AND THIS LAST LINE MAY NOT OVERRIDE IT: ${actionScale(n)} Keep the event photographic and tied to what the equipment really does. Make the body reaction and camera timing dramatic at every grade, but never enlarge a weak rough-prototype effect into a full-power blast.` : ''}`,
     faceCheckTail()
   ].filter(Boolean).join('\n\n');
@@ -5811,6 +5823,7 @@ async function askDirector(){
 아래 모티브와 장비에서 실제로 끌어낸, 이 학생만의 조합을 만들어라. 모티브가 무엇인지 그림만 보고 알아볼 수 있어야 한다.
 
 ${motifSelectionRule()}
+${limbCountRule()}
 선택한 모티브의 원문과 순서를 기준으로 모든 항목을 작성한다. 선택하지 않은 동물·사물·자연 현상을 새 모티브로 보태거나, 선택한 것을 다른 것으로 대체하지 마라.
 
 ${sourceFaceEditRule()}
@@ -5841,6 +5854,9 @@ ${sourceFaceEditRule()}
   선택한 대상에 실제로 있는 상징 부위는 반드시 살리되,
   인형 탈이 아니라 '기계로 만든 장비'로 — 관절 달린 장갑 꼬리, 갈고리 달린 케이블 꼬리,
   솟아오르는 성형 가시 스터드처럼 실제로 작동할 것 같은 물건으로 만들어라.
+  ★ 팔과 다리는 언제나 두 개씩이다. 로봇·기계처럼 '기계 팔'이 떠오르는 모티브나 직업이라도 팔을 하나 더 다는 것이 아니라,
+  원래 있는 두 팔·두 다리를 기계로 만드는 것이다. 문어 촉수, 거미 다리, 날개, 꼬리처럼 선택한 모티브에 원래 있는 부위만
+  따로 덧붙일 수 있고, 그것도 사람의 팔이나 손처럼 보이면 안 된다. artDirection·signature·motifCues 어디에도 세 번째 팔·손·다리를 적지 마라.
 - 직접 한 실험으로 얻은 장비: ${gear}
 - 촬영 컷: ${shot.name} (${shot.desc})${(SHOTS.find(x=>x.id===state.shot)||{}).free && String(state.shotFree||'').trim()
   ? `\n  ★ 이 장면은 학생이 직접 적은 것이다. 아래 shotEn 칸에 이것을 실사 영화 촬영 지시(영어 한두 문장)로 옮겨라.` : ''}

@@ -125,6 +125,53 @@ for (const engine of [chromium, webkit]) {
       assert.deepEqual(result.fixedCue, [result.preset]);
       assert.doesNotMatch(result.fixed, /OVERRIDE_(?:LOOK|POWER)_TOKEN/);
     });
+
+    await t.test('robot and engineer choices never add an arm; motif-owned tentacles and legs stay', async () => {
+      const result = await page.evaluate(async () => {
+        const originalFetch = orFetch, out = {};
+        const stages = async () => {
+          let director = '', cinematographer = '';
+          orFetch = async payload => {
+            director = payload.messages[0].content.find(p => p.type === 'text').text;
+            return {choices:[{message:{content:JSON.stringify({heroName:'', motifsEn:'', motifCues:'', artDirection:'A coherent costume.'})}}]};
+          };
+          const response = await askDirector();
+          const full = buildPrompt(response.artDirection);
+          orFetch = async payload => {
+            cinematographer = payload.messages[0].content.find(p => p.type === 'text').text;
+            return {choices:[{message:{content:JSON.stringify({picture:'A standing hero.', person:'An ordinary student.',
+              garment:'A fitted costume.', head:'An open headpiece.'})}}]};
+          };
+          return {full, lean:buildLeanPrompt(await askCinematographer(full)), director, cinematographer};
+        };
+        try {
+          Object.assign(state, {name:'Limb test', age:'15', gender:'neutral', level:'middle', photoFace:'', glasses:'',
+            loadout:[], palette:'', signature:'', shot:'poster', motifsEn:'', motifCues:''});
+          out.rule = limbCountRule();
+          out.engineerJob = ROLE_DATA.find(r => r.ko === '로봇을 만드는 공학자').job;
+          for (const photo of ['', 'data:image/png;base64,AA==']) {
+            Object.assign(state, {photo, motifsFree:'청개구리, 로봇', role:'로봇을 만드는 공학자'});
+            out[photo ? 'robotPhoto' : 'robotNoPhoto'] = await stages();
+          }
+          Object.assign(state, {photo:'', role:'', motifsFree:'문어, 거미'});
+          out.manyLimbs = await stages();
+        } finally { orFetch = originalFetch; }
+        return out;
+      });
+      assert.ok(result.rule.length > 0);
+      assert.doesNotMatch(result.engineerJob, /assist arm|spare arm/i, 'the robotics engineer must not carry an added arm');
+      for (const key of ['robotNoPhoto', 'robotPhoto', 'manyLimbs']) {
+        for (const stage of ['full', 'lean', 'director', 'cinematographer']) {
+          assert.ok(result[key][stage].includes(result.rule), `${key} ${stage}: the two-arms-two-legs rule reaches every generation stage`);
+          assert.doesNotMatch(result[key][stage], /assist arm|spare arm/i, `${key} ${stage}: nothing asks for an added arm`);
+        }
+        assert.match(result[key].director, /팔과 다리는 언제나 두 개씩/, key + ': the Korean director brief carries the rule too');
+      }
+      for (const stage of ['full', 'lean']) {
+        assert.match(result.manyLimbs[stage], /tentacle/i, stage + ': octopus tentacles stay allowed');
+        assert.match(result.manyLimbs[stage], /web-line/i, stage + ': spider web lines stay');
+      }
+    });
     assert.deepEqual(errors, []);
     assert.deepEqual(remotePosts, [], 'all AI replies were local mocks; no generation requests are allowed');
   });
