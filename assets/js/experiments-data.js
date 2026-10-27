@@ -429,6 +429,24 @@ window.EXPERIMENTS_DATA = {
         "정지 전압",
         "빛의 입자성"
       ]
+    },
+    {
+      "id": "double-slit-interference",
+      "title": "이중 슬릿에 의한 빛의 간섭과 회절",
+      "category": "waves-optics",
+      "description": "파장, 슬릿 간격, 슬릿 폭, 스크린 거리를 바꾸며 이중 슬릿에 의한 빛의 간섭무늬와 단일 슬릿에 의한 회절 무늬가 어떻게 달라지는지 차례로 관찰합니다.",
+      "lessonNote": {
+        "question": "두 슬릿을 지난 빛이 만든 밝은 무늬 사이 간격은 파장, 슬릿 간격, 스크린 거리에 따라 어떻게 달라질까요?",
+        "focus": "1단계에서 λ, d, L을 하나씩 바꾸며 Δx의 변화를 보고, 2단계에서 슬릿 폭 a에 따른 중앙 밝은 무늬의 폭을 살펴보세요. 3단계에서는 a를 바꿔도 Δx는 그대로이고 중앙 밝은 영역의 폭이 달라지는지 확인해 보세요."
+      },
+      "path": "experiments/double-slit-interference.html?v=c2fe8d80d2",
+      "date": "2026-10-28",
+      "tags": [
+        "이중 슬릿",
+        "간섭",
+        "회절",
+        "빛의 파동성"
+      ]
     }
   ],
   "plays": [

@@ -293,5 +293,19 @@
         "wait": 8000
       }
     ]
+  },
+  "double-slit-interference": {
+    "viewport": {
+      "width": 1100,
+      "height": 825
+    },
+    "steps": [
+      {
+        "click": "#steps [data-step=\"3\"]"
+      },
+      {
+        "wait": 600
+      }
+    ]
   }
 }

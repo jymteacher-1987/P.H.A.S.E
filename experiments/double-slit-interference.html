@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<script src="../assets/js/browser-compat.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f8f3ef">
+<title>이중 슬릿에 의한 빛의 간섭과 회절</title>
+<meta name="description" content="이중 슬릿에 의한 빛의 간섭, 단일 슬릿에 의한 빛의 회절, 실제 이중 슬릿 무늬를 차례로 관찰하며 파장, 슬릿 간격, 슬릿 폭, 스크린 거리에 따라 무늬가 어떻게 달라지는지 확인하는 가상 실험.">
+<style>
+/* 색은 홈페이지(assets/css/style.css)의 토큰을 따름. 스크린·레이저·그래프 색은 물리 표현이라 따로 둠 */
+:root{--bg:#f8f3ef;--ink:#342d2a;--muted:#6d625e;--faint:#9a8880;--line:#e7dad3;--paper:#fff;--soft:#fbf6f3;--tint:#f8f0ec;--accent:#875a49;--accent2:#a8877a;--cyan:#2f7f9c}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg)}
+body{font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);word-break:keep-all;overflow-wrap:break-word;-webkit-text-size-adjust:100%}
+button,input{font:inherit;color:inherit}
+button{border:1px solid var(--line);border-radius:9px;background:#fff;padding:5px 10px;font-size:12.5px;font-weight:700;min-height:32px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button:hover{background:var(--tint)}button:active{background:#f2e7e1}
+button[aria-pressed=true]{background:var(--tint);border-color:#dfcdc5;color:var(--accent)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent2);outline-offset:2px}
+[hidden]{display:none!important}
+
+.app{max-width:1800px;margin:auto;padding:10px 14px;display:flex;flex-direction:column;gap:8px}
+header{display:flex;justify-content:space-between;align-items:center;gap:10px;flex:none}
+h1{font-size:21px;letter-spacing:-.6px;margin:0;line-height:1.25;min-width:0}
+.actions{display:flex;gap:5px;flex:none}
+.icon{min-width:34px;font-size:15px;padding:4px 9px}
+
+.steps{flex:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.step{display:flex;align-items:center;gap:8px;text-align:left;padding:5px 11px;border-radius:12px;min-height:40px;min-width:0}
+.step .n{flex:none;width:22px;height:22px;border-radius:50%;background:#f2e7e1;color:var(--accent);display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}
+.step .tx{min-width:0;display:flex;flex-direction:column}
+.step .t{font-size:13.5px;font-weight:750;line-height:1.25}
+.step .s{font-size:10.5px;font-weight:600;color:var(--muted);line-height:1.3}
+.step[aria-pressed=true]{background:var(--tint);border-color:#c9a99c;color:var(--ink)}
+.step[aria-pressed=true] .n{background:var(--accent);color:#fff}
+
+.workspace{flex:1 1 auto;min-height:0;display:grid;gap:10px;grid-template-columns:minmax(0,1fr)}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;min-width:0}
+
+/* ---------- 장치 + 스크린 ---------- */
+.experiment{display:flex;flex-direction:column;overflow:hidden;min-height:0}
+.part-head{flex:none;display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;column-gap:10px;padding:7px 13px 3px;font-size:12px;font-weight:750;color:#5a4a43;line-height:1.35}
+.part-head .n{font-size:10.5px;font-weight:600;color:var(--muted)}
+.bench{flex:0 1 21%;min-height:66px;position:relative;margin:0 8px}
+.strip{flex:1 1 0;min-height:120px;position:relative;margin:0 8px;border-radius:9px;overflow:hidden;background:#101318}
+.bench canvas,.strip canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
+.legend{flex:none;display:flex;flex-wrap:wrap;align-content:flex-start;gap:3px 14px;margin:5px 12px 0;font-size:11.5px;color:var(--muted);line-height:1.4}
+.legend .it{display:inline-flex;align-items:center;gap:5px}
+.chip{flex:none;display:inline-block;width:26px;height:14px;border-radius:3px;background:#101318;position:relative}
+.chip::after{content:"";position:absolute;left:5px;right:5px;top:6px;border-top:2px solid var(--c)}
+.chip.dash::after{border-top-style:dashed}
+.chip.arw::after{content:"↔";border:0;left:0;right:0;top:0;text-align:center;font-size:12px;line-height:14px;font-weight:800;color:var(--c)}
+.caption{flex:none;margin:6px 8px;padding:6px 10px;border:1px solid #eadfd8;border-radius:9px;background:var(--soft);font-size:13px;line-height:1.45;display:flex;align-items:center;justify-content:center;text-align:center}
+.readouts{flex:none;display:flex;flex-wrap:wrap;border-top:1px solid var(--line);background:#fdfaf8}
+.readout{flex:1 1 230px;padding:6px 14px;min-width:0}
+.readout+.readout{border-left:1px solid var(--line)}
+.readout label{display:block;font-size:11.5px;color:var(--muted);line-height:1.3}
+.readout .val{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:6px}
+.readout strong{font-size:22px;font-variant-numeric:tabular-nums;font-weight:800;letter-spacing:-.5px;color:var(--accent)}
+.readout.env strong{color:var(--cyan)}
+.readout .u{font-size:12px;color:var(--muted);font-weight:600}
+.readout .calc{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.readout.off strong{color:#cdbfb8}
+.readout.off .calc{color:var(--faint)}
+
+/* ---------- 조작 칸 ---------- */
+.controls{min-height:0;min-width:0;overflow:hidden;padding:12px 15px;display:flex;flex-direction:column;gap:10px}
+.grp{min-width:0}
+.control+.control{border-top:1px solid var(--line);margin-top:6px;padding-top:6px}
+.control-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-size:13.5px;font-weight:750;line-height:1.3}
+.control-head label{min-width:0}
+.control-head small{font-size:10.5px;font-weight:600;color:var(--muted);margin-left:3px;display:inline-block}
+.control-head output{flex:none;font-size:16px;font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--accent)}
+.control.off .control-head output{color:var(--faint)}
+.control.off .range{opacity:.35;cursor:default}
+.range{display:block;width:100%;height:24px;margin:2px 0 0;appearance:none;-webkit-appearance:none;background:transparent;touch-action:pan-y;cursor:pointer}
+.range::-webkit-slider-runnable-track{height:7px;border-radius:9px;background:#eadfd8}
+.range::-moz-range-track{height:7px;border-radius:9px;background:#eadfd8}
+.range::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:18px;height:18px;margin-top:-5.5px;border-radius:50%;border:3px solid #fff;background:var(--accent);box-shadow:0 1px 4px #5a3d3155}
+.range::-moz-range-thumb{width:13px;height:13px;border-radius:50%;border:3px solid #fff;background:var(--accent);box-shadow:0 1px 4px #5a3d3155}
+/* 아래 laserRGB()의 꺾이는 점(400·420·440·490·510·580·645 nm)과 같은 색 */
+.spectrum::-webkit-slider-runnable-track{background:linear-gradient(90deg,#6e00a6 0%,#5500ff 6.67%,#0000ff 13.33%,#00ffff 30%,#00ff00 36.67%,#ffff00 60%,#ff0000 81.67%,#ff0000 100%)}
+.spectrum::-moz-range-track{background:linear-gradient(90deg,#6e00a6 0%,#5500ff 6.67%,#0000ff 13.33%,#00ffff 30%,#00ff00 36.67%,#ffff00 60%,#ff0000 81.67%,#ff0000 100%)}
+.sub-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;column-gap:8px;font-size:12.5px;font-weight:750;line-height:1.3;margin-bottom:4px}
+.sub-head small{font-size:10.5px;font-weight:600;color:var(--muted)}
+.slitbox{height:54px;position:relative;border-radius:8px;overflow:hidden;background:#3a312d;margin-bottom:8px}
+.slitbox canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.row{display:flex;gap:5px}
+.row>button{flex:1;padding:4px 2px}
+label.check{display:flex;align-items:center;gap:6px;font-size:12px;margin-top:6px;cursor:pointer;user-select:none}
+label.check input{accent-color:var(--accent)}
+.qbox{border:1px solid #eadfd8;background:var(--soft);border-radius:10px;padding:8px 11px;font-size:12px;line-height:1.55}
+.qbox .qt{font-size:12.5px;font-weight:750}
+.qbody{margin:3px 0 6px}
+.qbody ol{margin:0;padding-left:18px}
+.qbody .answer{color:#5e3f33}
+.qbox button{min-height:28px;font-size:11.5px;padding:3px 9px}
+.qbox .row>button{white-space:nowrap}
+
+/* ---------- 도움말 ---------- */
+.modal{position:fixed;inset:0;z-index:50;background:rgba(52,45,42,.45);display:flex;align-items:center;justify-content:center;padding:14px}
+.help-card{background:#fff;border-radius:16px;max-width:760px;width:100%;max-height:92vh;overflow:auto;padding:16px 20px;font-size:13.5px;line-height:1.7;box-shadow:0 20px 50px rgba(52,45,42,.25)}
+.help-head{display:flex;justify-content:space-between;align-items:center}
+.help-card h2{font-size:18px;margin:0}
+.help-card h3{font-size:14.5px;margin:12px 0 2px;color:var(--accent)}
+.help-card p{margin:6px 0}
+.help-card .eq{display:block;text-align:center;font-size:15px;margin:4px 0;font-weight:700;color:var(--accent)}
+.help-card details{margin-top:10px;font-size:12.5px;color:#5a4a43}
+.help-card summary{cursor:pointer;font-weight:700}
+.help-card .refs{font-size:11.5px;color:var(--muted)}
+.help-card a{color:var(--accent)}
+
+/* 기본(휴대폰 세로처럼 좁은 화면, 또는 한 화면에 넣으면 무늬나 글자가 너무 작아지는 크기): 위에서 아래로 쌓고 스크롤 */
+.bench{flex-basis:auto;height:78px}.strip{flex:none;height:230px}
+.controls{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+.rotate-hint{display:none;flex:none;margin:0;padding:6px 10px;border-radius:9px;background:var(--tint);color:var(--accent);font-size:12px;font-weight:700;text-align:center}
+@media (max-width:519px) and (orientation:portrait){ .rotate-hint{display:block} h1{font-size:17px} .step{padding:4px 7px;gap:5px} .step .s{display:none} .step .t{font-size:11.5px} }
+@media (min-width:720px){
+ html:not(.one) .controls{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) minmax(0,1fr);gap:0 14px;padding:10px 14px}
+ html:not(.one) .g-vw,html:not(.one) .g-ob{border-left:1px solid var(--line);padding-left:14px}
+}
+/* 아래의 한 화면 배치는 script(relayout)가 무늬 띠 높이와 조작 칸 축소 비율을 재어 보고 html 에 .one 을 붙였을 때만 쓴다 */
+/* 가로가 넓은 화면: 왼쪽 무늬, 오른쪽 조작 칸. 두 카드는 같은 행을 꽉 채워 위·아래 끝이 일치 */
+@media (min-aspect-ratio:6/5) and (min-width:600px) and (min-height:360px){
+ html.one,.one body{height:100%;overflow:hidden}
+ .one .app{height:100vh;height:100dvh}
+ .one .workspace{grid-template-columns:minmax(0,1fr) clamp(260px,27vw,360px);grid-template-rows:minmax(0,1fr)}
+ .one .experiment,.one .controls{height:100%}
+ .one .bench{flex:0 1 21%;height:auto}.one .strip{flex:1 1 0;height:auto}
+ .one .controls{display:flex;flex-direction:column;gap:0}
+ .one .g-vw{border-top:1px solid var(--line);margin-top:8px;padding-top:8px}
+ .one .g-ob{flex:1 0 auto;display:flex;flex-direction:column;justify-content:flex-end;margin-top:10px}
+}
+/* 세로로 긴 화면: 위에 무늬, 아래에 조작 칸 (한 화면) */
+@media (max-aspect-ratio:1199/1000) and (min-width:520px) and (min-height:540px){
+ html.one,.one body{height:100%;overflow:hidden}
+ .one .app{height:100vh;height:100dvh}
+ .one .workspace{grid-template-rows:minmax(0,1fr) auto}
+ .one .experiment{height:100%}
+ .one .bench{flex:0 1 21%;height:auto}.one .strip{flex:1 1 0;height:auto}
+ .one .controls{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) minmax(0,1fr);gap:0 14px;padding:10px 14px}
+ .one .g-vw,.one .g-ob{border-left:1px solid var(--line);padding-left:14px}
+}
+@media (max-aspect-ratio:1199/1000) and (min-width:520px) and (min-height:540px) and (max-width:719px){
+ .one .app{padding:8px 10px;gap:6px}
+ .one .controls{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"sl vw" "sl ob";gap:8px 12px;padding:9px 11px}
+ .one .g-sl{grid-area:sl}.one .g-vw{grid-area:vw}.one .g-ob{grid-area:ob}
+ .one .g-vw,.one .g-ob{padding-left:12px}
+ .one .step{padding:4px 8px;gap:6px}.one .step .s{display:none}.one .step .t{font-size:12px}
+ .one h1{font-size:17px}
+}
+/* 낮은 화면은 글자와 여백을 줄임 (한 화면 배치에서만) */
+@media (max-height:660px){
+ .one .app{padding:6px 10px;gap:6px}.one h1{font-size:17px}
+ .one .actions button{min-height:28px;padding:3px 7px}
+ .one .step{min-height:32px;padding:3px 10px}.one .step .s{display:none}.one .step .t{font-size:12.5px}
+ .one .part-head{padding:5px 11px 2px;font-size:11px}
+ .one .caption{font-size:12px;padding:4px 8px;margin:5px 8px}
+ .one .readout{padding:4px 10px}.one .readout strong{font-size:18px}
+ .one .controls{padding:9px 12px}.one .control+.control{margin-top:4px;padding-top:4px}
+ .one .slitbox{height:48px;margin-bottom:6px}.one .range{height:22px}
+ .one .qbox{padding:6px 9px;line-height:1.45}
+}
+@media (max-height:520px){
+ .one .app{padding:4px 8px;gap:4px}.one h1{font-size:15px}
+ .one .actions button{min-height:24px;padding:2px 6px;font-size:12px}
+ .one .step{min-height:26px;padding:2px 8px;gap:5px}.one .step .n{width:18px;height:18px;font-size:10.5px}.one .step .t{font-size:11.5px}
+ .one .bench{min-height:56px}.one .strip{min-height:100px}
+ .one .legend{font-size:10.5px;margin-top:3px}
+ .one .caption{font-size:11px;padding:3px 7px;margin:4px 8px;line-height:1.35}
+ .one .readout{padding:3px 9px}.one .readout label{font-size:10px}.one .readout strong{font-size:15px}.one .readout .calc{font-size:10.5px}
+ .one .control-head{font-size:12px}.one .control-head output{font-size:14px}
+ .one .row>button,.one .qbox button{min-height:26px}
+}
+@media (min-aspect-ratio:6/5) and (min-width:600px) and (min-height:360px) and (max-height:430px){
+ .one .part-head{display:none}
+ .one .bench{flex-basis:17%;min-height:44px}.one .strip{min-height:84px;margin-top:4px}
+ .one .legend{font-size:10px;margin:3px 10px 0;gap:1px 10px}.one .chip{width:22px;height:12px}.one .chip::after{top:5px}.one .chip.arw::after{line-height:12px;font-size:11px}
+ .one .caption{font-size:10.5px;padding:2px 6px;margin:3px 6px;line-height:1.3}
+ .one .readout{padding:2px 8px}.one .readout label{font-size:9.5px}.one .readout strong{font-size:14px}.one .readout .calc{font-size:9.5px}
+ .one .controls{padding:6px 9px}.one .control-head{font-size:11.5px}.one .control-head small{font-size:9.5px}.one .control-head output{font-size:13px}
+ .one .range{height:20px}.one .slitbox{height:38px;margin-bottom:4px}.one .sub-head{font-size:11px;margin-bottom:2px}
+ .one .row>button,.one .qbox button{min-height:24px;font-size:11px}.one label.check{font-size:11px;margin-top:3px}
+ .one .qbox{font-size:11px;line-height:1.35;padding:5px 8px}.one .qbox .qt{font-size:11.5px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+ <h1>이중 슬릿에 의한 빛의 간섭과 회절</h1>
+ <div class="actions">
+  <button id="resetBtn" class="icon" title="처음 값으로" aria-label="처음 값으로 되돌리기">↻</button>
+  <button id="helpBtn" class="icon" aria-label="원리와 관찰 방법 설명">?</button>
+ </div>
+</header>
+
+<p class="rotate-hint">휴대폰을 가로로 돌리면 무늬를 더 넓게 볼 수 있습니다.</p>
+<nav class="steps" id="steps" aria-label="관찰 단계">
+ <button class="step" data-step="1" aria-pressed="true"><span class="n">1</span><span class="tx"><span class="t">이중 슬릿에 의한 빛의 간섭</span><span class="s">슬릿 폭 무시 · Δx = λL ÷ d</span></span></button>
+ <button class="step" data-step="2" aria-pressed="false"><span class="n">2</span><span class="tx"><span class="t">단일 슬릿에 의한 빛의 회절</span><span class="s">슬릿 하나 · 중앙 밝은 무늬</span></span></button>
+ <button class="step" data-step="3" aria-pressed="false"><span class="n">3</span><span class="tx"><span class="t">실제 이중 슬릿 무늬</span><span class="s">간섭과 회절이 함께</span></span></button>
+</nav>
+
+<main class="workspace">
+ <section class="card experiment" id="exp" aria-label="실험 장치와 스크린">
+  <div class="part-head"><span>실험 장치 · 위에서 본 모습</span><span class="n">폭 방향은 크게 늘려 그림</span></div>
+  <div class="bench" id="benchBox"><canvas id="bench" role="img" aria-label="레이저, 슬릿, 스크린의 배치"></canvas></div>
+  <div class="part-head"><span>스크린에 생긴 무늬 · 실제 크기 비율</span><span class="n" id="stripNote">보기 범위 ±20 mm</span></div>
+  <div class="strip" id="stripBox"><canvas id="strip" role="img" aria-label="스크린에 생긴 무늬와 mm 자"></canvas></div>
+  <div class="legend" id="legend"></div>
+  <div class="caption" id="caption" role="status"></div>
+  <div class="readouts" id="readouts">
+   <div class="readout" id="roDxBox"><label>이웃한 밝은 무늬 사이 간격 Δx = λL ÷ d</label><div class="val"><strong id="roDx">–</strong><span class="u" id="roDxU">mm</span><span class="calc" id="roDxCalc"></span></div></div>
+   <div class="readout env" id="roWBox"><label id="roWLabel">회절에 의한 중앙 밝은 영역의 폭 = 2λL ÷ a</label><div class="val"><strong id="roW">–</strong><span class="u" id="roWU">mm</span><span class="calc" id="roWCalc"></span></div></div>
+  </div>
+ </section>
+
+ <section class="card controls" id="side" aria-label="조건 바꾸기">
+  <div class="grp g-sl">
+   <div class="control">
+    <div class="control-head"><label for="lam">빛의 파장 λ</label><output id="lamOut" for="lam">650 nm</output></div>
+    <input class="range spectrum" id="lam" type="range" min="400" max="700" step="1" value="650" aria-label="빛의 파장 λ, 나노미터">
+   </div>
+   <div class="control" id="dBlock">
+    <div class="control-head"><label for="dS">슬릿 간격 d <small>두 슬릿 중심 사이</small></label><output id="dOut" for="dS">0.25 mm</output></div>
+    <input class="range" id="dS" type="range" min="0.10" max="0.50" step="0.01" value="0.25" aria-label="슬릿 간격 d, 밀리미터">
+   </div>
+   <div class="control" id="aBlock">
+    <div class="control-head"><label id="aLabel" for="a3S">슬릿 폭 a <small>슬릿 하나의 폭</small></label><output id="aOut">0.040 mm</output></div>
+    <input class="range" id="a2S" type="range" min="0.020" max="0.100" step="0.005" value="0.050" aria-label="슬릿 폭 a, 밀리미터" hidden>
+    <input class="range" id="a3S" type="range" min="0.020" max="0.050" step="0.005" value="0.040" aria-label="슬릿 폭 a, 밀리미터">
+   </div>
+   <div class="control">
+    <div class="control-head"><label for="LS">스크린 거리 L <small>슬릿 → 스크린</small></label><output id="LOut" for="LS">1.50 m</output></div>
+    <input class="range" id="LS" type="range" min="1.00" max="3.00" step="0.01" value="1.50" aria-label="스크린 거리 L, 미터">
+   </div>
+  </div>
+  <div class="grp g-vw">
+   <div class="sub-head"><span>슬릿 판 확대 그림</span><small>2·3단계는 d와 a를 실제 비율로 그림</small></div>
+   <div class="slitbox"><canvas id="slits" role="img" aria-label="슬릿 판 확대 그림"></canvas></div>
+   <div class="sub-head"><span>스크린 보기 범위</span></div>
+   <div class="row" id="zoomRow" role="group" aria-label="스크린 보기 범위">
+    <button data-half="10" aria-pressed="false">±10 mm</button><button data-half="20" aria-pressed="true">±20 mm</button><button data-half="40" aria-pressed="false">±40 mm</button>
+   </div>
+   <label class="check"><input type="checkbox" id="sensor"> 빛의 세기 그래프 보기</label>
+  </div>
+  <div class="grp g-ob">
+   <div class="qbox">
+    <div class="qt" id="qTitle">관찰해 볼 것</div>
+    <div class="qbody" id="qbody"></div>
+    <div class="row">
+     <button id="ansBtn" aria-expanded="false">정리 보기</button>
+     <button id="nextBtn">다음 단계 →</button>
+    </div>
+   </div>
+  </div>
+ </section>
+</main>
+</div>
+
+<div class="modal" id="help" hidden>
+ <section class="help-card" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+  <div class="help-head"><h2 id="helpTitle">이 실험을 읽는 법</h2><button id="closeHelp">닫기</button></div>
+  <p>세 단계를 차례로 관찰합니다. 각 단계에서 값을 <b>하나만</b> 바꾸면 무늬 아래 안내 칸에 바꾸기 전과 후의 값이 함께 나옵니다. 세 단계 모두 스크린이 슬릿에서 충분히 멀다고 보고(L이 d, a, x보다 훨씬 큼) 무늬를 계산합니다.</p>
+
+  <h3>1단계 · 이중 슬릿에 의한 빛의 간섭</h3>
+  <p>두 슬릿을 지난 빛은 스크린의 한 점에서 <b>중첩</b>되어 <b>간섭</b>합니다. 두 슬릿에서 그 점까지의 거리 차이(<b>경로차</b>)가 반파장의 짝수 배(0, λ, 2λ, …)이면 <b>보강 간섭</b>이 일어나 밝아지고, 반파장의 홀수 배(λ/2, 3λ/2, …)이면 <b>상쇄 간섭</b>이 일어나 어두워집니다. 어두운 무늬 자리에서는 두 슬릿에서 온 빛이 상쇄되어 세기가 0이 되지만, 빛 에너지가 사라진 것은 아닙니다. 그만큼의 에너지가 밝은 무늬 쪽에 모입니다. 두 슬릿의 가운데에서 스크린 중앙을 바라본 방향과 중앙에서 x만큼 떨어진 점을 바라본 방향 사이의 각을 θ라 할 때, 스크린이 슬릿에서 충분히 멀면(L이 d와 x보다 훨씬 크면) 경로차는 d sinθ이고 sinθ ≈ x/L이므로, 이웃한 밝은 무늬 사이 간격은</p>
+  <span class="eq">Δx = λL ÷ d</span>
+  <p>입니다. 이 단계에서는 슬릿이 아주 좁다고 보고 <b>슬릿 폭의 효과를 무시</b>하므로, 밝은 무늬가 모두 같은 밝기로 나타납니다.</p>
+
+  <h3>2단계 · 단일 슬릿에 의한 빛의 회절</h3>
+  <p>폭이 a인 슬릿 하나를 지난 빛도 <b>회절</b>하여 퍼집니다. 슬릿 안의 여러 지점에서 나온 빛이 서로 간섭한 결과, a sinθ = λ, 2λ, 3λ, … 인 방향이 어두워집니다. 그래서 중앙 밝은 무늬는 양쪽 첫째 어두운 곳 사이로</p>
+  <span class="eq">중앙 밝은 무늬의 폭 = 2λL ÷ a</span>
+  <p>이고, <b>a가 좁을수록, λ가 길수록 넓게 퍼집니다.</b> 양옆 밝은 무늬의 폭은 중앙의 절반쯤(λL ÷ a)입니다. 양옆 무늬는 아주 희미해서, 중앙 밝은 무늬의 세기를 100 %로 할 때 바로 옆 무늬가 약 4.7 %, 그다음이 약 1.6 %, 그다음이 약 0.8 %입니다. 세기 그래프는 이 비율 그대로 그리므로 옆 무늬가 작게 보입니다. 교육과정(전자기와 양자)에서 회절은 정성적으로 다루므로, 이 단계의 식과 수치는 무늬의 변화를 이해하기 위한 참고입니다.</p>
+
+  <h3>3단계 · 실제 이중 슬릿 무늬</h3>
+  <p>실제 슬릿에는 폭이 있으므로, 이중 슬릿의 무늬는 <b>1단계의 간섭무늬가 2단계의 회절에 의한 밝기 분포 안에 그려진</b> 모습이 됩니다. 세기는 두 식을 곱한 값입니다. 세기 그래프의 점선은 밝은 무늬 중심을 이은 선으로, 슬릿 폭 a가 정하는 밝기 분포의 모양을 보여 줍니다. 슬릿에 관한 두 값 d와 a 가운데 밝은 무늬 사이 간격 Δx에 관계하는 것은 d이므로, <b>a를 바꿔도 Δx는 그대로</b>입니다. a를 바꾸면 중앙 밝은 영역의 폭(2λL ÷ a, 2단계와 같은 식)과 무늬마다의 밝기가 달라지므로 그 안에 보이는 밝은 무늬의 수도 달라집니다. 그러나 밝은 무늬는 여전히 Δx 간격의 같은 자리에 생기며, 무늬가 더 촘촘해지거나 그 사이에 새 무늬가 생기지는 않습니다. 밝기 분포가 0이 되는 자리에 걸린 밝은 무늬는 사라지거나, 가운데가 끊겨 희미한 두 줄로 보이기도 합니다.</p>
+
+  <h3>화살표 읽기</h3>
+  <p>흰 화살표(1·3단계)는 중앙 밝은 무늬의 중심에서 바로 옆 밝은 무늬의 중심까지, 곧 Δx입니다. 밝은 무늬의 중심은 양옆 어두운 무늬의 한가운데입니다. 하늘색 화살표(2·3단계)는 회절에 의한 양쪽 첫째 어두운 곳(a sinθ = ±λ) 사이, 곧 중앙 밝은 무늬(3단계에서는 중앙 밝은 영역)의 폭입니다. 화살표의 끝이 화면 밖으로 나가 있으면, 그 간격이나 폭이 지금 보기 범위보다 커서 끝이 화면에 들어오지 않았다는 뜻입니다. 보기 범위를 넓히면 끝이 화면에 들어올 수 있습니다. ±40 mm에서도 끝이 밖에 있으면 화살표에 적힌 값으로 확인하세요. 3단계 세기 그래프의 봉우리(가장 밝은 점)는 밝기 분포가 기울어진 곳에서 밝은 무늬의 중심과 어긋납니다. d가 작고 a가 크면 바로 옆 무늬의 봉우리도 Δx의 약 9 %만큼 중앙 쪽으로 치우칩니다. 두 슬릿의 간섭으로 생기는 어두운 무늬의 자리(d sinθ = λ/2, 3λ/2, …)는 a와 관계없으므로 a를 바꿔도 Δx는 그대로입니다.</p>
+
+  <details><summary>이 모형에서 단순화한 내용</summary>
+   <p>빛을 스칼라 파동으로 보고, 파장이 하나인 평면파가 슬릿을 고르게 비춘다고 가정합니다. 슬릿은 세로로 충분히 길다고 봅니다. sinθ = x ÷ √(x² + L²)이고 세기(중앙 = 1)는 1단계 cos²(πd sinθ ÷ λ), 2단계 [sin β ÷ β]², 3단계 두 식의 곱이며 β = πa sinθ ÷ λ입니다. 이 실험의 범위(L = 1.00 ~ 3.00 m, 화면 ±40 mm 안)에서 Δx = λL ÷ d, 2λL ÷ a로 구한 자리(밝은 무늬의 중심, 첫째 어두운 곳)와 위 식으로 그린 무늬에서 같은 자리의 차이는 0.1 %보다 작습니다. 슬릿의 각 점에서 스크린까지의 거리를 하나하나 계산한 결과와 위 식의 차이는 중앙 세기의 0.2 %보다 작습니다.</p>
+   <p>스크린 그림의 가로·세로는 아래 자의 눈금과 같은 실제 크기 비율입니다. 무늬가 세로로 짧은 것은 레이저 빔의 높이 때문입니다. 스크린 그림은 희미한 무늬도 보이도록 사진기처럼 밝기를 보정해 그리므로, 약한 무늬가 실제 비율보다 밝게 보입니다(세기 4.7 %인 무늬가 약 27 % 밝기로 보임). 정확한 비율은 세기 그래프로 확인하세요. 또 중앙 밝기가 늘 같게 보이도록 자동으로 맞추지만, 실제로는 L이 멀어지거나 a가 좁아지면 중앙 밝은 무늬가 더 어두워집니다. 화면 한 칸보다 촘촘한 무늬는 고르게 섞여 보이므로 보기 범위를 좁혀 확대하세요. 빛의 색은 파장에 따른 대략적인 색이며, 400 nm 근처의 보라색은 실제보다 밝게 그렸습니다.</p>
+   <p>위에서 본 모습의 그림은 장치 배치를 보여 주기 위한 것으로 폭 방향을 크게 늘려 그렸습니다. 빛이 퍼지는 폭은 2·3단계에서 λL ÷ a에 비례하게, 1단계에서는 넓게 퍼지는 모습으로 그렸습니다. 슬릿 판 확대 그림은 2·3단계에서 d와 a의 비율을 실제와 같게 그리고, 1단계에서는 아주 좁은 슬릿으로 그립니다. 실제 실험에서 레이저를 다룰 때는 빛을 눈에 직접 비추거나 반사된 빛을 보지 않도록 주의합니다.</p>
+  </details>
+  <p class="refs">참고: 2022 개정 교육과정 [12물리03-01], [12전자02-01] · <a href="https://openstax.org/books/university-physics-volume-3/pages/3-1-youngs-double-slit-interference" target="_blank" rel="noopener noreferrer">영의 이중 슬릿 간섭</a> · <a href="https://openstax.org/books/university-physics-volume-3/pages/4-1-single-slit-diffraction" target="_blank" rel="noopener noreferrer">단일 슬릿 회절</a> · <a href="https://openstax.org/books/university-physics-volume-3/pages/4-2-intensity-in-single-slit-diffraction" target="_blank" rel="noopener noreferrer">단일 슬릿 회절의 세기</a> · <a href="https://openstax.org/books/university-physics-volume-3/pages/4-3-double-slit-diffraction" target="_blank" rel="noopener noreferrer">이중 슬릿 회절</a> (OpenStax, <i>University Physics Volume 3</i>) · 기록·저장·외부 전송은 없습니다.</p>
+ </section>
+</div>
+
+<script>
+"use strict";
+/* =====================================================================
+   물리 모형: 원거리(프라운호퍼) 회절·간섭.  sinθ = x / √(x² + L²)
+   1단계  이중 슬릿 간섭 (슬릿 폭 무시)   I = cos²(π d sinθ / λ)
+   2단계  단일 슬릿 회절                  I = [sin β / β]²,  β = π a sinθ / λ
+   3단계  실제 이중 슬릿                  I = 1단계 × 2단계
+   (node 검증 스크립트가 PHYS-BEGIN ~ PHYS-END 구간만 떼어 씀)
+   ===================================================================== */
+/*PHYS-BEGIN*/
+function sinTheta(x, L){ return x/Math.sqrt(x*x + L*L); }
+function twoSlit(x, L, d, lam){ const c = Math.cos(Math.PI*d*sinTheta(x, L)/lam); return c*c; }
+function oneSlit(x, L, a, lam){
+  const b = Math.PI*a*sinTheta(x, L)/lam, s = Math.abs(b) < 1e-12 ? 1 : Math.sin(b)/b;
+  return s*s;
+}
+function intensity(step, x, L, d, a, lam){
+  if (step === 1) return twoSlit(x, L, d, lam);
+  if (step === 2) return oneSlit(x, L, a, lam);
+  return twoSlit(x, L, d, lam)*oneSlit(x, L, a, lam);
+}
+/* sinθ 값 → 스크린 위치 x */
+function xAtSin(s, L){ return Math.abs(s) < 1 ? L*s/Math.sqrt(1 - s*s) : NaN; }
+/*PHYS-END*/
+
+/* ---------- 표시 ---------- */
+// 48.75 × 10 이 487.4999… 로 저장되어 48.7 로 내려가는 일을 막으려고 12자리에서 한 번 정리한 뒤 반올림
+function roundTo(x, dec){ const p = 10**dec; return (x < 0 ? -1 : 1)*Math.round(+(Math.abs(x)*p).toPrecision(12))/p; }
+function fmtSig(x, s){
+  if (!isFinite(x)) return '–';
+  if (x === 0) return '0';
+  let p = Math.floor(Math.log10(Math.abs(x))), dec = Math.max(0, s - 1 - p), v = roundTo(x, dec);
+  const p2 = Math.floor(Math.log10(Math.abs(v)));
+  if (p2 > p){ dec = Math.max(0, s - 1 - p2); v = roundTo(x, dec); }
+  return v.toFixed(dec);
+}
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+/* 파장 → 표시 색 (대략적인 sRGB). 계산에는 쓰지 않는다. */
+function laserRGB(nm){
+  let r = 0, g = 0, b = 0;
+  if (nm < 440){ r = (440 - nm)/60; b = 1; }
+  else if (nm < 490){ g = (nm - 440)/50; b = 1; }
+  else if (nm < 510){ g = 1; b = (510 - nm)/20; }
+  else if (nm < 580){ r = (nm - 510)/70; g = 1; }
+  else if (nm < 645){ r = 1; g = (645 - nm)/65; }
+  else r = 1;
+  const f = nm < 420 ? Math.max(0.62, 0.3 + 0.7*(nm - 380)/40) : 1;
+  return [r*f, g*f, b*f];
+}
+const rgbStr = (c, al) => `rgba(${c.map(v => Math.round(v*255)).join(',')},${al})`;
+
+const DEF = { nm: 650, d: 0.25, a2: 0.050, a3: 0.040, L: 1.50 };
+const state = { ...DEF, step: 1, half: 20, sensor: false, ans: false };
+const snap = () => ({ nm: state.nm, d: state.d, a2: state.a2, a3: state.a3, L: state.L });
+let settled = snap();
+
+const $ = id => document.getElementById(id);
+const bench = $('bench'), bctx = bench.getContext('2d');
+const strip = $('strip'), sctx = strip.getContext('2d');
+const slits = $('slits'), lctx = slits.getContext('2d');
+let BW = 0, BH = 0, SW = 0, SH = 0, LW = 0, LH = 0, DPR = 1;
+
+function sizeCanvas(cv, ctx){
+  const box = cv.parentElement, w = Math.max(10, box.clientWidth), h = Math.max(10, box.clientHeight);
+  DPR = window.devicePixelRatio || 1;
+  cv.width = Math.round(w*DPR); cv.height = Math.round(h*DPR);
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  return [w, h];
+}
+function resizeAll(){
+  [BW, BH] = sizeCanvas(bench, bctx);
+  [SW, SH] = sizeCanvas(strip, sctx);
+  [LW, LH] = sizeCanvas(slits, lctx);
+  patternDirty = true; drawAll();
+}
+const curA = (s = state, st = state.step) => st === 2 ? s.a2 : s.a3;          // mm
+const SI = () => ({ lam: state.nm*1e-9, d: state.d*1e-3, a: curA()*1e-3, L: state.L });
+const dxOf = s => s.nm*1e-9*s.L/(s.d*1e-3)*1e3;                                 // mm
+const wOf = (s, a) => 2*s.nm*1e-9*s.L/(a*1e-3)*1e3;                              // mm
+
+/* ---------- 위에서 본 장치: 위 줄(슬릿·스크린 이름) / 장치 / 아래 줄(레이저 이름·거리 L) ---------- */
+const Z_MIN = -0.55, Z_MAX = 3.12;
+const bx = z => 14 + (z - Z_MIN)/(Z_MAX - Z_MIN)*(BW - 30);
+function drawBench(){
+  const c = bctx, W = BW, H = BH;
+  c.clearRect(0, 0, W, H);
+  const col = laserRGB(state.nm), css = rgbStr(col, 1);
+  const TOPR = 15, BOTR = 16;
+  const yTop = TOPR + 3, yBot = H - BOTR - 3, cy = (yTop + yBot)/2, half = Math.max(6, (yBot - yTop)/2);
+  c.fillStyle = '#efe6e1'; c.fillRect(bx(Z_MIN), cy - 3, bx(Z_MAX) - bx(Z_MIN), 6);
+  const lx0 = bx(-0.52), lx1 = bx(-0.16), lh = Math.min(8, half);
+  c.fillStyle = '#4a3f3a'; c.fillRect(lx0, cy - lh, lx1 - lx0, 2*lh);
+  c.fillStyle = css; c.fillRect(lx1 - 5, cy - 3, 5, 6);
+  c.strokeStyle = css; c.lineWidth = 2; c.beginPath(); c.moveTo(lx1, cy); c.lineTo(bx(0), cy); c.stroke();
+  // 슬릿을 지난 빛이 퍼지는 영역. 폭 방향만 크게 늘린 그림이며
+  // 2·3단계는 중앙 밝은 영역의 반폭 λL/a 에 비례(700 nm, 0.020 mm, 3 m 에서 꽉 참),
+  // 1단계(슬릿 폭 무시)는 넓게 퍼지는 모습으로 L 에만 비례
+  const sxp = bx(state.L), hmax = half - 1;
+  const spread = state.step === 1 ? 1 : (state.nm/curA())/(700/0.020);
+  const hs = Math.max(1.5, hmax*(state.L/3.0)*spread);
+  const g = c.createLinearGradient(bx(0), 0, sxp, 0);
+  g.addColorStop(0, rgbStr(col, 0.32)); g.addColorStop(1, rgbStr(col, 0.12));
+  c.fillStyle = g; c.beginPath(); c.moveTo(bx(0), cy - 1.5); c.lineTo(sxp, cy - hs); c.lineTo(sxp, cy + hs); c.lineTo(bx(0), cy + 1.5); c.closePath(); c.fill();
+  // 슬릿 판
+  const sh = Math.min(14, half);
+  c.fillStyle = '#7a6a62';
+  if (state.step === 2){ c.fillRect(bx(0) - 2.5, cy - sh, 5, sh - 1.5); c.fillRect(bx(0) - 2.5, cy + 1.5, 5, sh - 1.5); }
+  else { c.fillRect(bx(0) - 2.5, cy - sh, 5, sh - 3); c.fillRect(bx(0) - 2.5, cy + 3, 5, sh - 3); c.fillRect(bx(0) - 2.5, cy - 1, 5, 2); }
+  // 스크린 (크기는 늘 같게)
+  c.fillStyle = '#fffdfb'; c.strokeStyle = '#a8877a'; c.lineWidth = 1.4;
+  c.fillRect(sxp - 3, cy - half, 6, 2*half); c.strokeRect(sxp - 3, cy - half, 6, 2*half);
+  // 위 줄 이름표 (서로 겹치지 않게)
+  c.textBaseline = 'alphabetic'; c.textAlign = 'center';
+  c.font = '600 11px Pretendard,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif';
+  const t1 = state.step === 2 ? '단일 슬릿' : '이중 슬릿', w1 = c.measureText(t1).width;
+  const x1 = clamp(bx(0), w1/2 + 2, W - w1/2 - 2);
+  c.fillStyle = '#6d625e'; c.fillText(t1, x1, TOPR - 3);
+  c.font = '700 11px Pretendard,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif';
+  const t2 = '스크린', w2 = c.measureText(t2).width;
+  const x2 = Math.min(Math.max(sxp, x1 + (w1 + w2)/2 + 8), W - w2/2 - 2);
+  c.fillStyle = '#875a49'; c.fillText(t2, x2, TOPR - 3);
+  // 아래 줄: 레이저 이름표(왼쪽), 거리 L 치수선
+  const y = H - BOTR/2 - 1, x0 = bx(0);
+  c.textBaseline = 'middle'; c.font = '600 11px Pretendard,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif';
+  const t0 = '레이저', w0 = c.measureText(t0).width;
+  const xl = Math.max(w0/2 + 2, Math.min((lx0 + lx1)/2, x0 - 6 - w0/2));
+  c.fillStyle = '#6d625e'; c.fillText(t0, xl, y);
+  c.strokeStyle = '#a8877a'; c.fillStyle = '#a8877a'; c.lineWidth = 1;
+  c.beginPath(); c.moveTo(x0, y - 5); c.lineTo(x0, y + 5); c.moveTo(sxp, y - 5); c.lineTo(sxp, y + 5); c.moveTo(x0, y); c.lineTo(sxp, y); c.stroke();
+  [[x0, 1], [sxp, -1]].forEach(([x, s]) => { c.beginPath(); c.moveTo(x, y); c.lineTo(x + 6*s, y - 3); c.lineTo(x + 6*s, y + 3); c.closePath(); c.fill(); });
+  const lab = `L = ${state.L.toFixed(2)} m`;
+  c.font = '700 11px Pretendard,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif'; const tw = c.measureText(lab).width;
+  if (sxp - x0 >= tw + 22){
+    c.textAlign = 'center'; c.fillStyle = '#fff'; c.fillRect((x0 + sxp)/2 - tw/2 - 5, y - 8, tw + 10, 16);
+    c.fillStyle = '#875a49'; c.fillText(lab, (x0 + sxp)/2, y);
+  } else {                                   // 치수선이 짧으면 스크린 오른쪽에
+    c.textAlign = 'left'; c.fillStyle = '#875a49'; c.fillText(lab, Math.min(sxp + 8, W - tw - 2), y);
+  }
+  c.textBaseline = 'alphabetic';
+}
+
+/* ---------- 슬릿 판 확대: 2·3단계는 d와 a의 비율을 실제와 같게, 글자는 기호 a·d만 ---------- */
+function drawSlits(){
+  const c = lctx, W = LW, H = LH, st = state.step;
+  c.clearRect(0, 0, W, H);
+  c.fillStyle = '#3a312d'; c.fillRect(0, 0, W, H);
+  const ppm = (W - 40)/0.6, cx = W/2, top = 13, bot = H - 15;
+  const a = st === 1 ? 1.5 : curA()*ppm, d = state.d*ppm;
+  const centers = st === 2 ? [cx] : [cx - d/2, cx + d/2];
+  c.fillStyle = '#fbf6f0';
+  centers.forEach(x => c.fillRect(x - a/2, top, a, bot - top));
+  c.font = '700 11px Pretendard,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif'; c.textBaseline = 'middle';
+  if (st !== 1){                             // 왼쪽(또는 하나뿐인) 슬릿 위에 a 치수
+    const l = centers[0] - a/2, r = centers[0] + a/2, y = top - 6;
+    c.strokeStyle = '#9fd3ff'; c.fillStyle = '#9fd3ff'; c.lineWidth = 1;
+    c.beginPath(); c.moveTo(l, y); c.lineTo(r, y); c.moveTo(l, y - 3); c.lineTo(l, y + 3); c.moveTo(r, y - 3); c.lineTo(r, y + 3); c.stroke();
+    c.textAlign = 'right'; c.fillText('a', l - 4, y);
+  }
+  if (st !== 2){                             // 아래에 d 치수 (두 슬릿 중심 사이)
+    const y = bot + 7;
+    c.strokeStyle = '#ffd166'; c.lineWidth = 1;
+    c.setLineDash([2, 2]);
+    c.beginPath(); c.moveTo(cx - d/2, top); c.lineTo(cx - d/2, y); c.moveTo(cx + d/2, top); c.lineTo(cx + d/2, y); c.stroke();
+    c.setLineDash([]);
+    c.beginPath(); c.moveTo(cx - d/2, y); c.lineTo(cx + d/2, y); c.stroke();
+    c.fillStyle = '#3a312d'; c.fillRect(cx - 6, y - 6, 12, 12);
+    c.fillStyle = '#ffd166'; c.textAlign = 'center'; c.fillText('d', cx, y);
+  }
+  c.textBaseline = 'alphabetic';
+}
+
+/* ---------- 스크린 무늬: 위 띠(Δx 화살표) / 무늬 / 아래 띠(폭 화살표) / 자. 글자는 띠 안에만 ---------- */
+const RULER_H = 30, TOP_B = 26, BOT_B = 26;
+const LABEL_FONT = '800 12px Pretendard,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif';
+let patternDirty = true, patternCanvas = null, profile = null, envProfile = null;
+const ppmS = () => SW/(2*state.half);
+const xToPx = mm => SW/2 + mm*ppmS();
+function buildPattern(){
+  const midH = Math.max(1, SH - RULER_H - TOP_B - BOT_B);
+  const pw = Math.max(1, Math.round(SW*DPR)), ph = Math.max(1, Math.round(midH*DPR));
+  if (!patternCanvas) patternCanvas = document.createElement('canvas');
+  patternCanvas.width = pw; patternCanvas.height = ph;
+  const pc = patternCanvas.getContext('2d'), img = pc.createImageData(pw, ph), data = img.data;
+  const { lam, d, a, L } = SI(), half = state.half*1e-3, SUB = 4, st = state.step;
+  profile = new Float32Array(pw); envProfile = new Float32Array(pw);
+  for (let i = 0; i < pw; i++){
+    let s = 0;                               // 화면 한 칸 안의 세기를 평균 (촘촘한 무늬가 거짓 무늬로 보이지 않게)
+    for (let k = 0; k < SUB; k++){ const x = ((i + (k + 0.5)/SUB)/pw*2 - 1)*half; s += intensity(st, x, L, d, a, lam); }
+    profile[i] = s/SUB;
+    envProfile[i] = oneSlit(((i + 0.5)/pw*2 - 1)*half, L, a, lam);
+  }
+  const wmm = Math.sqrt(1.5*1.5 + (1.0*state.L)**2), ppm = pw/(2*state.half);   // 빔 높이 (1/e² 반지름, mm)
+  const col = laserRGB(state.nm), base = [16, 19, 24];
+  for (let j = 0; j < ph; j++){
+    const ymm = (j + 0.5 - ph/2)/ppm, gj = Math.exp(-2*(ymm/wmm)**2);
+    for (let i = 0; i < pw; i++){
+      const v = Math.pow(Math.min(1, 1.15*profile[i]*gj), 0.45), o = (j*pw + i)*4;
+      data[o] = base[0] + (255 - base[0])*col[0]*v;
+      data[o + 1] = base[1] + (255 - base[1])*col[1]*v;
+      data[o + 2] = base[2] + (255 - base[2])*col[2]*v;
+      data[o + 3] = 255;
+    }
+  }
+  pc.putImageData(img, 0, 0);
+  patternDirty = false;
+}
+function drawStrip(){
+  if (SW < 20) return;
+  if (patternDirty) buildPattern();
+  const c = sctx, W = SW, H = SH, bot = H - RULER_H, mTop = TOP_B, mBot = bot - BOT_B, st = state.step;
+  c.clearRect(0, 0, W, H);
+  c.drawImage(patternCanvas, 0, mTop, W, mBot - mTop);
+  if (state.sensor && profile){
+    const gTop = mTop + 4, gBot = mBot - 3, pw = profile.length, yv = v => gBot - v*(gBot - gTop);
+    if (st === 3){   // 밝은 무늬 중심을 이은 선 (슬릿 폭 a가 정하는 밝기 분포의 모양)
+      c.strokeStyle = 'rgba(255,255,255,.6)'; c.lineWidth = 1.2; c.setLineDash([5, 4]); c.beginPath();
+      for (let i = 0; i < pw; i++){ const x = (i + 0.5)/pw*W; i ? c.lineTo(x, yv(envProfile[i])) : c.moveTo(x, yv(envProfile[i])); }
+      c.stroke(); c.setLineDash([]);
+    }
+    c.strokeStyle = 'rgba(255,255,255,.95)'; c.lineWidth = 1.4; c.beginPath();
+    for (let i = 0; i < pw; i++){ const x = (i + 0.5)/pw*W; i ? c.lineTo(x, yv(profile[i])) : c.moveTo(x, yv(profile[i])); }
+    c.stroke();
+  }
+  const { lam, d, a, L } = SI();
+  if (st !== 2){                             // 흰 화살표: 0 → 바로 옆 밝은 무늬 중심 (d sinθ = λ)
+    const x1 = xAtSin(lam/d, L)*1e3, inV = x1 <= state.half, px0 = xToPx(0), px1 = inV ? xToPx(x1) : W;
+    const v = fmtSig(dxOf(state), 3), y = TOP_B/2 + 1;
+    guides(c, inV ? [px0, px1] : [px0], y + 6, mBot, '#ffffff');
+    bandArrow(c, W, y, px0, px1, inV ? 0 : 1, '#ffffff', inV ? [`Δx = ${v} mm`]
+      : [`Δx = ${v} mm · 옆 밝은 무늬가 화면 밖에 있음 (보기 범위를 넓혀 보세요)`, `Δx = ${v} mm · 옆 밝은 무늬가 화면 밖`, `Δx = ${v} mm`]);
+  }
+  if (st !== 1){                             // 하늘색 화살표: 양쪽 첫째 어두운 곳 (a sinθ = ±λ) 사이
+    const x1 = xAtSin(lam/a, L)*1e3, inV = x1 <= state.half, pl = inV ? xToPx(-x1) : 0, pr = inV ? xToPx(x1) : W;
+    const w = fmtSig(wOf(state, curA()), 3), name = st === 2 ? '중앙 밝은 무늬의 폭' : '중앙 밝은 영역의 폭', y = bot - BOT_B/2;
+    if (inV) guides(c, [pl, pr], mTop, y - 6, '#8fe3ff');
+    const more = state.half < 40 && x1 <= 40 ? ' (보기 범위를 넓혀 보세요)' : '';   // ±40 mm로도 끝이 안 들어오면 권하지 않음
+    bandArrow(c, W, y, pl, pr, inV ? 0 : 2, '#8fe3ff', inV ? [`${name} ${w} mm`, `${w} mm`]
+      : [`${name} ${w} mm · 양 끝이 화면 밖에 있음${more}`, `${name} ${w} mm · 양 끝이 화면 밖`, `${w} mm · 양 끝이 화면 밖`, `${w} mm`]);
+  }
+  drawRuler(c, W, bot);
+}
+function guides(c, xs, y0, y1, color){
+  c.strokeStyle = color; c.globalAlpha = 0.7; c.lineWidth = 1; c.setLineDash([3, 3]); c.beginPath();
+  xs.forEach(x => { c.moveTo(x, y0); c.lineTo(x, y1); });
+  c.stroke(); c.setLineDash([]); c.globalAlpha = 1;
+}
+/* 띠 안의 화살표와 글자. open: 0 양 끝 닫힘, 1 오른쪽 끝이 화면 밖, 2 양 끝이 화면 밖 */
+function bandArrow(c, W, y, xa, xb, open, color, cands){
+  c.strokeStyle = color; c.fillStyle = color; c.lineWidth = 1.4;
+  c.beginPath(); c.moveTo(xa, y); c.lineTo(xb, y); c.stroke();
+  const ah = Math.min(6, Math.abs(xb - xa)/2);
+  const head = (x, dir) => { c.beginPath(); c.moveTo(x, y); c.lineTo(x + dir*ah, y - 3.5); c.lineTo(x + dir*ah, y + 3.5); c.closePath(); c.fill(); };
+  if (open === 0){ head(xa, 1); head(xb, -1); }
+  else if (open === 1) head(xa, 1);
+  c.font = LABEL_FONT; c.textBaseline = 'middle'; c.textAlign = 'center';
+  // 긴 글부터, 화살표 머리를 가리지 않는 자리(화살표 위 가운데 → 오른쪽 → 왼쪽)에 들어가는 첫 글을 쓴다
+  const lo = Math.min(xa, xb), hi = Math.max(xa, xb);
+  let text = cands[cands.length - 1], tx = W/2;
+  for (const t of cands){
+    const w = c.measureText(t).width;
+    if (w > W - 24) continue;
+    if (hi - lo >= w + 24){ text = t; tx = (lo + hi)/2; break; }
+    if (hi + 10 + w <= W - 4){ text = t; tx = hi + 10 + w/2; break; }
+    if (lo - 10 - w >= 4){ text = t; tx = lo - 10 - w/2; break; }
+  }
+  const tw = c.measureText(text).width;
+  tx = clamp(tx, tw/2 + 6, W - tw/2 - 6);
+  c.fillStyle = '#101318'; c.fillRect(tx - tw/2 - 5, y - 8, tw + 10, 16);
+  c.fillStyle = color; c.fillText(text, tx, y);
+  c.textBaseline = 'alphabetic';
+}
+function drawRuler(c, W, bot){
+  c.fillStyle = '#f6f0dc'; c.fillRect(0, bot, W, RULER_H);
+  c.strokeStyle = '#d8c58f'; c.lineWidth = 1; c.beginPath(); c.moveTo(0, bot + 0.5); c.lineTo(W, bot + 0.5); c.stroke();
+  const half = state.half, labStep = half <= 10 ? 2 : half <= 20 ? 5 : 10;
+  c.strokeStyle = '#6b5b2c'; c.fillStyle = '#5c4d22'; c.font = '600 10px Pretendard,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif'; c.textAlign = 'center'; c.textBaseline = 'alphabetic';
+  for (let mm = -half; mm <= half; mm++){
+    const x = Math.floor(xToPx(mm)) + 0.5, isLab = mm % labStep === 0, five = mm % 5 === 0;
+    c.beginPath(); c.moveTo(x, bot); c.lineTo(x, bot + (isLab ? 10 : five ? 7 : 4)); c.stroke();
+    if (isLab && Math.abs(mm) < half) c.fillText(String(mm), x, bot + 22);
+  }
+  c.textAlign = 'right'; c.fillText('mm', W - 4, bot + 22);
+}
+
+/* ---------- 글로 된 부분 (범례·안내·판독값·질문) ---------- */
+const NAMES = { nm: '파장 λ', d: '슬릿 간격 d', a2: '슬릿 폭 a', a3: '슬릿 폭 a', L: '스크린 거리 L' };
+const fmtV = { nm: v => `${v} nm`, d: v => `${v.toFixed(2)} mm`, a2: v => `${v.toFixed(3)} mm`, a3: v => `${v.toFixed(3)} mm`, L: v => `${v.toFixed(2)} m` };
+const USED = { 1: ['nm', 'd', 'L'], 2: ['nm', 'a2', 'L'], 3: ['nm', 'd', 'a3', 'L'] };
+const INTRO = {
+  1: '1단계: 슬릿 폭을 무시한 이중 슬릿입니다. 조작 칸에서 λ, d, L 가운데 하나를 바꾸며 이웃한 밝은 무늬 사이 간격 Δx가 어떻게 달라지는지 관찰해 보세요.',
+  2: '2단계: 슬릿이 하나입니다. a, λ, L 가운데 하나를 바꾸며 중앙 밝은 무늬의 폭이 어떻게 달라지는지 관찰해 보세요.',
+  3: '3단계: 폭이 있는 실제 이중 슬릿입니다. a를 바꾸며 Δx와 중앙 밝은 영역의 폭을 비교해 보세요.'
+};
+function captionText(st, key, b, s){
+  if (!key) return INTRO[st];
+  const name = st === 2 ? '중앙 밝은 무늬' : '중앙 밝은 영역';
+  if (b[key] === s[key]){
+    let t = `${NAMES[key]}: ${fmtV[key](s[key])} (바꾸기 전과 같음)`;
+    if (st !== 2) t += ` · Δx ${fmtSig(dxOf(s), 3)} mm`;
+    if (st !== 1) t += ` · ${name}의 폭 ${fmtSig(wOf(s, curA(s, st)), 3)} mm`;
+    return t;
+  }
+  let t = `${NAMES[key]}: ${fmtV[key](b[key])} → ${fmtV[key](s[key])} (${fmtSig(s[key]/b[key], 3)}배)`;
+  if (st !== 2){
+    const d0 = dxOf(b), d1 = dxOf(s);
+    t += ` · Δx: ${fmtSig(d0, 3)} → ${fmtSig(d1, 3)} mm` + (key === 'a3' ? ' (그대로)' : ` (${fmtSig(d1/d0, 3)}배)`);
+  }
+  if (st !== 1){
+    const w0 = wOf(b, curA(b, st)), w1 = wOf(s, curA(s, st));
+    t += ` · ${name}의 폭: ${fmtSig(w0, 3)} → ${fmtSig(w1, 3)} mm` + (key === 'd' ? ' (그대로)' : ` (${fmtSig(w1/w0, 3)}배)`);
+  }
+  return t;
+}
+const CH = (cls, color, txt) => `<span class="it"><i class="chip ${cls}" style="--c:${color}"></i>${txt}</span>`;
+function legendHTML(st, sensor){
+  const out = [];
+  if (st !== 2) out.push(CH('arw', '#ffffff', 'Δx: 이웃한 밝은 무늬 중심 사이'));
+  if (st !== 1) out.push(CH('arw', '#8fe3ff', st === 2 ? '중앙 밝은 무늬의 폭: 양쪽 첫째 어두운 곳 사이' : '중앙 밝은 영역의 폭: 회절에 의한 양쪽 첫째 어두운 곳 사이'));
+  if (sensor) out.push(CH('', '#ffffff', '빛의 세기 (중앙 = 1)'));
+  if (sensor && st === 3) out.push(CH('dash', '#ffffff', '밝은 무늬 중심을 이은 선 (a가 정함)'));
+  return out.join('');
+}
+const QS = {
+  1: ['λ를 길게 하면 Δx는?', 'd를 넓히면 Δx는?', 'L을 멀리 하면 Δx는?'],
+  2: ['a를 좁히면 중앙 밝은 무늬의 폭은?', 'λ를 길게 하면 폭은?', '중앙 밝은 무늬와 양옆 무늬의 폭과 세기를 비교하면?'],
+  3: ['a를 바꾸면 Δx는 달라질까?', 'a를 바꾸면 무엇이 달라질까?', '1단계, 2단계 무늬와 비교하면?']
+};
+const ANS = {
+  1: 'Δx = λL ÷ d 이므로 Δx는 <b>λ와 L에 비례</b>하고 <b>d에 반비례</b>합니다. 슬릿 폭을 무시하면 밝은 무늬는 모두 같은 밝기, 같은 간격입니다.',
+  2: '중앙 밝은 무늬의 폭은 2λL ÷ a 입니다. <b>a가 좁을수록, λ가 길수록 넓게 퍼집니다.</b> 양옆 무늬의 폭은 중앙의 절반쯤이고, 세기는 중앙의 5 %도 되지 않습니다.',
+  3: '실제 무늬는 <b>1단계의 간섭무늬</b>가 <b>2단계의 회절에 의한 밝기 분포</b> 안에 그려진 모습입니다. Δx = λL ÷ d에는 a가 없으므로 <b>a를 바꿔도 Δx는 그대로</b>입니다. a를 바꾸면 중앙 밝은 영역의 폭과 무늬마다의 밝기가 달라져 그 안에 보이는 밝은 무늬의 수가 달라지지만, 무늬가 더 촘촘해지지는 않습니다.'
+};
+const qbodyHTML = (st, ans) => ans ? `<div class="answer">${ANS[st]}</div>` : `<ol>${QS[st].map(q => `<li>${q}</li>`).join('')}</ol>`;
+
+function renderReadouts(st){
+  const dxOn = st !== 2, wOn = st !== 1;
+  $('roDxBox').classList.toggle('off', !dxOn);
+  $('roWBox').classList.toggle('off', !wOn);
+  $('roDx').textContent = dxOn ? fmtSig(dxOf(state), 3) : '–';
+  $('roDxU').hidden = !dxOn;
+  $('roDxCalc').textContent = dxOn ? `= ${state.nm} nm × ${state.L.toFixed(2)} m ÷ ${state.d.toFixed(2)} mm` : '슬릿이 하나라 두 슬릿에 의한 간섭이 없습니다';
+  $('roW').textContent = wOn ? fmtSig(wOf(state, curA(state, st)), 3) : '–';
+  $('roWU').hidden = !wOn;
+  $('roWLabel').textContent = st === 2 ? '회절에 의한 중앙 밝은 무늬의 폭 = 2λL ÷ a' : '회절에 의한 중앙 밝은 영역의 폭 = 2λL ÷ a';
+  $('roWCalc').textContent = wOn ? `= 2 × ${state.nm} nm × ${state.L.toFixed(2)} m ÷ ${curA(state, st).toFixed(3)} mm` : '1단계는 슬릿 폭을 무시합니다';
+}
+function updateTexts(){
+  const st = state.step;
+  $('lamOut').textContent = fmtV.nm(state.nm);
+  $('dOut').textContent = st === 2 ? '쓰지 않음' : fmtV.d(state.d);
+  $('aOut').textContent = st === 1 ? '무시' : fmtV.a2(curA());
+  $('LOut').textContent = fmtV.L(state.L);
+  renderReadouts(st);
+  $('legend').innerHTML = legendHTML(st, state.sensor);
+  $('stripNote').textContent = `보기 범위 ±${state.half} mm`;
+}
+function setCaption(key){ $('caption').textContent = captionText(state.step, key, settled, state); }
+function renderQ(){
+  $('qTitle').textContent = state.ans ? '정리' : '관찰해 볼 것';
+  $('qbody').innerHTML = qbodyHTML(state.step, state.ans);
+  $('ansBtn').textContent = state.ans ? '질문 보기' : '정리 보기';
+  $('ansBtn').setAttribute('aria-expanded', state.ans);
+  $('nextBtn').textContent = state.step < 3 ? '다음 단계 →' : '1단계로';
+}
+function drawAll(){ drawBench(); drawSlits(); drawStrip(); updateTexts(); }
+
+/* 단계를 바꾸거나 정리를 열어도 크기가 바뀌지 않게, 글 칸의 높이를 가장 긴 내용에 맞춰 둔다 */
+function fixHeights(){
+  const keep = (el, variants) => {
+    const cur = el.innerHTML; el.style.minHeight = ''; let mx = 0;
+    for (const h of variants){ el.innerHTML = h; mx = Math.max(mx, Math.ceil(el.getBoundingClientRect().height)); }
+    el.innerHTML = cur; el.style.minHeight = mx + 'px';
+  };
+  const b = { nm: 400, d: 0.10, a2: 0.020, a3: 0.020, L: 1.00 }, s = { nm: 700, d: 0.50, a2: 0.100, a3: 0.050, L: 3.00 };
+  const caps = [INTRO[1], INTRO[2], INTRO[3]];
+  for (const st of [1, 2, 3]) for (const k of USED[st]){ caps.push(captionText(st, k, b, { ...b, [k]: s[k] })); caps.push(captionText(st, k, b, b)); }
+  keep($('caption'), caps.map(t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;')));
+  const leg = []; for (const st of [1, 2, 3]) for (const se of [false, true]) leg.push(legendHTML(st, se));
+  keep($('legend'), leg);
+  const qs = []; for (const st of [1, 2, 3]) for (const an of [false, true]) qs.push(qbodyHTML(st, an));
+  keep($('qbody'), qs);
+  const ro = $('readouts'); ro.style.minHeight = ''; let mx = 0;
+  for (const st of [1, 2, 3]){ renderReadouts(st); mx = Math.max(mx, Math.ceil(ro.getBoundingClientRect().height)); }
+  renderReadouts(state.step); ro.style.minHeight = mx + 'px';
+}
+
+/* ---------- 단계 ---------- */
+function setStep(n){
+  state.step = n; state.ans = false;
+  document.querySelectorAll('#steps .step').forEach(b => b.setAttribute('aria-pressed', +b.dataset.step === n));
+  $('dBlock').classList.toggle('off', n === 2); $('dS').disabled = n === 2;
+  $('aBlock').classList.toggle('off', n === 1);
+  $('a2S').hidden = n !== 2; $('a3S').hidden = n === 2; $('a3S').disabled = n === 1;
+  $('aLabel').htmlFor = n === 2 ? 'a2S' : 'a3S';
+  if (n !== 1){ state.sensor = true; $('sensor').checked = true; }
+  settled = snap();
+  patternDirty = true; drawAll(); setCaption(null); renderQ();
+}
+$('steps').addEventListener('click', e => { const b = e.target.closest('.step'); if (b) setStep(+b.dataset.step); });
+$('nextBtn').addEventListener('click', () => setStep(state.step < 3 ? state.step + 1 : 1));
+$('ansBtn').addEventListener('click', () => { state.ans = !state.ans; renderQ(); });
+
+/* ---------- 조작 ---------- */
+[['lam', 'nm'], ['dS', 'd'], ['a2S', 'a2'], ['a3S', 'a3'], ['LS', 'L']].forEach(([id, key]) => {
+  const el = $(id);
+  el.addEventListener('input', () => {
+    state[key] = key === 'nm' ? parseInt(el.value, 10) : roundTo(parseFloat(el.value), 3);
+    patternDirty = true; drawAll(); setCaption(key);
+  });
+  el.addEventListener('change', () => { setCaption(key); settled = snap(); });
+});
+$('zoomRow').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  state.half = +b.dataset.half;
+  [...$('zoomRow').children].forEach(x => x.setAttribute('aria-pressed', x === b));
+  patternDirty = true; drawStrip(); updateTexts();
+});
+$('sensor').addEventListener('change', e => { state.sensor = e.target.checked; drawStrip(); updateTexts(); });
+$('resetBtn').addEventListener('click', () => {
+  Object.assign(state, DEF, { half: 20, sensor: false });
+  $('lam').value = DEF.nm; $('dS').value = DEF.d; $('a2S').value = DEF.a2; $('a3S').value = DEF.a3; $('LS').value = DEF.L;
+  $('sensor').checked = false;
+  [...$('zoomRow').children].forEach(x => x.setAttribute('aria-pressed', x.dataset.half === '20'));
+  setStep(1);
+});
+const help = $('help'), app = document.querySelector('.app');
+const showHelp = () => { help.hidden = false; app.inert = true; $('closeHelp').focus(); };
+const hideHelp = () => { help.hidden = true; app.inert = false; $('helpBtn').focus(); };
+$('helpBtn').addEventListener('click', showHelp);
+$('closeHelp').addEventListener('click', hideHelp);
+help.addEventListener('click', e => { if (e.target === help) hideHelp(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !help.hidden) hideHelp(); });
+
+/* ---------- 한 화면에 맞추기 ----------
+   가로가 넓으면 좌우(SIDE), 세로로 길면 위아래(STACK) 한 화면 배치를 먼저 해 본다.
+   무늬 띠가 MIN_BAND보다 얇아지거나 조작 칸을 MIN_ZOOM보다 더 줄여야 하면 스크롤 배치로 둔다. */
+const SIDE = matchMedia('(min-aspect-ratio:6/5) and (min-width:600px) and (min-height:360px)');
+const STACK = matchMedia('(max-aspect-ratio:1199/1000) and (min-width:520px) and (min-height:540px)');
+const MIN_BAND = 56, MIN_ZOOM = 0.7;                                            // px, 배율
+const ZOOM_OK = 'zoom' in document.documentElement.style;
+const root = document.documentElement, side = $('side'), exp = $('exp');
+function fitLayout(){
+  let z = 1;
+  if (SIDE.matches){                         // 조작 칸 내용이 칸보다 길면 조작 칸만 조금 줄임
+    const need = side.scrollHeight, avail = side.clientHeight;
+    if (need > avail + 1) z = avail/need*0.995;
+  } else {                                   // 위 카드가 넘치면 아래 조작 칸을 조금 줄임
+    const over = exp.scrollHeight - exp.clientHeight;
+    if (over > 1){ const h = side.getBoundingClientRect().height; z = (h - over)/h*0.995; }
+  }
+  if (z < 1){
+    if (!ZOOM_OK || z < MIN_ZOOM) return false;
+    side.style.zoom = z;
+  }
+  const band = $('stripBox').clientHeight - RULER_H - TOP_B - BOT_B;
+  return band >= MIN_BAND && exp.scrollHeight <= exp.clientHeight + 1;
+}
+/* 화면 크기가 바뀌면: 축소를 풀고 글 칸 높이를 다시 잰 뒤 → 맞추기(안 맞으면 스크롤 배치) → 그림 다시 그리기.
+   requestAnimationFrame 은 보이지 않는 창(실험실 미리보기 등)에서 멈추므로 타이머를 쓴다 */
+let relayoutTimer = 0;
+function relayout(){
+  side.style.zoom = '';
+  root.classList.toggle('one', SIDE.matches || STACK.matches);
+  fixHeights();
+  if (root.classList.contains('one') && !fitLayout()){
+    root.classList.remove('one'); side.style.zoom = ''; fixHeights();
+  }
+  resizeAll();
+}
+const ro = new ResizeObserver(() => { clearTimeout(relayoutTimer); relayoutTimer = setTimeout(relayout, 16); });
+ro.observe(document.querySelector('.workspace'));
+ro.observe($('stripBox'));
+
+setStep(1);
+relayout();
+</script>
+</body>
+</html>
