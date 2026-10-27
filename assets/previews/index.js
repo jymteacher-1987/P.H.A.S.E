@@ -113,6 +113,11 @@ window.PHASE_PREVIEWS = {
       "sourceHash": "97823e14773689e168827dfd712c2f0f530bbad799953bae243be2bfa38c470c",
       "bytes": 21916
     },
+    "double-slit-interference": {
+      "src": "assets/previews/double-slit-interference-d1a4d86e29.webp",
+      "sourceHash": "d1896e88cac32cdfe4debe2b29d2aa61fb93a9962ac78a23d35b39d9ffc4cbd0",
+      "bytes": 31912
+    },
     "hero-maker": {
       "src": "assets/previews/hero-maker-340c30230e.webp",
       "sourceHash": "d3119fd81042e4e5d8f93849ac493694ec7ddcfdfe5dbdf45f59b1ea753c3b11",
@@ -162,11 +167,6 @@ window.PHASE_PREVIEWS = {
       "src": "assets/previews/school-rider-46a180f5c1.webp",
       "sourceHash": "01af2936b437a3df64c91b14b228ef1ab197bfd86f36b4626cf3b924e5a6a3e8",
       "bytes": 63480
-    },
-    "double-slit-interference": {
-      "src": "assets/previews/double-slit-interference-d1a4d86e29.webp",
-      "sourceHash": "d1896e88cac32cdfe4debe2b29d2aa61fb93a9962ac78a23d35b39d9ffc4cbd0",
-      "bytes": 31912
     }
   }
 };
