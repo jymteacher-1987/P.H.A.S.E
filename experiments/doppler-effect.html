@@ -65,7 +65,7 @@ h1{font-size:21px;letter-spacing:-.6px;margin:0;line-height:1.25;min-width:0}
 .readout .u{font-size:12px;color:var(--muted);font-weight:600}
 .readout .calc{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
 .readout .sub{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:8px;line-height:1.4;min-height:1.4em}
-.readout .tag{font-size:12px;font-weight:800;line-height:1.5;padding:0 7px;border-radius:7px;white-space:nowrap}
+.readout .tag{font-size:12px;font-weight:800;line-height:1.5;padding:0 7px;border-radius:7px;white-space:nowrap;min-width:5.6em;text-align:center}   /* 'f₀와 같음'·'높게 들림'·'낮게 들림'을 같은 폭으로: 바뀌어도 측정값이 다음 줄로 밀리지 않게 */
 .readout .tag:empty{display:none}
 .readout .tag.up{background:#2f7f9c1f;color:#22657d}
 .readout .tag.dn{background:#c0503e1f;color:#a33a2a}
@@ -114,7 +114,7 @@ sub{font-size:.72em;line-height:0;position:relative;bottom:-.22em;vertical-align
 .fr .bar b{position:absolute;top:-4px;bottom:-4px;margin-left:-1px;border-left:2px solid var(--ink)}
 .fr .bar.over i{border-radius:8px 0 0 8px}
 .fr .bar.over::after{content:'';position:absolute;right:-7px;top:50%;margin-top:-5px;border-left:6px solid #7d6d66;border-top:5px solid transparent;border-bottom:5px solid transparent}
-.fr .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.fr .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;padding-left:5px}   /* 막대 끝 ▸(7px)가 값 글자에 닿지 않게 */
 
 /* ---------- 도움말 ---------- */
 .modal{position:fixed;inset:0;z-index:50;background:rgba(52,45,42,.45);display:flex;align-items:center;justify-content:center;padding:14px}
@@ -336,12 +336,12 @@ sub{font-size:.72em;line-height:0;position:relative;bottom:-.22em;vertical-align
   <p>분자의 부호는 관찰자의 운동이, 분모의 부호는 음원의 운동이 따로 정합니다. 각자 상대 쪽으로 움직이면 위 부호, 상대에게서 멀어지는 쪽으로 움직이면 아래 부호이므로, 이 실험의 A(서로 가까워짐)는 둘 다 위 부호, B(서로 멀어짐)는 둘 다 아래 부호입니다. v<sub>s</sub>는 분모에, v<sub>o</sub>는 분자에 들어가므로 v<sub>s</sub>와 v<sub>o</sub>가 다를 때 두 값을 맞바꾸면 <span class="nw">f′가</span> 달라집니다. 음원과 관찰자는 모두 같은 직선 위에서 움직이며, 관찰자가 음원을 지나치기 전에 장면이 처음으로 돌아갑니다.</p>
 
   <h3>화살표와 글자 읽기</h3>
-  <p>노란 화살표는 원들의 중심을 잇는 직선(두 파면에 수직인 방향) 위에서 굵은 원과 바로 이웃한 파면 사이, 곧 <b>그쪽의 파장</b>입니다. 화살표는 굵은 원과 함께 나타나 바깥으로 움직이다가 함께 사라지므로 A 쪽과 B 쪽 화살표는 늘 같이 보이며, 그 길이(그림에서 잰 <span class="nw">거리)는</span> 장면 위쪽 모서리의 노란 글자로 읽습니다. 오른쪽 위가 A 쪽(1단계의 앞), 왼쪽 위가 B 쪽(1단계의 <span class="nw">뒤)입니다</span>. 음원의 진동수 f₀나 속력 v<sub>s</sub>를 바꾸면 그 뒤에 나온 파면부터 간격이 달라지므로(관찰자의 속력 v<sub>o</sub>는 파면 간격을 바꾸지 않음), 이미 퍼져 나간 파면이 지나가는 동안에는 노란 글자와 "측정" 진동수가 식으로 구한 값과 잠시 다를 수 있습니다.</p>
+  <p>노란 화살표는 원들의 중심을 지나는 직선(두 파면에 수직인 방향) 위에서 바로 이웃한 두 파면 사이, 곧 <b>그쪽의 파장</b>입니다. 화살표는 굵은 원과 함께 바깥으로 움직이다가 다음 굵은 원의 화살표로 서서히 넘어가므로 A 쪽과 B 쪽 화살표는 늘 같이 보이며, 그 길이(그림에서 잰 <span class="nw">거리)는</span> 장면 위쪽 모서리의 노란 글자로 읽습니다. 오른쪽 위가 A 쪽(1단계의 앞), 왼쪽 위가 B 쪽(1단계의 <span class="nw">뒤)입니다</span>. 음원의 진동수 f₀나 속력 v<sub>s</sub>를 바꾸면 그 뒤에 나온 파면부터 간격이 달라지므로(관찰자의 속력 v<sub>o</sub>는 파면 간격을 바꾸지 않음), 이미 퍼져 나간 파면이 지나가는 동안에는 노란 글자와 "측정" 진동수가 식으로 구한 값과 잠시 다를 수 있습니다.</p>
   <p>주황 작은 점은 각 파면이 나온 순간의 음원 위치, 곧 그 원의 중심입니다. 음원이 움직여도 이미 나온 파면의 중심은 따라 움직이지 않으므로, 음원이 움직이는 쪽으로 원들이 몰립니다. 굵게 그린 원은 파면 하나를 골라 강조한 것입니다. 그 파면이 나온 뒤 같은 시간 동안 중심에서 모든 방향으로 같은 거리만큼 퍼졌으므로(8방향 화살표의 길이가 같음), 소리는 <b>모든 방향으로 같은 속력(340 m/s)</b>으로 퍼집니다. 장면 맨 아래 띠는 같은 축척으로 그린 속력이며, 음원과 관찰자는 소리보다 느립니다.</p>
   <p>조작 칸의 "진동수 비교" 막대는 모든 단계에서 같은 축척(막대 끝 = f₀의 2배)으로 그렸고, 그보다 크면 끝에 ▸가 붙습니다. 세로선이 f₀이고, f₀보다 높으면 파랑, 낮으면 빨강입니다. 관찰자 둘레의 고리는 파면이 닿을 때마다 퍼지며 사라지므로, 고리가 빛나는 빠르기는 그 관찰자가 듣는 진동수에 비례합니다(150배·400배에서 세어 보기 쉬움). 음원이 다가오는 동안에도 이 빠르기는 점점 빨라지지 않고 일정합니다. 느리게 재생한 화면에서 파면이 1초에 4번보다 자주 닿으면 고리는 깜빡이지 않고 켜진 채로 있습니다.</p>
 
   <details><summary>이 모형에서 단순화한 내용</summary>
-   <p>공기는 정지해 있고(바람 없음), 음원은 점음원이며, 음원과 관찰자는 같은 직선 위에서 등속으로 움직입니다. 실제 파면은 구면이고 그림은 그 단면(원)입니다. 장면이 끝나면 화면이 잠깐 어두워졌다가 처음부터 다시 시작하며(멈춘 동안에는 끝 장면을 그대로 보여 줌), 음원은 그때 소리를 내기 시작합니다. 새 파면이 관찰자에게 닿기 전에는 직전 측정값을 흐리게 보여 줍니다(값을 바꾼 뒤라면 "측정 중…"). 멀리 퍼진 파면은 보기 편하도록 흐리게 그렸습니다(세기를 계산한 것은 아닙니다). 음원의 속력은 소리의 속력보다 작은 범위(0 ~ 170 m/s)만 다루고, 소리의 속력은 340 m/s(약 15 °C의 공기)로 고정했습니다. 그림의 가로 폭은 30 m이고 아래 자의 눈금과 같은 실제 비율입니다. "소리로 들어 보기"는 식으로 구한 진동수의 순음을 모두 같은 진폭의 신호로 재생하는 것으로, 실제 음원 소리와 음색은 다릅니다. 낮은 음이 더 작게 들린다면 스피커와 귀의 특성 때문입니다.</p>
+   <p>공기는 정지해 있고(바람 없음), 음원은 점음원이며, 음원과 관찰자는 같은 직선 위에서 등속으로 움직입니다. 실제 파면은 구면이고 그림은 그 단면(원)입니다. 장면이 끝나면 화면이 잠깐 어두워졌다가 처음부터 다시 시작하며(멈춘 동안에는 끝 장면을 그대로 보여 줌), 음원은 그때 소리를 내기 시작합니다. 새 장면에서 이웃한 두 파면이 관찰자에게 닿기 전에는 직전 측정값을 흐리게 보여 줍니다(단계를 바꾼 직후이거나 값을 바꾼 뒤 아직 새 값으로 재지 못했다면 "측정 중…"). 멀리 퍼진 파면은 보기 편하도록 흐리게 그렸습니다(세기를 계산한 것은 아닙니다). 음원의 속력은 소리의 속력보다 작은 범위(0 ~ 170 m/s)만 다루고, 소리의 속력은 340 m/s(약 15 °C의 공기)로 고정했습니다. 그림의 가로 폭은 30 m이고 아래 자의 눈금과 같은 실제 비율입니다. "소리로 들어 보기"는 식으로 구한 진동수의 순음을 모두 같은 진폭의 신호로 재생하는 것으로, 실제 음원 소리와 음색은 다릅니다. 낮은 음이 더 작게 들린다면 스피커와 귀의 특성 때문입니다.</p>
   </details>
   <p class="refs">참고: 2022 개정 교육과정 역학과 에너지 [12역학03-03] · <a href="https://openstax.org/books/university-physics-volume-1/pages/17-7-the-doppler-effect" target="_blank" rel="noopener noreferrer">도플러 효과</a> (OpenStax, <i>University Physics Volume 1</i>) · 기록·저장·외부 전송은 없습니다.</p>
  </section>
@@ -487,8 +487,8 @@ function drawScene(){
   // 위아래로 장면에 다 들어오는 크기(Rmax)까지 키운 뒤 새로 나온 파면으로 넘어가며, 넘어갈 때 서서히 흐려지고 밝아진다
   const Rmax = clamp(Math.max(Math.min(roadY - (Math.round(CF*1.7) + 14), bot - roadY - 4)/ppm, 1.34*V/state.f0), 0.8, 7), fd = 0.25*Rmax;   // 한 주기에 퍼지는 거리(V ÷ f₀)의 1.34배 이상: 흐려지기 시작할 때 넘겨받을 파면이 늘 있음
   const i0 = fronts.length ? fronts[0].idx : 0, rOf = h => V*(t - fronts[h.idx - i0].te);
-  hls = hls.filter(h => h.idx >= i0 && h.idx - i0 < fronts.length && rOf(h) < Rmax);
-  if (!hls.some(h => rOf(h) < Rmax - fd)){                                       // 강조한 원이 흐려지기 시작했거나 없으면, 가장 새 파면이 넘겨받음
+  hls = hls.filter(h => h.idx >= i0 && h.idx - i0 < fronts.length && (rOf(h) < h.R || h.la > 0));   // 굵은 원이 사라져도 다음 원의 화살표가 다 나타날 때까지 그 화살표는 남김
+  if (!hls.some(h => rOf(h) < 0.75*h.R)){                                       // 강조한 원이 흐려지기 시작했거나 없으면, 가장 새 파면이 넘겨받음
     // 바깥 이웃 파면이 있는 것(i ≥ 1) 가운데, 파장 화살표의 음원 쪽 끝이 음원 점 밖으로 이미 나온 가장 새 파면. 없으면 가장 새 파면
     const rClear = 9.5*sk/ppm*V/(V - Math.abs(us));
     let pick = -1;
@@ -498,10 +498,13 @@ function drawScene(){
       if (r > 0 && pick < 0) pick = i;
       if (r >= rClear){ pick = i; break; }
     }
-    if (pick >= 1) hls.push({ idx: fronts[pick].idx, r0: V*(t - fronts[pick].te) });
+    if (pick >= 1){                                                              // 넘겨주는 원이 흐려지기 시작한 뒤 더 퍼진 만큼(보통 한 프레임 이하) 새 원을 밝게 시작해 두 원의 밝기 합이 1로 이어짐
+      const fading = hls.filter(h => rOf(h) < h.R), lag = fading.length ? clamp(Math.min(...fading.map(h => rOf(h) - 0.75*h.R)), 0, fd) : 0;
+      hls.push({ idx: fronts[pick].idx, r0: V*(t - fronts[pick].te) - lag, R: Rmax });
+    }
   }
-  const hl = hls.map(h => { const f = fronts[h.idx - i0], r = V*(t - f.te); return { f, r, al: clamp(Math.min((r - h.r0)/fd, (Rmax - r)/fd), 0, 1) }; });
-  for (const h of hl) if (h.al > 0) drawHighlight(c, px(h.f.xc), roadY, h.r*ppm, h.al, fw, sk, Rmax*ppm);
+  const hl = hls.map(h => { const f = fronts[h.idx - i0], r = V*(t - f.te), d = 0.25*h.R; return { h, f, r, R: h.R, ai: clamp((r - h.r0)/d, 0, 1), al: clamp(Math.min((r - h.r0)/d, (h.R - r)/d), 0, 1) }; });   // 원마다 고를 때의 Rmax(R)를 끝까지 씀
+  for (const h of hl) if (h.al > 0) drawHighlight(c, px(h.f.xc), roadY, h.r*ppm, h.al, fw, sk, h.R*ppm);
   c.restore();
   // 파장: 원들의 중심을 잇는 축(음원이 움직이는 직선) 위에서 굵은 원과 바로 바깥 파면(한 주기 먼저 나온 것) 사이에 화살표.
   // 축은 모든 파면에 수직이므로 화살표가 두 파면에 수직이고 그 길이가 곧 파장이다.
@@ -515,15 +518,18 @@ function drawScene(){
     if (!q[0] || !q[1]) return 0;
     const near = Math.min(...q.map(p => Math.abs(p.a - xs)*ppm));
     const edge = Math.min(...q.map(p => Math.min((Math.min(p.a, p.b) - 0.2)/0.8, (X_MAX - 0.2 - Math.max(p.a, p.b))/0.8)));
-    return clamp((near - 8*sk)/(1.5*sk), 0, 1)*clamp(edge, 0, 1);
+    return clamp((near - 8*sk)/(0.4*ppm), 0, 1)*clamp(edge, 0, 1);
   };
+  // 화살표 밝기: 가장 새 굵은 원의 화살표가 먼저, 그 앞 원의 화살표는 남은 만큼(합이 1이라 넘겨줄 때 꺼지거나 튀지 않음)
+  let left = 1;
+  for (let k = hl.length - 1; k >= 0; k--){ const h = hl[k]; h.la = h.h.la = Math.min(h.ai, showOf(h))*left; left -= h.la; }
   for (const [side, name] of sides){
     let best = -1;
     for (const h of hl){
       const pr = pairAt(h.f.idx, side);
       if (!pr) continue;
-      if (h.al > best){ best = h.al; lamDisp[side] = fx(pr.len, 3) + ' m'; }     // 더 밝은 쪽의 값(두 원의 값은 같음). 판독 칸과 같은 자릿수
-      const al = h.al*showOf(h);
+      if (h.la > best){ best = h.la; lamDisp[side] = fx(pr.len, 3) + ' m'; }     // 더 밝게 그린 화살표의 값(모서리 글자가 늘 보이는 화살표의 길이). 판독 칸과 같은 자릿수
+      const al = h.la;
       if (al > 0){ const xa = px(Math.min(pr.a, pr.b)), xb = px(Math.max(pr.a, pr.b)); lamHalo(c, xa, xb, roadY, al, sk); lamQ.push([xa, xb, al]); }
     }
     labels.push([side, `${name} = ${lamDisp[side] || '–'}`]);
@@ -577,7 +583,7 @@ function drawSpeeds(c, W, y0, SPH, sk){
   const cx = Math.round(W/2);
   arrow(cx, cx - L, SND); arrow(cx, cx + L, SND);
   c.fillStyle = SND; c.beginPath(); c.arc(cx, ya, 2.5*sk, 0, 2*Math.PI); c.fill();
-  label(cx, '소리 340 m/s (모든 방향)', SND);
+  c.font = `700 ${W < 420 ? 10 : fz(13, 11)}px ${FONT}`; const span = (x, s) => { const w = c.measureText(s).width, m = clamp(x, w/2 + 4, W - w/2 - 4); return [m - w/2, m + w/2]; }, LONG = '소리 340 m/s (모든 방향)', hw = c.measureText(LONG).width/2; label(cx, span(Math.round(W*0.14), '음원 888 m/s')[1] + 6 <= cx - hw && span(Math.round(W*0.86), '관찰자 A·B 888 m/s')[0] - 6 >= cx + hw ? LONG : '소리 340 m/s', SND);   // 좁은 장면: 양옆 글자(가장 긴 값 기준)와 6 px보다 가까우면 '(모든 방향)'을 빼고 씀. 폭으로만 정하므로 값을 바꿔도 글자가 바뀌지 않음
   item(Math.round(W*0.14), us, SRC, '음원');
   item(Math.round(W*0.86), st === 1 ? 0 : obs[0].u, OBS, '관찰자 A·B');
   c.textBaseline = 'alphabetic';
@@ -587,7 +593,7 @@ function drawHighlight(c, cx, cy, R, al, fw, sk, Rm){
   c.strokeStyle = '#ffffff'; c.fillStyle = '#ffffff';
   c.globalAlpha = al; c.lineWidth = 2*fw;
   c.beginPath(); c.arc(cx, cy, R, 0, 2*Math.PI); c.stroke();
-  const sp = Rm < 28*sk ? 0 : clamp((R - Math.min(24*sk, 0.45*Rm))/Math.min(16*sk, 0.3*Rm), 0, 1);   // Rm: 가장 큰 반지름. 작은 장면에서도 원이 흐려지기 전에 화살표가 다 나타남
+  const sp = Rm < 20*sk ? 0 : clamp((R - Math.min(24*sk, 0.45*Rm))/Math.min(16*sk, 0.3*Rm), 0, 1);   // Rm: 가장 큰 반지름. 작은 장면에서도 원이 흐려지기 전에 화살표가 다 나타남
   if (sp > 0){
     c.globalAlpha = 0.5*al*sp; c.lineWidth = 1; c.setLineDash([3, 4]); c.beginPath();
     for (let k = 0; k < 8; k++){ const a = k*Math.PI/4, ca = Math.cos(a), sa = Math.sin(a); c.moveTo(cx + 5*sk*ca, cy + 5*sk*sa); c.lineTo(cx + (R - 8*sk)*ca, cy + (R - 8*sk)*sa); }
@@ -603,7 +609,7 @@ function drawHighlight(c, cx, cy, R, al, fw, sk, Rm){
 }
 /* 파장 화살표의 두 파면: k번 파면(안쪽)과 k − 1번 파면(바깥쪽). 축 위 두 파면의 거리는 시간에 따라 변하지 않는다 */
 let lamDisp = {};
-let hls = [];                                                                  // 강조하는 파면: 번호(idx), 고를 때의 반지름(r0). 넘겨줄 때만 둘
+let hls = [];                                                                  // 강조하는 파면: 번호(idx), 고를 때의 반지름(r0)과 Rmax(R). 넘겨줄 때만 둘
 const frontPos = (f, side) => f.xc + side*V*(t - f.te);
 function pairAt(k, side){
   if (!fronts.length) return null;
@@ -645,7 +651,7 @@ function drawBody(c, x, y, color, flash, name, u, W, sk, F, lx){
    몸통 밑 어두운 테두리(lamHalo, 축선·원의 중심 점을 가림)는 관찰자 점보다 먼저, 노란 화살표(lamArrow)는 나중에 그린다 */
 function lamHalo(c, xa, xb, y, al, sk){
   const ah = Math.min(5*sk, (xb - xa)/3.2);
-  c.globalAlpha = al; c.strokeStyle = '#101318'; c.lineWidth = 2*sk + 2;          // 화살촉 끝의 파면은 가리지 않음
+  c.globalAlpha = al; c.strokeStyle = '#101318'; c.lineWidth = 3.6*sk + 2;          // 화살촉 끝의 파면은 가리지 않음
   c.beginPath(); c.moveTo(xa + ah, y); c.lineTo(xb - ah, y); c.stroke();
   c.globalAlpha = 1;
 }
@@ -708,10 +714,10 @@ const QS = {
 };
 const ANS = {
   1: '소리는 매질(공기)이 정한 속력 <b>v = 340 m/s로 모든 방향으로 똑같이</b> 퍼집니다. 음원이 움직이면 한 주기에 v<sub>s</sub>T만큼 앞쪽 파면을 따라가므로 <span class="nw">앞의 λ′ = (v − v<sub>s</sub>) ÷ f₀</span>는 짧고 <span class="nw">뒤의 λ′ = (v + v<sub>s</sub>) ÷ f₀</span>는 깁니다. 서 있는 관찰자는 <span class="nw">f′ = v ÷ λ′</span>를 들으므로 <b class="nw">f<sub>A</sub> &gt; f₀ &gt; f<sub>B</sub></b>입니다. v<sub>s</sub>가 클수록 앞은 더 높게, 뒤는 더 낮게 들립니다.',
-  2: '음원이 서 있으면 파장 <span class="nw">λ = v ÷ f₀</span>는 어느 쪽이나 그대로입니다. 다가가는 A는 파면을 상대 속력 <span class="nw">v + v<sub>o</sub></span>로 만나므로 <b class="nw">f<sub>A</sub> = f₀(v + v<sub>o</sub>) ÷ v</b>, 멀어지는 B는 <span class="nw">v − v<sub>o</sub></span>로 만나므로 <b class="nw">f<sub>B</sub> = f₀(v − v<sub>o</sub>) ÷ v</b>입니다. 같은 속력으로 움직여도 1단계보다 A는 덜 높게, B는 더 낮게 들립니다.',
+  2: '음원이 서 있으면 파장 <span class="nw">λ = v ÷ f₀</span>는 어느 쪽이나 그대로입니다. A가 다가가면 파면을 상대 속력 <span class="nw">v + v<sub>o</sub></span>로 만나므로 <b class="nw">f<sub>A</sub> = f₀(v + v<sub>o</sub>) ÷ v</b>, B가 멀어지면 <span class="nw">v − v<sub>o</sub></span>로 만나므로 <b class="nw">f<sub>B</sub> = f₀(v − v<sub>o</sub>) ÷ v</b>입니다. 같은 속력으로 움직여도 1단계보다 A는 덜 높게, B는 더 낮게 들립니다.',
   3: '<b class="nw">f<sub>A</sub> = f₀(v + v<sub>o</sub>) ÷ (v − v<sub>s</sub>)</b>, <span class="nw"><b>f<sub>B</sub> = f₀(v − v<sub>o</sub>) ÷ (v + v<sub>s</sub>)</b>이므로</span> 하나라도 움직이면 <b class="nw">f<sub>A</sub> &gt; f₀ &gt; f<sub>B</sub></b>입니다. 음원의 운동은 <span class="nw">분모(파장)에</span>, 관찰자의 운동은 분자(파면을 만나는 <span class="nw">빠르기)에</span> 들어가므로 <b><span class="nw">v<sub>s</sub> ≠ v<sub>o</sub></span>이면 맞바꿀 때 값이 달라집니다.</b> 거꾸로 f₀, v<sub>o</sub>, f<sub>A</sub>를 알면 <span class="nw">v<sub>s</sub> = v − f₀(v + v<sub>o</sub>) ÷ f<sub>A</sub></span>로 구할 수 있습니다.'
 };
-const qbodyHTML = (st, ans) => ans ? `<div class="answer">${ANS[st]}</div>` : `<ol>${QS[st].map(q => `<li>${q.replace(/\{vs\}/g, state.vs || DEF.vs)}</li>`).join('')}</ol>`;
+const qbodyHTML = (st, ans) => ans ? `<div class="answer">${ANS[st]}</div>` : `<ol>${QS[st].map(q => `<li>${q.replace(/\{vs\}/g, state.vs >= 10 ? state.vs : DEF.vs)}</li>`).join('')}</ol>`;   // {vs}: 1단계의 vₛ. 10 m/s보다 작으면 1·2단계 값이 0.1 Hz 자리에서 같아 보이므로 기본값(102)으로 물음
 
 /* f가 f₀보다 높게·낮게 들리는지: 막대와 같은 색(파랑 = 높게, 빨강 = 낮게) */
 function setTag(id, f, f0){
@@ -722,7 +728,7 @@ function setTag(id, f, f0){
   el.textContent = same ? 'f₀와 같음' : r > 1 ? '높게 들림' : '낮게 들림';
 }
 /* 판독 칸: 왼쪽 A, 오른쪽 B. 각 칸에 듣는 진동수(식과 대입), 그쪽 파장, 높낮이, 측정값 */
-function renderReadouts(st){
+let roH = {}, roW = {}; function renderReadouts(st){   // roH: 단계별 판독 칸 세 줄(이름·값·파장)의 높이, roW: 그 단계에서 대입식이 다음 줄로 넘어갈 때가 있으면 늘 다음 줄에. 값이나 '정지' ↔ '서로 가까워짐'이 바뀌어도 글이 움직이지 않게
   const o = outs(state, st), f0 = state.f0, vs = state.vs, vo = state.vo, L = st === 2 ? 'λ' : 'λ′';
   const who = st === 1 ? ['앞', '뒤'] : still(st) ? ['정지', '정지'] : st === 2 ? ['가까워짐', '멀어짐'] : ['서로 가까워짐', '서로 멀어짐'];
   const eq = st === 1 ? ['f<sub>A</sub> = f₀v ÷ (v − v<sub>s</sub>)', 'f<sub>B</sub> = f₀v ÷ (v + v<sub>s</sub>)']
@@ -736,7 +742,7 @@ function renderReadouts(st){
     $(`ro${id}`).textContent = fx(f, 1);
     $(`ro${id}Calc`).innerHTML = NW(calc[i]);
     $(`ro${id}Sub`).textContent = `파장 ${L} = ${fx(lam, 3)}${NB}m`;
-    setTag(`ro${id}Tag`, f, f0);
+    setTag(`ro${id}Tag`, f, f0); [...$(`ro${id}Box`).children].forEach((el, k) => { el.style.minHeight = roH[st] ? roH[st][k] + 'px' : ''; }); $(`ro${id}Calc`).style.flexBasis = roW[st] ? '100%' : '';
   });
 }
 /* 진동수 비교 막대: 모든 단계에서 막대 끝 = f₀의 2배(세로선 f₀는 늘 가운데). 세 줄을 한 번 만들고 값만 바꿔 단계를 바꿔도 부드럽게 변함 */
@@ -772,7 +778,7 @@ let liveCache = '', measDisp = [];
 const clearMeas = () => { measDisp = []; liveCache = ''; lamDisp = {}; };
 function updateLive(){
   obs.forEach((o, i) => {
-    const m = measured(o), el = $(i ? 'roBMeas' : 'roAMeas'), op = isFinite(m) ? '' : '0.45';
+    const m = measured(o), el = $(i ? 'roBMeas' : 'roAMeas'), op = isFinite(m) ? '' : '0.7';
     if (isFinite(m)) measDisp[i] = `측정 ${fx(m, 1)} Hz`;
     if (el.style.opacity !== op) el.style.opacity = op;                         // 이번 장면에서 두 파면이 닿기 전에는 직전 값을 흐리게
   });
@@ -809,14 +815,14 @@ function fixHeights(){
   keep($('legend'), [1, 2, 3].map(legendHTML));
   const qs = []; for (const st of [1, 2, 3]) for (const an of [false, true]) qs.push(qbodyHTML(st, an));
   keep($('qbody'), qs);
-  const ro = $('readouts'); ro.style.minHeight = ''; let mx = 0;
+  const ro = $('readouts'); ro.style.minHeight = ''; let mx = 0; roH = {}; roW = {};
   const save = { f0: state.f0, vs: state.vs, vo: state.vo };
   for (const st of [1, 2, 3]) for (const v of [b, s]){
     Object.assign(state, { f0: v.f0, vs: v.vs, vo: v.vo });
     $('roAMeas').textContent = '측정 1500.0 Hz'; $('roBMeas').textContent = '측정 1500.0 Hz';
-    renderReadouts(st); mx = Math.max(mx, Math.ceil(ro.getBoundingClientRect().height));
+    renderReadouts(st); roH[st] = [0, 1, 2].map(k => Math.max(roH[st] ? roH[st][k] : 0, ...['roABox', 'roBBox'].map(b => Math.ceil($(b).children[k].getBoundingClientRect().height)))); roW[st] = roW[st] || ['A', 'B'].some(id => { const n = $(`ro${id}`).getBoundingClientRect(); return $(`ro${id}Calc`).getBoundingClientRect().top > (n.top + n.bottom)/2; });
   }
-  Object.assign(state, save); liveCache = '';
+  for (const st of [1, 2, 3]){ renderReadouts(st); mx = Math.max(mx, Math.ceil(ro.getBoundingClientRect().height)); } Object.assign(state, save); liveCache = '';   // 줄 높이를 정한 뒤 칸 전체 높이를 잼
   renderReadouts(state.step); ro.style.minHeight = mx + 'px';
   const fc = $('fcmp'); fc.style.minHeight = ''; renderFcmp(1);                  // 막대가 3줄일 때 높이로 고정
   const fh = Math.ceil(fc.getBoundingClientRect().height); renderFcmp(state.step); fc.style.minHeight = fh + 'px';
@@ -939,7 +945,7 @@ function relayout(){
   if (root.classList.contains('one') && !fitLayout()){
     root.classList.remove('one'); side.style.zoom = ''; side.style.overflowY = ''; fixHeights();
   }
-  resizeAll();
+  if (side.style.overflowY) fixHeights(); resizeAll();                          // 조작 칸 안에 스크롤 막대가 생기면 글 폭이 줄어 줄바꿈이 달라지므로 그 폭에서 높이를 다시 잼
 }
 const ro = new ResizeObserver(() => { clearTimeout(relayoutTimer); relayoutTimer = setTimeout(relayout, 16); });
 ro.observe(document.querySelector('.workspace'));
