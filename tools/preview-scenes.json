@@ -307,5 +307,16 @@
         "wait": 600
       }
     ]
+  },
+  "doppler-effect": {
+    "viewport": {
+      "width": 1100,
+      "height": 825
+    },
+    "steps": [
+      {
+        "wait": 6000
+      }
+    ]
   }
 }

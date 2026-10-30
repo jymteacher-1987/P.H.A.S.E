@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<script src="../assets/js/browser-compat.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f8f3ef">
+<title>소리의 도플러 효과</title>
+<meta name="description" content="음원이 움직일 때, 관찰자가 움직일 때, 둘 다 움직일 때를 차례로 관찰하며 소리의 파면 간격(파장)과 관찰자가 듣는 진동수가 어떻게 달라지는지 확인하는 가상 실험.">
+<style>
+/* 색은 홈페이지(assets/css/style.css)의 토큰을 따름. 파면·음원·관찰자 색은 물리 표현이라 따로 둠 */
+:root{--bg:#f8f3ef;--ink:#342d2a;--muted:#6d625e;--faint:#9a8880;--line:#e7dad3;--paper:#fff;--soft:#fbf6f3;--tint:#f8f0ec;--accent:#875a49;--accent2:#a8877a;--cyan:#2f7f9c}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg)}
+body{padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}   /* 노치가 있는 휴대폰 가로: 내용이 노치 밑으로 들어가지 않게 */
+body{font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);word-break:keep-all;overflow-wrap:break-word;-webkit-text-size-adjust:100%}
+button,input{font:inherit;color:inherit}
+button{border:1px solid var(--line);border-radius:9px;background:#fff;padding:5px 10px;font-size:12.5px;font-weight:700;min-height:32px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button:hover{background:var(--tint)}button:active{background:#f2e7e1}
+button[aria-pressed=true]{background:var(--tint);border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);color:var(--accent)}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+
+.app{max-width:1800px;margin:auto;padding:10px 14px;display:flex;flex-direction:column;gap:8px}
+header{display:flex;justify-content:space-between;align-items:center;gap:10px;flex:none}
+h1{font-size:21px;letter-spacing:-.6px;margin:0;line-height:1.25;min-width:0}
+.actions{display:flex;gap:5px;flex:none}
+.icon{min-width:34px;font-size:15px;padding:4px 9px}
+
+.steps{flex:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.step{display:flex;align-items:center;gap:8px;text-align:left;padding:5px 11px;border-radius:12px;min-height:40px;min-width:0}
+.step .n{flex:none;width:22px;height:22px;border-radius:50%;background:#f2e7e1;color:var(--accent);display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}
+.step .tx{min-width:0;display:flex;flex-direction:column}
+.step .t{font-size:13.5px;font-weight:750;line-height:1.25;text-wrap:balance}
+.step .s{font-size:10.5px;font-weight:600;color:var(--muted);line-height:1.3}
+.step[aria-pressed=true]{background:var(--tint);border-color:#c9a99c;color:var(--ink);box-shadow:none}
+.step[aria-pressed=true] .n{background:var(--accent);color:#fff}
+
+.workspace{flex:1 1 auto;min-height:0;display:grid;gap:10px;grid-template-columns:minmax(0,1fr)}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;min-width:0}
+
+/* ---------- 장면 ---------- */
+.experiment{display:flex;flex-direction:column;overflow:hidden;min-height:0}
+.part-head{flex:none;display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;column-gap:10px;padding:7px 13px 3px;font-size:12px;font-weight:750;color:#5a4a43;line-height:1.35}
+.part-head .n{font-size:10.5px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
+.scene{flex:1 1 0;min-height:150px;position:relative;margin:0 8px;border-radius:9px;overflow:hidden;background:#101318}
+.scene canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
+.legend{flex:none;display:flex;flex-wrap:wrap;align-content:flex-start;gap:3px 14px;margin:5px 12px 0;font-size:11.5px;color:var(--muted);line-height:1.4}
+.legend .it{display:inline-flex;align-items:center;gap:5px}
+.chip{flex:none;display:inline-block;width:26px;height:14px;border-radius:3px;background:#101318;position:relative}
+.chip::after{content:"";position:absolute;left:5px;right:5px;top:6px;border-top:2px solid var(--c);box-sizing:border-box}
+.chip.arw::after{content:"↔";border:0;left:0;right:0;top:0;text-align:center;font-size:12px;line-height:14px;font-weight:800;color:var(--c)}
+.chip.pt::after{border:0;left:10px;right:10px;top:4px;height:6px;border-radius:50%;background:var(--c)}
+.chip.ring::after{left:7px;right:7px;top:1px;height:12px;border:1.5px solid var(--c);border-radius:50%}
+.chip.ring.hl::after{border-width:2.5px}
+.caption{flex:none;margin:6px 8px;padding:6px 10px;border:1px solid #eadfd8;border-radius:9px;background:var(--soft);font-size:13px;line-height:1.45;display:flex;align-items:center;justify-content:center;text-align:center}
+.readouts{flex:none;display:flex;flex-wrap:wrap;border-top:1px solid var(--line);background:#fdfaf8}
+.readout{flex:1 1 260px;padding:6px 14px;min-width:0}
+.readout+.readout{border-left:1px solid var(--line)}
+.readout label{display:block;font-size:11.5px;color:var(--muted);line-height:1.3}
+.readout label b{font-size:1.13em;font-weight:800;color:var(--ink)}
+.readout .val{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:6px}
+.readout strong{font-size:22px;font-variant-numeric:tabular-nums;font-weight:800;letter-spacing:-.5px;color:var(--accent)}
+.readout .u{font-size:12px;color:var(--muted);font-weight:600}
+.readout .calc{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.readout .sub{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:8px;line-height:1.4;min-height:1.4em}
+.readout .tag{font-size:12px;font-weight:800;line-height:1.5;padding:0 7px;border-radius:7px;white-space:nowrap}
+.readout .tag:empty{display:none}
+.readout .tag.up{background:#2f7f9c1f;color:#22657d}
+.readout .tag.dn{background:#c0503e1f;color:#a33a2a}
+.readout .tag.same{background:#b9a69d33;color:var(--muted)}
+.readout .meas{color:#33697e;font-weight:600;display:inline-block;min-width:7.6em;margin-left:auto;text-align:right;transition:opacity .3s}
+.nw{white-space:nowrap}
+sub{font-size:.72em;line-height:0;position:relative;bottom:-.22em;vertical-align:baseline}
+
+/* ---------- 조작 칸 ---------- */
+.controls{min-height:0;min-width:0;overflow:hidden;padding:12px 15px;display:flex;flex-direction:column;gap:10px}
+.grp{min-width:0}
+.control+.control{border-top:1px solid var(--line);margin-top:6px;padding-top:6px}
+.control-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-size:13.5px;font-weight:750;line-height:1.3}
+.control-head label{min-width:0}
+.control-head small{font-size:10.5px;font-weight:600;color:var(--muted);margin-left:3px;display:inline-block}
+.control-head output{flex:none;font-size:16px;font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--accent)}
+.control.fixed .control-head output{color:var(--muted);font-size:14px}
+.control.off .control-head output{color:var(--faint)}
+.control.off .range{opacity:.35;cursor:default}
+.range{display:block;width:100%;height:24px;margin:2px 0 0;appearance:none;-webkit-appearance:none;background:transparent;touch-action:pan-y;cursor:pointer}
+.range::-webkit-slider-runnable-track{height:7px;border-radius:9px;background:#eadfd8}
+.range::-moz-range-track{height:7px;border-radius:9px;background:#eadfd8}
+.range::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:18px;height:18px;margin-top:-5.5px;border-radius:50%;border:3px solid #fff;background:var(--accent);box-shadow:0 1px 4px #5a3d3155}
+.range::-moz-range-thumb{width:13px;height:13px;border-radius:50%;border:3px solid #fff;background:var(--accent);box-shadow:0 1px 4px #5a3d3155}
+.sub-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;column-gap:8px;font-size:12.5px;font-weight:750;line-height:1.3;margin-bottom:4px}
+.sub-head small{font-size:10.5px;font-weight:600;color:var(--muted)}
+.sub-head+.row+.sub-head{margin-top:9px}
+.row{display:flex;gap:5px}
+.row>button{flex:1;padding:4px 2px;line-height:1.2}
+.row.off>button{opacity:.45;cursor:default}
+.qbox{border:1px solid #eadfd8;background:var(--soft);border-radius:10px;padding:8px 11px;font-size:12px;line-height:1.55}
+.qbox .qt{font-size:12.5px;font-weight:750}
+.qbody{margin:3px 0 6px}
+.qbody ol{margin:0;padding-left:18px}
+.qbody .answer{color:#5e3f33}
+.qbody .answer b{color:var(--accent)}
+.qbox button{min-height:28px;font-size:11.5px;padding:3px 9px}
+.qbox .row>button{white-space:nowrap;padding:3px 5px}
+
+/* 진동수 비교 막대: 모든 단계에서 같은 축척(막대 끝 = f₀의 2배, 세로선 = f₀). 이름 칸은 모든 단계의 가장 긴 이름 폭을 미리 잡아 두어 단계를 바꿔도 막대의 축척(시작점과 길이)이 그대로 */
+.fcmp{display:grid;grid-template-columns:max-content minmax(0,1fr) max-content;align-items:center;gap:7px 8px;font-size:13px;font-weight:800;line-height:1.25}
+.fr{display:contents}
+.fr .nm{color:var(--ink);white-space:nowrap;min-width:5.8em}
+.fr .bar{position:relative;height:16px;border-radius:8px;background:#f1e8e3}
+.fr .bar i{position:absolute;left:0;top:0;bottom:0;border-radius:8px;transition:width .3s ease,background-color .3s ease}
+.fr .bar b{position:absolute;top:-4px;bottom:-4px;margin-left:-1px;border-left:2px solid var(--ink)}
+.fr .bar.over i{border-radius:8px 0 0 8px}
+.fr .bar.over::after{content:'';position:absolute;right:-7px;top:50%;margin-top:-5px;border-left:6px solid #7d6d66;border-top:5px solid transparent;border-bottom:5px solid transparent}
+.fr .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* ---------- 도움말 ---------- */
+.modal{position:fixed;inset:0;z-index:50;background:rgba(52,45,42,.45);display:flex;align-items:center;justify-content:center;padding:14px}
+.help-card{background:#fff;border-radius:16px;max-width:760px;width:100%;max-height:92vh;overflow:auto;padding:16px 20px;font-size:13.5px;line-height:1.7;box-shadow:0 20px 50px rgba(52,45,42,.25)}
+.help-head{display:flex;justify-content:space-between;align-items:center}
+.help-card h2{font-size:18px;margin:0}
+.help-card h3{font-size:14.5px;margin:12px 0 2px;color:var(--accent)}
+.help-card p{margin:6px 0}
+.help-card .eq{display:block;text-align:center;font-size:15px;margin:4px 0;font-weight:700;color:var(--accent)}
+.help-card details{margin-top:10px;font-size:12.5px;color:#5a4a43}
+.help-card summary{cursor:pointer;font-weight:700}
+.help-card .refs{font-size:11.5px;color:var(--muted)}
+.help-card a{color:var(--accent)}
+
+/* 기본(휴대폰 세로처럼 좁은 화면, 또는 한 화면에 넣으면 장면이 너무 작아지는 크기): 위에서 아래로 쌓고 스크롤 */
+.scene{flex:none;height:300px}
+.controls{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+.rotate-hint{display:none;flex:none;margin:0;padding:6px 10px;border-radius:9px;background:var(--tint);color:var(--accent);font-size:12px;font-weight:700;text-align:center}
+@media (max-width:519px) and (orientation:portrait){ .rotate-hint{display:block} h1{font-size:17px} .step{padding:4px 7px;gap:5px} .step .s{display:none} .step .t{font-size:11.5px} .scene{height:230px} }
+@media (min-width:720px){
+ html:not(.one) .controls{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) minmax(0,1fr);gap:0 14px;padding:10px 14px}
+ html:not(.one) .g-vw,html:not(.one) .g-ob{border-left:1px solid var(--line);padding-left:14px}
+}
+/* 아래의 한 화면 배치는 script(relayout)가 장면 높이와 조작 칸 축소 비율을 재어 보고 html 에 .one 을 붙였을 때만 쓴다 */
+/* 가로가 넓은 화면: 왼쪽 장면, 오른쪽 조작 칸 */
+@media (min-aspect-ratio:6/5) and (min-width:600px) and (min-height:300px){
+ html.one,.one body{height:100%;overflow:hidden}
+ .one .app{height:100vh;height:100dvh}
+ .one .workspace{grid-template-columns:minmax(0,1fr) clamp(260px,27vw,360px);grid-template-rows:minmax(0,1fr)}
+ .one .experiment,.one .controls{height:100%}
+ .one .scene{flex:1 1 0;height:auto}
+ .one .controls{display:flex;flex-direction:column;gap:0}
+ .one .g-vw{border-top:1px solid var(--line);margin-top:8px;padding-top:8px}
+ .one .g-ob{flex:1 0 auto;display:flex;flex-direction:column;justify-content:flex-end;margin-top:10px}
+}
+/* 세로로 긴 화면: 위에 장면, 아래에 조작 칸 (한 화면) */
+@media (max-aspect-ratio:1199/1000) and (min-width:520px) and (min-height:540px){
+ html.one,.one body{height:100%;overflow:hidden}
+ .one .app{height:100vh;height:100dvh}
+ .one .workspace{grid-template-rows:minmax(0,1fr) auto}
+ .one .experiment{height:100%}
+ .one .scene{flex:1 1 0;height:auto}
+ .one .controls{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) minmax(0,1fr);gap:0 14px;padding:10px 14px}
+ .one .g-vw,.one .g-ob{border-left:1px solid var(--line);padding-left:14px}
+}
+@media (max-aspect-ratio:1199/1000) and (min-width:520px) and (min-height:540px) and (max-width:719px){
+ .one .app{padding:8px 10px;gap:6px}
+ .one .controls{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"sl vw" "sl ob";gap:8px 12px;padding:9px 11px}
+ .one .g-sl{grid-area:sl}.one .g-vw{grid-area:vw}.one .g-ob{grid-area:ob}
+ .one .g-vw,.one .g-ob{padding-left:12px}
+ .one .step{padding:4px 8px;gap:6px}.one .step .s{display:none}.one .step .t{font-size:12px}
+ .one h1{font-size:17px}
+}
+/* 낮은 화면은 글자와 여백을 줄임 (한 화면 배치에서만) */
+@media (max-height:660px){
+ .one .app{padding:6px 10px;gap:6px}.one h1{font-size:17px}
+ .one .actions button{min-height:28px;padding:3px 7px}
+ .one .step{min-height:32px;padding:3px 10px}.one .step .s{display:none}.one .step .t{font-size:12.5px}
+ .one .part-head{padding:5px 11px 2px;font-size:11px}
+ .one .caption{font-size:12px;padding:4px 8px;margin:5px 8px}
+ .one .readout{padding:4px 10px}.one .readout strong{font-size:18px}
+ .one .controls{padding:9px 12px}.one .control+.control{margin-top:4px;padding-top:4px}
+ .one .range{height:22px}
+ .one .qbox{padding:6px 9px;line-height:1.45}
+}
+@media (max-height:520px){
+ .one .app{padding:4px 8px;gap:4px}.one h1{font-size:15px}
+ .one .actions button{min-height:24px;padding:2px 6px;font-size:12px}
+ .one .step{min-height:26px;padding:2px 8px;gap:5px}.one .step .n{width:18px;height:18px;font-size:10.5px}.one .step .t{font-size:11.5px}
+ .one .scene{min-height:110px}
+ .one .legend{font-size:10.5px;margin-top:3px}
+ .one .caption{font-size:11px;padding:3px 7px;margin:4px 8px;line-height:1.35}
+ .one .readout{padding:3px 9px}.one .readout label{font-size:10px}.one .readout strong{font-size:15px}.one .readout .calc{font-size:10.5px}.one .readout .tag{font-size:10.5px}
+ .one .control-head{font-size:12px}.one .control-head output{font-size:14px}
+ .one .row>button,.one .qbox button{min-height:26px}
+}
+@media (min-aspect-ratio:6/5) and (min-width:600px) and (min-height:300px) and (max-height:430px){
+ .one .part-head{display:none}
+ .one .scene{min-height:96px;margin-top:4px}
+ .one .legend{font-size:10px;margin:3px 10px 0;gap:1px 10px}.one .chip{width:22px;height:12px}.one .chip.arw::after{line-height:12px;font-size:11px}.one .chip.ring::after{left:5.5px;right:5.5px;top:.5px;height:11px}.one .chip.pt::after{left:8px;right:8px;top:3px}
+ .one .caption{font-size:10.5px;padding:2px 6px;margin:3px 6px;line-height:1.3}
+ .one .readout{padding:2px 8px;flex-basis:0}.one .readout label{font-size:9.5px}.one .readout strong{font-size:14px}.one .readout .calc{font-size:9.5px}.one .readout .tag{font-size:9.5px;padding:0 5px}
+ .one .controls{padding:6px 9px}.one .control-head{font-size:11.5px}.one .control-head small{font-size:9.5px}.one .control-head output{font-size:13px}
+ .one .range{height:20px}.one .sub-head{font-size:11px;margin-bottom:2px}
+ .one .row>button,.one .qbox button{min-height:24px;font-size:11px}
+ .one .qbox{font-size:11px;line-height:1.35;padding:5px 8px}.one .qbox .qt{font-size:11.5px}
+}
+/* 넓은 노트북·모니터: 진동수 비교 막대를 굵게(글자 크기와 막대 길이는 그대로) */
+@media (min-aspect-ratio:6/5) and (min-width:1400px) and (min-height:840px){ .one .fcmp{row-gap:10px} .one .fr .bar{height:22px;border-radius:11px} .one .fr .bar i{border-radius:11px} .one .fr .bar.over i{border-radius:11px 0 0 11px} .one .fr .bar b{top:-6px;bottom:-6px} }
+/* 큰 화면(1920 프로젝터·전자칠판): 글자와 버튼을 키우고 조작 칸을 넓힘 (한 화면 배치에서만) */
+@media (min-aspect-ratio:6/5) and (min-width:1500px) and (min-height:880px){
+ .one h1{font-size:24px}
+ .one .icon{font-size:17px;min-width:40px;min-height:38px}
+ .one .step{min-height:46px}.one .step .n{width:25px;height:25px;font-size:13.5px}.one .step .t{font-size:15.5px}.one .step .s{font-size:12.5px}
+ .one .workspace{grid-template-columns:minmax(0,1fr) 420px}
+ .one .part-head{font-size:13.5px}.one .part-head .n{font-size:12.5px}
+ .one .legend{font-size:13.5px}
+ .one .caption{font-size:15px}
+ .one .readout label{font-size:13.5px}.one .readout strong{font-size:28px}.one .readout .u,.one .readout .calc{font-size:14px}.one .readout .tag{font-size:13.5px}
+ .one .control-head{font-size:15.5px}.one .control-head output{font-size:19px}.one .control.fixed .control-head output{font-size:16px}
+ .one .control-head small,.one .sub-head small{font-size:12.5px}.one .sub-head{font-size:14.5px}
+ .one .row>button,.one .qbox button{font-size:14px;min-height:38px}
+ .one .fcmp{font-size:14px}
+ .one .qbox{font-size:14px}.one .qbox .qt{font-size:15px}
+ .one .help-card{max-width:900px;font-size:16px}.one .help-card h2{font-size:21px}.one .help-card h3{font-size:17px}.one .help-card .eq{font-size:18px}
+}
+@media (min-aspect-ratio:6/5) and (min-width:1500px) and (min-height:960px){ .one .fcmp{row-gap:13px} .one .fr .bar{height:28px;border-radius:14px} .one .fr .bar i{border-radius:14px} .one .fr .bar.over i{border-radius:14px 0 0 14px} .one .fr .bar b{top:-7px;bottom:-7px} .one .readout label{font-size:15px} .one .readout .u,.one .readout .calc{font-size:15.5px} .one .readout .tag{font-size:15.5px} }
+/* 조작 칸이 좁은 화면: 소리 버튼은 짧은 이름(끄기 | 음원 | A | B) */
+@media (min-width:520px) and (max-width:1099px){ #soundRow .lg{display:none} }
+@media (min-width:520px) and (max-width:899px){ .fr .lg2{display:none} .fr .nm{min-width:0} }
+@media (max-height:520px){ .one .fcmp{font-size:12px;gap:5px 7px}.one .fr .bar{height:13px} }
+@media (max-height:430px){ .one .fcmp{font-size:11px;gap:4px 6px}.one .fr .bar{height:11px}.one .fr .bar b{top:-3px;bottom:-3px} }
+@media (max-height:355px){ .one .legend{display:none} }   /* 주소창이 보이는 휴대폰 가로: 범례(도움말에도 있음)를 접어 장면 높이를 지킴 */
+/* 터치 화면: 손잡이와 버튼을 손가락 크기로 */
+@media (any-pointer:coarse) and (min-height:700px){ html .range{height:36px;margin:-3px 0 -7px} .range::-webkit-slider-thumb{width:26px;height:26px;margin-top:-9.5px} .range::-moz-range-thumb{width:20px;height:20px} html .row>button{min-height:38px} html .qbox button{min-height:36px} html .actions .icon{min-width:42px;min-height:38px} }
+/* 휴대폰 가로: 장면·안내·판독값은 한 화면에 두고 조작 칸만 칸 안에서 스크롤. 막대를 슬라이더 바로 뒤에 */
+.one .controls{overscroll-behavior:contain;scrollbar-width:thin}
+@media (min-aspect-ratio:6/5) and (min-width:600px) and (max-height:430px){ .one .g-vw{display:flex;flex-direction:column} .one #fcmpHead,.one #fcmp{order:-1} .one #fcmpHead{margin-top:0} .one #fcmp{margin-bottom:9px} }
+@media (any-pointer:coarse) and (min-height:380px) and (max-height:430px){ .one .controls .range{height:34px} .one .controls .range::-webkit-slider-thumb{width:24px;height:24px;margin-top:-8.5px} .one .controls .range::-moz-range-thumb{width:20px;height:20px} .one .controls .row>button,.one .qbox button{min-height:36px} }
+@media (orientation:landscape) and (max-height:500px){ html:not(.one) .step .s{display:none} html:not(.one) .scene{height:calc(100vh - 130px);height:calc(100dvh - 130px);min-height:200px} }
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+ <h1>소리의 도플러 효과</h1>
+ <div class="actions">
+  <button id="playBtn" class="icon" title="멈춤/재생" aria-label="재생 멈추기">⏸</button>
+  <button id="stepBtn" class="icon" title="한 주기만 진행" aria-label="멈추고 한 주기만 진행">⏭</button>
+  <button id="resetBtn" class="icon" title="처음 값으로" aria-label="처음 값으로 되돌리기">↻</button>
+  <button id="helpBtn" class="icon" aria-label="원리와 관찰 방법 설명">?</button>
+ </div>
+</header>
+
+<p class="rotate-hint">휴대폰을 가로로 돌리면 파면을 더 넓게 볼 수 있습니다.</p>
+<nav class="steps" id="steps" aria-label="관찰 단계">
+ <button class="step" data-step="1" aria-pressed="true"><span class="n">1</span><span class="tx"><span class="t">음원이 움직일 때</span><span class="s">관찰자 정지 · f′ = f₀v ÷ (v ∓ v<sub>s</sub>)</span></span></button>
+ <button class="step" data-step="2" aria-pressed="false"><span class="n">2</span><span class="tx"><span class="t">관찰자가 움직일 때</span><span class="s">음원 정지 · f′ = f₀(v ± v<sub>o</sub>) ÷ v</span></span></button>
+ <button class="step" data-step="3" aria-pressed="false"><span class="n">3</span><span class="tx"><span class="t">둘 다 움직일 때</span><span class="s">f′ = f₀(v ± v<sub>o</sub>) ÷ (v ∓ v<sub>s</sub>)</span></span></button>
+</nav>
+
+<main class="workspace">
+ <section class="card experiment" id="exp" aria-label="실험 장면">
+  <div class="part-head"><span>소리의 파면(1주기마다 하나) · 위에서 본 모습</span><span class="n" id="slowNote">실제보다 150배 느리게 재생</span></div>
+  <div class="scene" id="sceneBox"><canvas id="scene" role="img" aria-label="음원과 관찰자, 퍼져 나가는 소리의 파면(위에서 본 모습)"></canvas></div>
+  <div class="legend" id="legend"></div>
+  <div class="caption" id="caption" role="status"></div>
+  <div class="readouts" id="readouts">
+   <div class="readout" id="roABox"><label id="roALabel">–</label><div class="val"><strong id="roA">–</strong><span class="u">Hz</span><span class="calc" id="roACalc"></span></div><div class="sub"><span class="calc" id="roASub"></span><span class="tag" id="roATag"></span><span class="calc meas" id="roAMeas"></span></div></div>
+   <div class="readout" id="roBBox"><label id="roBLabel">–</label><div class="val"><strong id="roB">–</strong><span class="u">Hz</span><span class="calc" id="roBCalc"></span></div><div class="sub"><span class="calc" id="roBSub"></span><span class="tag" id="roBTag"></span><span class="calc meas" id="roBMeas"></span></div></div>
+  </div>
+ </section>
+
+ <section class="card controls" id="side" aria-label="조건 바꾸기">
+  <div class="grp g-sl">
+   <div class="control">
+    <div class="control-head"><label for="f0S">음원의 진동수 f₀</label><output id="f0Out" for="f0S">340 Hz</output></div>
+    <input class="range" id="f0S" type="range" min="200" max="500" step="10" value="340" aria-label="음원의 진동수, 헤르츠">
+   </div>
+   <div class="control" id="vsBlock">
+    <div class="control-head"><label for="vsS">음원의 속력 v<sub>s</sub></label><output id="vsOut" for="vsS">102 m/s</output></div>
+    <input class="range" id="vsS" type="range" min="0" max="170" step="1" value="102" aria-label="음원의 속력, 초속 미터">
+   </div>
+   <div class="control" id="voBlock">
+    <div class="control-head"><label for="voS">관찰자의 속력 v<sub>o</sub></label><output id="voOut" for="voS">68 m/s</output></div>
+    <input class="range" id="voS" type="range" min="0" max="170" step="1" value="68" aria-label="관찰자의 속력, 초속 미터">
+   </div>
+   <div class="control fixed">
+    <div class="control-head"><label>소리의 속력 v <small>공기 중 · 고정</small></label><output>340 m/s</output></div>
+   </div>
+  </div>
+  <div class="grp g-vw">
+   <div class="sub-head"><span>실제보다 느리게</span><small>⏭: 한 주기씩</small></div>
+   <div class="row" id="slowRow" role="group" aria-label="재생 빠르기">
+    <button data-slow="60" aria-pressed="false" aria-label="실제보다 60배 느리게">60배</button><button data-slow="150" aria-pressed="true" aria-label="실제보다 150배 느리게">150배</button><button data-slow="400" aria-pressed="false" aria-label="실제보다 400배 느리게">400배</button>
+   </div>
+   <div class="sub-head"><span>소리로 들어 보기</span></div>
+   <div class="row" id="soundRow" role="group" aria-label="소리로 들어 보기">
+    <button data-sound="off" aria-pressed="true">끄기</button><button data-sound="src" aria-pressed="false" aria-label="음원의 소리 f₀">음원<span class="lg"> f₀</span></button><button data-sound="A" id="sndA" aria-pressed="false" aria-label="관찰자 A가 듣는 소리"><span class="lg">관찰자 </span>A</button><button data-sound="B" id="sndB" aria-pressed="false" aria-label="관찰자 B가 듣는 소리"><span class="lg">관찰자 </span>B</button>
+   </div>
+   <div class="sub-head" id="fcmpHead"><span>진동수 비교</span><small>세로선 = f₀ · 파랑 높게 · 빨강 낮게</small></div>
+   <div class="fcmp" id="fcmp" role="img" aria-label="관찰자가 듣는 진동수와 음원의 진동수를 비교한 막대"></div>
+  </div>
+  <div class="grp g-ob">
+   <div class="qbox">
+    <div class="qt" id="qTitle">관찰해 볼 것</div>
+    <div class="qbody" id="qbody"></div>
+    <div class="row">
+     <button id="ansBtn" aria-expanded="false">정리 보기</button>
+     <button id="nextBtn">다음 단계 →</button>
+    </div>
+   </div>
+  </div>
+ </section>
+</main>
+</div>
+
+<div class="modal" id="help" hidden>
+ <section class="help-card" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+  <div class="help-head"><h2 id="helpTitle">이 실험을 읽는 법</h2><button id="closeHelp">닫기</button></div>
+  <p>소리는 공기(매질) 속에서 <b>v = 340 m/s</b>로 퍼집니다. 이 속력은 매질이 정하는 <b>공기에 대한 속력</b>이라 음원이나 관찰자가 움직여도 변하지 않습니다. 다만 움직이는 관찰자에게는 파면이 <b class="nw">v + v<sub>o</sub></b>(다가갈 때)나 <b class="nw">v − v<sub>o</sub></b>(멀어질 때)의 상대 속력으로 지나갑니다. 그림의 흰 원은 1주기(T = 1 ÷ f₀)마다 하나씩 나온 <b>파면</b>(같은 위상의 면)을 위에서 본 모습이고, 이웃한 파면 사이 거리가 <b>파장</b>입니다. 실제보다 느리게(기본 150배, 60배·400배로 바꿀 수 있음) 재생합니다. ⏭ 버튼을 누르면 재생이 멈추고, 누를 때마다 지금 재생 빠르기 그대로 정확히 한 주기만큼 움직인 뒤 멈춥니다(파면이 하나씩 더 나옵니다). 각 단계에서 값을 <b>하나만</b> 바꾸면 장면 아래 안내 칸에 바꾸기 전과 후의 값이 함께 나옵니다. 그 아래 진동수 칸의 "측정"은 이웃한 두 파면이 관찰자에게 닿은 시각의 차로 구한 진동수로, 식으로 구한 값과 같은지 확인하는 용도입니다.</p>
+
+  <h3>1단계 · 음원이 움직일 때</h3>
+  <p>파면은 <b>나온 순간의 음원 위치</b>를 중심으로 같은 속력 v로 퍼집니다. 한 주기 동안 파면은 vT만큼 퍼지고 음원은 v<sub>s</sub>T만큼 따라가므로, 음원이 다가가는 앞쪽에서는 파면이 촘촘해지고 뒤쪽에서는 성깁니다. 음원이 움직이는 직선 위에서 파장은 다음과 같습니다.</p>
+  <span class="eq"><span class="nw">앞(A 쪽) λ′ = (v − v<sub>s</sub>) ÷ f₀</span>, <span class="nw">뒤(B 쪽) λ′ = (v + v<sub>s</sub>) ÷ f₀</span></span>
+  <p>서 있는 관찰자에게는 이 파면이 v로 지나가므로 듣는 진동수는 f′ = v ÷ λ′입니다.</p>
+  <span class="eq"><span class="nw">앞 f<sub>A</sub> = f₀ v ÷ (v − v<sub>s</sub>) &gt; f₀</span>, <span class="nw">뒤 f<sub>B</sub> = f₀ v ÷ (v + v<sub>s</sub>) &lt; f₀</span></span>
+  <p>f<sub>A</sub> ÷ f₀ = v ÷ (v − v<sub>s</sub>)이므로 비율은 f₀와 관계없이 v<sub>s</sub>만으로 정해집니다. v<sub>s</sub>가 v에 가까워지면 앞쪽 파장이 0에 가까워져 f<sub>A</sub>가 매우 커지고, v<sub>s</sub> = v가 되면 앞쪽 파면이 음원 자리에 한데 겹치고, v<sub>s</sub> &gt; v이면 충격파가 생깁니다(이 실험은 <span class="nw">v<sub>s</sub> &lt; v</span>만 다룹니다).</p>
+  <p>앞뒤에 서 있는 두 관찰자가 잰 f<sub>A</sub>, f<sub>B</sub>만 알면 f₀를 몰라도 <span class="nw">v<sub>s</sub> = v(f<sub>A</sub> − f<sub>B</sub>) ÷ (f<sub>A</sub> + f<sub>B</sub>)</span>로 음원의 속력을 구할 수 있습니다(기본값: <span class="nw">340 × 224.2 ÷ 747.2 ≈ 102 m/s</span>). 실제 속력 측정 장치는 쏜 파동이 움직이는 물체에 반사되어 돌아올 때의 진동수 변화를 잽니다.</p>
+
+  <h3>2단계 · 관찰자가 움직일 때</h3>
+  <p>음원 쪽으로 움직이는 A(가까워짐)와 음원 반대쪽으로 움직이는 B(멀어짐)를 함께 봅니다. 음원이 서 있으면 공기 속 <b>파장 λ = v ÷ f₀는 어느 쪽이나 그대로</b>입니다. 관찰자가 v<sub>o</sub>로 다가가면 파면이 관찰자를 상대 속력 v + v<sub>o</sub>로 지나가므로, 1초 동안 (v + v<sub>o</sub>) ÷ λ개의 파면을 만납니다.</p>
+  <span class="eq"><span class="nw">가까워질 때 f<sub>A</sub> = f₀ (v + v<sub>o</sub>) ÷ v</span>, <span class="nw">멀어질 때 f<sub>B</sub> = f₀ (v − v<sub>o</sub>) ÷ v</span></span>
+  <p>같은 속력 u로 움직여도 1단계와 값이 다릅니다. 가까워질 때는 음원이 움직이는 쪽이 더 높게 들리고(<span class="nw">v ÷ (v − u) &gt; (v + u) ÷ v</span>), 멀어질 때는 관찰자가 움직이는 쪽이 더 낮게 들립니다(<span class="nw">(v − u) ÷ v &lt; v ÷ (v + u)</span>).</p>
+
+  <h3>3단계 · 둘 다 움직일 때</h3>
+  <p>음원이 오른쪽으로 움직이고, 앞의 A는 음원 쪽으로(서로 가까워짐), 뒤의 B는 음원 반대쪽으로(서로 멀어짐) 움직입니다. 음원의 운동은 <b>파장을 바꾸어 분모</b>에, 관찰자의 운동은 <b>파면을 만나는 빠르기를 바꾸어 분자</b>에 들어갑니다.</p>
+  <span class="eq">f′ = f₀ (v ± v<sub>o</sub>) ÷ (v ∓ v<sub>s</sub>)</span>
+  <p>분자의 부호는 관찰자의 운동이, 분모의 부호는 음원의 운동이 따로 정합니다. 각자 상대 쪽으로 움직이면 위 부호, 상대에게서 멀어지는 쪽으로 움직이면 아래 부호이므로, 이 실험의 A(서로 가까워짐)는 둘 다 위 부호, B(서로 멀어짐)는 둘 다 아래 부호입니다. v<sub>s</sub>는 분모에, v<sub>o</sub>는 분자에 들어가므로 v<sub>s</sub>와 v<sub>o</sub>가 다를 때 두 값을 맞바꾸면 <span class="nw">f′가</span> 달라집니다. 음원과 관찰자는 모두 같은 직선 위에서 움직이며, 관찰자가 음원을 지나치기 전에 장면이 처음으로 돌아갑니다.</p>
+
+  <h3>화살표와 글자 읽기</h3>
+  <p>노란 화살표는 원들의 중심을 잇는 직선(두 파면에 수직인 방향) 위에서 굵은 원과 바로 이웃한 파면 사이, 곧 <b>그쪽의 파장</b>입니다. 화살표는 굵은 원과 함께 나타나 바깥으로 움직이다가 함께 사라지므로 A 쪽과 B 쪽 화살표는 늘 같이 보이며, 그 길이(그림에서 잰 <span class="nw">거리)는</span> 장면 위쪽 모서리의 노란 글자로 읽습니다. 오른쪽 위가 A 쪽(1단계의 앞), 왼쪽 위가 B 쪽(1단계의 <span class="nw">뒤)입니다</span>. 음원의 진동수 f₀나 속력 v<sub>s</sub>를 바꾸면 그 뒤에 나온 파면부터 간격이 달라지므로(관찰자의 속력 v<sub>o</sub>는 파면 간격을 바꾸지 않음), 이미 퍼져 나간 파면이 지나가는 동안에는 노란 글자와 "측정" 진동수가 식으로 구한 값과 잠시 다를 수 있습니다.</p>
+  <p>주황 작은 점은 각 파면이 나온 순간의 음원 위치, 곧 그 원의 중심입니다. 음원이 움직여도 이미 나온 파면의 중심은 따라 움직이지 않으므로, 음원이 움직이는 쪽으로 원들이 몰립니다. 굵게 그린 원은 파면 하나를 골라 강조한 것입니다. 그 파면이 나온 뒤 같은 시간 동안 중심에서 모든 방향으로 같은 거리만큼 퍼졌으므로(8방향 화살표의 길이가 같음), 소리는 <b>모든 방향으로 같은 속력(340 m/s)</b>으로 퍼집니다. 장면 맨 아래 띠는 같은 축척으로 그린 속력이며, 음원과 관찰자는 소리보다 느립니다.</p>
+  <p>조작 칸의 "진동수 비교" 막대는 모든 단계에서 같은 축척(막대 끝 = f₀의 2배)으로 그렸고, 그보다 크면 끝에 ▸가 붙습니다. 세로선이 f₀이고, f₀보다 높으면 파랑, 낮으면 빨강입니다. 관찰자 둘레의 고리는 파면이 닿을 때마다 퍼지며 사라지므로, 고리가 빛나는 빠르기는 그 관찰자가 듣는 진동수에 비례합니다(150배·400배에서 세어 보기 쉬움). 음원이 다가오는 동안에도 이 빠르기는 점점 빨라지지 않고 일정합니다. 느리게 재생한 화면에서 파면이 1초에 4번보다 자주 닿으면 고리는 깜빡이지 않고 켜진 채로 있습니다.</p>
+
+  <details><summary>이 모형에서 단순화한 내용</summary>
+   <p>공기는 정지해 있고(바람 없음), 음원은 점음원이며, 음원과 관찰자는 같은 직선 위에서 등속으로 움직입니다. 실제 파면은 구면이고 그림은 그 단면(원)입니다. 장면이 끝나면 화면이 잠깐 어두워졌다가 처음부터 다시 시작하며(멈춘 동안에는 끝 장면을 그대로 보여 줌), 음원은 그때 소리를 내기 시작합니다. 새 파면이 관찰자에게 닿기 전에는 직전 측정값을 흐리게 보여 줍니다(값을 바꾼 뒤라면 "측정 중…"). 멀리 퍼진 파면은 보기 편하도록 흐리게 그렸습니다(세기를 계산한 것은 아닙니다). 음원의 속력은 소리의 속력보다 작은 범위(0 ~ 170 m/s)만 다루고, 소리의 속력은 340 m/s(약 15 °C의 공기)로 고정했습니다. 그림의 가로 폭은 30 m이고 아래 자의 눈금과 같은 실제 비율입니다. "소리로 들어 보기"는 식으로 구한 진동수의 순음을 모두 같은 진폭의 신호로 재생하는 것으로, 실제 음원 소리와 음색은 다릅니다. 낮은 음이 더 작게 들린다면 스피커와 귀의 특성 때문입니다.</p>
+  </details>
+  <p class="refs">참고: 2022 개정 교육과정 역학과 에너지 [12역학03-03] · <a href="https://openstax.org/books/university-physics-volume-1/pages/17-7-the-doppler-effect" target="_blank" rel="noopener noreferrer">도플러 효과</a> (OpenStax, <i>University Physics Volume 1</i>) · 기록·저장·외부 전송은 없습니다.</p>
+ </section>
+</div>
+
+<script>
+"use strict";
+/* =====================================================================
+   물리 모형: 정지한 공기(매질) 속에서 음원과 관찰자가 같은 직선 위를 등속으로 움직인다.
+   파면은 나온 순간의 음원 위치를 중심으로 속력 V로 퍼진다.
+   관찰자가 듣는 진동수  f′ = f₀ (V + vₒ) / (V − vₛ)
+     vₛ: 음원이 관찰자 쪽으로 다가가는 속도(+), vₒ: 관찰자가 음원 쪽으로 다가가는 속도(+)
+   (node 검증 스크립트가 PHYS-BEGIN ~ PHYS-END 구간만 떼어 씀)
+   ===================================================================== */
+/*PHYS-BEGIN*/
+const V = 340;                                                                   // 공기 중 소리의 속력 (m/s)
+function fHeard(f0, vs, vo){ return f0*(V + vo)/(V - vs); }
+/* 음원이 vs(+: 그쪽으로 다가감)로 움직일 때 그쪽의 파장 */
+function lamSide(f0, vs){ return (V - vs)/f0; }
+/* x_c에서 시각 t_e에 나온 파면이, 시각 0에 x0에 있고 속도 u로 움직이는 관찰자(파면 중심의 s쪽, s = ±1)에 닿는 시각 */
+function arrival(xc, te, x0, u, s){ return (xc - x0 - s*V*te)/(u - s*V); }
+/*PHYS-END*/
+
+/* ---------- 표시 ---------- */
+function roundTo(x, dec){ const p = 10**dec; return (x < 0 ? -1 : 1)*Math.round(+(Math.abs(x)*p).toPrecision(12))/p; }
+function fmtSig(x, s){
+  if (!isFinite(x)) return '–';
+  if (x === 0) return '0';
+  let p = Math.floor(Math.log10(Math.abs(x))), dec = Math.max(0, s - 1 - p), v = roundTo(x, dec);
+  const p2 = Math.floor(Math.log10(Math.abs(v)));
+  if (p2 > p){ dec = Math.max(0, s - 1 - p2); v = roundTo(x, dec); }
+  return v.toFixed(dec);
+}
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+/* 물리량 표시: 계산 오차(1e-12 수준) 때문에 1.275 같은 값이 1.27·1.28로 오가지 않게 roundTo로 반올림한 뒤 자릿수를 맞춘다 */
+const fx = (x, d) => isFinite(x) ? roundTo(x, d).toFixed(d) : '–';
+const FONT = 'Pretendard,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif';
+const C_SRC = '#ff9a3d', C_SRC_DOT = 'rgba(255,154,61,.65)', C_LAM = '#ffe45c';   // 음원 주황과 파장 노랑: 색각 이상에서도 구분되게 색상 차이를 넓힘
+const NW = s => `<span class="nw">${s}</span>`;                                  // 식이 줄 끝에서 끊기지 않게
+const NB = '\u00a0';                                                            // 숫자와 단위 사이에서 줄이 바뀌지 않는 빈칸
+
+const DEF = { f0: 340, vs: 102, vo: 68 };
+const state = { ...DEF, step: 1, sound: 'off', playing: true, ans: false, slow: 150 };
+const snap = () => ({ f0: state.f0, vs: state.vs, vo: state.vo });
+let settled = snap();
+
+const $ = id => document.getElementById(id);
+const scene = $('scene'), sctx = scene.getContext('2d');
+let SW = 0, SH = 0, DPR = 1;
+function sizeCanvas(cv, ctx){
+  const box = cv.parentElement, w = Math.max(10, box.clientWidth), h = Math.max(10, box.clientHeight);
+  DPR = window.devicePixelRatio || 1;
+  cv.width = Math.round(w*DPR); cv.height = Math.round(h*DPR);
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  return [w, h];
+}
+function resizeAll(){ [SW, SH] = sizeCanvas(scene, sctx); drawScene(); }
+
+/* ---------- 각 단계의 식 ---------- */
+/* fA: A(가까워짐 쪽)가 듣는 진동수, fB: B(멀어짐 쪽)가 듣는 진동수, lam·lamB: A 쪽·B 쪽 파장.
+   음원은 오른쪽(+)으로, 관찰자는 왼쪽(−)으로 움직이므로 A에게는 둘 다 다가가는 쪽, B에게는 둘 다 멀어지는 쪽 */
+function outs(s, st){
+  const vs = st === 2 ? 0 : s.vs, vo = st === 1 ? 0 : s.vo;
+  return { fA: fHeard(s.f0, vs, vo), fB: fHeard(s.f0, -vs, -vo), lam: lamSide(s.f0, vs), lamB: lamSide(s.f0, -vs) };
+}
+
+/* 아무것도 움직이지 않을 때(2단계 vₒ = 0, 3단계 vₛ = vₒ = 0)는 이름에 '가까워짐·멀어짐' 대신 '정지' */
+const still = st => st === 2 ? state.vo === 0 : st === 3 && state.vs === 0 && state.vo === 0;
+
+/* ---------- 장면: 가로 30 m. 음원과 관찰자의 자리·속도 부호. end 는 장면을 처음으로 돌릴 조건 ---------- */
+const X_MAX = 30;
+let U = 1;                                                                       // 캔버스 배율: 장면 크기에만 따르므로 창 크기가 바뀔 때만 달라짐
+const fz = (b, m) => Math.max(m, Math.round(b*U));                              // 글자 크기: 기본 크기(m) 아래로는 줄지 않음
+function scenario(){
+  const st = state.step;
+  // 모든 단계: A는 오른쪽(음원 앞), B는 왼쪽(음원 뒤). 음원은 오른쪽으로, 관찰자는 왼쪽으로 움직인다
+  if (st === 1) return { src: { x0: 7, s: 1 }, obs: [{ id: 'A', x0: 27, s: 0 }, { id: 'B', x0: 3, s: 0 }], end: (xs, xo) => xs >= 23 };
+  if (st === 2) return { src: { x0: 15, s: 0 }, obs: [{ id: 'A', x0: 29.5, s: -1 }, { id: 'B', x0: 12, s: -1 }], end: (xs, xo) => xo[0] <= 17 || xo[1] <= 0.5 };
+  return { src: { x0: 13, s: 1 }, obs: [{ id: 'A', x0: 29.5, s: -1 }, { id: 'B', x0: 10, s: -1 }], end: (xs, xo) => xo[0] - xs <= 3.5 || xo[1] <= 0.5 || xs >= 27.5 };
+}
+let sc = null, t = 0, xs = 0, us = 0, obs = [], fronts = [], emitted = 0, nextEmit = 0;
+let vis = 1, ending = false, stepLeft = 0, ghostA = 0;                          // 밝기, 장면 끝에 닿았는지, ⏭로 남은 진행 시간(s), 이전 장면 겹침
+const ghost = document.createElement('canvas');                                  // 단계를 바꿀 때 이전 장면을 0.3초 동안 겹쳐 흐리게
+let labelBoxes = [];                                                             // 지난 프레임의 모서리 글자 상자(겹침 그림에서 지움)
+function keepGhost(){
+  if (!scene.width) return;
+  ghost.width = scene.width; ghost.height = scene.height;
+  const g = ghost.getContext('2d'); g.drawImage(scene, 0, 0);
+  g.fillStyle = '#101318'; labelBoxes.forEach(([x, y, w, h]) => g.fillRect(x*DPR, y*DPR, w*DPR, h*DPR));   // 이전 글자가 새 글자 둘레로 비치지 않게
+  ghostA = 1; vis = 1;                                                           // 겹침 그림이 이전 밝기를 담고 있으므로 새 장면은 밝게 시작
+}
+function restart(){
+  const fo = outs(state, state.step);                                            // 다른 값에서 잰 측정은 새 장면에 남기지 않음(같은 값이면 그대로)
+  [fo.fA, fo.fB].forEach((f, i) => { if (measDisp[i] !== `측정 ${fx(f, 1)} Hz`) measDisp[i] = undefined; }); liveCache = '';
+  sc = scenario(); t = 0; fronts = []; emitted = 0; nextEmit = 0; ending = false; stepLeft = 0;
+  xs = sc.src.x0;
+  obs = sc.obs.map(o => ({ id: o.id, x: o.x0, s: o.s, u: 0, k: 0, last: NaN, prev: NaN }));
+  hls = [];
+  syncVel();
+}
+function syncVel(){ us = sc.src.s*state.vs; obs.forEach(o => { o.u = o.s*state.vo; }); }
+/* 실제 시간 dt 만큼 진행: 위치 → 새 파면 → 오래된 파면 정리 → 관찰자에게 닿은 파면 */
+function advance(dt){
+  t += dt; xs += us*dt; obs.forEach(o => { o.x += o.u*dt; });
+  while (nextEmit <= t){ fronts.push({ idx: emitted++, te: nextEmit, xc: xs - us*(t - nextEmit) }); nextEmit += 1/state.f0; }
+  while (fronts.length && V*(t - fronts[0].te) > 45) fronts.shift();            // 그림 밖으로 완전히 나간 파면
+  for (const o of obs){
+    if (!fronts.length) break;
+    if (o.k < fronts[0].idx) o.k = fronts[0].idx;
+    const x0e = o.x - o.u*t;                                                     // 이번 프레임의 등속 운동을 시각 0까지 늘린 출발 위치
+    while (o.k < emitted){
+      const f = fronts[o.k - fronts[0].idx], r = V*(t - f.te);
+      if (Math.abs(o.x - f.xc) > r) break;
+      const s = o.x >= f.xc ? 1 : -1;
+      o.prev = o.last; o.last = arrival(f.xc, f.te, x0e, o.u, s); o.k++;
+    }
+  }
+}
+const measured = o => (isFinite(o.prev) && o.last > o.prev) ? 1/(o.last - o.prev) : NaN;
+
+/* ---------- 그리기 ---------- */
+function drawScene(){
+  const c = sctx, W = SW, H = SH; if (W < 20 || !sc) return;
+  U = clamp(Math.min(W/880, H/450), 0.8, 1.6);
+  const sk = Math.max(1, U), fw = Math.max(1.5, 1.2*U);                            // 표식 배율, 파면 선 굵기
+  const RH = fz(26, 26), SPH = fz(44, 38), CF = W < 420 ? 13 : fz(17, 13);         // 자 높이, 속력 띠 높이, 모서리 글자 크기
+  const ppm = W/X_MAX, bot = H - RH - SPH, px = x => x*ppm;
+  const roadY = Math.min(Math.round((bot + Math.round(CF*1.7) + 10)/2), bot - Math.round(7*sk + 1.65*fz(14, 12)) - 2);   // 축: 모서리 글자 띠와 자 사이의 가운데(이름표는 자에 닿지 않게)
+  c.fillStyle = '#101318'; c.fillRect(0, 0, W, H);
+  c.strokeStyle = '#3a3f48'; c.lineWidth = 1; c.beginPath(); c.moveTo(0, roadY + 0.5); c.lineTo(W, roadY + 0.5); c.stroke();
+  // 파면: 나온 자리를 중심으로 반지름 V(t − t_e)의 원. 멀리 퍼진 파면은 보기 편하게 조금 흐리게(세기 계산은 아님)
+  c.save(); c.beginPath(); c.rect(0, 0, W, bot); c.clip();
+  c.lineWidth = fw;
+  for (const f of fronts){
+    const r = V*(t - f.te); if (r <= 0) continue;
+    c.strokeStyle = `rgba(235,240,255,${(0.45 + 0.3*Math.min(1, 1.5/r)).toFixed(3)})`;
+    c.beginPath(); c.arc(px(f.xc), roadY, r*ppm, 0, 2*Math.PI); c.stroke();
+  }
+  // 각 파면의 중심 = 그 파면이 나온 순간의 음원 위치
+  c.fillStyle = C_SRC_DOT;
+  for (const f of fronts){ if (t > f.te){ c.beginPath(); c.arc(px(f.xc), roadY, 1.8*sk, 0, 2*Math.PI); c.fill(); } }
+  // 강조한 파면: 중심(나온 자리)에서 모든 방향으로 같은 거리 → 모든 방향으로 같은 속력.
+  // 위아래로 장면에 다 들어오는 크기(Rmax)까지 키운 뒤 새로 나온 파면으로 넘어가며, 넘어갈 때 서서히 흐려지고 밝아진다
+  const Rmax = clamp(Math.max(Math.min(roadY - (Math.round(CF*1.7) + 14), bot - roadY - 4)/ppm, 1.34*V/state.f0), 0.8, 7), fd = 0.25*Rmax;   // 한 주기에 퍼지는 거리(V ÷ f₀)의 1.34배 이상: 흐려지기 시작할 때 넘겨받을 파면이 늘 있음
+  const i0 = fronts.length ? fronts[0].idx : 0, rOf = h => V*(t - fronts[h.idx - i0].te);
+  hls = hls.filter(h => h.idx >= i0 && h.idx - i0 < fronts.length && rOf(h) < Rmax);
+  if (!hls.some(h => rOf(h) < Rmax - fd)){                                       // 강조한 원이 흐려지기 시작했거나 없으면, 가장 새 파면이 넘겨받음
+    // 바깥 이웃 파면이 있는 것(i ≥ 1) 가운데, 파장 화살표의 음원 쪽 끝이 음원 점 밖으로 이미 나온 가장 새 파면. 없으면 가장 새 파면
+    const rClear = 9.5*sk/ppm*V/(V - Math.abs(us));
+    let pick = -1;
+    for (let i = fronts.length - 1; i >= 1; i--){
+      const r = V*(t - fronts[i].te);
+      if (r >= 0.5*Rmax) break;
+      if (r > 0 && pick < 0) pick = i;
+      if (r >= rClear){ pick = i; break; }
+    }
+    if (pick >= 1) hls.push({ idx: fronts[pick].idx, r0: V*(t - fronts[pick].te) });
+  }
+  const hl = hls.map(h => { const f = fronts[h.idx - i0], r = V*(t - f.te); return { f, r, al: clamp(Math.min((r - h.r0)/fd, (Rmax - r)/fd), 0, 1) }; });
+  for (const h of hl) if (h.al > 0) drawHighlight(c, px(h.f.xc), roadY, h.r*ppm, h.al, fw, sk, Rmax*ppm);
+  c.restore();
+  // 파장: 원들의 중심을 잇는 축(음원이 움직이는 직선) 위에서 굵은 원과 바로 바깥 파면(한 주기 먼저 나온 것) 사이에 화살표.
+  // 축은 모든 파면에 수직이므로 화살표가 두 파면에 수직이고 그 길이가 곧 파장이다.
+  // 화살표는 굵은 원과 함께 나타나고 사라지므로 A 쪽·B 쪽 화살표가 늘 같이 보이고, 값은 움직이지 않는 위쪽 모서리에 적는다
+  const st = state.step;
+  const sides = st === 2 ? [[1, 'A 쪽 λ'], [-1, 'B 쪽 λ']] : st === 1 && W >= 340 ? [[1, '앞(A 쪽) λ′'], [-1, '뒤(B 쪽) λ′']] : [[1, 'A 쪽 λ′'], [-1, 'B 쪽 λ′']];   // 좁은 장면(W < 340)은 1단계도 짧은 이름
+  const labels = [], lamQ = [];
+  // A 쪽·B 쪽 화살표가 늘 함께 나타나고 사라지게: 음원 점(반지름 7)이 화살촉을 가리는 동안, 장면 양 끝에 닿을 때는 양쪽을 함께 숨김
+  const showOf = h => {
+    const q = [1, -1].map(sd => pairAt(h.f.idx, sd));
+    if (!q[0] || !q[1]) return 0;
+    const near = Math.min(...q.map(p => Math.abs(p.a - xs)*ppm));
+    const edge = Math.min(...q.map(p => Math.min((Math.min(p.a, p.b) - 0.2)/0.8, (X_MAX - 0.2 - Math.max(p.a, p.b))/0.8)));
+    return clamp((near - 8*sk)/(1.5*sk), 0, 1)*clamp(edge, 0, 1);
+  };
+  for (const [side, name] of sides){
+    let best = -1;
+    for (const h of hl){
+      const pr = pairAt(h.f.idx, side);
+      if (!pr) continue;
+      if (h.al > best){ best = h.al; lamDisp[side] = fx(pr.len, 3) + ' m'; }     // 더 밝은 쪽의 값(두 원의 값은 같음). 판독 칸과 같은 자릿수
+      const al = h.al*showOf(h);
+      if (al > 0){ const xa = px(Math.min(pr.a, pr.b)), xb = px(Math.max(pr.a, pr.b)); lamHalo(c, xa, xb, roadY, al, sk); lamQ.push([xa, xb, al]); }
+    }
+    labels.push([side, `${name} = ${lamDisp[side] || '–'}`]);
+  }
+  // 음원과 관찰자. 관찰자 이름표는 음원 이름표와 겹치지 않게 바깥쪽으로 비켜 선다(가까워질수록 서서히)
+  const FB = fz(14, 12);
+  c.font = `800 ${FB}px ${FONT}`;
+  const wS = c.measureText('음원').width, sX = px(xs);
+  const longOK = W - c.measureText('A · 가까워짐').width - wS/2 - 12 > px(26);                // 장면 끝(음원 26 m)에서도 긴 이름표가 들어갈 만큼 넓은가(좁으면 A·B만)
+  const nameOf = id => st === 1 ? (id === 'A' ? 'A · 앞' : 'B · 뒤') : still(st) ? id + ' · 정지' : longOK ? (id === 'A' ? 'A · 가까워짐' : 'B · 멀어짐') : id;
+  const sL = clamp(sX, wS/2 + 4, W - wS/2 - 4 - (c.measureText(nameOf('A')).width + 16));   // 끝난 뒤 어두워지는 동안 음원이 더 가도 A 이름표가 비켜 설 자리를 남김
+  drawBody(c, sX, roadY, C_SRC, 0, '음원', us, W, sk, FB, sL);
+  for (const o of obs){
+    const per = isFinite(o.prev) && o.last > o.prev ? (o.last - o.prev)*state.slow : 1;          // 화면에서 파면이 닿는 간격(s)
+    const fl = !isFinite(o.last) ? 0 : per < 0.25 - 1e-9 ? 0.5                                           // 1초에 4번보다 잦으면 깜빡이지 않고 켜 둠
+             : clamp(1 - (t - o.last)*state.slow/Math.min(0.4, 0.7*per), 0, 1);                  // 다음 파면이 오기 전에 꺼짐
+    const name = nameOf(o.id);
+    c.font = `800 ${FB}px ${FONT}`;
+    const ox = px(o.x), sg = o.x >= xs ? 1 : -1, need = (wS + c.measureText(name).width)/2 + 16;
+    drawBody(c, ox, roadY, '#8fe3ff', fl, name, o.u, W, sk, FB, (ox - sL)*sg < need ? sL + sg*need : ox);
+  }
+  lamQ.forEach(([xa, xb, al]) => lamArrow(c, xa, xb, roadY, al, sk));          // 노란 파장 화살표는 관찰자 점 위에(화살촉이 가려 반쪽만 보이는 일이 없게)
+  // 단계를 바꾸면 이전 장면을 0.3초 동안 겹쳐 흐리고, 장면이 끝나면 파면 영역만 어두워졌다가 밝아짐(멈추면 다시 밝아져 끝 장면을 보여 줌)
+  if (ghostA > 0){ c.globalAlpha = ghostA; c.drawImage(ghost, 0, 0, ghost.width, Math.min(ghost.height, Math.round(bot*DPR)), 0, 0, W, bot); c.globalAlpha = 1; }
+  if (vis < 1){ const e = vis*vis*(3 - 2*vis); c.fillStyle = `rgba(16,19,24,${(1 - e).toFixed(3)})`; c.fillRect(0, 0, W, bot); }
+  labelBoxes = []; labels.forEach(([side, text]) => cornerLabel(c, side, text, W, CF));
+  drawRuler(c, W, bot, ppm, RH, sk);
+  drawSpeeds(c, W, bot + RH, SPH, sk);
+}
+/* 속력 비교 띠: 같은 축척의 화살표. 소리는 가운데에서 양쪽으로 같은 길이(어느 방향이든 같은 속력). 글자는 값이 바뀔 때만 바뀐다 */
+function drawSpeeds(c, W, y0, SPH, sk){
+  c.fillStyle = '#171b22'; c.fillRect(0, y0, W, SPH);
+  const st = state.step, ya = y0 + Math.round(SPH*0.3), ty = y0 + Math.round(SPH*0.72), L = Math.max(28, Math.min(W*0.16, 130*sk));   // L: 340 m/s 화살표 길이
+  const SND = '#ebf0ff', SRC = C_SRC, OBS = '#8fe3ff';
+  const arrow = (x0, x1, col) => {
+    const sg = Math.sign(x1 - x0);
+    c.strokeStyle = col; c.fillStyle = col; c.lineWidth = 2.5*sk;
+    if (Math.abs(x1 - x0) > 7*sk){ c.beginPath(); c.moveTo(x0, ya); c.lineTo(x1 - sg*6*sk, ya); c.stroke(); }
+    c.beginPath(); c.moveTo(x1, ya); c.lineTo(x1 - sg*7*sk, ya - 4.5*sk); c.lineTo(x1 - sg*7*sk, ya + 4.5*sk); c.closePath(); c.fill();
+  };
+  const label = (x, text, col) => {
+    c.font = `700 ${W < 420 ? 10 : fz(13, 11)}px ${FONT}`; c.textAlign = 'center'; c.textBaseline = 'middle';
+    const w = c.measureText(text).width;
+    c.fillStyle = col; c.fillText(text, Math.round(clamp(x, w/2 + 4, W - w/2 - 4)), ty);
+  };
+  const item = (x, u, col, name) => {
+    if (u === 0){ c.fillStyle = col; c.beginPath(); c.arc(x, ya, 3.5*sk, 0, 2*Math.PI); c.fill(); }
+    else { const len = Math.abs(u)/V*L, sg = Math.sign(u); arrow(x - sg*len/2, x + sg*len/2, col); }
+    label(x, `${name} ${u === 0 ? '정지' : Math.abs(u) + ' m/s'}`, col);
+  };
+  const cx = Math.round(W/2);
+  arrow(cx, cx - L, SND); arrow(cx, cx + L, SND);
+  c.fillStyle = SND; c.beginPath(); c.arc(cx, ya, 2.5*sk, 0, 2*Math.PI); c.fill();
+  label(cx, '소리 340 m/s (모든 방향)', SND);
+  item(Math.round(W*0.14), us, SRC, '음원');
+  item(Math.round(W*0.86), st === 1 ? 0 : obs[0].u, OBS, '관찰자 A·B');
+  c.textBaseline = 'alphabetic';
+}
+/* 강조한 파면: 굵은 원 + 중심에서 8방향으로 같은 길이의 화살표(원이 커지며 서서히 나타남) */
+function drawHighlight(c, cx, cy, R, al, fw, sk, Rm){
+  c.strokeStyle = '#ffffff'; c.fillStyle = '#ffffff';
+  c.globalAlpha = al; c.lineWidth = 2*fw;
+  c.beginPath(); c.arc(cx, cy, R, 0, 2*Math.PI); c.stroke();
+  const sp = Rm < 28*sk ? 0 : clamp((R - Math.min(24*sk, 0.45*Rm))/Math.min(16*sk, 0.3*Rm), 0, 1);   // Rm: 가장 큰 반지름. 작은 장면에서도 원이 흐려지기 전에 화살표가 다 나타남
+  if (sp > 0){
+    c.globalAlpha = 0.5*al*sp; c.lineWidth = 1; c.setLineDash([3, 4]); c.beginPath();
+    for (let k = 0; k < 8; k++){ const a = k*Math.PI/4, ca = Math.cos(a), sa = Math.sin(a); c.moveTo(cx + 5*sk*ca, cy + 5*sk*sa); c.lineTo(cx + (R - 8*sk)*ca, cy + (R - 8*sk)*sa); }
+    c.stroke(); c.setLineDash([]);
+    c.globalAlpha = al*sp;
+    for (let k = 0; k < 8; k++){
+      const a = k*Math.PI/4, ca = Math.cos(a), sa = Math.sin(a), tx = cx + (R - 1)*ca, ty = cy + (R - 1)*sa;
+      c.beginPath(); c.moveTo(tx, ty); c.lineTo(tx - 8*sk*ca - 4*sk*sa, ty - 8*sk*sa + 4*sk*ca); c.lineTo(tx - 8*sk*ca + 4*sk*sa, ty - 8*sk*sa - 4*sk*ca); c.closePath(); c.fill();
+    }
+  }
+  c.globalAlpha = al; c.fillStyle = C_SRC; c.beginPath(); c.arc(cx, cy, 3.2*sk, 0, 2*Math.PI); c.fill();
+  c.globalAlpha = 1;
+}
+/* 파장 화살표의 두 파면: k번 파면(안쪽)과 k − 1번 파면(바깥쪽). 축 위 두 파면의 거리는 시간에 따라 변하지 않는다 */
+let lamDisp = {};
+let hls = [];                                                                  // 강조하는 파면: 번호(idx), 고를 때의 반지름(r0). 넘겨줄 때만 둘
+const frontPos = (f, side) => f.xc + side*V*(t - f.te);
+function pairAt(k, side){
+  if (!fronts.length) return null;
+  const i = k - fronts[0].idx;
+  if (i < 1 || i >= fronts.length) return null;
+  const a = frontPos(fronts[i], side), b = frontPos(fronts[i - 1], side);        // a: 나중에 나온(안쪽) 파면, b: 바깥 파면
+  if ((a - xs)*side <= 0.02) return null;
+  return { a, b, len: Math.abs(b - a), ri: V*(t - fronts[i].te) };              // ri: 안쪽 파면의 반지름
+}
+function cornerLabel(c, side, text, W, F){
+  c.font = `800 ${F}px ${FONT}`; c.textBaseline = 'middle'; c.textAlign = 'left';
+  const w = c.measureText(text.replace(/= .*$/, '= 0.000 m')).width;             // 값 자리 폭으로 고정: '–'에서 값으로 바뀌어도 상자와 글자 시작점이 그대로
+  const bh = Math.round(F*1.7), pd = Math.round(F*0.55), y = 6 + bh/2, x = Math.round(side > 0 ? W - w - pd - 9 : pd + 9);
+  c.fillStyle = 'rgba(16,19,24,.9)'; c.fillRect(x - pd, y - bh/2, w + 2*pd, bh); labelBoxes.push([x - pd, y - bh/2, w + 2*pd, bh]);
+  c.fillStyle = C_LAM; c.fillText(text, x, y);
+  c.textBaseline = 'alphabetic';
+}
+/* lx: 이름표의 가운데(다른 이름표와 겹치지 않게 비켜 선 자리) */
+function drawBody(c, x, y, color, flash, name, u, W, sk, F, lx){
+  if (flash > 0){                                                                // 파면이 닿으면 서서히 나타나 퍼지며 사라지는 고리
+    c.strokeStyle = color; c.lineWidth = 2.5*sk; c.globalAlpha = flash*Math.min(1, (1 - flash)/0.25);
+    c.beginPath(); c.arc(x, y, (9 + 6*(1 - flash))*sk, 0, 2*Math.PI); c.stroke(); c.globalAlpha = 1;
+  }
+  if (u){                                                                        // 움직이는 방향: 몸 위쪽에(축은 파면 사이 거리를 재는 자리라 비워 둠)
+    const sg = Math.sign(u), ya = y - 20*sk, x0 = x - sg*8*sk, x1 = x + sg*9*sk;
+    c.strokeStyle = color; c.fillStyle = color; c.lineWidth = 2*sk;
+    c.beginPath(); c.moveTo(x0, ya); c.lineTo(x1 - sg*5*sk, ya); c.stroke();
+    c.beginPath(); c.moveTo(x1, ya); c.lineTo(x1 - sg*6*sk, ya - 4*sk); c.lineTo(x1 - sg*6*sk, ya + 4*sk); c.closePath(); c.fill();
+  }
+  c.fillStyle = color; c.beginPath(); c.arc(x, y, 7*sk, 0, 2*Math.PI); c.fill();
+  c.strokeStyle = '#101318'; c.lineWidth = 1.5; c.stroke();
+  c.font = `800 ${F}px ${FONT}`; c.textAlign = 'center'; c.textBaseline = 'middle';
+  const w = c.measureText(name).width, cx = Math.round(clamp(lx, w/2 + 4, W - w/2 - 4)), yy = y + Math.round(7*sk) + F;
+  c.lineJoin = 'round'; c.lineWidth = Math.max(3, Math.round(F*0.32)); c.strokeStyle = 'rgba(16,19,24,.92)'; c.strokeText(name, cx, yy); c.lineJoin = 'miter';   // 상자 대신 글자 테두리: 굵은 원이 이름표 뒤에서 끊기지 않게
+  c.fillStyle = color; c.fillText(name, cx, yy);
+  c.textBaseline = 'alphabetic';
+}
+/* 파장 화살표: 축(원들의 중심을 잇는 직선) 위에서 두 파면 사이. 화살촉 끝이 두 파면에 닿는다.
+   몸통 밑 어두운 테두리(lamHalo, 축선·원의 중심 점을 가림)는 관찰자 점보다 먼저, 노란 화살표(lamArrow)는 나중에 그린다 */
+function lamHalo(c, xa, xb, y, al, sk){
+  const ah = Math.min(5*sk, (xb - xa)/3.2);
+  c.globalAlpha = al; c.strokeStyle = '#101318'; c.lineWidth = 2*sk + 2;          // 화살촉 끝의 파면은 가리지 않음
+  c.beginPath(); c.moveTo(xa + ah, y); c.lineTo(xb - ah, y); c.stroke();
+  c.globalAlpha = 1;
+}
+function lamArrow(c, xa, xb, y, al, sk){
+  const ah = Math.min(5*sk, (xb - xa)/3.2), hh = 4*sk;
+  c.globalAlpha = al; c.strokeStyle = C_LAM; c.fillStyle = C_LAM; c.lineWidth = 2*sk;
+  c.beginPath(); c.moveTo(xa + ah*0.5, y); c.lineTo(xb - ah*0.5, y); c.stroke();
+  [[xa, 1], [xb, -1]].forEach(([x, d]) => { c.beginPath(); c.moveTo(x, y); c.lineTo(x + d*ah, y - hh); c.lineTo(x + d*ah, y + hh); c.closePath(); c.fill(); });
+  c.globalAlpha = 1;
+}
+function drawRuler(c, W, bot, ppm, RH, sk){
+  c.fillStyle = '#f6f0dc'; c.fillRect(0, bot, W, RH);
+  c.strokeStyle = '#d8c58f'; c.lineWidth = 1; c.beginPath(); c.moveTo(0, bot + 0.5); c.lineTo(W, bot + 0.5); c.stroke();
+  c.strokeStyle = '#6b5b2c'; c.fillStyle = '#5c4d22'; c.font = `600 ${fz(11, 10)}px ${FONT}`; c.textAlign = 'center'; c.textBaseline = 'alphabetic';
+  for (let m = 0; m <= X_MAX; m++){
+    const x = Math.floor(m*ppm) + 0.5, lab = m % 5 === 0;
+    c.beginPath(); c.moveTo(x, bot); c.lineTo(x, bot + (lab ? 9 : 5)*sk); c.stroke();
+    if (lab && m > 0 && m < X_MAX) c.fillText(String(m), x, bot + RH - 6);
+  }
+  c.textAlign = 'right'; c.fillText('m', W - 4, bot + RH - 6);
+}
+
+/* ---------- 글로 된 부분 (범례·안내·판독값·질문) ---------- */
+const NAMES = { f0: '음원의 진동수 f₀', vs: '음원의 속력 v<sub>s</sub>', vo: '관찰자의 속력 v<sub>o</sub>' };
+const fmtV = { f0: v => `${v}${NB}Hz`, vs: v => `${v}${NB}m/s`, vo: v => `${v}${NB}m/s` };
+const USED = { 1: ['f0', 'vs'], 2: ['f0', 'vo'], 3: ['f0', 'vs', 'vo'] };
+const INTRO = {
+  1: '1단계: 음원만 오른쪽으로 움직이고 관찰자 <span class="nw">A(앞)와</span> <span class="nw">B(뒤)는</span> 서 있습니다. v<sub>s</sub>를 바꾸며 앞과 뒤의 파장과 듣는 진동수를 비교해 보세요.',
+  2: '2단계: 음원은 서 있고, A는 음원 쪽으로(가까워짐), B는 반대쪽으로(멀어짐) 같은 속력 v<sub>o</sub>로 움직입니다. 두 쪽의 파장과 1초에 만나는 파면 수(150배에서 고리가 빛나는 빠르기)를 비교해 보세요.',
+  3: '3단계: 둘 다 움직입니다. 앞의 A는 음원과 서로 가까워지고, 뒤의 B는 음원과 서로 멀어집니다. v<sub>s</sub>와 v<sub>o</sub>를 다르게 놓고, 두 값을 맞바꾸기 전과 후의 f<sub>A</sub>와 f<sub>B</sub>를 비교해 보세요.'
+};
+/* 단계에 들어올 때 그 단계의 속력이 0이면(슬라이더는 단계끼리 같이 씀) 움직인다고 쓰지 않는 안내 */
+const INTRO0 = {
+  1: '1단계: 지금은 v<sub>s</sub> = 0이라 음원도 서 있어 A와 B가 모두 f₀를 듣습니다. v<sub>s</sub>를 키워 음원을 오른쪽으로 움직이며 앞과 뒤의 파장과 듣는 진동수를 비교해 보세요.',
+  2: '2단계: 지금은 v<sub>o</sub> = 0이라 A와 B도 서 있어 둘 다 f₀를 듣습니다. v<sub>o</sub>를 키워 A는 음원 쪽으로, B는 반대쪽으로 움직이며 두 쪽의 파장과 듣는 진동수를 비교해 보세요.',
+  3: '3단계: 지금은 v<sub>s</sub>나 v<sub>o</sub>가 0이라 둘 다 움직이지는 않습니다. 두 값을 모두 0보다 크고 서로 다르게 놓고, 맞바꾸기 전과 후의 f<sub>A</sub>와 f<sub>B</sub>를 비교해 보세요.'
+};
+function captionText(st, key, b, s){
+  if (!key) return (st === 1 ? s.vs === 0 : st === 2 ? s.vo === 0 : s.vs === 0 || s.vo === 0) ? INTRO0[st] : INTRO[st];
+  const ob = outs(b, st), os = outs(s, st), same = b[key] === s[key];
+  const head = `${NAMES[key]}: ` + (same ? `${fmtV[key](s[key])} (바꾸기 전과 같음)`
+    : `${fmtV[key](b[key])} → ${fmtV[key](s[key])}` + (b[key] > 0 && s[key] > 0 ? ` (${fmtSig(s[key]/b[key], 3)}배)` : ''));
+  const pair = (name, a, z) => Math.abs(a - z) < 1e-9
+    ? ` · ${name} ${fx(a, 1)}${NB}Hz${same ? '' : ' (그대로)'}`
+    : ` · ${name}: ${fx(a, 1)} → ${fx(z, 1)}${NB}Hz (${fmtSig(z/a, 3) === '1.00' ? fmtSig(z/a, 4) : fmtSig(z/a, 3)}배)`;
+  return head + pair('f<sub>A</sub>', ob.fA, os.fA) + pair('f<sub>B</sub>', ob.fB, os.fB);
+}
+const CH = (cls, color, txt) => `<span class="it"><i class="chip ${cls}" style="--c:${color}"></i>${txt}</span>`;
+function legendHTML(st){
+  return [
+    CH('arw', C_LAM, `${st === 2 ? 'λ' : 'λ′'}(파장): 이웃한 두 파면 사이`),
+    CH('ring hl', '#ffffff', '굵은 원: 중심에서 모든 방향으로 같은 속력'),
+    CH('pt', C_SRC, '원의 중심: 그 파면이 나온 곳')
+  ].join('');
+}
+const QS = {
+  1: ['앞(A 쪽)과 뒤(B 쪽)로 퍼지는 소리의 속력은 다를까? (굵은 원)', '앞과 뒤의 파장을 비교하면? 그래서 A와 B가 듣는 진동수는? (고리: 파면이 닿는 순간)', 'v<sub>s</sub>를 키우면 f<sub>A</sub>와 f<sub>B</sub>는 각각 어떻게 될까?'],
+  2: ['음원이 서 있으면 A 쪽과 B 쪽의 파장은 다를까?', 'A(가까워짐)와 B(멀어짐)가 듣는 진동수를 f₀와 비교하면?', 'v<sub>o</sub>를 {vs}&nbsp;m/s로 하면, 1단계에서 v<sub>s</sub> = {vs}&nbsp;m/s일 때의 f<sub>A</sub>, f<sub>B</sub>와 비교해 어떨까?'],
+  3: ['서로 가까워지는 A와 서로 멀어지는 B가 듣는 진동수를 f₀와 비교하면?', 'v<sub>s</sub> ≠ v<sub>o</sub>일 때 두 값을 맞바꾸면 f<sub>A</sub>는 같을까?', 'f₀와 자기 속력 v<sub>o</sub>를 아는 A가 f<sub>A</sub>를 재면, 음원의 속력 v<sub>s</sub>를 구할 수 있을까?']
+};
+const ANS = {
+  1: '소리는 매질(공기)이 정한 속력 <b>v = 340 m/s로 모든 방향으로 똑같이</b> 퍼집니다. 음원이 움직이면 한 주기에 v<sub>s</sub>T만큼 앞쪽 파면을 따라가므로 <span class="nw">앞의 λ′ = (v − v<sub>s</sub>) ÷ f₀</span>는 짧고 <span class="nw">뒤의 λ′ = (v + v<sub>s</sub>) ÷ f₀</span>는 깁니다. 서 있는 관찰자는 <span class="nw">f′ = v ÷ λ′</span>를 들으므로 <b class="nw">f<sub>A</sub> &gt; f₀ &gt; f<sub>B</sub></b>입니다. v<sub>s</sub>가 클수록 앞은 더 높게, 뒤는 더 낮게 들립니다.',
+  2: '음원이 서 있으면 파장 <span class="nw">λ = v ÷ f₀</span>는 어느 쪽이나 그대로입니다. 다가가는 A는 파면을 상대 속력 <span class="nw">v + v<sub>o</sub></span>로 만나므로 <b class="nw">f<sub>A</sub> = f₀(v + v<sub>o</sub>) ÷ v</b>, 멀어지는 B는 <span class="nw">v − v<sub>o</sub></span>로 만나므로 <b class="nw">f<sub>B</sub> = f₀(v − v<sub>o</sub>) ÷ v</b>입니다. 같은 속력으로 움직여도 1단계보다 A는 덜 높게, B는 더 낮게 들립니다.',
+  3: '<b class="nw">f<sub>A</sub> = f₀(v + v<sub>o</sub>) ÷ (v − v<sub>s</sub>)</b>, <span class="nw"><b>f<sub>B</sub> = f₀(v − v<sub>o</sub>) ÷ (v + v<sub>s</sub>)</b>이므로</span> 하나라도 움직이면 <b class="nw">f<sub>A</sub> &gt; f₀ &gt; f<sub>B</sub></b>입니다. 음원의 운동은 <span class="nw">분모(파장)에</span>, 관찰자의 운동은 분자(파면을 만나는 <span class="nw">빠르기)에</span> 들어가므로 <b><span class="nw">v<sub>s</sub> ≠ v<sub>o</sub></span>이면 맞바꿀 때 값이 달라집니다.</b> 거꾸로 f₀, v<sub>o</sub>, f<sub>A</sub>를 알면 <span class="nw">v<sub>s</sub> = v − f₀(v + v<sub>o</sub>) ÷ f<sub>A</sub></span>로 구할 수 있습니다.'
+};
+const qbodyHTML = (st, ans) => ans ? `<div class="answer">${ANS[st]}</div>` : `<ol>${QS[st].map(q => `<li>${q.replace(/\{vs\}/g, state.vs || DEF.vs)}</li>`).join('')}</ol>`;
+
+/* f가 f₀보다 높게·낮게 들리는지: 막대와 같은 색(파랑 = 높게, 빨강 = 낮게) */
+function setTag(id, f, f0){
+  const el = $(id), r = f/f0;
+  if (!isFinite(r)){ el.className = 'tag'; el.textContent = ''; return; }
+  const same = Math.abs(r - 1) < 1e-9;
+  el.className = 'tag ' + (same ? 'same' : r > 1 ? 'up' : 'dn');
+  el.textContent = same ? 'f₀와 같음' : r > 1 ? '높게 들림' : '낮게 들림';
+}
+/* 판독 칸: 왼쪽 A, 오른쪽 B. 각 칸에 듣는 진동수(식과 대입), 그쪽 파장, 높낮이, 측정값 */
+function renderReadouts(st){
+  const o = outs(state, st), f0 = state.f0, vs = state.vs, vo = state.vo, L = st === 2 ? 'λ' : 'λ′';
+  const who = st === 1 ? ['앞', '뒤'] : still(st) ? ['정지', '정지'] : st === 2 ? ['가까워짐', '멀어짐'] : ['서로 가까워짐', '서로 멀어짐'];
+  const eq = st === 1 ? ['f<sub>A</sub> = f₀v ÷ (v − v<sub>s</sub>)', 'f<sub>B</sub> = f₀v ÷ (v + v<sub>s</sub>)']
+           : st === 2 ? ['f<sub>A</sub> = f₀(v + v<sub>o</sub>) ÷ v', 'f<sub>B</sub> = f₀(v − v<sub>o</sub>) ÷ v']
+           : ['f<sub>A</sub> = f₀(v + v<sub>o</sub>) ÷ (v − v<sub>s</sub>)', 'f<sub>B</sub> = f₀(v − v<sub>o</sub>) ÷ (v + v<sub>s</sub>)'];
+  const calc = st === 1 ? [`= ${f0} × 340 ÷ (340 − ${vs})`, `= ${f0} × 340 ÷ (340 + ${vs})`]
+             : st === 2 ? [`= ${f0} × (340 + ${vo}) ÷ 340`, `= ${f0} × (340 − ${vo}) ÷ 340`]
+             : [`= ${f0} × (340 + ${vo}) ÷ (340 − ${vs})`, `= ${f0} × (340 − ${vo}) ÷ (340 + ${vs})`];
+  [['A', o.fA, o.lam], ['B', o.fB, o.lamB]].forEach(([id, f, lam], i) => {
+    $(`ro${id}Label`).innerHTML = `<b>${id}</b>(${who[i]})가 듣는 진동수 ${NW(eq[i])}`;
+    $(`ro${id}`).textContent = fx(f, 1);
+    $(`ro${id}Calc`).innerHTML = NW(calc[i]);
+    $(`ro${id}Sub`).textContent = `파장 ${L} = ${fx(lam, 3)}${NB}m`;
+    setTag(`ro${id}Tag`, f, f0);
+  });
+}
+/* 진동수 비교 막대: 모든 단계에서 막대 끝 = f₀의 2배(세로선 f₀는 늘 가운데). 세 줄을 한 번 만들고 값만 바꿔 단계를 바꿔도 부드럽게 변함 */
+function renderFcmp(st){
+  const o = outs(state, st), f0 = state.f0, top = 2;
+  const tail = st === 1 ? [' · 앞', ' · 뒤'] : still(st) ? [' · 정지', ' · 정지'] : [' · 가까워짐', ' · 멀어짐'];
+  const rows = [[`A<span class="lg2">${tail[0]}</span>`, o.fA], ['음원 f₀', f0], [`B<span class="lg2">${tail[1]}</span>`, o.fB]];
+  const box = $('fcmp');
+  if (box.children.length !== rows.length)
+    box.innerHTML = rows.map(() => '<div class="fr"><span class="nm"></span><span class="bar"><i></i><b></b></span><span class="v"></span></div>').join('');
+  [...box.children].forEach((el, i) => {
+    const [n, f] = rows[i], r = f/f0, bar = el.querySelector('i');
+    el.querySelector('.nm').innerHTML = n;
+    bar.style.width = `${Math.min(100, r/top*100).toFixed(2)}%`;
+    bar.style.background = Math.abs(r - 1) < 1e-9 ? '#b9a69d' : r > 1 ? '#2f7f9c' : '#c0503e';   // 파랑 = 높게, 빨강 = 낮게
+    el.querySelector('.bar').classList.toggle('over', r > top + 1e-9);            // f₀의 2배보다 크면 끝에 ▸
+    el.querySelector('b').style.left = `${(100/top).toFixed(2)}%`;
+    el.querySelector('.v').textContent = i === 1 ? `${f0} Hz` : `${fx(f, 1)} Hz`;
+  });
+}
+function updateTexts(){
+  const st = state.step;
+  $('f0Out').textContent = fmtV.f0(state.f0);
+  $('vsOut').textContent = st === 2 ? '정지' : fmtV.vs(state.vs);
+  $('voOut').textContent = st === 1 ? '정지' : fmtV.vo(state.vo);
+  renderReadouts(st);
+  $('legend').innerHTML = legendHTML(st);
+  renderFcmp(st);
+  updateSoundFreq();
+}
+/* 측정 진동수: 장면이 처음으로 돌아가도 새 값이 나올 때까지 직전 값을 유지해 글자가 깜빡이지 않게 */
+let liveCache = '', measDisp = [];
+const clearMeas = () => { measDisp = []; liveCache = ''; lamDisp = {}; };
+function updateLive(){
+  obs.forEach((o, i) => {
+    const m = measured(o), el = $(i ? 'roBMeas' : 'roAMeas'), op = isFinite(m) ? '' : '0.45';
+    if (isFinite(m)) measDisp[i] = `측정 ${fx(m, 1)} Hz`;
+    if (el.style.opacity !== op) el.style.opacity = op;                         // 이번 장면에서 두 파면이 닿기 전에는 직전 값을 흐리게
+  });
+  const txt = [0, 1].map(i => i < obs.length ? (measDisp[i] || '측정 중…') : '').join('|');
+  if (txt === liveCache) return; liveCache = txt;
+  const parts = txt.split('|');
+  $('roAMeas').textContent = parts[0];
+  $('roBMeas').textContent = parts[1];
+}
+const capHTML = t => `<span>${t}</span>`;                              // 안내 칸(flex)에서 글과 첨자가 한 줄 흐름으로 이어지게
+function setCaption(key){ $('caption').innerHTML = capHTML(captionText(state.step, key, settled, state)); }
+function renderQ(){
+  $('qTitle').textContent = state.ans ? '정리' : '관찰해 볼 것';
+  $('qbody').innerHTML = qbodyHTML(state.step, state.ans);
+  $('ansBtn').textContent = state.ans ? '질문 보기' : '정리 보기';
+  $('ansBtn').setAttribute('aria-expanded', state.ans);
+  $('nextBtn').textContent = state.step < 3 ? '다음 단계 →' : '1단계로';
+}
+
+/* 단계를 바꾸거나 정리를 열어도 크기가 바뀌지 않게, 글 칸의 높이를 가장 긴 내용에 맞춰 둔다 */
+function fixHeights(){
+  const keep = (el, variants) => {
+    const cur = el.innerHTML; el.style.minHeight = ''; let mx = 0;
+    for (const h of variants){ el.innerHTML = h; mx = Math.max(mx, Math.ceil(el.getBoundingClientRect().height)); }
+    el.innerHTML = cur; el.style.minHeight = mx + 'px';
+  };
+  const b = { f0: 200, vs: 0, vo: 0 }, s = { f0: 500, vs: 170, vo: 170 };
+  const caps = [INTRO[1], INTRO[2], INTRO[3], INTRO0[1], INTRO0[2], INTRO0[3]];
+  for (const st of [1, 2, 3]) for (const k of USED[st]){
+    caps.push(captionText(st, k, b, { ...b, [k]: s[k] })); caps.push(captionText(st, k, b, b));
+    caps.push(captionText(st, k, s, { ...s, [k]: b[k] }));
+  }
+  keep($('caption'), caps.map(capHTML));
+  keep($('legend'), [1, 2, 3].map(legendHTML));
+  const qs = []; for (const st of [1, 2, 3]) for (const an of [false, true]) qs.push(qbodyHTML(st, an));
+  keep($('qbody'), qs);
+  const ro = $('readouts'); ro.style.minHeight = ''; let mx = 0;
+  const save = { f0: state.f0, vs: state.vs, vo: state.vo };
+  for (const st of [1, 2, 3]) for (const v of [b, s]){
+    Object.assign(state, { f0: v.f0, vs: v.vs, vo: v.vo });
+    $('roAMeas').textContent = '측정 1500.0 Hz'; $('roBMeas').textContent = '측정 1500.0 Hz';
+    renderReadouts(st); mx = Math.max(mx, Math.ceil(ro.getBoundingClientRect().height));
+  }
+  Object.assign(state, save); liveCache = '';
+  renderReadouts(state.step); ro.style.minHeight = mx + 'px';
+  const fc = $('fcmp'); fc.style.minHeight = ''; renderFcmp(1);                  // 막대가 3줄일 때 높이로 고정
+  const fh = Math.ceil(fc.getBoundingClientRect().height); renderFcmp(state.step); fc.style.minHeight = fh + 'px';
+}
+
+/* ---------- 단계 ---------- */
+function setStep(n){
+  state.step = n; state.ans = false;
+  document.querySelectorAll('#steps .step').forEach(b => b.setAttribute('aria-pressed', +b.dataset.step === n));
+  $('vsBlock').classList.toggle('off', n === 2); $('vsS').disabled = n === 2;
+  $('voBlock').classList.toggle('off', n === 1); $('voS').disabled = n === 1;
+  settled = snap();
+  if (sc) keepGhost();
+  clearMeas(); restart(); updateTexts(); setCaption(null); renderQ(); drawScene();
+}
+$('steps').addEventListener('click', e => { const b = e.target.closest('.step'); if (b) setStep(+b.dataset.step); });
+$('nextBtn').addEventListener('click', () => setStep(state.step < 3 ? state.step + 1 : 1));
+$('ansBtn').addEventListener('click', () => { state.ans = !state.ans; renderQ(); });
+
+/* ---------- 조작 ---------- */
+[['f0S', 'f0'], ['vsS', 'vs'], ['voS', 'vo']].forEach(([id, key]) => {
+  const el = $(id);
+  el.addEventListener('input', () => { state[key] = parseInt(el.value, 10); syncVel(); updateTexts(); setCaption(key); });
+  el.addEventListener('change', () => { setCaption(key); settled = snap(); });
+});
+function setPlaying(on){
+  if (on) stepLeft = 0;
+  state.playing = on;
+  $('playBtn').textContent = on ? '⏸' : '▶';
+  $('playBtn').setAttribute('aria-label', on ? '재생 멈추기' : '다시 재생');
+}
+$('playBtn').addEventListener('click', () => setPlaying(!state.playing));
+/* 멈춘 채 정확히 한 주기(T = 1 ÷ f₀)만 진행: 지금 재생 빠르기로 움직여 보여 준 뒤 멈춘다(파면이 하나 더 나온다) */
+$('stepBtn').addEventListener('click', () => {
+  setPlaying(false);
+  if (ending){ keepGhost(); restart(); return; }                                  // 장면 끝에서 누르면 처음으로(이전 장면을 겹쳐 흐리며)
+  stepLeft += 1/state.f0;                                                         // 누를 때마다 정확히 한 주기
+});
+function setSlow(v){
+  state.slow = v;
+  [...$('slowRow').children].forEach(x => x.setAttribute('aria-pressed', +x.dataset.slow === v));
+  $('slowNote').textContent = `실제보다 ${v}배 느리게 재생`;
+}
+$('slowRow').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setSlow(+b.dataset.slow); });
+$('resetBtn').addEventListener('click', () => {
+  Object.assign(state, DEF);
+  setPlaying(true); setSlow(150);
+  $('f0S').value = DEF.f0; $('vsS').value = DEF.vs; $('voS').value = DEF.vo;
+  setSound('off');
+  setStep(1);
+});
+
+/* ---------- 소리로 들어 보기: 식으로 구한 진동수의 순음 (Web Audio, 외부 의존 없음) ---------- */
+let actx = null, osc = null, gainNode = null;
+function soundFreq(){
+  const o = outs(state, state.step);
+  return state.sound === 'src' ? state.f0 : state.sound === 'A' ? o.fA : state.sound === 'B' ? o.fB : 0;
+}
+function updateSoundFreq(){
+  if (!osc || state.sound === 'off') return;
+  const f = soundFreq(); if (isFinite(f) && f > 0) osc.frequency.setTargetAtTime(f, actx.currentTime, 0.02);
+}
+function setSound(mode){
+  state.sound = mode;
+  [...$('soundRow').children].forEach(x => x.setAttribute('aria-pressed', x.dataset.sound === mode));
+  if (mode === 'off'){ if (gainNode) gainNode.gain.setTargetAtTime(0, actx.currentTime, 0.03); return; }
+  try {
+    if (!actx){
+      actx = new (window.AudioContext || window.webkitAudioContext)();
+      osc = actx.createOscillator(); gainNode = actx.createGain(); gainNode.gain.value = 0;
+      osc.type = 'sine'; osc.connect(gainNode); gainNode.connect(actx.destination); osc.start();
+    }
+    if (actx.state === 'suspended') actx.resume();
+    osc.frequency.setValueAtTime(soundFreq(), actx.currentTime);
+    gainNode.gain.setTargetAtTime(0.15, actx.currentTime, 0.03);                 // 모든 버튼이 같은 진폭(노트북 스피커에서도 들리되 너무 크지 않게)
+  } catch (e){ state.sound = 'off'; [...$('soundRow').children].forEach(x => x.setAttribute('aria-pressed', x.dataset.sound === 'off')); }
+}
+$('soundRow').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setSound(b.dataset.sound); });
+document.addEventListener('visibilitychange', () => { if (document.hidden && state.sound !== 'off') setSound('off'); });
+window.addEventListener('pagehide', () => { if (state.sound !== 'off') setSound('off'); });
+
+const help = $('help'), app = document.querySelector('.app');
+const showHelp = () => { help.hidden = false; app.inert = true; $('closeHelp').focus(); };
+const hideHelp = () => { help.hidden = true; app.inert = false; $('helpBtn').focus(); };
+$('helpBtn').addEventListener('click', showHelp);
+$('closeHelp').addEventListener('click', hideHelp);
+help.addEventListener('click', e => { if (e.target === help) hideHelp(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !help.hidden) hideHelp(); });
+
+/* ---------- 한 화면에 맞추기 ----------
+   가로가 넓으면 좌우(SIDE), 세로로 길면 위아래(STACK) 한 화면 배치를 먼저 해 본다.
+   장면이 MIN_BAND보다 낮아지거나 조작 칸을 MIN_ZOOM보다 더 줄여야 하면 스크롤 배치로 둔다. */
+const SIDE = matchMedia('(min-aspect-ratio:6/5) and (min-width:600px) and (min-height:300px)');
+const STACK = matchMedia('(max-aspect-ratio:1199/1000) and (min-width:520px) and (min-height:540px)');
+const MIN_BAND = 170, MIN_ZOOM = 0.7;                                           // px, 배율
+const ZOOM_OK = 'zoom' in document.documentElement.style;
+const LOW = matchMedia('(max-height:430px)');
+const root = document.documentElement, side = $('side'), exp = $('exp');
+function fitLayout(){
+  let z = 1; side.style.overflowY = '';
+  if (SIDE.matches){
+    const need = side.scrollHeight, avail = side.clientHeight;
+    if (need > avail + 1) z = avail/need*0.995;
+    if (z < (LOW.matches ? 0.85 : MIN_ZOOM)){ z = 1; side.style.overflowY = 'auto'; }   // 휴대폰 가로·낮은 창: 장면·안내·판독값은 한 화면, 조작 칸만 칸 안에서 스크롤
+  } else {
+    const over = exp.scrollHeight - exp.clientHeight;
+    if (over > 1){ const h = side.getBoundingClientRect().height; z = (h - over)/h*0.995; }
+  }
+  if (z < 1){
+    if (!ZOOM_OK || z < MIN_ZOOM) return false;
+    side.style.zoom = z;
+  }
+  return $('sceneBox').clientHeight >= (LOW.matches ? 150 : MIN_BAND) && exp.scrollHeight <= exp.clientHeight + 1;
+}
+let relayoutTimer = 0;
+function relayout(){
+  side.style.zoom = ''; side.style.overflowY = '';
+  root.classList.toggle('one', SIDE.matches || STACK.matches);
+  fixHeights();
+  if (root.classList.contains('one') && !fitLayout()){
+    root.classList.remove('one'); side.style.zoom = ''; side.style.overflowY = ''; fixHeights();
+  }
+  resizeAll();
+}
+const ro = new ResizeObserver(() => { clearTimeout(relayoutTimer); relayoutTimer = setTimeout(relayout, 16); });
+ro.observe(document.querySelector('.workspace'));
+ro.observe($('sceneBox'));
+
+/* ---------- 시간 진행 ---------- */
+/* 장면이 끝나면 FADE 초 동안 어두워졌다가 처음부터 다시 밝아진다. 어두워지는 동안에도 운동은 그대로 이어지고,
+   그사이 멈추면 다시 밝아져 끝 장면을 보여 준다 */
+const FADE = 0.45;
+let lastT = performance.now();
+function frame(now){
+  const dtw = Math.min(0.05, Math.max(0, (now - lastT)/1000)); lastT = now;
+  let run = 0;
+  if (state.playing) run = dtw/state.slow;
+  else if (stepLeft > 0){ run = Math.min(stepLeft, dtw/state.slow); stepLeft -= run; if (stepLeft < 1e-12) stepLeft = 0; }   // ⏭: 재생할 때와 같은 빠르기로 한 주기만
+  if (run > 0 && sc){
+    advance(run);
+    if (!ending && sc.end(xs, obs.map(o => o.x))){ ending = true; stepLeft = 0; }
+  }
+  vis = ending && state.playing ? Math.max(0, vis - dtw/FADE) : Math.min(1, vis + dtw/FADE);
+  if (vis === 0 && ending) restart();
+  if (ghostA > 0) ghostA = Math.max(0, ghostA - dtw/0.3);
+  if ((window.devicePixelRatio || 1) !== DPR) [SW, SH] = sizeCanvas(scene, sctx);   // 배율이 다른 화면으로 옮기면 캔버스 해상도를 다시 맞춤
+  drawScene(); updateLive();
+  requestAnimationFrame(frame);
+}
+
+setStep(1);
+relayout();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
