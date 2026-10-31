@@ -240,6 +240,158 @@ for (const engine of [chromium, webkit]) {
       assert.match(result[0].full, /Invent an ORIGINAL face/);
       assert.match(result[0].lean, /FACE: an original believable Korean/);
     });
+    await t.test('the chosen shot sets the pose and the time of day; only standing shots keep the standing rules', async () => {
+      const cases = await page.evaluate(async () => {
+        const originalFetch = orFetch, results = [];
+        let director = '';
+        orFetch = async payload => {
+          director = payload.messages[0].content.find(part => part.type === 'text').text;
+          return {choices:[{message:{content:'{}'}}]};
+        };
+        const photo = 'data:image/png;base64,AA==';
+        const equip = (level, ids, grades) => LABS[level].map((station, index) => ({
+          ...(station.experiments.find(e => e.id === ids[index]) || station.experiments[0]),
+          slot:station.slot, slotEn:station.slotEn, ok:grades[index] !== 'miss', grade:grades[index]
+        }));
+        const run = (profile, shot, shotFree) => {
+          Object.assign(state, {photoFace:'', faceTreatment:'original', role:'재난 현장 구조대원', motifsFree:'거미', motifsEn:'spider',
+            motifCues:'', palette:'', signature:'', shotEn:'', ...profile, shot, shotFree});
+          const full = buildPrompt(''), lean = buildLeanPrompt({picture:'A hero in the chosen scene.', garment:'A costume.'});
+          return {full, lean};
+        };
+        try {
+          const ok4 = ['ok', 'ok', 'ok', 'ok'];
+          const shots = [...SHOTS.filter(s => !s.free).map(s => [s.id, '']), ['custom', '도서관 창가에 앉아 책을 읽고 있다']];
+          const profiles = [
+            {photo, glasses:'no', age:'15', gender:'boy', name:'Pose test', level:'middle'},
+            {photo:'', glasses:'', age:'8', gender:'girl', name:'-Pose test-', level:'middle'},
+            {photo, glasses:'no', age:'8', gender:'boy', name:'-Pose test-', level:'elementary'}
+          ];
+          for (const profile of profiles) for (const traits of ['조용하지만 강한', '느긋하고 침착한', '']) for (const [shot, shotFree] of shots) {
+            state.loadout = equip(profile.level, ['oobleck', 'fruitcell', profile.level === 'middle' ? 'spectrum' : 'rainbow', 'hydrophobic'], ok4);
+            const out = run({...profile, traits}, shot, shotFree);
+            director = '';
+            await askDirector();
+            results.push({...out, shot, free:shotFree, traits, photo:!!profile.photo, age:profile.age, gender:profile.gender,
+              legend:isLegend(), pose:shotPose(), director});
+          }
+          // 추진 장비: 점수가 높으면 몸이 떠오르고, 낮으면 앞으로 기울기만 한다
+          const thrust = {};
+          for (const [key, level, ids, grades] of [
+            ['gasStrong', 'middle', ['oobleck', 'gas', 'spectrum', 'hydrophobic'], ok4],
+            ['gasWeak', 'middle', ['oobleck', 'gas', 'spectrum', 'hydrophobic'], ['miss', 'ok', 'miss', 'miss']],
+            ['gasTwo', 'middle', ['oobleck', 'gas', 'spectrum', 'hydrophobic'], ['ok', 'ok', 'miss', 'miss']],
+            ['gasThree', 'middle', ['oobleck', 'gas', 'spectrum', 'hydrophobic'], ['ok', 'ok', 'ok', 'miss']],
+            ['balloonStrong', 'elementary', ['oobleck', 'balloon', 'rainbow', 'hydrophobic'], ok4]
+          ]) {
+            state.loadout = equip(level, ids, grades);
+            thrust[key] = run({photo:'', glasses:'', age:'14', gender:'neutral', name:'Thrust test', level, traits:'조용하지만 강한'}, 'activate', '');
+          }
+          // 전설 등급이 아닌 여자 히어로: 낮은 점수(1)와 높은 점수(4)의 조명 줄이 모두 푸른 하늘을 지켜야 한다
+          const rooftopGirls = [['miss', 'ok', 'miss', 'miss'], ok4].map(grades => {
+            state.loadout = equip('middle', ['oobleck', 'fruitcell', 'spectrum', 'hydrophobic'], grades);
+            return run({photo:'', glasses:'', age:'15', gender:'girl', name:'Rooftop test', level:'middle', traits:'조용하지만 강한'}, 'rooftop', '');
+          });
+          return {results, thrust, rooftopGirls};
+        } finally { orFetch = originalFetch; }
+      });
+      // 예전에는 '히어로 랜딩'을 골라도 이 문장들이 착지 자세를 덮어 서 있는 그림이 나왔다.
+      const daylightLine = /no night scene|outdoors under a bright sky|pale sky, sunlit haze|clean directional daylight|Daylight, golden hour|light airy background/;
+      const standing = /standing action pose about capability, and the camera|full-length standing shot|soles on the ground|standing as tall as|both feet flat|low planted stance with the feet apart|bouncing on the toes|HOW THIS PERSON STANDS|TEMPERAMENT pose is followed exactly|weight planted|temperament's stance/;
+      for (const entry of cases.results) {
+        const context = `${entry.shot} ${entry.gender} ${entry.age}${entry.photo ? ' photo' : ''} trait '${entry.traits}'`;
+        if (['poster', 'rooftop'].includes(entry.shot)) {
+          assert.equal(entry.pose, '', context + ': a standing shot sets no pose of its own');
+          assert.match(entry.full, /The pose is a standing action pose about capability/, context);
+          assert.doesNotMatch(entry.lean, /★ THE BODY/, context);
+        } else {
+          assert.ok(entry.pose, context + ': this shot sets the pose');
+          for (const part of ['full', 'lean']) {
+            assert.doesNotMatch(entry[part], standing, `${context} ${part}: no standing rule overrides the chosen pose`);
+          }
+          assert.ok(entry.lean.includes(entry.pose), context + ': the image prompt states the pose');
+          assert.ok(entry.full.split('crown to hip joint, hip joint to sole').length - 1 >= 2, context + ': age is measured along a posed body');
+          assert.match(entry.full, /FOR THIS PICTURE THE CHOSEN SHOT SETS THE POSE/, context + ': the temperament is carried inside the pose');
+          if (entry.age === '8') assert.match(entry.full, /midpoint of the body measured along it/, context);
+          if (entry.traits === '조용하지만 강한') assert.match(entry.director, /단, 이번 촬영 컷\(.+\)은 몸의 자세까지 정한다\. 성격은 그 자세 안에서 어깨, 손, 무게 중심으로 드러내고/, context + ': the designer is told the shot sets the pose');
+          if (entry.shot !== 'activate') {
+            assert.ok(entry.lean.includes('★ THE BODY: ' + entry.pose), context);
+            assert.ok(entry.full.includes('THE BODY IN THIS SHOT: ' + entry.pose), context);
+            assert.match(entry.full, /4a-POSE\. THE BODY\./, context);
+            assert.ok(entry.full.includes('This student chose a shot that sets what the body is doing: ' + entry.pose),
+              context + ': the modesty section, which wins conflicts, hands the pose to the shot');
+            if (entry.legend) assert.match(entry.full, /THE BEARING LINE ABOVE IS ADJUSTED/, context);
+            assert.match(entry.full, /none of them is a reason to stand the hero up/, context);
+          }
+        }
+        if (entry.shot === 'landing') {
+          assert.match(entry.lean, /ONE KNEE ON THE GROUND/);
+          assert.match(entry.lean, /ONE FIST pressed onto the ground/);
+          assert.match(entry.lean, /bottom two-fifths below them is open, plain wet ground/, context + ': the crouch stays above the poster title band');
+          assert.match(entry.full, /camera down near the ground, because the crouched head is down there/);
+          assert.match(entry.full, /lower two-fifths of the frame, below the knee and the fist on the ground/, context);
+          assert.ok(entry.full.includes('stays inside the frame (for a landing: the top of the head'), context + ': the framing aside is closed');
+          for (const part of ['full', 'lean']) {
+            assert.ok(entry[part].includes('the camera close to the ground at the height of the crouched head'), `${context} ${part}: the camera is level with the crouched head`);
+            assert.doesNotMatch(entry[part], /low-angle/, `${context} ${part}: no camera looking up at the child`);
+          }
+          assert.match(entry.director, /낮게 찍은 컷/, context + ': the card text the director reads');
+          assert.doesNotMatch(entry.director, /올려다/, context + ': the director is not told to look up at the child');
+          if (entry.legend) assert.match(entry.full, /CAMERA line is measured from the crouched head/, context);
+        }
+        if (entry.shot === 'backlit') assert.match(entry.full, /wide full-length shot/, context);
+        if (entry.shot === 'custom') {
+          assert.match(entry.full, /Do not overrule it with a different pose/, context);
+          assert.ok(entry.lean.includes('no other line on this page changes it'), context + ': a student-written standing scene is not argued with');
+          assert.doesNotMatch(entry.lean, /turns it back into a still standing pose/, context);
+        }
+        if (entry.shot === 'bench' && !entry.photo) assert.doesNotMatch(entry.full + entry.lean, /photographed head pose/, context);
+        if (entry.shot === 'rooftop') {
+          assert.match(entry.lean, /★ THE TIME OF DAY: blue hour/, context);
+          assert.match(entry.full, /THE TIME OF DAY IS PART OF WHAT THEY CHOSE/, context);
+          if (entry.gender === 'girl') for (const part of ['full', 'lean']) {
+            assert.doesNotMatch(entry[part], daylightLine,
+              `${context} ${part}: the bright girl-hero light keeps the chosen blue hour`);
+          }
+        }
+        if (entry.age === '8') {
+          const keepsScene = entry.shot === 'rooftop' || entry.shot === 'custom';
+          assert.equal(/put bright warm light on the whole scene/.test(entry.full), !keepsScene, context + ': the young-child warm light respects a chosen time of day');
+          if (keepsScene) assert.match(entry.full, /never brightens dusk or night into day/, context);
+        }
+        if (entry.age === '8') {
+          assert.match(entry.full, /it must land ABOVE the hip joint, on the lower belly/, context + ': a child has the midpoint above the hip');
+          assert.doesNotMatch(entry.full, /must land BELOW the hip/, context);
+        }
+        assert.match(entry.full, /So the hip line sits BELOW the midpoint of this figure/, context + ': short legs put the hip below the midpoint');
+        if (entry.gender === 'boy' && entry.age === '8') assert.doesNotMatch(entry.full + entry.lean, /low planted stance/, context + ': a primary-school boy keeps the child stance');
+        if (entry.gender === 'boy' && entry.age === '15' && entry.shot === 'poster') assert.match(entry.lean, /low planted stance with the feet apart/, context);
+        if (entry.legend) {
+          assert.equal(/THE HEAD IS THE EXCEPTION/.test(entry.full), entry.photo, context + ': the legend camera line follows the photo');
+          assert.equal(/Chin level, looking straight down the lens/.test(entry.full), !entry.photo, context + ': the legend bearing line follows the photo');
+        }
+        if (entry.shot === 'custom' && entry.traits === '조용하지만 강한') assert.match(entry.director, /학생이 적은 장면과 다른 자세를 쓰지 마라/, context);
+      }
+      const {gasStrong, gasWeak, gasTwo, gasThree, balloonStrong} = cases.thrust;
+      assert.match(gasStrong.lean, /both boots just off the ground/);
+      assert.match(gasStrong.full, /The hero is already off the ground/);
+      assert.match(gasWeak.lean, /weak push of the thrust/);
+      assert.doesNotMatch(gasWeak.full + gasWeak.lean, /already off the ground/, 'a weak thruster cannot lift the hero');
+      assert.match(balloonStrong.lean, /slightly up by the thrust/);
+      for (const entry of [gasStrong, gasWeak, balloonStrong]) assert.doesNotMatch(entry.lean, /weight on one foot/, 'a thruster pushes the hero instead of planting them');
+      assert.doesNotMatch(gasTwo.full + gasTwo.lean, /already off the ground|both boots just off the ground/, 'score 2 still cannot lift the hero');
+      assert.match(gasThree.lean, /both boots just off the ground/, 'score 3 lifts the hero');
+      assert.match(gasThree.full, /The hero is already off the ground/, 'score 3 lifts the hero');
+      for (const entry of [gasStrong, gasWeak, gasTwo, gasThree, balloonStrong]) {
+        assert.ok(entry.full.includes('for this thruster that is the push itself'), 'the rulebook body follows the thruster');
+        assert.doesNotMatch(entry.full, /weight thrown onto one foot|braced legs against a recoil/, 'the rulebook does not plant a thruster');
+      }
+      for (const entry of cases.rooftopGirls) for (const part of ['full', 'lean']) {
+        assert.match(entry[part], /LIGHT: bright and clean INSIDE the chosen scene/, part + ': a non-legend girl keeps the blue hour');
+        assert.doesNotMatch(entry[part], daylightLine, part);
+      }
+    });
+
     assert.deepEqual(errors, []);
   });
 }
