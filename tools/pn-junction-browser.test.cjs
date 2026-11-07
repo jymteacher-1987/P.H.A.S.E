@@ -15,7 +15,8 @@ for (const engine of [chromium, webkit]) test(`PN classroom controls, polarity a
   const origin = `http://127.0.0.1:${server.address().port}`;
   let browser;
   try {
-    browser = await engine.launch(engine === chromium ? { channel: 'msedge' } : {});
+    const channel = process.env.PREVIEW_BROWSER_CHANNEL || (process.platform === 'win32' ? 'msedge' : undefined);
+    browser = await engine.launch(engine === chromium && channel ? { channel } : {});
     const page = await browser.newPage({ viewport: { width: 1366, height: 900 } });
     const errors = []; page.on('pageerror', e => errors.push(e.message));
     await page.route('**/*', route => new URL(route.request().url()).origin === origin ? route.continue() : route.abort());
