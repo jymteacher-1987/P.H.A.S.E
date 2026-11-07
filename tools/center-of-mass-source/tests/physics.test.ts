@@ -40,8 +40,9 @@ test('recorded line is the actual vertical string extension and rotates with the
  }
 });
 
-test('a free first suspension still permits a stable quarter-turn search on all ten plates',()=>{
- for(const shape of SHAPES){const c=centroid(shape.points);for(const pin of suspensionPins(shape)){
+test('first attachments along every upper edge permit a stable quarter-turn search on all ten plates',()=>{
+ for(const shape of SHAPES){const c=centroid(shape.points),edge=bounds(shape.points);for(let i=1;i<100;i++){
+  const pin=topAttachment(shape.points,0,edge.left+edge.width*i/100);
   const first=suspensionAngle(c,pin),second=first+secondOrientation(shape,first),rc=rotate(c,second);
   const p=rotate(topAttachment(shape.points,second,rc.x),second);
   assert(p.y<rc.y,shape.id);

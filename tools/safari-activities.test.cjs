@@ -221,7 +221,32 @@ test('WebKit: all activities on small iPhone screens, older APIs, game start and
             await frame.getByRole('button', {name:'재료가 있는 곳',exact:true}).tap();
             const start=frame.getByRole('button', {name:'직접 찾아보기',exact:true});
             await start.scrollIntoViewIfNeeded();await reachable(start,'Center of mass start');await start.tap();
+            const assertAttachmentOnEdge=async()=>{
+              const distance=await frame.locator('svg.stage').evaluate(svg=>{
+                const pin=svg.querySelector('[data-attachment]'),m=pin.transform.baseVal.consolidate().matrix;
+                const points=pin.parentElement.querySelector('polygon').points;
+                let nearest=Infinity;
+                for(let i=0;i<points.numberOfItems;i++){
+                  const a=points.getItem(i),b=points.getItem((i+1)%points.numberOfItems);
+                  const dx=b.x-a.x,dy=b.y-a.y,t=Math.max(0,Math.min(1,((m.e-a.x)*dx+(m.f-a.y)*dy)/(dx*dx+dy*dy)));
+                  nearest=Math.min(nearest,Math.hypot(m.e-a.x-t*dx,m.f-a.y-t*dy));
+                }
+                return nearest;
+              });
+              assert.ok(distance<.0001,'The displayed attachment stays on the plate boundary');
+            };
+            await assertAttachmentOnEdge();
+            const firstPosition=frame.locator('#attachment-position');
+            assert.ok(await firstPosition.isVisible(),'First attachment has the same edge slider as the second');
+            const firstX=Number(await firstPosition.inputValue());
+            await frame.getByRole('button',{name:'오른쪽으로 점 옮기기',exact:true}).tap();
+            assert.ok(Number(await firstPosition.inputValue())>firstX,'First attachment moves right along the edge');
+            await assertAttachmentOnEdge();
             await frame.locator('svg.stage').tap();
+            await assertAttachmentOnEdge(); // Tapping the interior chooses its upper edge, never an interior pin.
+            const firstPin=await frame.locator('[data-attachment]').getAttribute('transform');
+            await frame.locator('svg.stage').press('ArrowDown');
+            assert.equal(await frame.locator('[data-attachment]').getAttribute('transform'),firstPin,'Vertical keys cannot move the attachment into the plate');
             const hang=frame.getByRole('button',{name:'이 점에 매달아 보기',exact:true});
             await hang.scrollIntoViewIfNeeded();await reachable(hang,'Center of mass hang');await hang.tap();
             await frame.locator('[data-live-plumb]').waitFor({state:'visible'});
@@ -233,6 +258,7 @@ test('WebKit: all activities on small iPhone screens, older APIs, game start and
             const position=frame.locator('#attachment-position'),before=Number(await position.inputValue());
             await frame.getByRole('button',{name:'오른쪽으로 점 옮기기',exact:true}).tap();
             assert.ok(Number(await position.inputValue())>before,'Second attachment moves right along upper material edge');
+            await assertAttachmentOnEdge();
           }
           if (entry.id === 'hero-maker') {
             const normalized = await frame.evaluate(async () => {
