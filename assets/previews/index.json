@@ -172,6 +172,11 @@
       "src": "assets/previews/school-rider-46a180f5c1.webp",
       "sourceHash": "01af2936b437a3df64c91b14b228ef1ab197bfd86f36b4626cf3b924e5a6a3e8",
       "bytes": 63480
+    },
+    "center-of-mass": {
+      "src": "assets/previews/center-of-mass-b9c076455f.webp",
+      "sourceHash": "ca42b4089f6d734c3090fcc00054ce520b180b721756e962d7604ff4e02d18d8",
+      "bytes": 6062
     }
   }
 }

@@ -1,0 +1,74 @@
+rules_version = '2';
+service cloud.firestore {
+ match /databases/{database}/documents {
+  function validRound(r, id, cx, cy, scale) {
+   let p=r.point;
+   let x=p.x;
+   let y=p.y;
+   let score=r.score;
+   let ms=r.ms;
+   let dx=x-cx;
+   let dy=y-cy;
+   let distance=math.sqrt(dx*dx+dy*dy);
+   return r.keys().hasOnly(['prediction','shapeId','point','score','ms'])
+     && r.prediction is bool && r.shapeId==id
+     && p.keys().hasOnly(['x','y'])
+     && x is number && y is number
+     && math.abs(x)<=1000 && math.abs(y)<=1000
+     && score is int && score>=0
+     && (score==0 ? distance>scale*0.995 : score==math.round(100.0*(1.0-distance / scale)))
+     && ms is number && ms>=0 && ms<=7200000;
+  }
+  function validPart(d,part) {
+   let r=d.rounds;
+   return part in ['first','second']
+     && d.keys().hasOnly(['rounds','total','ms','version'])
+     && d.version=='lamina-v2'
+     && r is list && r.size()==5
+     && d.total is int && d.total>=0 && d.total<=500
+     && d.ms is number && d.ms>=0 && d.ms<=7200000
+     && (part=='first' ? (validRound(r[0], 'triangle', -16.666666666666668, 23.333333333333332, 80.43825271598085)
+       && validRound(r[1], 'trapezoid', -5.333333333333333, 14.666666666666666, 84.00148808205721)
+       && validRound(r[2], 'kite', 15.666666666666666, -2.3333333333333335, 73.55015295701295)
+       && validRound(r[3], 'arrow', -0.20520520520520522, 0, 84.52995031348355)
+       && validRound(r[4], 'l', -29.48401281955728, 31.476894983975555, 82.20591523728692)) : (validRound(r[0], 'star', 0, 0, 86.62469498321151)
+       && validRound(r[1], 'hammer', 0, -36.24778917580474, 87.50892811593569)
+       && validRound(r[2], 'u', 0, 17.586206896551722, 83.10385069297331)
+       && validRound(r[3], 'moon', -30.537639620180528, 0, 73.23007785995871)
+       && validRound(r[4], 'island', -10.590725064409275, -5.108821003557845, 88.45903006477066)))
+     && d.total==r[0].score+r[1].score+r[2].score+r[3].score+r[4].score
+     && math.abs(d.ms-(r[0].ms+r[1].ms+r[2].ms+r[3].ms+r[4].ms))<1;
+  }
+  function validSummary(d) {
+   let a=getAfter(/databases/$(database)/documents/centerLabRuns/$(request.auth.uid)/games/$(d.runId)/parts/first).data;
+   let b=getAfter(/databases/$(database)/documents/centerLabRuns/$(request.auth.uid)/games/$(d.runId)/parts/second).data;
+   return d.keys().hasOnly(['name','total','ms','uid','version','rankKey','createdAt','runId'])
+     && d.uid==request.auth.uid && d.version=='lamina-v2'
+     && d.name is string && d.name.size()>0 && d.name.size()<=16
+     && d.total is int && d.total==a.total+b.total
+     && d.ms is int && d.ms>=1000 && d.ms<=7200000
+     && math.abs(d.ms-(a.ms+b.ms))<2
+     && a.version==d.version && b.version==d.version
+     && d.rankKey is int && d.rankKey==d.total*10000000000-d.ms
+     && d.createdAt==request.time;
+  }
+  match /centerLabRuns/{uid}/games/{runId}/parts/{part} {
+   allow read: if request.auth!=null && request.auth.uid==uid;
+   allow create: if request.auth!=null && request.auth.uid==uid && validPart(request.resource.data,part);
+   allow update,delete: if false;
+  }
+  match /centerLabScores/{runId} {
+   allow get: if true;
+   allow list: if request.query.limit!=null && request.query.limit<=30;
+   allow create: if request.auth!=null && request.resource.data.runId==runId && validSummary(request.resource.data);
+   allow update,delete: if false;
+  }
+  // Diagnostic summaries are private and never appear in the leaderboard.
+  match /connectionChecks/{uid} {
+   allow read: if request.auth!=null && request.auth.uid==uid;
+   allow create,update: if request.auth!=null && request.auth.uid==uid && validSummary(request.resource.data);
+   allow delete: if false;
+  }
+  match /{document=**} {allow read,write: if false;}
+ }
+}

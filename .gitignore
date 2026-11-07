@@ -1,2 +1,4 @@
 node_modules/
 .preview-tmp/
+
+tools/center-of-mass-source/dist/

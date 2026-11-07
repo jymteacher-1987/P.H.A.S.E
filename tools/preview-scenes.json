@@ -318,5 +318,35 @@
         "wait": 6000
       }
     ]
+  },
+  "center-of-mass": {
+    "viewport": {
+      "width": 960,
+      "height": 720
+    },
+    "target": ".experiment",
+    "steps": [
+      {
+        "click": "button:text-is(\"재료가 있는 곳\")"
+      },
+      {
+        "click": "button:text-is(\"직접 찾아보기\")"
+      },
+      {
+        "click": "svg.stage"
+      },
+      {
+        "click": "button:text-is(\"이 점에 매달아 보기\")"
+      },
+      {
+        "wait": 10000
+      },
+      {
+        "click": "button:text-is(\"찾았어요 · 점선 A 남기기\")"
+      },
+      {
+        "click": "button:text-is(\"물체 90° 돌리기\")"
+      }
+    ]
   }
 }

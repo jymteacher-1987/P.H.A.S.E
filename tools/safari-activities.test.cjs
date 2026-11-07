@@ -217,6 +217,23 @@ test('WebKit: all activities on small iPhone screens, older APIs, game start and
             await frame.locator('[data-action=next]').tap();
             assert.equal(await frame.locator('#levelTitle').innerText(), '옥상 사이의 길');
           }
+          if (entry.id === 'center-of-mass') {
+            await frame.getByRole('button', {name:'재료가 있는 곳',exact:true}).tap();
+            const start=frame.getByRole('button', {name:'직접 찾아보기',exact:true});
+            await start.scrollIntoViewIfNeeded();await reachable(start,'Center of mass start');await start.tap();
+            await frame.locator('svg.stage').tap();
+            const hang=frame.getByRole('button',{name:'이 점에 매달아 보기',exact:true});
+            await hang.scrollIntoViewIfNeeded();await reachable(hang,'Center of mass hang');await hang.tap();
+            await frame.locator('[data-live-plumb]').waitFor({state:'visible'});
+            const save=frame.getByRole('button',{name:'찾았어요 · 점선 A 남기기',exact:true});
+            await frame.waitForFunction(()=>{const b=Array.from(document.querySelectorAll('button')).find(b=>b.textContent.includes('점선 A 남기기'));return b&&!b.disabled;},null,{timeout:20000});
+            await save.scrollIntoViewIfNeeded();await save.tap();
+            await frame.getByRole('button',{name:'물체 90° 돌리기',exact:true}).tap();
+            assert.equal(await frame.locator('[data-line="A"]').count(),1);
+            const position=frame.locator('#attachment-position'),before=Number(await position.inputValue());
+            await frame.getByRole('button',{name:'오른쪽으로 점 옮기기',exact:true}).tap();
+            assert.ok(Number(await position.inputValue())>before,'Second attachment moves right along upper material edge');
+          }
           if (entry.id === 'hero-maker') {
             const normalized = await frame.evaluate(async () => {
               const canvas = document.createElement('canvas'); canvas.width = 40; canvas.height = 30;
