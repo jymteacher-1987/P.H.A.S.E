@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {centroid,SHAPES,suspensionPins,suspensionAngle,rotate,scoreGuess,inside,bounds,polarMomentPerMass,angularAcceleration,swingStep,topAttachment,initialOrientation,secondOrientation,plumbLineDirection,isCenterBelowPin} from '../lib/physics.ts';
+import {centroid,SHAPES,suspensionPins,suspensionAngle,rotate,scoreGuess,inside,bounds,polarMomentPerMass,angularAcceleration,swingStep,topAttachment,initialOrientation,secondOrientation,plumbLineDirection,isCenterBelowPin,canRecordPlumbLine} from '../lib/physics.ts';
 test('polygon centroid agrees with independently known rectangle and triangle centers',()=>{
  assert.deepEqual(centroid([{x:0,y:0},{x:12,y:0},{x:12,y:6},{x:0,y:6}]),{x:6,y:3});
  assert.deepEqual(centroid([{x:0,y:0},{x:12,y:0},{x:0,y:6}]),{x:4,y:2});
@@ -75,4 +75,56 @@ test('gravity torque agrees with an independent potential-energy derivative in r
    assert(Math.abs(angularAcceleration(dx,dy,inertia,angle,0)*inertia-torque)<.001,shape.id);
   }
  }
+});
+
+
+test('both initial-pose searches find independent lines through the center of every shape',()=>{
+ for(const shape of SHAPES){
+  const c=centroid(shape.points),turn=secondOrientation(shape,0),directions=[];
+  for(const angle of [0,turn]){
+   const rc=rotate(c,angle),pin=topAttachment(shape.points,angle,rc.x),dx=c.x-pin.x,dy=c.y-pin.y;
+   const inertia=polarMomentPerMass(shape.points)+dx*dx+dy*dy;
+   let state={angle,omega:0},maximum=0;
+   for(let i=0;i<240;i++){state=swingStep(state.angle,state.omega,1/120,dx,dy,inertia);maximum=Math.max(maximum,Math.abs((state.angle-angle)*180/Math.PI));}
+   assert(canRecordPlumbLine(2,maximum),shape.id+' no rotation from release');
+   const d=plumbLineDirection(state.angle);directions.push(d);
+   assert(Math.abs(dx*d.y-dy*d.x)<1e-7,shape.id+' recorded line contains center');
+  }
+  assert(Math.abs(directions[0].x*directions[1].y-directions[0].y*directions[1].x)>.999999,shape.id);
+ }
+});
+
+test('a rotated plate cannot qualify merely by settling later in a different pose',()=>{
+ const shape=SHAPES[0],c=centroid(shape.points),b=bounds(shape.points);
+ const pin=topAttachment(shape.points,0,b.left+b.width*.12),dx=c.x-pin.x,dy=c.y-pin.y;
+ const inertia=polarMomentPerMass(shape.points)+dx*dx+dy*dy;
+ let state={angle:0,omega:0},maximum=0;
+ for(let i=0;i<2400;i++){state=swingStep(state.angle,state.omega,1/120,dx,dy,inertia);maximum=Math.max(maximum,Math.abs(state.angle*180/Math.PI));}
+ assert(Math.abs(state.omega)<.001,'eventually settles');
+ assert(maximum>2,'rotated away from release');
+ assert.equal(canRecordPlumbLine(20,maximum),false,'eventual rest does not qualify');
+ assert.equal(canRecordPlumbLine(0,0),false,'new trial must be observed');
+ assert.equal(canRecordPlumbLine(1.49,0),false);
+ assert.equal(canRecordPlumbLine(1.5,2),true);
+ assert.equal(canRecordPlumbLine(1.5,2.01),false);
+});
+
+test('the horseshoe inner pin gives a valid vertical line but a perturbation grows',()=>{
+ const shape=SHAPES.find(s=>s.id==='u')!,c=centroid(shape.points),pin=topAttachment(shape.points,0,c.x);
+ const dx=c.x-pin.x,dy=c.y-pin.y,inertia=polarMomentPerMass(shape.points)+dx*dx+dy*dy;
+ assert.equal(isCenterBelowPin(c,pin,0),false);
+ assert.equal(angularAcceleration(dx,dy,inertia,0,0),0);
+ const d=plumbLineDirection(0);assert(Math.abs(dx*d.y-dy*d.x)<1e-10);
+ let s={angle:.001,omega:0};for(let i=0;i<120;i++)s=swingStep(s.angle,s.omega,1/120,dx,dy,inertia);
+ assert(s.angle>.001,'a small tilt increases in unstable equilibrium');
+});
+
+
+test('the fine slider resolves even the unstable inner-edge equilibrium of the L plate',()=>{
+ const shape=SHAPES.find(s=>s.id==='l')!,c=centroid(shape.points),b=bounds(shape.points),step=.001,min=b.left+.001;
+ const x=min+Math.round((c.x-min)/step)*step,pin=topAttachment(shape.points,0,x),dx=c.x-pin.x,dy=c.y-pin.y;
+ const inertia=polarMomentPerMass(shape.points)+dx*dx+dy*dy;
+ let s={angle:0,omega:0},maximum=0;
+ for(let i=0;i<190;i++){s=swingStep(s.angle,s.omega,1/120,dx,dy,inertia);maximum=Math.max(maximum,Math.abs(s.angle)*180/Math.PI);}
+ assert(canRecordPlumbLine(190/120,maximum));
 });

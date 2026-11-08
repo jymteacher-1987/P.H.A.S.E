@@ -339,13 +339,7 @@
         "click": "button:text-is(\"이 점에 매달아 보기\")"
       },
       {
-        "wait": 10000
-      },
-      {
-        "click": "button:text-is(\"찾았어요 · 점선 A 남기기\")"
-      },
-      {
-        "click": "button:text-is(\"물체 90° 돌리기\")"
+        "wait": 800
       }
     ]
   }

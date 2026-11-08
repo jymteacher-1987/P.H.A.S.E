@@ -169,9 +169,9 @@ window.PHASE_PREVIEWS = {
       "bytes": 23044
     },
     "center-of-mass": {
-      "src": "assets/previews/center-of-mass-8a17207421.webp",
-      "sourceHash": "8c95907ec5941d43c70f68f2dbd28eb1adbed88da310f564262b924253fbe680",
-      "bytes": 6210
+      "src": "assets/previews/center-of-mass-36f6c1d8ea.webp",
+      "sourceHash": "ca3c4933fda5f1de31d3585d192650b1d01bc30af2221200ee89ad569155c45c",
+      "bytes": 6614
     },
     "school-rider": {
       "src": "assets/previews/school-rider-46a180f5c1.webp",

@@ -611,7 +611,7 @@ window.EXPERIMENTS_DATA = {
       "title": "질량중심 탐험",
       "icon": "📍",
       "description": "균일한 판을 직접 매달고, 90° 돌려 두 연장선의 교점으로 질량중심을 찾아보세요. 10가지 모양과 빈 공간의 중심, 정수 점수·온라인 랭킹을 만나는 물리 실험 게임입니다.",
-      "path": "plays/center-of-mass.html?v=4d3808a843",
+      "path": "plays/center-of-mass.html?v=2d646d4ba2",
       "date": "2026-11-07",
       "tags": [
         "질량중심",

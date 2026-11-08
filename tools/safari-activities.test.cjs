@@ -251,7 +251,16 @@ test('WebKit: all activities on small iPhone screens, older APIs, game start and
             await hang.scrollIntoViewIfNeeded();await reachable(hang,'Center of mass hang');await hang.tap();
             await frame.locator('[data-live-plumb]').waitFor({state:'visible'});
             const save=frame.getByRole('button',{name:'찾았어요 · 점선 A 남기기',exact:true});
-            await frame.waitForFunction(()=>{const b=Array.from(document.querySelectorAll('button')).find(b=>b.textContent.includes('점선 A 남기기'));return b&&!b.disabled;},null,{timeout:20000});
+            await frame.waitForFunction(()=>document.querySelector('.rotation-feedback')?.textContent.includes('처음 회전:'),null,{timeout:10000});
+            assert.equal(await save.isEnabled(),false,'Rotation away from the initial pose cannot be saved');
+            await frame.getByRole('button',{name:'원래 방향으로 · 점 다시 고르기',exact:true}).tap();
+            // The first uniform triangle has x_cm=(-105-70+125)/3=-50/3.
+            // Set its visible range control, rather than changing game state.
+            await firstPosition.evaluate(input=>{input.value='-16.7';input.dispatchEvent(new Event('input',{bubbles:true}));input.dispatchEvent(new Event('change',{bubbles:true}));});
+            await assertAttachmentOnEdge();
+            await hang.scrollIntoViewIfNeeded();await hang.tap();
+            assert.equal(await save.isEnabled(),false,'A fresh attempt must first be observed');
+            await frame.waitForFunction(()=>{const b=Array.from(document.querySelectorAll('button')).find(b=>b.textContent.includes('점선 A 남기기'));return b&&!b.disabled;},null,{timeout:10000});
             await save.scrollIntoViewIfNeeded();await save.tap();
             await frame.getByRole('button',{name:'물체 90° 돌리기',exact:true}).tap();
             assert.equal(await frame.locator('[data-line="A"]').count(),1);
