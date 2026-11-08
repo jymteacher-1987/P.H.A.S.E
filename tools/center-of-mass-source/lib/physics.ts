@@ -41,8 +41,8 @@ export function plumbLineDirection(recordedAngle:number){return rotate({x:0,y:1}
 // Zero torque alone also occurs with the center above the pin (an unstable
 // inverted equilibrium). This distinction is feedback, not a line-recording restriction.
 export function isCenterBelowPin(center:Point,pin:Point,angle:number){return rotate({x:center.x-pin.x,y:center.y-pin.y},angle).y>1e-6;}
-// Both searches observe rotation from the release pose, not eventual rest.
-export function canRecordPlumbLine(seconds:number,maxDegrees:number){return seconds>=1.5&&maxDegrees<=2;}
+// A reference cue for both searches, never permission to record a chosen line.
+export function keptInitialPose(seconds:number,maxDegrees:number){return seconds>=1.5&&maxDegrees<=2;}
 // Polar second moment of area divided by area, shifted to the centroid.
 // Uniform density/thickness cancel. Coordinates use millimetres in the swing model.
 export function polarMomentPerMass(p: Point[]) {let crossSum=0,moment=0;for(let i=0;i<p.length;i++){const a=p[i],b=p[(i+1)%p.length],k=a.x*b.y-b.x*a.y;crossSum+=k;moment+=k*(a.x*a.x+a.x*b.x+b.x*b.x+a.y*a.y+a.y*b.y+b.y*b.y);}const c=centroid(p);return moment/(6*crossSum)-c.x*c.x-c.y*c.y;}

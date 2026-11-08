@@ -14,3 +14,132 @@
 .attachment-control{margin:14px 0;padding:14px 12px;background:#fffaf4;border:1px solid #dfcbbb;border-radius:12px;grid-column:1/-1}.attachment-label{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;font-weight:700}.fine-toggle{font-size:10px;font-weight:400;display:flex;align-items:center;gap:4px;color:#8c7160}.fine-toggle input{accent-color:#795f52}.attachment-control input[type=range]{width:100%;margin:19px 0 14px;accent-color:#795f52;height:8px;cursor:ew-resize}.attachment-arrows{display:flex;align-items:center;justify-content:space-between;gap:6px}.attachment-arrows>span{font-size:9px;color:#a18a77}.attachment-arrows button{display:flex;align-items:center;gap:3px;padding:10px 8px;border:1px solid #d8c2ae;background:#fffdfa;border-radius:8px;font-size:11px}.stage{touch-action:none}.rotation-feedback{margin:8px 0}.control-panel:has(.attachment-control) .steps{display:none}.control-panel .attachment-control~.live-stats{margin-top:auto}.experiment .stage-wrap{display:flex;flex-direction:column;justify-content:center}.experiment .scene-caption{position:relative;bottom:auto;margin:8px 0 12px}.experiment .stage{width:100%;height:auto}
 
 .attachment-arrows button{white-space:nowrap;flex-shrink:0}.attachment-arrows>span{font-size:8px;white-space:nowrap}.attachment-control{padding:12px 8px}.fine-adjust>div{gap:4px}.fine-adjust button{width:34px}.stage-wrap{padding-bottom:0}.control-panel:has(.fine-adjust) .steps{display:none}
+
+/* Final play layout: landscape puts the plate beside the controls. */
+.phone-tip{display:none}
+.repeat-button{touch-action:none;user-select:none;-webkit-user-select:none}
+.fine-toggle{min-height:44px;cursor:pointer;font-size:12px}
+.fine-toggle input{width:18px;height:18px;margin:0 4px 0 0}
+.attachment-control input[type=range]{height:28px;margin:4px 0 10px;touch-action:pan-y}
+.attachment-arrows button,.fine-adjust button{min-width:44px;min-height:44px}
+.attachment-arrows>span{font-size:10px}
+.fine-adjust{flex-wrap:wrap;gap:8px}
+.fine-adjust>span{font-size:11px}
+.fine-adjust>div{gap:8px}
+.fine-adjust button{width:44px;height:44px}
+.close-btn{width:44px;height:44px;right:12px;top:12px}
+.modal h2{padding-right:22px}
+.modal details{font-size:13px;border-bottom:1px solid var(--line)}
+.modal details summary{padding:8px 0;line-height:1.65}
+.modal details p{font-size:13px;line-height:1.85}
+.rank-row>span:nth-child(2){min-width:0;overflow-wrap:anywhere}
+.save-row input{font-size:16px}
+.game-grid{scroll-margin-top:8px}
+@media(max-width:900px){
+ .app-shell:has(.game-grid:not([data-phase="predict"])) .intro-row{display:none}
+ .site-header{height:56px;padding:0 12px}
+ .brand{font-size:14px;gap:7px}.brand-icon{width:30px;height:30px}.brand-icon svg{width:20px}
+ .brand-en{display:none}.site-header nav{gap:0}
+ .site-header nav button,.site-header nav button.nav-active{min-width:44px;min-height:44px;padding:10px;font-size:0;gap:0}
+ main{padding:0 12px max(16px,env(safe-area-inset-bottom))}
+ .intro-row{padding:18px 0 14px}.intro-row h1{font-size:24px;letter-spacing:-1px;margin:8px 0}
+ .intro-row p{font-size:12px;line-height:1.65;word-break:keep-all}
+ .collection-title{gap:8px}.shape-list{grid-template-columns:repeat(5,minmax(0,1fr))}
+ .shape-name{white-space:normal;text-align:center;font-size:10px}
+ .learning-strip p{font-size:12px}.learning-strip strong{font-size:12px}
+ .modal-backdrop{padding:12px max(12px,env(safe-area-inset-left)) max(12px,env(safe-area-inset-bottom));overscroll-behavior:contain}
+ .modal{padding:28px 20px}.modal h2{font-size:23px}
+ .rank-head,.rank-row{grid-template-columns:24px minmax(0,1fr) 48px 76px;gap:6px}
+ .rank-row{font-size:12px}.rank-head{font-size:10px}
+ .record-status,.record-status>span{font-size:11px}
+ .summary{padding:24px 16px}.summary-actions{gap:8px;flex-wrap:wrap}
+ .summary-actions .secondary-btn{min-height:44px;font-size:13px}
+ .round-results{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+ .round-results>div{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:6px;text-align:left}
+ .round-results svg{width:28px;height:28px}.round-results span{font-size:11px;margin:0}.round-results strong{margin:0}
+ .save-row>label,.save-row>p{font-size:12px}.save-row .primary-btn{font-size:12px}
+}
+@media(max-width:640px){
+ .game-grid{gap:10px}
+ .control-panel{display:contents}
+ .game-grid .experiment{order:2}
+ .control-panel .panel-kicker{display:none}
+ .control-panel h2{order:1;font-size:19px;margin:2px 0 0;grid-column:1/-1}
+ .control-panel .panel-description{order:3;margin:0;font-size:13px;line-height:1.65;min-height:0}
+ .control-panel .steps{display:none}
+ .control-panel .prediction,.control-panel .classification-result{order:4;margin:0}
+ .control-panel .rotation-feedback{order:4;margin:0;padding:10px 12px}
+ .control-panel .attachment-control,.control-panel .fine-adjust{order:5;margin:0}
+ .control-panel .main-action,.control-panel .trial-actions{order:6;margin:0}
+ .control-panel .live-stats,.control-panel .round-score{order:7;margin:0;padding:7px 0;display:grid;grid-template-columns:1fr 1fr}
+ .control-panel .round-score{padding:10px 14px}.round-score strong{grid-column:2;grid-row:1/3;font-size:28px;text-align:right}
+ .control-panel .live-stats>div{display:flex;align-items:center;justify-content:space-between;gap:6px}
+ .live-stats strong{font-size:18px}.live-stats>div>span{font-size:10px}
+ .control-panel .action-note{order:8;margin:0;font-size:11px;line-height:1.6}
+ .experiment-top{padding:10px 12px 0}.specimen{gap:8px}.specimen-number{width:27px;height:30px}
+ .specimen h2{font-size:14px}.specimen div>span{display:none}.state-badge{font-size:9px;padding:4px 6px}
+ .experiment .stage{height:clamp(170px,30svh,250px);min-height:0;max-height:none;width:100%}
+ .experiment .scene-caption{font-size:11px;line-height:1.5;margin:2px 0 8px;padding:0 10px}
+ .board-footer{padding:7px 12px;font-size:10px}
+ .prediction legend{font-size:12px;margin-bottom:6px}.prediction legend span{display:inline;margin-left:8px}
+ .prediction button{min-height:44px;font-size:13px;padding:10px 6px}
+ .attachment-control{padding:8px 10px}.attachment-label{font-size:13px}
+ .attachment-arrows button{padding:8px 12px;font-size:12px}.attachment-arrows>span{font-size:10px}
+ .trial-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+ .trial-actions .main-action{order:0;grid-column:auto;justify-content:center}
+ .trial-actions .keep-line{grid-column:auto;min-height:48px;font-size:12px;padding:10px 5px;gap:4px}
+ .trial-actions .keep-line:not(:disabled){background:#795f52;color:#fffdfa;border-color:#795f52}
+ .trial-actions .main-action{background:#fffdfa;color:#795f52;border-color:#d6bfa9;font-size:12px;padding:10px 5px;gap:4px}
+ .main-action{min-height:48px;font-size:14px;padding:12px 16px}
+ .fine-adjust{justify-content:space-between}.fine-adjust>span{font-size:12px}
+ .collection{margin-top:24px}
+}
+@media(max-width:640px) and (orientation:portrait){
+ .phone-tip{display:flex;align-items:center;gap:7px;background:#f2e9e0;border-radius:8px;padding:9px 10px;color:#795f52;font-size:12px;margin:0 0 12px}
+ .app-shell:has(.game-grid:not([data-phase="predict"])) .phone-tip{display:none}
+}
+@media(max-width:1000px) and (max-height:540px) and (orientation:landscape){
+ main{padding:8px max(12px,env(safe-area-inset-left)) max(12px,env(safe-area-inset-bottom))}
+ .site-header{height:48px}.intro-row,.phone-tip{display:none}
+ .game-grid{grid-template-columns:minmax(0,1fr) minmax(232px,.9fr);gap:12px;align-items:start}
+ .game-grid .experiment{order:0;position:sticky;top:8px;align-self:start}
+ .experiment-top{padding:8px 10px 0;gap:5px;flex-wrap:wrap}
+ .specimen h2{font-size:13px}.specimen-number{height:25px;width:25px}.specimen div>span{display:none}
+ .state-badge{font-size:9px;padding:3px 6px}
+ .experiment .stage{height:clamp(115px,calc(100svh - 140px),275px);min-height:0;max-height:none}
+ .experiment .scene-caption{font-size:10px;line-height:1.5;margin:2px 0 6px;padding:0 8px}
+ .board-footer{padding:6px 10px;font-size:9px}
+ .control-panel{display:flex;padding:12px;border-radius:12px;gap:8px;min-width:0}
+ .control-panel>*{order:initial!important;margin:0!important}
+ .control-panel .panel-kicker,.control-panel .steps{display:none}
+ .control-panel h2{font-size:17px;line-height:1.4}
+ .control-panel .panel-description{font-size:12px;line-height:1.65;min-height:0}
+ .control-panel .prediction{grid-template-columns:1fr 1fr;gap:6px}
+ .prediction legend{font-size:11px;margin-bottom:5px}.prediction legend span{font-size:10px;display:block;margin:0}
+ .control-panel .prediction button{font-size:11px;min-height:44px;padding:8px 4px}
+ .control-panel .attachment-control{padding:6px 8px}
+ .attachment-label{font-size:12px}.fine-toggle{font-size:11px}
+ .attachment-arrows>span{display:none}.attachment-arrows button{flex:1;justify-content:center;min-height:44px}
+ .control-panel .live-stats{display:grid;grid-template-columns:1fr 1fr;padding:6px 0;gap:12px}
+ .live-stats strong{font-size:18px}.live-stats>div>span{font-size:10px}
+ .control-panel .main-action{min-height:44px;font-size:12px;padding:10px}
+ .control-panel .trial-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+ .trial-actions .main-action,.trial-actions .keep-line{grid-column:auto;min-height:44px;font-size:11px;padding:8px 4px;gap:3px;justify-content:center}
+ .trial-actions svg{width:14px}.keep-line:not(:disabled){background:#795f52;color:#fffdfa}
+ .control-panel .rotation-feedback{padding:8px;font-size:11px}
+ .control-panel .action-note{font-size:10px;line-height:1.6}
+ .fine-adjust{display:block}.fine-adjust>span{display:block;margin-bottom:8px;font-size:11px}
+ .fine-adjust>div{justify-content:space-between;gap:4px}.fine-adjust button{min-width:44px;min-height:44px}
+ .control-panel .round-score{display:block;padding:10px}
+ .round-score strong{display:block;text-align:left;font-size:26px}
+ .collection{margin-top:20px}.shape-list{grid-template-columns:repeat(10,minmax(0,1fr))}
+}
+@media(max-width:640px){
+ .game-grid{grid-template-columns:minmax(0,1fr)}
+ .game-grid .experiment,.control-panel>*{grid-column:1/-1;grid-row:auto!important}
+ .control-panel .live-stats{grid-column:1/-1!important}
+}
+@media(max-width:640px) and (max-height:540px) and (orientation:landscape){
+ .game-grid{grid-template-columns:minmax(0,1fr) minmax(232px,.9fr)}
+ .game-grid .experiment{grid-column:auto}
+}

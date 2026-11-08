@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {centroid,SHAPES,suspensionPins,suspensionAngle,rotate,scoreGuess,inside,bounds,polarMomentPerMass,angularAcceleration,swingStep,topAttachment,initialOrientation,secondOrientation,plumbLineDirection,isCenterBelowPin,canRecordPlumbLine} from '../lib/physics.ts';
+import {centroid,SHAPES,suspensionPins,suspensionAngle,rotate,scoreGuess,inside,bounds,polarMomentPerMass,angularAcceleration,swingStep,topAttachment,initialOrientation,secondOrientation,plumbLineDirection,isCenterBelowPin,keptInitialPose} from '../lib/physics.ts';
 test('polygon centroid agrees with independently known rectangle and triangle centers',()=>{
  assert.deepEqual(centroid([{x:0,y:0},{x:12,y:0},{x:12,y:6},{x:0,y:6}]),{x:6,y:3});
  assert.deepEqual(centroid([{x:0,y:0},{x:12,y:0},{x:0,y:6}]),{x:4,y:2});
@@ -86,7 +86,7 @@ test('both initial-pose searches find independent lines through the center of ev
    const inertia=polarMomentPerMass(shape.points)+dx*dx+dy*dy;
    let state={angle,omega:0},maximum=0;
    for(let i=0;i<240;i++){state=swingStep(state.angle,state.omega,1/120,dx,dy,inertia);maximum=Math.max(maximum,Math.abs((state.angle-angle)*180/Math.PI));}
-   assert(canRecordPlumbLine(2,maximum),shape.id+' no rotation from release');
+   assert(keptInitialPose(2,maximum),shape.id+' no rotation from release');
    const d=plumbLineDirection(state.angle);directions.push(d);
    assert(Math.abs(dx*d.y-dy*d.x)<1e-7,shape.id+' recorded line contains center');
   }
@@ -102,11 +102,11 @@ test('a rotated plate cannot qualify merely by settling later in a different pos
  for(let i=0;i<2400;i++){state=swingStep(state.angle,state.omega,1/120,dx,dy,inertia);maximum=Math.max(maximum,Math.abs(state.angle*180/Math.PI));}
  assert(Math.abs(state.omega)<.001,'eventually settles');
  assert(maximum>2,'rotated away from release');
- assert.equal(canRecordPlumbLine(20,maximum),false,'eventual rest does not qualify');
- assert.equal(canRecordPlumbLine(0,0),false,'new trial must be observed');
- assert.equal(canRecordPlumbLine(1.49,0),false);
- assert.equal(canRecordPlumbLine(1.5,2),true);
- assert.equal(canRecordPlumbLine(1.5,2.01),false);
+ assert.equal(keptInitialPose(20,maximum),false,'eventual rest does not qualify');
+ assert.equal(keptInitialPose(0,0),false,'new trial must be observed');
+ assert.equal(keptInitialPose(1.49,0),false);
+ assert.equal(keptInitialPose(1.5,2),true);
+ assert.equal(keptInitialPose(1.5,2.01),false);
 });
 
 test('the horseshoe inner pin gives a valid vertical line but a perturbation grows',()=>{
@@ -126,5 +126,5 @@ test('the fine slider resolves even the unstable inner-edge equilibrium of the L
  const inertia=polarMomentPerMass(shape.points)+dx*dx+dy*dy;
  let s={angle:0,omega:0},maximum=0;
  for(let i=0;i<190;i++){s=swingStep(s.angle,s.omega,1/120,dx,dy,inertia);maximum=Math.max(maximum,Math.abs(s.angle)*180/Math.PI);}
- assert(canRecordPlumbLine(190/120,maximum));
+ assert(keptInitialPose(190/120,maximum));
 });

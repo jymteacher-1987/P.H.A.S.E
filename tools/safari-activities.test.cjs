@@ -252,14 +252,14 @@ test('WebKit: all activities on small iPhone screens, older APIs, game start and
             await frame.locator('[data-live-plumb]').waitFor({state:'visible'});
             const save=frame.getByRole('button',{name:'찾았어요 · 점선 A 남기기',exact:true});
             await frame.waitForFunction(()=>document.querySelector('.rotation-feedback')?.textContent.includes('처음 회전:'),null,{timeout:10000});
-            assert.equal(await save.isEnabled(),false,'Rotation away from the initial pose cannot be saved');
+            assert.equal(await save.isEnabled(),true,'Students may record an off-balance first choice');
             await frame.getByRole('button',{name:'원래 방향으로 · 점 다시 고르기',exact:true}).tap();
             // The first uniform triangle has x_cm=(-105-70+125)/3=-50/3.
             // Set its visible range control, rather than changing game state.
             await firstPosition.evaluate(input=>{input.value='-16.7';input.dispatchEvent(new Event('input',{bubbles:true}));input.dispatchEvent(new Event('change',{bubbles:true}));});
             await assertAttachmentOnEdge();
             await hang.scrollIntoViewIfNeeded();await hang.tap();
-            assert.equal(await save.isEnabled(),false,'A fresh attempt must first be observed');
+            assert.equal(await save.isEnabled(),true,'Recording does not require waiting for an automatic judgment');
             await frame.waitForFunction(()=>{const b=Array.from(document.querySelectorAll('button')).find(b=>b.textContent.includes('점선 A 남기기'));return b&&!b.disabled;},null,{timeout:10000});
             await save.scrollIntoViewIfNeeded();await save.tap();
             await frame.getByRole('button',{name:'물체 90° 돌리기',exact:true}).tap();
@@ -268,6 +268,48 @@ test('WebKit: all activities on small iPhone screens, older APIs, game start and
             await frame.getByRole('button',{name:'오른쪽으로 점 옮기기',exact:true}).tap();
             assert.ok(Number(await position.inputValue())>before,'Second attachment moves right along upper material edge');
             await assertAttachmentOnEdge();
+            for(const size of [{width:390,height:844},{width:844,height:390},{width:568,height:260}]){
+              await page.setViewportSize(size);
+              const metrics=await frame.evaluate(()=>({overflow:document.documentElement.scrollWidth>innerWidth+1,buttons:[...document.querySelectorAll('.attachment-arrows button')].map(b=>({w:b.getBoundingClientRect().width,h:b.getBoundingClientRect().height})),plate:document.querySelector('.experiment').getBoundingClientRect().toJSON(),controls:document.querySelector('.control-panel').getBoundingClientRect().toJSON()}));
+              assert.equal(metrics.overflow,false,'Phone layout must not scroll horizontally');
+              assert.ok(metrics.buttons.every(b=>b.w>=44&&b.h>=44),'Movement buttons need 44px touch targets');
+              if(size.width>size.height)assert.ok(metrics.plate.right<=metrics.controls.left,'Landscape keeps the plate beside the controls');
+            }
+            await page.setViewportSize({width:844,height:390});
+            const right=frame.getByRole('button',{name:'오른쪽으로 점 옮기기',exact:true});
+            await right.scrollIntoViewIfNeeded();await reachable(right,'Phone movement');
+            const box=await right.boundingBox(),holdStart=Number(await position.inputValue());
+            await page.mouse.move(box.x+box.width/2,box.y+box.height/2);await page.mouse.down();
+            try{await frame.waitForFunction(start=>Number(document.querySelector('#attachment-position').value)>=start+9,holdStart,{timeout:3000});}finally{await page.mouse.up();}
+            const stopped=await position.inputValue();await page.waitForTimeout(200);
+            assert.equal(await position.inputValue(),stopped,'Releasing a held button stops movement');
+            await assertAttachmentOnEdge();
+            const chosenPin=await frame.locator('[data-attachment]').evaluate(p=>{const m=p.transform.baseVal.consolidate().matrix;return {x:m.e,y:m.f};});
+            await hang.scrollIntoViewIfNeeded();await hang.tap();
+            const saveB=frame.getByRole('button',{name:'찾았어요 · 점선 B 남기기',exact:true});
+            assert.equal(await saveB.isEnabled(),true,'Second line can be recorded immediately');
+            await frame.waitForFunction(()=>document.querySelector('.rotation-feedback')?.textContent.includes('처음 회전:'),null,{timeout:10000});
+            assert.equal(await saveB.isEnabled(),true,'A visibly wrong second choice still can be recorded');
+            await saveB.scrollIntoViewIfNeeded();await reachable(saveB,'Save second phone observation');await saveB.tap();
+            const recordedPin=await frame.locator('[data-line="B"] line').first().evaluate(l=>({x:(l.x1.baseVal.value+l.x2.baseVal.value)/2,y:(l.y1.baseVal.value+l.y2.baseVal.value)/2}));
+            assert.ok(Math.hypot(recordedPin.x-chosenPin.x,recordedPin.y-chosenPin.y)<.0001,'B records the selected point without correcting it');
+            await frame.locator('svg.stage').scrollIntoViewIfNeeded();
+            const crossing=await frame.evaluate(()=>{
+              const read=name=>{const l=document.querySelector('[data-line="'+name+'"] line'),m=l.getScreenCTM(),p=new DOMPoint(l.x1.baseVal.value,l.y1.baseVal.value).matrixTransform(m),q=new DOMPoint(l.x2.baseVal.value,l.y2.baseVal.value).matrixTransform(m);return {x:p.x,y:p.y,dx:q.x-p.x,dy:q.y-p.y};};
+              const a=read('A'),b=read('B'),cross=a.dx*b.dy-a.dy*b.dx,t=((b.x-a.x)*b.dy-(b.y-a.y)*b.dx)/cross;
+              return {x:a.x+t*a.dx,y:a.y+t*a.dy,independence:Math.abs(cross)/Math.hypot(a.dx,a.dy)/Math.hypot(b.dx,b.dy)};
+            });
+            assert.ok(crossing.independence>.99,'The recorded phone lines give two independent directions');
+            const frameBox=await page.locator('#expFrame').boundingBox();await page.mouse.click(frameBox.x+crossing.x,frameBox.y+crossing.y);
+            const guess=frame.locator('[data-guess]');assert.equal(await guess.count(),1);
+            const originalGuess=await guess.getAttribute('transform');
+            await page.setViewportSize({width:390,height:844});
+            assert.equal(await guess.getAttribute('transform'),originalGuess,'Changing phone orientation preserves the chosen point');
+            const adjust=frame.getByRole('button',{name:'교점 오른쪽',exact:true});await adjust.scrollIntoViewIfNeeded();await reachable(adjust,'Fine adjustment on portrait phone');await adjust.tap();
+            assert.notEqual(await guess.getAttribute('transform'),originalGuess,'Touch fine adjustment moves the answer');
+            const submit=frame.getByRole('button',{name:'여기가 질량중심!',exact:true});await submit.scrollIntoViewIfNeeded();await reachable(submit,'Submit phone answer');await submit.tap();
+            const score=Number((await frame.locator('.round-score strong').innerText()).split('/')[0]);
+            assert.ok(Number.isInteger(score)&&score>=0&&score<95,'An inaccurate chosen B line leads to a lower integer score');
           }
           if (entry.id === 'hero-maker') {
             const normalized = await frame.evaluate(async () => {
