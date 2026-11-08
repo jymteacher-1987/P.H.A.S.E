@@ -1,7 +1,7 @@
 'use client';
 import {useEffect,useRef,useState} from 'react';
 import {ArrowRight,ArrowLeft,ArrowDown,ArrowUp,RotateCw,RotateCcw,Timer,Target,Check,MousePointer2} from 'lucide-react';
-import {centroid,inside,rotate,bounds,topAttachment,secondOrientation,plumbLineDirection,scoreGuess,polarMomentPerMass,angularAcceleration,swingStep,type Point,type Shape} from '@/lib/physics';
+import {centroid,inside,rotate,bounds,topAttachment,secondOrientation,plumbLineDirection,isCenterBelowPin,scoreGuess,polarMomentPerMass,angularAcceleration,swingStep,type Point,type Shape} from '@/lib/physics';
 export type RoundResult={prediction:boolean;shapeId:string;point:Point;score:number;ms:number};
 type Phase='predict'|'axis1'|'turn'|'axis2'|'guess';
 type FoundLine={point:Point;angle:number};
@@ -14,7 +14,8 @@ export default function CenterGame({shape,index,total,totalMs,result,onComplete,
  const start=useRef(0),svg=useRef<SVGSVGElement>(null),done=useRef(false);
  const center=centroid(shape.points),base=reference+(['axis2','guess'].includes(phase)?turnAngle:0),actualInside=inside(center,shape.points),canSelect=(phase==='axis1'||phase==='axis2')&&!trial&&!result;
  const edgeBounds=bounds(shape.points.map(p=>rotate(p,base))),pinX=pin?rotate(pin,base).x:edgeBounds.left;
- const searching=(phase==='axis1'||phase==='axis2')&&!result,canKeep=trial&&(phase==='axis1'?steadyTime>=.7:trialTime>=1.5&&maxSwing<=2);
+ const belowPin=pin?isCenterBelowPin(center,pin,angle):false,unstableStill=trial&&!belowPin&&steadyTime>=.7;
+ const searching=(phase==='axis1'||phase==='axis2')&&!result,canKeep=trial&&belowPin&&(phase==='axis1'?steadyTime>=.7:trialTime>=1.5&&maxSwing<=2);
  const dx=pin?center.x-pin.x:0,dy=pin?center.y-pin.y:0,inertia=polarMomentPerMass(shape.points)+dx*dx+dy*dy;
  const displacement=rotate({x:dx,y:dy},base),initialOffset=displacement.x;
  const radius=pin?Math.max(...shape.points.map(v=>Math.hypot(v.x-pin.x,v.y-pin.y))):185,trialScale=Math.min(1,185/radius);
@@ -26,7 +27,7 @@ export default function CenterGame({shape,index,total,totalMs,result,onComplete,
  function moveAttachment(x:number){if(!searching)return;setTrial(false);setPin(topAttachment(shape.points,base,x));setNotice('');}
  function pointer(e:React.PointerEvent<SVGSVGElement>){if((!searching&&phase!=='guess')||result)return;const matrix=svg.current?.getScreenCTM();if(!matrix)return;const p=new DOMPoint(e.clientX,e.clientY).matrixTransform(matrix.inverse());if(phase==='guess'){setGuess(rotate({x:p.x-370,y:p.y-236},-base));return;}if(!trial)moveAttachment(p.x-370);}
  function nudge(x:number,y:number,step=fine?.2:3){if(searching&&pin){if(x)moveAttachment(pinX+x*step);return;}if(phase==='guess'&&guess){const d=rotate({x:x*step,y:y*step},-base);setGuess({x:guess.x+d.x,y:guess.y+d.y});}}
- function tryHanging(){if(!pin)return;setAngle(base);setTrialTime(0);setTrial(true);setTrials(n=>n+1);setNotice('');}
+ function tryHanging(){if(!pin)return;setAngle(base);setTrialTime(0);setMaxSwing(0);setSteadyTime(0);setTrial(true);setTrials(n=>n+1);setNotice('');}
  function saveLine(){if(!pin||!canKeep)return;setLines(l=>[...l,{point:{...pin},angle:angle}]);if(phase==='axis1')setTurnAngle(secondOrientation(shape,angle));setReference(phase==='axis1'?angle:angle-turnAngle);setTrial(false);setPin(null);setNotice('');setPhase(phase==='axis1'?'turn':'guess');}
  function submit(){if(!guess||done.current)return;done.current=true;const ms=performance.now()-start.current;onComplete({prediction:prediction??true,shapeId:shape.id,point:guess,score:scoreGuess(shape,guess),ms});}
  const stageTitle=result?'실험으로 찾은 질량중심':phase==='predict'?'어디에 있을지 예상해 볼까요?':phase==='axis1'?'테두리에서 매달 점을 골라요.':phase==='turn'?'첫 점선 A를 남겼어요.':phase==='axis2'?'다시 매달아 점선 B를 찾아요.':'두 점선의 교점을 찍어 주세요.';
@@ -44,12 +45,12 @@ export default function CenterGame({shape,index,total,totalMs,result,onComplete,
  {!pin&&!lines.length&&phase!=='predict'&&<text x="370" y="420" textAnchor="middle" fontSize="13" fill="#9a816b">위쪽 테두리에서 매달 점을 골라 보세요.</text>}
  </svg><span className="scene-caption">{trial?'매단 점을 고정한 모형 · 움직이는 동안에는 이 선이 중심을 지나지 않을 수 있어요.':phase==='guess'||result?'점선은 내가 남긴 수직선의 연장선입니다.':phase==='predict'?'A와 B 모두 위쪽 테두리에서 매달 점을 골라요.':'위쪽 테두리를 따라 점을 옮기며 회전 방향을 비교해요.'}</span></div>
  <div className="board-footer"><span><i className="legend-dot teal"/>점선 A {lines.length?'찾음':'아직 없음'}</span><span><i className="legend-dot coral"/>점선 B {lines.length===2?'찾음':'아직 없음'}</span><span className="board-footer-right"><MousePointer2 size={14}/>실험 {trials}회</span></div></div>
- <aside className="control-panel"><div className="panel-kicker">FIND · HANG · ROTATE <span>{String(index+1).padStart(2,'0')} / 10</span></div><h2>{stageTitle}</h2><p className="panel-description" aria-live="polite">{hint}</p>
+ <aside className="control-panel"><div className="panel-kicker">FIND · HANG · ROTATE <span>{String(index+1).padStart(2,'0')} / 10</span></div><h2>{stageTitle}</h2><p className="panel-description" aria-live="polite">{unstableStill?'거의 멈춰 보여도 안정된 자세가 아니에요. 점을 옮겨 다시 매달아 보세요.':hint}</p>
  {phase==='predict'&&<fieldset className="prediction"><legend>내 예상은… <span>예상은 감점하지 않아요</span></legend><button className={prediction===true?'chosen':''} aria-pressed={prediction===true} onClick={()=>setPrediction(true)}><span className="material-icon"/>재료가 있는 곳</button><button className={prediction===false?'chosen':''} aria-pressed={prediction===false} onClick={()=>setPrediction(false)}><span className="space-icon"/>빈 공간</button></fieldset>}
  {result&&<div className="classification-result"><span>실험으로 확인한 질량중심</span><strong>{actualInside?'재료가 있는 곳':'빈 공간'}에 있어요!</strong><p>처음 예상: {result.prediction?'재료가 있는 곳':'빈 공간'} {result.prediction===actualInside?'→ 예상과 같았어요.':'→ 실험으로 생각을 바꿨어요.'}</p>{!actualInside&&<p>여기에 실을 묶을 수는 없어도, 두 연장선으로 중심을 찾을 수 있어요.</p>}</div>}
  {!result&&<ol className="steps">{['테두리에 매달아 점선 A 남기기','90° 돌려 점선 B 찾기','두 점선의 교점 찾기'].map((text,i)=>{const step=phase==='guess'?2:phase==='axis2'?1:phase==='turn'?1:0;return <li className={i<step?'done':i===step?'current':''} key={text}><span className="step-num">{i<step?<Check size={14}/>:i+1}</span><strong>{text}</strong></li>})}</ol>}
  {notice&&<p className="point-notice" role="status">{notice}</p>}
- {trial&&<div className="rotation-feedback"><RotateCw size={18} style={{transform:initialOffset<0?'scaleX(-1)':undefined}}/><div><strong>{phase==='axis1'?(canKeep?'흔들림이 가라앉았어요':'흔들림이 가라앉기를 기다려요'):maxSwing<=2?(trialTime<1.5?'처음 회전을 관찰하는 중…':'거의 돌지 않는 위치를 찾았어요'):initialOffset>0?'처음 회전: 시계 방향':'처음 회전: 시계 반대 방향'}</strong><span>놓기 전보다 {Math.abs((angle-base)*180/Math.PI).toFixed(1)}° 회전</span></div></div>}
+ {trial&&<div className="rotation-feedback"><RotateCw size={18} style={{transform:initialOffset<0?'scaleX(-1)':undefined}}/><div><strong>{unstableStill?'멈춰 보여도 불안정한 자세예요':phase==='axis1'?(canKeep?'흔들림이 가라앉았어요':'흔들림이 가라앉기를 기다려요'):maxSwing<=2?(trialTime<1.5?'처음 회전을 관찰하는 중…':'거의 돌지 않는 위치를 찾았어요'):initialOffset>0?'처음 회전: 시계 방향':'처음 회전: 시계 반대 방향'}</strong><span>놓기 전보다 {Math.abs((angle-base)*180/Math.PI).toFixed(1)}° 회전</span></div></div>}
  {searching&&pin&&<div className="attachment-control"><div className="attachment-label"><label htmlFor="attachment-position">매다는 위치</label><label className="fine-toggle"><input type="checkbox" checked={fine} onChange={e=>setFine(e.target.checked)}/>미세 이동</label></div><input id="attachment-position" type="range" min={edgeBounds.left+.001} max={edgeBounds.right-.001} step="0.1" value={pinX} onChange={e=>moveAttachment(Number(e.target.value))} aria-label="매다는 위치를 왼쪽 오른쪽으로 이동"/><div className="attachment-arrows"><button aria-label="왼쪽으로 점 옮기기" onClick={()=>nudge(-1,0)}><ArrowLeft size={18}/>왼쪽</button><span>위쪽 테두리를 따라 이동</span><button aria-label="오른쪽으로 점 옮기기" onClick={()=>nudge(1,0)}>오른쪽<ArrowRight size={18}/></button></div></div>}
  {!result&&phase==='guess'&&guess&&<div className="fine-adjust"><span>교점 미세 이동 · 방향키도 가능</span><div><button aria-label="교점 왼쪽" onClick={()=>nudge(-1,0,.2)}><ArrowLeft size={15}/></button><button aria-label="교점 오른쪽" onClick={()=>nudge(1,0,.2)}><ArrowRight size={15}/></button><button aria-label="교점 위쪽" onClick={()=>nudge(0,-1,.2)}><ArrowUp size={15}/></button><button aria-label="교점 아래쪽" onClick={()=>nudge(0,1,.2)}><ArrowDown size={15}/></button></div></div>}
 

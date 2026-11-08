@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {centroid,SHAPES,suspensionPins,suspensionAngle,rotate,scoreGuess,inside,bounds,polarMomentPerMass,angularAcceleration,swingStep,topAttachment,initialOrientation,secondOrientation,plumbLineDirection} from '../lib/physics.ts';
+import {centroid,SHAPES,suspensionPins,suspensionAngle,rotate,scoreGuess,inside,bounds,polarMomentPerMass,angularAcceleration,swingStep,topAttachment,initialOrientation,secondOrientation,plumbLineDirection,isCenterBelowPin} from '../lib/physics.ts';
 test('polygon centroid agrees with independently known rectangle and triangle centers',()=>{
  assert.deepEqual(centroid([{x:0,y:0},{x:12,y:0},{x:12,y:6},{x:0,y:6}]),{x:6,y:3});
  assert.deepEqual(centroid([{x:0,y:0},{x:12,y:0},{x:0,y:6}]),{x:4,y:2});
@@ -49,4 +49,30 @@ test('first attachments along every upper edge permit a stable quarter-turn sear
   const a=plumbLineDirection(first),b=plumbLineDirection(second);
   assert(Math.abs(a.x*b.y-a.y*b.x)>.999,shape.id+' lines are independent');
  }}
+});
+
+
+test('zero rotation with the center above the pin is not a stable hanging equilibrium',()=>{
+ assert.equal(angularAcceleration(0,-50,10000,0,0),0);
+ assert.equal(isCenterBelowPin({x:0,y:0},{x:0,y:50},0),false);
+ assert.equal(isCenterBelowPin({x:0,y:0},{x:0,y:50},Math.PI),true);
+ for(const id of ['u','l']){
+  const shape=SHAPES.find(s=>s.id===id)!,c=centroid(shape.points),pin=topAttachment(shape.points,0,c.x);
+  assert.equal(isCenterBelowPin(c,pin,0),false,id+' inner upper edge is below the center');
+  assert.equal(isCenterBelowPin(c,pin,suspensionAngle(c,pin)),true,id+' after settling the center is below the pin');
+ }
+});
+
+
+test('gravity torque agrees with an independent potential-energy derivative in rotated poses',()=>{
+ const eps=1e-5,g=9810;
+ for(const shape of SHAPES){const c=centroid(shape.points),edge=bounds(shape.points);
+  const pin=topAttachment(shape.points,0,edge.left+edge.width*.23),dx=c.x-pin.x,dy=c.y-pin.y;
+  const inertia=polarMomentPerMass(shape.points)+dx*dx+dy*dy;
+  for(const angle of [-2.4,-.6,0,.7,2.8]){
+   const potential=a=>-g*rotate({x:dx,y:dy},a).y;
+   const torque=-(potential(angle+eps)-potential(angle-eps))/(2*eps);
+   assert(Math.abs(angularAcceleration(dx,dy,inertia,angle,0)*inertia-torque)<.001,shape.id);
+  }
+ }
 });

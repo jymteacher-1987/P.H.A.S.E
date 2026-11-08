@@ -168,15 +168,15 @@ window.PHASE_PREVIEWS = {
       "sourceHash": "c37fc87513dac892328c39ddd7130a2a465ee3e2fc24392be930cc3211266dca",
       "bytes": 23044
     },
+    "center-of-mass": {
+      "src": "assets/previews/center-of-mass-8a17207421.webp",
+      "sourceHash": "8c95907ec5941d43c70f68f2dbd28eb1adbed88da310f564262b924253fbe680",
+      "bytes": 6210
+    },
     "school-rider": {
       "src": "assets/previews/school-rider-46a180f5c1.webp",
       "sourceHash": "01af2936b437a3df64c91b14b228ef1ab197bfd86f36b4626cf3b924e5a6a3e8",
       "bytes": 63480
-    },
-    "center-of-mass": {
-      "src": "assets/previews/center-of-mass-8a17207421.webp",
-      "sourceHash": "36143c8a5ac78b9af2d1774e970cdc54fe24263507a1b96d39e6f9afc40c98a1",
-      "bytes": 6210
     }
   }
 };

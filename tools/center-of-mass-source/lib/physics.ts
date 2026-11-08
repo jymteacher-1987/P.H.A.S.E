@@ -38,6 +38,9 @@ export function secondOrientation(shape:Shape,firstAngle:number){
  return p.y<c.y-1?Math.PI/2:-Math.PI/2;
 }
 export function plumbLineDirection(recordedAngle:number){return rotate({x:0,y:1},-recordedAngle);}
+// Zero torque alone also occurs with the center above the pin (an unstable
+// inverted equilibrium). A settled hanging plate must have its center below.
+export function isCenterBelowPin(center:Point,pin:Point,angle:number){return rotate({x:center.x-pin.x,y:center.y-pin.y},angle).y>1e-6;}
 // Polar second moment of area divided by area, shifted to the centroid.
 // Uniform density/thickness cancel. Coordinates use millimetres in the swing model.
 export function polarMomentPerMass(p: Point[]) {let crossSum=0,moment=0;for(let i=0;i<p.length;i++){const a=p[i],b=p[(i+1)%p.length],k=a.x*b.y-b.x*a.y;crossSum+=k;moment+=k*(a.x*a.x+a.x*b.x+b.x*b.x+a.y*a.y+a.y*b.y+b.y*b.y);}const c=centroid(p);return moment/(6*crossSum)-c.x*c.x-c.y*c.y;}
