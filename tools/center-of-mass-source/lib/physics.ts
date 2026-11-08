@@ -1,5 +1,5 @@
 export type Point = { x: number; y: number };
-export type Shape = { id: string; name: string; tag: string; points: Point[]; color: string; fact: string };
+export type Shape = { id: string; name: string; tag: string; points: Point[]; color: string; fact: string; startAngle?: number };
 const points = (values: number[][]): Point[] => values.map(([x,y]) => ({x,y}));
 export function centroid(p: Point[]): Point {
   let a = 0, x = 0, y = 0;
@@ -84,7 +84,7 @@ export const SHAPES: Shape[] = [
  {id:'l',name:'기역자 블록',tag:'움푹한 곳의 비밀',color:'#89afd8',points:points([[-110,-120],[-42,-120],[-42,48],[120,48],[120,115],[-110,115]]),fact:'오목한 모양에서는 물체가 없는 빈 공간에 무게중심이 놓일 수도 있어요.'},
  {id:'star',name:'다섯 갈래 별',tag:'대칭을 발견해요',color:'#e8bf63',points:star,fact:'같은 두께와 재질로 만든 이 별의 무게중심은 회전 대칭의 중심과 같아요.'},
  {id:'hammer',name:'꼬마 망치',tag:'질량이 모인 쪽',color:'#c3abd1',points:points([[-125,-115],[125,-115],[125,-40],[28,-40],[28,130],[-28,130],[-28,-40],[-125,-40]]),fact:'이 판은 모두 같은 재질이에요. 넓은 망치 머리 부분이 무게중심의 위치에 영향을 줘요.'},
- {id:'u',name:'말굽 블록',tag:'빈 공간도 찍어 봐요',color:'#85b5bc',points:points([[-120,-115],[-60,-115],[-60,55],[60,55],[60,-115],[120,-115],[120,115],[-120,115]]),fact:'찾았나요? 무게중심은 판이 없는 두 팔 사이의 빈 공간에 있어요.'},
+ {id:'u',name:'말굽 블록',tag:'빈 공간도 찍어 봐요',color:'#85b5bc',startAngle:Math.PI,points:points([[-120,-115],[-60,-115],[-60,55],[60,55],[60,-115],[120,-115],[120,115],[-120,115]]),fact:'찾았나요? 무게중심은 판이 없는 두 팔 사이의 빈 공간에 있어요.'},
  {id:'moon',name:'초승달 조각',tag:'달의 숨은 중심',color:'#efae86',points:crescent,fact:'무게중심은 질량 분포로 정해지는 점이에요. 꼭 재료가 있는 곳일 필요는 없어요.'},
  {id:'island',name:'이상한 섬',tag:'마지막 탐험',color:'#a4bc8c',points:points([[-115,-55],[-80,-110],[-25,-72],[20,-120],[75,-80],[65,-20],[130,25],[85,70],[10,60],[-40,120],[-90,85],[-75,20],[-130,5]]),fact:'모양이 복잡해도 원리는 같아요. 서로 다른 두 점에서 얻은 수직선의 교점을 찾으면 돼요.'},
 ];

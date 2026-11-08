@@ -5,7 +5,7 @@ import {SHAPES,scoreTotal,type Shape} from '@/lib/physics';
 import CenterGame, {type RoundResult} from '@/components/center-game';
 import {saveRecord,loadRecords,onlineEnabled,type GameRecord} from '@/lib/ranking';
 const fmt=(ms:number)=>{const s=Math.floor(ms/1000);return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;};
-function MiniShape({shape}:{shape:Shape}){return <svg viewBox="-150 -150 300 300" aria-hidden="true"><polygon points={shape.points.map(p=>`${p.x.toFixed(6)},${p.y.toFixed(6)}`).join(' ')} fill={shape.color} stroke="currentColor" strokeWidth="5" strokeLinejoin="round"/></svg>}
+function MiniShape({shape}:{shape:Shape}){return <svg viewBox="-150 -150 300 300" aria-hidden="true"><polygon transform={`rotate(${(shape.startAngle??0)*180/Math.PI})`} points={shape.points.map(p=>`${p.x.toFixed(6)},${p.y.toFixed(6)}`).join(' ')} fill={shape.color} stroke="currentColor" strokeWidth="5" strokeLinejoin="round"/></svg>}
 export default function Home(){
  const [index,setIndex]=useState(0),[rounds,setRounds]=useState<RoundResult[]>([]),[summary,setSummary]=useState(false);
  const [modal,setModal]=useState<'records'|'science'|null>(null),[records,setRecords]=useState<GameRecord[]>([]),[name,setName]=useState(''),[saveState,setSaveState]=useState(''),[saved,setSaved]=useState(false),[saving,setSaving]=useState(false),[recordMessage,setRecordMessage]=useState('');

@@ -80,8 +80,8 @@ test('gravity torque agrees with an independent potential-energy derivative in r
 
 test('both initial-pose searches find independent lines through the center of every shape',()=>{
  for(const shape of SHAPES){
-  const c=centroid(shape.points),turn=secondOrientation(shape,0),directions=[];
-  for(const angle of [0,turn]){
+  const c=centroid(shape.points),start=shape.startAngle??0,turn=secondOrientation(shape,start),directions=[];
+  for(const angle of [start,start+turn]){
    const rc=rotate(c,angle),pin=topAttachment(shape.points,angle,rc.x),dx=c.x-pin.x,dy=c.y-pin.y;
    const inertia=polarMomentPerMass(shape.points)+dx*dx+dy*dy;
    let state={angle,omega:0},maximum=0;
@@ -117,6 +117,30 @@ test('the horseshoe inner pin gives a valid vertical line but a perturbation gro
  const d=plumbLineDirection(0);assert(Math.abs(dx*d.y-dy*d.x)<1e-10);
  let s={angle:.001,omega:0};for(let i=0;i<120;i++)s=swingStep(s.angle,s.omega,1/120,dx,dy,inertia);
  assert(s.angle>.001,'a small tilt increases in unstable equilibrium');
+});
+
+test('the horseshoe starts inverted with stable supports and restoring rotation in both searches',()=>{
+ const shape=SHAPES.find(s=>s.id==='u')!,c=centroid(shape.points),start=shape.startAngle!;
+ assert.equal(start,Math.PI);
+ assert(!inside(c,shape.points),'center remains in the empty gap');
+ assert.equal(scoreGuess(shape,c),100,'rotation does not change scoring coordinates');
+ for(const angle of [start,start+secondOrientation(shape,start)]){
+  const rc=rotate(c,angle),pin=topAttachment(shape.points,angle,rc.x);
+  assert(isCenterBelowPin(c,pin,angle),'the center lies below the material support');
+  const dx=c.x-pin.x,dy=c.y-pin.y,inertia=polarMomentPerMass(shape.points)+dx*dx+dy*dy;
+  assert(Math.abs(angularAcceleration(dx,dy,inertia,angle,0))<1e-10);
+  for(const perturbation of [-.01,.01]){
+   assert(angularAcceleration(dx,dy,inertia,angle+perturbation,0)*perturbation<0,'torque opposes a small tilt');
+  }
+  for(const offset of [-1,1]){
+   const shifted=topAttachment(shape.points,angle,rc.x+offset),sx=c.x-shifted.x,sy=c.y-shifted.y;
+   const moment=polarMomentPerMass(shape.points)+sx*sx+sy*sy;
+   assert(angularAcceleration(sx,sy,moment,angle,0)*offset<0,'rotation tells the player which way to move the pin');
+   let state={angle,omega:0},maximum=0;
+   for(let i=0;i<240;i++){state=swingStep(state.angle,state.omega,1/120,sx,sy,moment);maximum=Math.max(maximum,Math.abs(state.angle-angle));}
+   assert(maximum<2*Math.PI/180,'a 1 mm error produces a small swing instead of a flip');
+  }
+ }
 });
 
 

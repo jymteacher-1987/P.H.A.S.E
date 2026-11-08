@@ -9,8 +9,8 @@ type FoundLine={point:Point;angle:number};
 const formatTime=(ms:number)=>`${String(Math.floor(ms/60000)).padStart(2,'0')}:${String(Math.floor(ms/1000)%60).padStart(2,'0')}`;
 function lineCoordinates(line:FoundLine){const direction=plumbLineDirection(line.angle);return {x1:line.point.x-direction.x*1000,y1:line.point.y-direction.y*1000,x2:line.point.x+direction.x*1000,y2:line.point.y+direction.y*1000};}
 export default function CenterGame({shape,index,total,totalMs,result,onComplete,onNext}:{shape:Shape;index:number;total:number;totalMs:number;result?:RoundResult;onComplete:(r:RoundResult)=>void;onNext:()=>void}){
- const [reference,setReference]=useState(0);
- const [phase,setPhase]=useState<Phase>('predict'),[prediction,setPrediction]=useState<boolean|null>(null),[pin,setPin]=useState<Point|null>(null),[guess,setGuess]=useState<Point|null>(null),[lines,setLines]=useState<FoundLine[]>([]),[notice,setNotice]=useState(''),[trial,setTrial]=useState(false),[angle,setAngle]=useState(0),[trialTime,setTrialTime]=useState(0),[trials,setTrials]=useState(0),[elapsed,setElapsed]=useState(0),[clockStarted,setClockStarted]=useState(false);
+ const [reference,setReference]=useState(shape.startAngle??0);
+ const [phase,setPhase]=useState<Phase>('predict'),[prediction,setPrediction]=useState<boolean|null>(null),[pin,setPin]=useState<Point|null>(null),[guess,setGuess]=useState<Point|null>(null),[lines,setLines]=useState<FoundLine[]>([]),[notice,setNotice]=useState(''),[trial,setTrial]=useState(false),[angle,setAngle]=useState(shape.startAngle??0),[trialTime,setTrialTime]=useState(0),[trials,setTrials]=useState(0),[elapsed,setElapsed]=useState(0),[clockStarted,setClockStarted]=useState(false);
  const [maxSwing,setMaxSwing]=useState(0),[turnAngle,setTurnAngle]=useState(Math.PI/2),[fine,setFine]=useState(false);
  const board=useRef<HTMLElement>(null),start=useRef(0),svg=useRef<SVGSVGElement>(null),done=useRef(false);
  const center=centroid(shape.points),base=reference+(['axis2','guess'].includes(phase)?turnAngle:0),actualInside=inside(center,shape.points),canSelect=(phase==='axis1'||phase==='axis2')&&!trial&&!result;
