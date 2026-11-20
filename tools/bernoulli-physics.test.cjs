@@ -5,278 +5,170 @@ const assert = require('node:assert/strict');
 
 const source = fs.readFileSync(path.join(__dirname, '../experiments/bernoulli-principle.html'), 'utf8');
 const between = (first, last) => source.slice(source.indexOf(first), source.indexOf(last));
-const modelCode = between('  const RHO=', '  function update(){');
-const strengthCode = between('  function setStrength(value){', '  function step(dt){');
-const stepCode = between('  function step(dt){', '  function render(){');
+const modelCode = between('  const AREA_RATIO=', '  function label(');
 const close = (a, b, tolerance = 1e-9) => assert.ok(Math.abs(a - b) <= tolerance, `${a} != ${b}`);
 
-// Exercise the published model and animation functions, without rebuilding their physics.
-function simulation(strength = 0) {
-  const sim = new Function('reduced', modelCode + strengthCode + stepCode + `
-    function update() {}
-    function render() {}
-    return {model, step, seed, hitRate, setStrength,
-      setBoundaryStrength: value => {state.strength = value;},
-      velocities: () => state.points.map(particleVelocity),
-      snapshot: () => structuredClone(state)};
+// Exercise the published model and animation functions (no canvas), without rebuilding their physics.
+function simulation() {
+  const sim = new Function('reduced', modelCode + `
+    return {state, seed, step, hitShares, hRel, pressureShare, geom,
+      AREA_RATIO, U_WIDE, C_WIDE, K2, WIDE_END, NARROW_START, GATE_WIDE, GATE_NARROW};
   `)(false);
   sim.seed();
-  sim.setStrength(strength);
   return sim;
 }
-// Both pixel-speed components share the requested 1.6x drawing scale; v and P do not change.
-const DRAWN_DRIFT = 200 * 1.6;
-const randomSpeed = (velocity, strength) => Math.hypot(velocity.vx - DRAWN_DRIFT * strength / 100, velocity.vy);
-function run(sim, seconds) {
-  for (let frame = 0; frame < seconds * 120; frame++) sim.step(1 / 120);
-  return sim.snapshot();
+function run(sim, seconds, dt = 1 / 60) {
+  for (let frame = 0; frame < Math.round(seconds / dt); frame++) sim.step(dt);
 }
+const sectionArea = sim => ({
+  wide: sim.WIDE_END,
+  taper: (sim.NARROW_START - sim.WIDE_END) * (1 + 1 / sim.AREA_RATIO) / 2,
+  narrow: (1 - sim.NARROW_START) / sim.AREA_RATIO
+});
 
-function observeImpacts(sim, seconds) {
-  let count = sim.snapshot().collisionCount;
-  const impacts = [];
-  for (let frame = 0; frame < seconds * 120; frame++) {
-    sim.step(1 / 120);
-    const state = sim.snapshot(), added = state.collisionCount - count;
-    if (added) impacts.push(...state.flashes.slice(-added));
-    count = state.collisionCount;
-  }
-  return {state: sim.snapshot(), impacts};
-}
-
-test('Bernoulli speed and pressure retain the existing numerical relationship', () => {
+test('continuity and Bernoulli: the narrow flow is three times faster and P + q stays fixed', () => {
   const sim = simulation();
-  const expected = [
-    {strength: 0, v: 0, P: 100, q: 0},
-    {strength: 40, v: 4.8, P: 86.176, q: 13.824},
-    {strength: 100, v: 12, P: 13.6, q: 86.4}
-  ];
-  for (const row of expected) {
-    const actual = sim.model(row.strength);
-    for (const key of ['v', 'P', 'q']) close(actual[key], row[key]);
+  assert.equal(sim.AREA_RATIO, 3);
+  close(sim.hRel(0), 1);
+  close(sim.hRel(1), 1 / 3);
+  // Drift u = U_WIDE / hRel, so u x area is the same everywhere.
+  for (const x of [0, .2, sim.WIDE_END, .49, sim.NARROW_START, .8, 1]) {
+    close((sim.U_WIDE / sim.hRel(x)) * sim.hRel(x), sim.U_WIDE);
   }
+  // The pressure share and the dynamic share of the same constant always add up to one.
   let previous = Infinity;
-  for (let strength = 0; strength <= 100; strength++) {
-    const {v, P, q, total} = sim.model(strength);
-    close(q, 0.5 * 1.2 * v * v);
-    close(P + q, 100);
-    close(total, 100);
-    assert.ok(P < previous);
-    previous = P;
+  for (let x = 0; x <= 1.0001; x += .01) {
+    const hr = sim.hRel(Math.min(1, x)), u = sim.U_WIDE / hr;
+    close(sim.pressureShare(hr) + u * u / sim.K2, 1);
+    assert.ok(sim.pressureShare(hr) <= previous + 1e-12, 'pressure never rises along the converging pipe');
+    previous = sim.pressureShare(hr);
+  }
+  close(sim.pressureShare(1), .9);
+  close(sim.pressureShare(1 / 3), .1);
+  const narrowRandom = Math.sqrt(sim.K2 - (sim.U_WIDE * 3) ** 2);
+  assert.ok(narrowRandom > 0, 'random motion never stops in the fast part');
+  close(narrowRandom / sim.C_WIDE, 1 / 3);
+});
+
+test('molecules are equally dense in the wide, tapered and narrow parts', () => {
+  const sim = simulation(), area = sectionArea(sim);
+  run(sim, 20);
+  const totals = {wide: 0, taper: 0, narrow: 0};
+  let samples = 0;
+  for (let i = 0; i < 600; i++) {
+    run(sim, 1 / 6);
+    for (const p of sim.state.points) {
+      const x = p.xc + p.ox;
+      if (x < sim.WIDE_END) totals.wide++;
+      else if (x > sim.NARROW_START) totals.narrow++;
+      else totals.taper++;
+    }
+    samples++;
+  }
+  const density = key => totals[key] / samples / area[key];
+  for (const key of ['taper', 'narrow']) {
+    const ratio = density(key) / density('wide');
+    assert.ok(ratio > .93 && ratio < 1.07, `${key} density ratio ${ratio}`);
   }
 });
 
-test('every molecule shares the same drift, and only the random part weakens as the flow speeds up', () => {
+test('the same number of molecules pass both check lines at every moment', () => {
   const sim = simulation();
-  const baseline = sim.velocities();
-  assert.equal(baseline.length, 96);
-  for (const velocity of baseline) close(randomSpeed(velocity, 0), 45 * 1.6);
-  let previous = Infinity;
-  for (const strength of [0, 10, 40, 70, 100]) {
-    sim.setStrength(strength);
-    const velocities = sim.velocities(), drift = DRAWN_DRIFT * strength / 100;
-    const thermal = randomSpeed(velocities[0], strength);
-    assert.ok(thermal > 0, 'drawing exaggeration must not stop random motion');
-    let meanX = 0, meanY = 0;
-    for (let i = 0; i < velocities.length; i++) {
-      const velocity = velocities[i];
-      close(randomSpeed(velocity, strength), thermal);
-      // Each random direction stays the same; only its size changes.
-      close((velocity.vx - drift) / thermal, baseline[i].vx / 72);
-      close(velocity.vy / thermal, baseline[i].vy / 72);
-      meanX += velocity.vx; meanY += velocity.vy;
-    }
-    close(meanX / velocities.length, drift);
-    close(meanY / velocities.length, 0);
-    assert.ok(thermal < previous);
-    previous = thermal;
+  let largestGap = 0;
+  for (let i = 0; i < 60 * 60; i++) {
+    sim.step(1 / 60);
+    largestGap = Math.max(largestGap, Math.abs(sim.state.passWide - sim.state.passNarrow));
   }
-  close(sim.model(0).random, 1);
-  assert.ok(sim.model(100).random > 0.35 && sim.model(100).random < 0.45);
+  assert.ok(sim.state.passWide > 600, 'enough molecules cross to compare: ' + sim.state.passWide);
+  assert.ok(largestGap <= 2, 'the two counts stay together even early on: largest gap ' + largestGap);
 });
 
-test('zero gauge pressure is not zero random molecular motion', () => {
+test('the narrow walls receive fewer and weaker hits per unit wall length', () => {
   const sim = simulation();
-  // Extend the same equation to its zero-gauge point for this conceptual boundary check.
-  // The displayed slider still has its original 0..100 range and 12 m/s maximum.
-  const strength = Math.sqrt(2 * 100 / 1.2) / 12 * 100;
-  // The actual UI setter clamps at 100%; bypass only for this boundary case.
-  sim.setBoundaryStrength(strength);
-  close(sim.model().P, 0);
-  const thermal = randomSpeed(sim.velocities()[0], strength);
-  assert.ok(thermal > 0, 'random motion never stops at atmospheric pressure');
-  for (const velocity of sim.velocities()) close(randomSpeed(velocity, strength), thermal);
-});
-
-test('medium and fast flow have visibly fewer and weaker actual wall impacts', () => {
-  // Compare complete observation windows, not whichever flash survives at the end.
-  const still = observeImpacts(simulation(0), 36);
-  const medium = observeImpacts(simulation(40), 36);
-  const fast = observeImpacts(simulation(100), 36);
-  assert.ok(still.impacts.length > 100, 'observe enough impacts to compare the modes');
-  const ratio = medium.impacts.length / still.impacts.length;
-  assert.ok(ratio > 0.4 && ratio < 0.7, 'medium flow should show about half as many impacts: ' + ratio);
-  assert.ok(fast.impacts.length > 0, 'fast flow still hits the walls');
-  assert.ok(fast.impacts.length < medium.impacts.length * 0.6);
-  const meanStrength = result => result.impacts.reduce((sum, f) => sum + f.strength, 0) / result.impacts.length;
-  assert.ok(meanStrength(medium) < meanStrength(still) * 0.7);
-  assert.ok(meanStrength(fast) < meanStrength(medium) * 0.6);
-  assert.ok(fast.state.points.some((p, i) => p.x !== still.state.points[i].x), 'the added drift remains visible');
-});
-
-test('each counted yellow flash comes from a molecule crossing a wall', () => {
-  for (const strength of [0, 40, 100]) {
-    const sim = simulation(strength), dt = 1 / 120, drawingHeight = 270 - 89;
-    let verified = 0;
-    for (let frame = 0; frame < 12 * 120; frame++) {
-      const before = sim.snapshot(), velocities = sim.velocities();
-      const crossings = [];
-      before.points.forEach((point, i) => {
-        const dy = velocities[i].vy * dt / drawingHeight;
-        if (point.y + dy < 0 || point.y + dy > 1) {
-          crossings.push({wall: point.y + dy < 0 ? 0 : 1});
-        }
-      });
-      sim.step(dt);
-      const after = sim.snapshot();
-      assert.equal(after.collisionCount - before.collisionCount, crossings.length);
-      const added = after.flashes.filter(flash => flash.time >= before.time);
-      assert.equal(added.length, crossings.length, 'no timed or decorative wall flashes');
-      added.forEach((flash, i) => {
-        assert.equal(flash.wall, crossings[i].wall);
-        assert.ok(flash.time <= after.time);
-        assert.ok(flash.x >= 0 && flash.x <= 1);
-        assert.ok(after.hits.includes(flash.time), 'the counter uses the same actual crossing');
-      });
-      verified += added.length;
+  run(sim, 10);
+  let wide = {count: 0, strength: 0}, narrow = {count: 0, strength: 0}, seen = 0;
+  for (let i = 0; i < 120 * 60; i++) {
+    sim.step(1 / 60);
+    const added = sim.state.hits.slice(seen);
+    for (const h of added) {
+      const side = h.wide ? wide : narrow;
+      side.count++; side.strength += h.strength;
     }
-    assert.ok(verified > 0, `no actual wall impacts verified at strength ${strength}`);
+    sim.state.hits = sim.state.hits.filter(h => sim.state.time - h.time < 5);
+    seen = sim.state.hits.length;
   }
+  const perLength = (side, length) => side.count / length;
+  const countRatio = perLength(narrow, 1 - sim.NARROW_START) / perLength(wide, sim.WIDE_END);
+  assert.ok(countRatio > .25 && countRatio < .45, 'narrow hit count ratio ' + countRatio);
+  const strengthRatio = (narrow.strength / narrow.count) / (wide.strength / wide.count);
+  assert.ok(strengthRatio > .25 && strengthRatio < .45, 'narrow hit strength ratio ' + strengthRatio);
+  assert.ok(narrow.count > 0, 'the fast part still hits its walls');
 });
 
-test('the hit counter reports recent wall impacts per second', () => {
-  const sim = simulation(0);
-  assert.equal(sim.hitRate(), null);
-  const rest = run(sim, 4), restRate = sim.hitRate();
-  assert.ok(restRate > 8 && restRate < 25, 'slower random motion still produces visible wall impacts: ' + restRate);
-  close(restRate, rest.hits.length / 3);
-  sim.setStrength(100);
-  run(sim, 4);
-  assert.ok(sim.hitRate() < restRate * 0.6);
-});
-
-test('a mode change clears old impacts and waits half a second for a fresh sample', () => {
+test('the collision bars show a clear gap after the first moments', () => {
   const sim = simulation();
-  const before = run(sim, 4);
-  assert.ok(before.hits.length > 0);
-  sim.setStrength(40);
-  const changed = sim.snapshot();
-  assert.equal(changed.time, before.time);
-  assert.deepEqual(changed.points, before.points, 'changing modes does not reseed molecules');
-  assert.deepEqual(changed.hits, []);
-  assert.deepEqual(changed.flashes, []);
-  assert.equal(sim.hitRate(), null);
-  for (let frame = 0; frame < 49; frame++) sim.step(0.01);
-  assert.equal(sim.hitRate(), null, 'do not report a rate from less than half a second');
-  sim.step(0.02);
-  const sample = sim.snapshot();
-  assert.ok(Number.isFinite(sim.hitRate()));
-  assert.ok(sample.hits.every(time => time >= before.time));
-  close(sim.hitRate(), sample.hits.length / 0.51);
-  const steady = run(sim, 4);
-  close(sim.hitRate(), steady.hits.length / 3);
-  sim.setStrength(0);
-  assert.equal(sim.hitRate(), null, 'returning to still air also starts a new sample');
-  sim.seed();
-  assert.equal(sim.snapshot().time, 0);
-  assert.deepEqual(sim.snapshot().hits, []);
-  assert.equal(sim.hitRate(), null);
+  assert.equal(sim.hitShares(), null);
+  run(sim, 1);
+  assert.equal(sim.hitShares(), null, 'no bar before 1.5 seconds');
+  run(sim, .6);
+  for (let i = 0; i < 40; i++) {
+    run(sim, .5);
+    const share = sim.hitShares();
+    assert.ok(share, 'bars appear after 1.5 seconds');
+    close(share.wide, 1);
+    assert.ok(share.narrow < .35, 'narrow bar stays well below the wide bar: ' + share.narrow);
+  }
 });
 
-test('at the medium setting molecules collide and every one of them is carried to the right', () => {
-  const sim = simulation(40), dt = 1 / 120, drift = DRAWN_DRIFT * 40 / 100;
-  const start = sim.snapshot().points, sumUx = points => points.reduce((sum, p) => sum + p.ux, 0);
-  const sumAbsUy = points => points.reduce((sum, p) => sum + Math.abs(p.uy), 0);
-  const moved = new Array(start.length).fill(0);
-  let windows = 0, backward = 0, last = moved.slice();
-  for (let frame = 1; frame <= 12 * 120; frame++) {
-    sim.velocities().forEach((velocity, i) => {
-      assert.ok(velocity.vx > 0, `medium flow reverses molecule ${i} at frame ${frame}`);
-      moved[i] += velocity.vx * dt;
-    });
+test('each yellow flash comes from a molecule actually crossing a wall', () => {
+  const sim = simulation(), dt = 1 / 60;
+  let verified = 0;
+  for (let frame = 0; frame < 20 * 60; frame++) {
+    const g = sim.geom(), k = g.k;
+    const expected = sim.state.points.filter(p => {
+      const x = Math.min(1, Math.max(0, p.xc + p.ox)), hr = sim.hRel(x), half = g.hW * hr / 2;
+      const u = sim.U_WIDE * k / hr, c = Math.sqrt(Math.max(0, sim.K2 * k * k - u * u));
+      return Math.abs(p.s + c * p.uy * dt / half) > 1;
+    }).length;
+    const time = sim.state.time;
     sim.step(dt);
-    if (frame % 240 === 0) {
-      moved.forEach((x, i) => { windows++; if (x - last[i] <= 0) backward++; });
-      last = moved.slice();
-    }
+    const added = sim.state.flashes.filter(f => f.time > time).length;
+    assert.equal(added, expected, 'no timed or decorative flashes');
+    verified += added;
   }
-  const end = sim.snapshot().points;
-  assert.ok(end.some((p, i) => p.ux !== start[i].ux), 'molecules change direction by colliding');
-  close(sumUx(end), sumUx(start), 1e-9);
-  close(sumAbsUy(end), sumAbsUy(start), 1e-9);
-  assert.ok(moved.every(x => x > 0), 'no molecule keeps moving against the flow');
-  close(moved.reduce((sum, x) => sum + x, 0) / moved.length, drift * 12, 1e-6);
-  assert.ok(backward / windows < 0.02, 'over two seconds almost every molecule moves right: ' + backward / windows);
+  assert.ok(verified > 100, 'checked enough wall hits: ' + verified);
 });
 
-test('molecules keep a visible free-flight segment before another random turn', () => {
-  const sim = simulation(40), dt = 1 / 120;
-  let previous = sim.snapshot().points, turns = 0;
-  const lastTurn = previous.map(() => null);
-  for (let frame = 1; frame <= 4 * 120; frame++) {
-    sim.step(dt);
-    const current = sim.snapshot().points;
-    current.forEach((point, i) => {
-      // Wall reflections change uy, so compare ux to observe molecule-to-molecule turns.
-      if (point.ux === previous[i].ux) return;
-      const time = frame * dt;
-      if (lastTurn[i] !== null) {
-        assert.ok(time - lastTurn[i] >= 0.30 - 1e-9, `molecule ${i} turned again too soon`);
-      }
-      lastTurn[i] = time;
-      turns++;
-    });
-    previous = current;
-  }
-  assert.ok(turns > previous.length, 'random directions must still change over time');
+test('molecules collide with each other but keep their set of random directions', () => {
+  const sim = simulation();
+  const sumUx = () => sim.state.points.reduce((sum, p) => sum + p.ux, 0);
+  const sumAbsUy = () => sim.state.points.reduce((sum, p) => sum + Math.abs(p.uy), 0);
+  const ux0 = sumUx(), uy0 = sumAbsUy(), start = sim.state.points.map(p => p.ux);
+  run(sim, 12);
+  close(sumUx(), ux0, 1e-9);
+  close(sumAbsUy(), uy0, 1e-9);
+  assert.ok(sim.state.points.some((p, i) => p.ux !== start[i]), 'directions change by colliding');
 });
 
-test('still-air particles explore space instead of merely trembling near their starting points', () => {
-  const sim = simulation(0), dt = 1 / 120;
-  const moved = sim.snapshot().points.map(() => ({x: 0, y: 0}));
-  for (let frame = 1; frame <= 12 * 120; frame++) {
-    sim.velocities().forEach((v, i) => { moved[i].x += v.vx * dt; moved[i].y += v.vy * dt; });
-    sim.step(dt);
-    if (frame % 120 === 0) {
-      // Integrate actual velocities so crossing the periodic side does not look like a jump.
-      const rms = Math.sqrt(moved.reduce((sum, p) => sum + p.x ** 2 + p.y ** 2, 0) / moved.length);
-      assert.ok(rms > 35, `one-second travel was only ${rms}px: random turns are too frequent`);
-      close(moved.reduce((sum, p) => sum + p.x, 0) / moved.length, 0, 1e-9);
-      moved.forEach(p => { p.x = 0; p.y = 0; });
-    }
-  }
+test('slow view slows the clock by ten times without changing the physics', () => {
+  assert.match(source, /<button id="slow"[^>]*>느리게 보기 \(1\/10배\)<\/button>/);
+  assert.match(modelCode, /const SLOW_FACTOR=\.1;/);
+  assert.match(source, /step\(dt\*\(state\.slow\?SLOW_FACTOR:1\)\)/, 'the frame loop scales the simulation time step');
+  // Ten slow steps cover the same simulated time as one normal step.
+  const normal = simulation(), slow = simulation();
+  run(normal, 2, 1 / 60);
+  run(slow, 2, 1 / 600);
+  close(normal.state.time, slow.state.time, 1e-9);
+  const passRatio = slow.state.passWide / Math.max(1, normal.state.passWide);
+  assert.ok(passRatio > .8 && passRatio < 1.25, 'same flow in simulated time: ' + passRatio);
 });
 
-test('weak flow carries the particle group rightward without suppressing random backward travel', () => {
-  // The longer free-flight segments must remain random at weak flow. Check the
-  // group's drift over short windows and advection over a longer observation,
-  // rather than forcing almost every molecule to turn right within half a second.
-  for (const seconds of [0.5, 1, 2, 6]) {
-    const sim = simulation(10), dt = 1 / 120;
-    const moved = new Array(sim.snapshot().points.length).fill(0);
-    const framesPerWindow = Math.round(seconds / dt);
-    for (let frame = 1; frame <= 12 * 120; frame++) {
-      sim.velocities().forEach((velocity, i) => { moved[i] += velocity.vx * dt; });
-      sim.step(dt);
-      if (frame % framesPerWindow === 0) {
-        const rightward = moved.filter(distance => distance > 0).length / moved.length;
-        assert.ok(rightward > 0.5,
-          `${seconds}s window ending at frame ${frame}: most particles should move right`);
-        if (seconds === 6) assert.ok(rightward >= 0.95, 'sustained weak flow carries almost all particles right');
-        close(moved.reduce((sum, distance) => sum + distance, 0) / moved.length,
-          DRAWN_DRIFT * 0.1 * seconds, 1e-6);
-        moved.fill(0);
-      }
-    }
-  }
+test('the flow carries every molecule to the right and recycles it at the inlet', () => {
+  const sim = simulation();
+  const before = sim.state.points.map(p => p.xc);
+  sim.step(1 / 60);
+  sim.state.points.forEach((p, i) => {
+    assert.ok(p.xc > before[i] || p.xc < .05, 'a carrier moves right or re-enters at the inlet');
+    assert.ok(Math.abs(p.ox) < .1, 'random travel along the pipe stays near its carrier');
+  });
 });

@@ -4,125 +4,124 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#f4f7f8">
-<title>베르누이 정리 · 속력이 빨라지면 압력은?</title>
+<title>베르누이 정리 · 관이 좁아지면 압력은?</title>
 <style>
-:root{color-scheme:light;--ink:#203e4b;--muted:#748994;--line:#dde8ec;--blue:#278dcc;--orange:#ce7c37;--green:#19816d}*{box-sizing:border-box}body{margin:0;color:var(--ink);background:#f4f7f8;font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;word-break:keep-all;line-height:1.6}button,input{font:inherit}button{cursor:pointer;touch-action:manipulation}button:focus-visible,input:focus-visible{outline:3px solid var(--blue);outline-offset:4px}main{width:min(1020px,100% - 40px);margin:28px auto 20px}.eyebrow{font-size:11px;font-weight:800;letter-spacing:.07em;color:var(--green);margin:0 0 6px}h1{font-size:clamp(26px,3.2vw,35px);letter-spacing:-.05em;line-height:1.3;margin:0 0 8px}.intro{margin:0 0 18px;font-size:14px;color:var(--muted)}.lab{border:1px solid var(--line);border-radius:20px;overflow:hidden;background:#fff;box-shadow:0 8px 30px #29454f05}.toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);padding:12px 20px}.status{color:var(--green);font-size:12px;font-weight:750}.actions{display:flex;gap:6px}.btn{border:1px solid var(--line);border-radius:8px;background:#fff;font-size:12px;color:#687e88;padding:6px 10px}.btn:hover{background:#f1f6f7}.visual{display:grid;grid-template-columns:minmax(0,1fr) 142px;gap:16px;padding:17px 22px 6px}.pipe-view{min-width:0}.direction{display:flex;justify-content:center;align-items:center;gap:9px;font-size:12px;color:#40819c;font-weight:700;margin:3px 0 4px}.direction b{font-size:24px;line-height:1}.assembly{display:grid;grid-template-columns:112px minmax(0,1fr)}.blower{width:112px;height:270px}.blower-wind{opacity:0;stroke-dasharray:15 9;animation:blow .7s linear infinite;animation-play-state:paused}canvas{display:block;width:100%;height:270px}.legend{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;font-size:10px;color:var(--muted);padding-bottom:10px}.legend span{display:inline-flex;align-items:center;gap:5px}.dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--blue)}.dot.gold{background:#eabe23;box-shadow:0 0 5px #f2ce4380}.legend b{color:#9a7400;font-size:1.3em;font-weight:800;font-variant-numeric:tabular-nums;min-width:2ch;text-align:right}.hit-bar{display:inline-block;width:46px;height:7px;border-radius:4px;background:#f1ead0;overflow:hidden;vertical-align:middle}.hit-bar i{display:block;height:100%;width:0;background:#e2b31a;border-radius:4px;transition:width .3s}.gauge{padding:14px 15px;border:1px solid #f0e1d0;border-radius:13px;background:#fffaf4;margin-bottom:14px;display:flex;flex-direction:column;justify-content:space-between}.gauge-title{color:#a2764e;font-size:13px;font-weight:700}.gauge-number{font-size:34px;font-weight:800;color:var(--orange);line-height:1.3;font-variant-numeric:tabular-nums}.unit{font-size:12px;font-weight:400;margin-left:3px;color:#9b8570}.gauge-note{font-size:10px;color:#a08a77}.gauge-chart{height:116px;position:relative;border-bottom:1px solid #dbc9b4;margin:10px 0 6px;background:repeating-linear-gradient(to top,transparent 0,transparent 28px,#efdfcb 29px)}.gauge-chart:before{content:"100";position:absolute;left:0;top:-8px;font-size:9px;color:#b59b81}.gauge-chart:after{content:"0";position:absolute;left:0;bottom:-7px;font-size:9px;color:#b59b81}.gauge-fill{position:absolute;bottom:0;left:43%;width:35%;background:#dba16c;height:100%;border-radius:5px 5px 0 0;transition:height .12s}.energy{margin:0 22px 18px;padding:14px 17px;border:1px solid var(--line);border-radius:13px;background:#fafcfd}.formula{display:flex;justify-content:center;align-items:baseline;gap:10px;font-family:"Segoe UI",sans-serif;line-height:1.35;font-size:26px;white-space:nowrap}.p-color{color:var(--orange)}.q-color{color:var(--blue)}.total-color{color:var(--green)}.value-row{display:flex;justify-content:center;align-items:baseline;gap:9px;font-size:15px;font-variant-numeric:tabular-nums;margin-top:5px}.value-row small{font-size:10px;color:var(--muted)}.energy-bar{display:flex;width:100%;height:10px;background:#eaf0f2;border-radius:7px;overflow:hidden;margin-top:13px}.energy-p{width:100%;background:#dba16c;transition:width .12s}.energy-q{width:0;background:#409acb;transition:width .12s}.bar-labels{display:flex;justify-content:space-between;gap:10px;font-size:10px;margin-top:5px}.controls{padding:17px 24px;display:grid;grid-template-columns:144px minmax(0,1fr);gap:22px;align-items:center;border-top:1px solid var(--line)}.control-heading{display:flex;align-items:baseline;justify-content:space-between;gap:8px}.control-heading label{font-size:15px;font-weight:800}.control-heading output{color:var(--green);font-size:20px;font-weight:800}.control-heading output span{font-size:11px;font-weight:400}.presets{display:flex;gap:5px;margin-top:8px}.preset{font-size:10px;border:1px solid var(--line);border-radius:6px;padding:3px 7px;color:#6f8881;background:#fff}.preset[aria-pressed=true]{color:#147a61;border-color:#a8d4c7;background:#ebf7f2}.range{display:block;width:100%;height:25px;margin:0;accent-color:var(--green);cursor:pointer}.ticks{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:3px}.velocity{display:flex;align-items:center;justify-content:center;gap:7px;color:var(--blue);font-size:13px;margin-top:8px}.velocity output{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums}.insight{padding:15px 20px;background:#edf7f2;border-top:1px solid #d9eae1;text-align:center;font-size:17px;font-weight:800;letter-spacing:-.02em}.explanation{font-size:13px;text-align:center;margin:14px 4px 6px;color:#4f6d79}.conditions{font-size:10px;color:#8a9aa2;text-align:center;margin:5px 4px;line-height:1.7}@keyframes blow{to{stroke-dashoffset:-24}}
-@media(max-width:650px){main{width:calc(100% - 24px);margin:18px auto}.intro{font-size:12px;margin-bottom:14px}.toolbar{padding:10px 12px}.status{font-size:11px}.btn{font-size:11px;padding:5px 8px}.visual{grid-template-columns:minmax(0,1fr) 88px;gap:6px;padding:13px 10px 3px}.direction{font-size:10px;gap:6px}.direction b{font-size:20px}.assembly{grid-template-columns:66px minmax(0,1fr)}.blower{width:66px;height:235px}canvas{height:235px}.gauge{padding:10px 8px}.gauge-title{font-size:11px}.gauge-number{font-size:25px}.gauge-note{font-size:9px}.unit{font-size:10px}.gauge-chart{height:100px}.legend{font-size:9px;gap:9px}.energy{margin:0 12px 13px;padding:12px}.formula{font-size:23px;gap:7px}.value-row{font-size:13px;gap:7px}.bar-labels{font-size:9px}.controls{padding:14px;grid-template-columns:105px minmax(0,1fr);gap:14px}.control-heading{display:block}.control-heading label{display:block;font-size:14px}.presets{gap:3px}.preset{font-size:9px;padding:3px 5px}.velocity{font-size:11px}.velocity output{font-size:17px}.insight{padding:12px;font-size:15px}.explanation{font-size:12px}.conditions{font-size:9px}.lab{border-radius:16px}}
-@media(prefers-reduced-motion:reduce){*{transition:none!important}.blower-wind{animation:none}}
-.flow-arrow{display:block;width:125px;height:18px;flex:none;color:#40819c}.explanation{max-width:820px;margin:15px auto 8px;text-align:left;line-height:1.85;padding:0 5px;font-size:13px}.explanation b{color:#244d5c}@media(max-width:650px){.flow-arrow{width:86px;height:16px}.explanation{font-size:12px}.direction{gap:7px}}
-
-.rotate-hint{display:none}.btn{min-height:36px}.range{min-height:36px}.velocity{flex-wrap:wrap}.conditions{font-size:11px;color:#71858f}.explanation{font-size:14px;line-height:1.9}
-@media(max-width:650px){
-  main{width:calc(100% - 24px);margin:16px auto}.intro{font-size:13px}.toolbar{gap:6px}.status{font-size:10px}.actions{gap:4px}.btn{min-height:40px;padding:5px 8px}
-  .visual{grid-template-columns:minmax(0,1fr);padding:12px 10px 0;gap:0}.assembly{grid-template-columns:54px minmax(0,1fr)}.blower{width:54px;height:235px}.direction{font-size:11px}.legend{font-size:11px;padding-bottom:8px}
-  .gauge{display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:16px;padding:8px 13px;margin:0 2px 13px}.gauge>div:first-child{display:grid;grid-template-columns:auto auto;column-gap:8px;align-items:baseline}.gauge-title{font-size:12px}.gauge-number{font-size:28px}.gauge>div:first-child .gauge-note{grid-column:1/-1;font-size:10px}.gauge>.gauge-note{display:none}.gauge-chart{flex:1;max-width:112px;height:42px;margin:8px 0}.gauge-chart:before,.gauge-chart:after{font-size:9px}
-  .controls{grid-template-columns:minmax(0,1fr);gap:7px;padding:12px 14px}.controls>div:first-child{display:flex;align-items:center;justify-content:space-between;gap:8px}.control-heading{display:flex;align-items:baseline;gap:7px}.control-heading label{font-size:14px}.control-heading output{font-size:20px}.presets{gap:4px;margin-top:0}.preset{font-size:11px;min-width:43px;min-height:44px;padding:6px}.range{min-height:44px}.ticks{font-size:11px;margin-top:0}.velocity{font-size:13px;margin-top:6px}.velocity output{font-size:19px}
-  .energy{margin:0 12px 12px}.bar-labels{font-size:10px}.formula{font-size:25px}.insight{font-size:16px}.explanation{font-size:14px;line-height:1.9;margin:16px 2px 8px;padding:0 2px}.conditions{font-size:11px;line-height:1.8;margin:6px 3px}
-}
-@media(max-width:650px){.toolbar{flex-wrap:wrap}.blower text{display:none}}
-@media(max-width:500px) and (orientation:portrait){.rotate-hint{display:block;font-size:11px;color:#71858f;margin:-5px 0 13px}}
-@media(max-height:500px) and (orientation:landscape){main{margin:12px auto}.visual{padding-top:8px}.assembly .blower,.assembly canvas{height:215px}.intro{margin-bottom:12px}}
-
-/* Keep one-half readable as a stacked fraction in every displayed equation. */
+:root{color-scheme:light;--ink:#203e4b;--muted:#748994;--line:#dde8ec;--blue:#278dcc;--orange:#ce7c37;--green:#19816d}*{box-sizing:border-box}body{margin:0;color:var(--ink);background:#f4f7f8;font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;word-break:keep-all;line-height:1.6}button{font:inherit;cursor:pointer;touch-action:manipulation}button:focus-visible{outline:3px solid var(--blue);outline-offset:4px}main{width:min(1020px,100% - 40px);margin:28px auto 20px}.eyebrow{font-size:11px;font-weight:800;letter-spacing:.07em;color:var(--green);margin:0 0 6px}h1{font-size:clamp(26px,3.2vw,35px);letter-spacing:-.05em;line-height:1.3;margin:0 0 8px}.intro{margin:0 0 18px;font-size:14px;color:var(--muted)}.rotate-hint{display:none}
+.lab{border:1px solid var(--line);border-radius:20px;overflow:hidden;background:#fff;box-shadow:0 8px 30px #29454f05}.toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);padding:12px 20px}.status{color:var(--green);font-size:12px;font-weight:750}.actions{display:flex;gap:6px}.btn{border:1px solid var(--line);border-radius:8px;background:#fff;font-size:12px;color:#687e88;padding:6px 10px;min-height:36px}.btn:hover{background:#f1f6f7}
+.stage{padding:14px 22px 0}.direction{display:flex;justify-content:center;align-items:center;gap:9px;font-size:12px;color:#40819c;font-weight:700;margin:0 0 2px}.flow-arrow{display:block;width:125px;height:18px;flex:none;color:#40819c}canvas{display:block;width:100%;height:290px}
+.legend{display:flex;justify-content:center;gap:8px 20px;flex-wrap:wrap;font-size:12px;color:var(--muted);padding:6px 0 14px}.legend span{display:inline-flex;align-items:center;gap:6px}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--blue)}.gate{display:inline-block;width:0;height:14px;border-left:2px dashed #19816d}.pass-note{text-align:center;font-size:12px;color:#4f6d79;margin:-6px 0 14px;font-variant-numeric:tabular-nums}.pass-note b{color:var(--green);display:inline-block;min-width:3ch;text-align:right}.glint{display:inline-block;width:16px;height:5px;border-radius:3px;background:#efbd0c;box-shadow:0 0 5px #f2ce4380}
+.compare{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0 22px}.card{border:1px solid var(--line);border-radius:13px;background:#fafcfd;padding:12px 16px 13px}.card h2{font-size:15px;margin:0 0 6px;letter-spacing:-.02em}.row{display:grid;grid-template-columns:72px minmax(0,1fr);align-items:center;gap:8px;min-height:40px;font-size:13px}.row .k{color:var(--muted)}.val{display:flex;align-items:center;gap:8px;font-weight:700}.sym{font-family:"Segoe UI",sans-serif;font-weight:800;line-height:1;display:inline-block;min-width:24px;text-align:center}.sym.big{font-size:32px}.sym.small{font-size:17px}.hit-bar{flex:1;max-width:150px;height:9px;border-radius:5px;background:#f1ead0;overflow:hidden}.hit-bar i{display:block;height:100%;width:0;background:#e2b31a;border-radius:5px;transition:width .4s}
+.energy-bar{display:flex;width:100%;height:11px;background:#eaf0f2;border-radius:7px;overflow:hidden;margin-top:8px}.energy-p{background:#dba16c}.energy-q{background:#409acb}.bar-labels{display:flex;justify-content:space-between;gap:10px;font-size:11px;margin-top:4px}.p-color{color:var(--orange)}.q-color{color:var(--blue)}.total-color{color:var(--green)}
+.sum-note{text-align:center;font-size:13px;color:#4f6d79;margin:12px 22px 16px}.insight{padding:15px 20px;background:#edf7f2;border-top:1px solid #d9eae1;text-align:center;font-size:17px;font-weight:800;letter-spacing:-.02em}
+.explanation{max-width:820px;margin:15px auto 8px;text-align:left;line-height:1.9;padding:0 5px;font-size:14px;color:#4f6d79}.explanation b{color:#244d5c}.eq-note{max-width:810px;margin:2px auto 14px;padding:10px 14px;border-left:3px solid var(--green);border-radius:0 9px 9px 0;background:#eef7f2;font-size:13px;line-height:1.85;color:#4f6d79}.eq-note b{color:#1c5e4d}@media(max-width:650px){.eq-note{margin:2px 2px 14px;font-size:13px}}.conditions{font-size:11px;color:#71858f;text-align:center;margin:6px 4px;line-height:1.8}
 .energy-term{display:inline-block;white-space:nowrap}.fraction{display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;line-height:1;font-size:.78em;text-align:center;margin-inline:.1em .16em;min-width:.68em}.fraction>span:first-child{padding:0 .1em .08em;border-bottom:1px solid currentColor}.fraction>span:last-child{padding:.08em .1em 0}
+@media(max-width:650px){main{width:calc(100% - 24px);margin:16px auto}.intro{font-size:13px;margin-bottom:14px}.toolbar{padding:10px 12px;flex-wrap:wrap;gap:6px}.status{font-size:11px}.btn{min-height:40px;padding:5px 8px;font-size:11px}.stage{padding:12px 8px 0}.direction{font-size:11px;gap:7px}.flow-arrow{width:86px;height:16px}canvas{height:240px}.legend{font-size:11px}.compare{grid-template-columns:minmax(0,1fr);margin:0 12px;gap:10px}.row{grid-template-columns:62px minmax(0,1fr);font-size:12px;min-height:36px}.sym.big{font-size:28px}.sym.small{font-size:15px}.sum-note{margin:10px 12px 14px;font-size:12px}.insight{padding:12px;font-size:15px}.explanation{font-size:14px;margin:16px 2px 8px;padding:0 2px}.lab{border-radius:16px}}
+@media(max-width:500px) and (orientation:portrait){.rotate-hint{display:block;font-size:11px;color:#71858f;margin:-5px 0 13px}}
+@media(max-height:500px) and (orientation:landscape){main{margin:12px auto}.intro{margin-bottom:12px}canvas{height:230px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 <script defer src="../assets/js/visit-entry.js?v=f0ad5bcfab"></script>
 </head>
 <body>
 <main>
-<header><p class="eyebrow">가상 물리 실험실 · 베르누이 정리</p><h1>속력이 빨라지면, 압력은?</h1><p class="intro">공기의 흐름을 살펴보며, 속력 v가 커질 때 압력 P와 벽에 부딪히는 분자가 어떻게 달라지는지 관찰해 보세요.</p><p class="rotate-hint">가로로 돌리면 관을 더 넓게 볼 수 있어요.</p></header>
-<section class="lab" aria-label="유체의 속력과 압력 관계를 살펴보는 베르누이 정리 실험">
-  <div class="toolbar"><span class="status">P + <span class="energy-term"><span class="fraction" role="math" aria-label="2분의 1"><span aria-hidden="true">1</span><span aria-hidden="true">2</span></span>ρv²</span>의 합은 일정</span><div class="actions"><button id="pause" class="btn" aria-pressed="false">Ⅱ 일시정지</button><button id="reset" class="btn">↺ 처음으로</button></div></div>
-  <div class="visual"><div class="pipe-view"><div class="direction"><span>흐름 방향</span><svg class="flow-arrow" viewBox="0 0 150 18" aria-hidden="true"><path d="M2 9 H145 M138 3 L145 9 L138 15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>오른쪽</span></div><div class="assembly">
-    <svg class="blower" viewBox="0 0 150 270" role="img" aria-labelledby="blower-title" xmlns="http://www.w3.org/2000/svg">
-  <title id="blower-title">입을 살짝 벌리고 오른쪽으로 바람을 부는 사람</title>
-  <!-- A three-quarter face. The small open mouth stays inside the cheek. -->
-  <path d="M26 226 C28 192 41 181 66 180 L84 180 C108 185 116 200 116 226Z" fill="#8ac7b6"/>
-  <path d="M49 185 Q69 202 94 187" fill="none" stroke="#64ae98" stroke-width="3" stroke-linecap="round"/>
-  <path d="M58 154 L58 181 Q71 191 84 179 L84 156Z" fill="#efb58e"/>
-  <path d="M34 98 C32 70 45 54 69 54 C94 54 111 71 112 97 L112 110 Q112 115 118 120 Q119 123 112 124 L111 138 C109 156 97 167 78 168 C52 169 34 149 32 124Z" fill="#f6c6a4" stroke="#d99b76" stroke-width="1.4" stroke-linejoin="round"/>
-  <path d="M31 125 C20 104 23 72 39 59 C53 47 79 48 91 54 C104 61 113 74 112 90 C100 89 92 80 85 72 C72 83 55 88 41 87 L41 120 L33 130Z" fill="#354550"/>
-  <path d="M34 102 C24 99 22 110 27 119 Q32 127 39 122 L40 106Z" fill="#f6c6a4" stroke="#d99b76" stroke-width="1.4"/>
-  <path d="M31 110 Q36 106 36 116" fill="none" stroke="#dba17d" stroke-width="1.6" stroke-linecap="round"/>
-  <path d="M81 96 Q88 92 96 95" fill="none" stroke="#48555b" stroke-width="2.5" stroke-linecap="round"/>
-  <path d="M84 105 Q90 110 97 104" fill="none" stroke="#48555b" stroke-width="2.6" stroke-linecap="round"/>
-  <ellipse cx="88" cy="130" rx="10" ry="8" fill="#efa894" opacity=".36"/>
-  <ellipse cx="107" cy="133" rx="3.1" ry="5.1" fill="#754e47"/>
-  <path d="M102 143 Q105 145 108 143" fill="none" stroke="#d29c7c" stroke-width="1.4" stroke-linecap="round"/>
-  <path d="M31 225 H115" fill="none" stroke="#70b49f" stroke-width="2" stroke-linecap="round"/>
-  <g id="blower-wind" class="blower-wind" fill="none" stroke="#4c9cbe" stroke-width="2.5" stroke-linecap="round">
-    <path d="M117 127 Q131 121 148 124 M117 133 H150 M117 139 Q131 145 148 142"/>
-  </g>
-  <text x="75" y="252" text-anchor="middle" fill="#718b86" font-size="11" font-family="Malgun Gothic,sans-serif" id="blower-label">후— 불어 보세요</text>
-</svg>
-    <canvas id="scene" role="img" aria-label="분자의 무작위 운동과 모든 분자가 함께 흘러가는 운동을 나타낸 도식. 흐름이 빨라지면 무작위 운동이 약해져 벽에 부딪히는 횟수와 세기가 줄어듭니다. 벽에 부딪힌 자리는 노란빛으로 나타내며, 부딪히는 세기가 약할수록 흐리게 보입니다. 변화는 크게 과장했습니다."></canvas>
-  </div><div class="legend"><span><i class="dot"></i>기체 분자(모형)</span><span><i class="dot gold"></i>벽에 충돌 · 1초에 <b id="hit-rate">—</b>번<i class="hit-bar" aria-hidden="true"><i id="hit-fill"></i></i></span></div></div>
-  <div class="gauge"><div><div class="gauge-title">압력 P</div><div class="gauge-number"><span id="pressure">100.0</span><span class="unit">Pa</span></div><div class="gauge-note">주변 공기보다 높은 만큼</div></div><div class="gauge-chart" id="gauge-chart" role="img" aria-label="주변 공기보다 100 파스칼 높음"><div class="gauge-fill" id="pressure-column"></div></div><div class="gauge-note">베르누이 식으로 계산</div></div></div>
-  <div class="energy" aria-label="압력과 운동 에너지 항의 합">
-    <div class="formula"><span class="p-color">P</span><span>+</span><span class="q-color"><span class="energy-term"><span class="fraction" role="math" aria-label="2분의 1"><span aria-hidden="true">1</span><span aria-hidden="true">2</span></span>ρv²</span></span><span>=</span><span class="total-color">일정</span></div>
-    <div class="value-row"><b class="p-color" id="p-value">100.0</b><span>+</span><b class="q-color" id="q-value">0.0</b><span>=</span><b class="total-color">100.0</b><small>Pa</small></div>
-    <div class="energy-bar" aria-hidden="true"><div class="energy-p" id="energy-p"></div><div class="energy-q" id="energy-q"></div></div><div class="bar-labels"><span class="p-color">압력 항 P</span><span class="q-color">운동 에너지 항 <span class="energy-term"><span class="fraction" role="math" aria-label="2분의 1"><span aria-hidden="true">1</span><span aria-hidden="true">2</span></span>ρv²</span></span></div>
+<header><p class="eyebrow">가상 물리 실험실 · 베르누이 정리</p><h1>관이 좁아지면, 압력은?</h1><p class="intro">넓은 관에서 좁은 관으로 흐르는 공기를 살펴보며, 흐름이 느린 곳과 빠른 곳에서 분자가 벽에 부딪히는 충돌과 압력 P가 어떻게 다른지 비교해 보세요.</p><p class="rotate-hint">가로로 돌리면 관을 더 넓게 볼 수 있어요.</p></header>
+<section class="lab" aria-label="넓은 관과 좁은 관에서 유체의 속력과 압력을 비교하는 베르누이 정리 실험">
+  <div class="toolbar"><span class="status">P + <span class="energy-term"><span class="fraction" role="math" aria-label="2분의 1"><span aria-hidden="true">1</span><span aria-hidden="true">2</span></span>ρv²</span>의 합은 일정 (수평인 한 흐름)</span><div class="actions"><button id="slow" class="btn" aria-pressed="false">느리게 보기 (1/10배)</button><button id="pause" class="btn" aria-pressed="false">Ⅱ 일시정지</button><button id="reset" class="btn">↺ 처음으로</button></div></div>
+  <div class="stage">
+    <div class="direction"><span>흐름 방향</span><svg class="flow-arrow" viewBox="0 0 150 18" aria-hidden="true"><path d="M2 9 H145 M138 3 L145 9 L138 15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>오른쪽</span></div>
+    <canvas id="scene" role="img" aria-label="넓은 관에서 좁은 관으로 흐르는 기체 분자의 도식. 넓은 곳은 흐름이 느리고 분자가 벽에 자주, 세게 부딪혀 압력이 큽니다. 좁은 곳은 흐름이 빠르고 벽에 드물게, 약하게 부딪혀 압력이 작습니다. 노란색 표시는 분자가 벽에 부딪힌 충돌입니다. 변화는 크게 과장했습니다."></canvas>
+    <div class="legend"><span><i class="dot"></i>기체 분자(모형)</span><span><i class="glint"></i>노란색 표시는 분자가 벽에 부딪힌 충돌을 나타내요</span><span><i class="gate"></i>초록 점선은 확인선이에요. 지나가는 분자가 잠깐 초록색으로 빛나요</span><span>변화는 잘 보이도록 크게 과장했어요</span></div>
+    <p class="pass-note" aria-live="off">확인선을 지나 오른쪽으로 간 분자 수 · 넓은 곳 <b id="pass-wide">0</b>개, 좁은 곳 <b id="pass-narrow">0</b>개 → 같은 시간 동안 지나가는 공기의 양이 같아요</p>
   </div>
-  <div class="controls"><div><div class="control-heading"><label for="strength">빨라진 정도</label><output for="strength"><b id="strength-value">0</b><span> %</span></output></div><div class="presets"><button class="preset" data-value="0" aria-pressed="true">멈춤</button><button class="preset" data-value="40" aria-pressed="false">중간</button><button class="preset" data-value="100" aria-pressed="false">빠르게</button></div></div><div><input class="range" id="strength" type="range" min="0" max="100" step="1" value="0" aria-label="빨라진 정도"><div class="ticks"><span>멈춰 있음</span><span>빠르게 →</span></div><div class="velocity"><span>흐름의 속력 v =</span><output id="speed" for="strength">0.0</output><span>m/s</span></div></div></div>
-  <div class="insight" id="insight" aria-live="polite">흐름이 없을 때 압력 P가 가장 큽니다</div>
+  <div class="compare">
+    <div class="card" aria-label="넓은 곳: 흐름 속력 느림, 충돌 많음, 압력 큼">
+      <h2>넓은 곳</h2>
+      <div class="row"><span class="k">흐름 속력</span><span class="val"><span class="sym small q-color">v</span>느림</span></div>
+      <div class="row"><span class="k">벽 충돌</span><span class="val"><span class="hit-bar" aria-hidden="true"><i id="hit-wide"></i></span>많고 셈</span></div>
+      <div class="row"><span class="k">압력</span><span class="val"><span class="sym big p-color">P</span>큼</span></div>
+      <div class="energy-bar" aria-hidden="true"><div class="energy-p" id="wide-p"></div><div class="energy-q" id="wide-q"></div></div>
+      <div class="bar-labels" aria-hidden="true"><span class="p-color">P</span><span class="q-color"><span class="energy-term"><span class="fraction"><span>1</span><span>2</span></span>ρv²</span></span></div>
+    </div>
+    <div class="card" aria-label="좁은 곳: 흐름 속력 빠름, 충돌 적음, 압력 작음">
+      <h2>좁은 곳</h2>
+      <div class="row"><span class="k">흐름 속력</span><span class="val"><span class="sym big q-color">v</span>빠름</span></div>
+      <div class="row"><span class="k">벽 충돌</span><span class="val"><span class="hit-bar" aria-hidden="true"><i id="hit-narrow"></i></span>적고 약함</span></div>
+      <div class="row"><span class="k">압력</span><span class="val"><span class="sym small p-color">P</span>작음</span></div>
+      <div class="energy-bar" aria-hidden="true"><div class="energy-p" id="narrow-p"></div><div class="energy-q" id="narrow-q"></div></div>
+      <div class="bar-labels" aria-hidden="true"><span class="p-color">P</span><span class="q-color"><span class="energy-term"><span class="fraction"><span>1</span><span>2</span></span>ρv²</span></span></div>
+    </div>
+  </div>
+  <p class="sum-note">두 막대의 전체 길이는 같아요(<b class="total-color">P + <span class="energy-term"><span class="fraction" role="math" aria-label="2분의 1"><span aria-hidden="true">1</span><span aria-hidden="true">2</span></span>ρv²</span> 일정</b>). 막대 비율은 잘 보이도록 크게 과장했어요.</p>
+  <div class="insight">관이 좁아짐 → v ↑ → 충돌 ↓ → P ↓</div>
 </section>
-<p class="explanation">기체 분자의 운동은 두 가지로 나누어 볼 수 있어요. 하나는 분자마다 제각각 사방으로 움직이는 <b>무작위 운동</b>이고, 다른 하나는 모든 분자가 <b>같은 속도로 함께 흘러가는 운동</b>이에요. 흐름의 속력 v는 이 두 번째 운동의 빠르기, 곧 분자들의 평균 속도예요.</p>
-<p class="explanation">벽에 부딪혀 압력 P를 만드는 것은 무작위 운동이에요. 함께 흘러가는 운동은 벽과 나란해서 벽을 밀지 않아요. 같은 관을 따라 흐르는 기체가 빨라지면 <b>무작위 운동의 에너지 일부가 흐름의 운동 에너지로 바뀌어요.</b> 그래서 무작위 운동이 약해지고, 분자가 벽에 부딪히는 횟수와 세기가 줄어 압력 P가 낮아져요. 줄어든 압력만큼 <span class="energy-term"><span class="fraction" role="math" aria-label="2분의 1"><span aria-hidden="true">1</span><span aria-hidden="true">2</span></span>ρv²</span>이 커지므로 <b>P + <span class="energy-term"><span class="fraction" role="math" aria-label="2분의 1"><span aria-hidden="true">1</span><span aria-hidden="true">2</span></span>ρv²</span>의 값은 일정</b>하게 유지돼요. 이때 기체를 빠르게 만드는 것은 압력이 높은 쪽에서 낮은 쪽으로 미는 힘이에요.</p>
-<p class="explanation">압력계의 P는 <b>주변 대기압보다 얼마나 높은지</b>를 나타내요. P가 0이면 대기압과 같다는 뜻이지, 분자의 운동이 멈췄다는 뜻은 아니에요. 실제 공기에서는 흐름이 이만큼 빨라져도 무작위 운동이 아주 조금만 약해져요. 그림에서는 변화가 잘 보이도록 크게 과장했어요.</p>
-<p class="conditions">입자 그림은 무작위 운동과 흐름을 나누어 크게 과장한 도식 · 압력 표시값은 베르누이 식으로 계산<br>ρ = 1.2 kg/m³ 일정 · 수평 정상 흐름 · 같은 유선 위에서만 비교 · 손실·추가 에너지 공급 없음</p>
+<p class="explanation"><b>연속 방정식</b>에 따라 단면적이 3분의 1인 좁은 곳에서는 흐름이 <b>세 배 빨라요.</b> 초록 확인선을 지나가는 분자 수로, 같은 시간 동안 두 곳을 지나가는 공기의 양이 같은 것을 확인할 수 있어요.</p>
+<p class="eq-note"><b>연속 방정식</b> · 공기가 관 속을 일정하게 흐를 때, 공기는 관 중간에 쌓이거나 사라지지 않아요. 그래서 1초 동안 어느 단면을 지나가는 공기의 부피(단면적 A × 속력 v)는 어디서나 같아요. <b>A₁v₁ = A₂v₂</b>이므로 단면적이 작은 곳일수록 속력이 커요. 좁은 곳에서 공기가 더 빽빽하게 눌리는 것이 아니라, 같은 간격으로 더 빨리 지나가는 거예요.</p>
+<p class="explanation">압력 P는 분자가 사방으로 움직이는 <b>무작위 운동</b>으로 벽에 부딪혀 생겨요. 흐름이 빠른 좁은 곳에서는 같은 넓이의 벽에 부딪히는 충돌이 <b>적고 약해서</b> 압력이 낮아요. <span class="energy-term"><span class="fraction" role="math" aria-label="2분의 1"><span aria-hidden="true">1</span><span aria-hidden="true">2</span></span>ρv²</span>이 커진 만큼 P가 작아져 <b>P + <span class="energy-term"><span class="fraction" role="math" aria-label="2분의 1"><span aria-hidden="true">1</span><span aria-hidden="true">2</span></span>ρv²</span>은 두 곳에서 같아요.</b></p>
+<p class="explanation">이것은 <b>같은 흐름 안의 두 곳</b>을 비교할 때만 성립해요. 실제 공기에서는 차이가 아주 작아, 멈춰 있던 공기가 초속 12 m로 빨라져도 압력은 대기압의 0.1%도 안 되게 낮아지고 분자의 무작위 운동(초속 약 500 m)도 거의 그대로예요.</p>
+<p class="conditions">차이가 잘 보이도록 크게 과장한 기체 분자 모형 · 좁은 곳 단면적은 넓은 곳의 3분의 1<br>수평 정상 흐름 · 공기 밀도 일정 · 마찰 손실 없음</p>
 </main>
 <script>
 'use strict';
 (() => {
   const $=id=>document.getElementById(id),canvas=$('scene'),ctx=canvas.getContext('2d');
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  // Use one pixel-speed scale so faster thermal motion keeps the same visible flow balance.
-  // The physical v and P shown below still come from the unchanged Bernoulli model.
-  const RHO=1.2,TOTAL_PRESSURE=100,MAX_SPEED=12;
-  const PARTICLE_SPEED_SCALE=1.6,THERMAL_SPEED=45*PARTICLE_SPEED_SCALE,DRIFT_SPEED=200*PARTICLE_SPEED_SCALE;
-  const DRAWN_BASE=4,HIT_WINDOW=3,COLLISION_TIME=.45,DIRECTION_HOLD=.30;
-  const state={strength:0,paused:reduced,time:0,points:[],flashes:[],hits:[],hitStartedAt:0,collisionCount:0,swaps:0};
-  let width=600,height=270,dpr=1,last=null;
-  // The gauge uses Bernoulli with a fixed total gauge pressure.
-  // Every molecule shares one drift, the flow speed v; only the random part reaches the walls.
-  // The random speed follows DRAWN_BASE + P: an absolute pressure whose atmosphere is shrunk
-  // so that the tiny real change becomes visible. It weakens as the flow speeds up but never
-  // stops, not even at zero gauge pressure, so wall hits grow fewer and weaker as P falls.
-  // Random motion and drift are not drawn to their real relative scales.
-  // Yellow glints come only from actual wall intersections, never a timer.
-  function model(strength=state.strength){
-    const v=MAX_SPEED*strength/100,q=.5*RHO*v*v,P=TOTAL_PRESSURE-q;
-    const random=Math.sqrt((DRAWN_BASE+P)/(DRAWN_BASE+TOTAL_PRESSURE));
-    return {v,q,P,total:TOTAL_PRESSURE,random};
+  // Steady, horizontal, incompressible flow. The narrow section has a third of the wide area,
+  // so continuity (u x area = const) makes the narrow drift exactly three times the wide drift.
+  // Drawn molecules: the random speed c and the drift u keep c^2 + u^2 fixed. With uniform density
+  // this is the drawn counterpart of P + 1/2 rho v^2 = const (P ~ c^2, 1/2 rho v^2 ~ u^2).
+  // The contrast is exaggerated; in real air c is about 500 m/s and barely changes.
+  const AREA_RATIO=3,U_WIDE=40,C_WIDE=120,K2=C_WIDE*C_WIDE+U_WIDE*U_WIDE;
+  const WIDE_END=.42,NARROW_START=.56,PAD=12,HIT_WINDOW=5,COLLISION_TIME=.45,DIRECTION_HOLD=.30,RELAX=.30;
+  // The drawn flow moves DRIFT_DRAW times faster than the energy model, so the flow and the speed-up
+  // in the narrow part stand out. Random speeds, collisions and the bars still follow the model.
+  const DRIFT_DRAW=1.75;
+  // Check lines: molecules crossing them are counted, showing the same flow through both sections.
+  const GATE_WIDE=.30,GATE_NARROW=.70,GLOW_TIME=.6;
+  // Slow view runs the whole simulation clock at a tenth of real time; the physics is unchanged.
+  const SLOW_FACTOR=.1;
+  const FONT='"Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif';
+  const state={paused:reduced,slow:false,time:0,points:[],flashes:[],hits:[],hitStartedAt:0,swaps:0,passWide:0,passNarrow:0};
+  let width=700,height=290,dpr=1,last=null;
+  // Relative pipe height (wide = 1) at a position x in [0,1] along the pipe.
+  const hRel=x=>x<=WIDE_END?1:x>=NARROW_START?1/AREA_RATIO:1+(1/AREA_RATIO-1)*(x-WIDE_END)/(NARROW_START-WIDE_END);
+  // Position x whose upstream pipe area is the given share of the whole pipe area.
+  function xAtAreaShare(share){
+    const r=1/AREA_RATIO,taper=NARROW_START-WIDE_END,taperArea=taper*(1+r)/2;
+    const a=share*(WIDE_END+taperArea+(1-NARROW_START)*r);
+    if(a<=WIDE_END)return a;
+    if(a<=WIDE_END+taperArea){const b=(a-WIDE_END)/taper;return WIDE_END+taper*(Math.sqrt(1+2*(r-1)*b)-1)/(r-1);}
+    return NARROW_START+(a-WIDE_END-taperArea)/r;
   }
-  function hitRate(){const elapsed=state.time-state.hitStartedAt;return elapsed>=.5?state.hits.length/Math.min(HIT_WINDOW,elapsed):null;}
+  // Share of the constant total carried by the pressure term at relative height hr.
+  const pressureShare=hr=>{const u=U_WIDE/hr;return Math.max(0,K2-u*u)/K2;};
+  function geom(){
+    const band=height<260?40:48,drawW=Math.max(1,width-PAD*2),hW=Math.max(20,height-band*2);
+    return{band,drawW,hW,mid:band+hW/2,xa:PAD+WIDE_END*drawW,xb:PAD+NARROW_START*drawW,k:Math.min(1.2,Math.max(.55,drawW/720))};
+  }
+  const wallY=(xPx,side,g)=>g.mid+side*g.hW*hRel((xPx-PAD)/g.drawW)/2;
   function rng(seed){return()=>{seed=(1664525*seed+1013904223)>>>0;return(seed+.5)/4294967296;};}
   let random=rng(31927);
   function seed(){
-    random=rng(31927);state.time=0;state.flashes=[];state.hits=[];state.hitStartedAt=0;state.collisionCount=0;state.swaps=0;
-    state.points=[];
-    // Balanced quadrants give zero mean flow at rest, without speed outliers.
-    for(let i=0;i<24;i++){
-      const angle=(i+.5)/24*Math.PI/2,ux=Math.cos(angle),uy=Math.sin(angle);
+    random=rng(31927);state.time=0;state.flashes=[];state.hits=[];state.hitStartedAt=0;state.swaps=0;state.points=[];
+    // Balanced quadrants give zero mean random velocity. Carriers are spaced evenly in pipe area
+    // (equal shares of the flow), so the density is the same everywhere and both check lines count
+    // molecules at the same steady rate: their counts never differ by more than one.
+    const n=38,total=n*4,order=[...Array(total).keys()];
+    for(let i=total-1;i>0;i--){const j=Math.floor(random()*(i+1));[order[i],order[j]]=[order[j],order[i]];}
+    let next=0;
+    for(let i=0;i<n;i++){
+      const angle=(i+.5)/n*Math.PI/2,ux=Math.cos(angle),uy=Math.sin(angle);
       for(const sx of [-1,1])for(const sy of [-1,1]){
-        state.points.push({x:random(),y:.01+random()*.98,ux:sx*ux,uy:sy*uy,r:2.5,lastTurn:-DIRECTION_HOLD});
+        const x=xAtAreaShare((order[next++]+.5)/total);
+        state.points.push({xc:x,ox:0,s:(random()*2-1)*.97,ux:sx*ux,uy:sy*uy,lastTurn:-DIRECTION_HOLD,glow:-9});
       }
     }
+    state.passWide=0;state.passNarrow=0;
   }
-  function particleVelocity(p){
-    // Magnify the contrast only in this schematic, including at the medium preset.
-    // Real wall crossings still drive every yellow flash and the displayed count.
-    const m=model(),drawingScale=m.random/(1+2*state.strength/100),thermal=THERMAL_SPEED*drawingScale;
-    return {vx:DRIFT_SPEED*m.v/MAX_SPEED+thermal*p.ux,vy:thermal*p.uy};
-  }
-  // Molecules also collide with one another. Two molecules of equal mass can exchange velocities
-  // in an elastic collision, so swapping their random directions keeps the same set of directions
-  // (zero mean flow at rest, the same thermal energy). Keep a visible free-flight segment:
-  // at rest a molecule travels at least 21.6 px before another random turn, not just 5.76 px.
-  // This visual timing does not postpone reflections at a wall.
+  // Molecules also collide with one another: swapping random directions of equal-mass molecules
+  // keeps the set of directions (zero mean random velocity, same random energy).
   function collide(dt){
-    const n=state.points.length;
-    state.swaps+=dt*n/(2*COLLISION_TIME);
+    state.swaps+=dt*state.points.length/(2*COLLISION_TIME);
     const eligible=state.points.filter(p=>state.time-p.lastTurn>=DIRECTION_HOLD);
     while(state.swaps>=1){
       state.swaps-=1;
@@ -133,80 +132,120 @@
       a.lastTurn=b.lastTurn=state.time;
     }
   }
-  function update(){
-    const m=model(),s=state.strength;
-    $('strength').value=s;$('strength-value').textContent=s;$('speed').textContent=m.v.toFixed(1);
-    $('pressure').textContent=m.P.toFixed(1);$('p-value').textContent=m.P.toFixed(1);$('q-value').textContent=m.q.toFixed(1);
-    $('pressure-column').style.height=(m.P/TOTAL_PRESSURE*100)+'%';
-    $('energy-p').style.width=(m.P/TOTAL_PRESSURE*100)+'%';$('energy-q').style.width=(m.q/TOTAL_PRESSURE*100)+'%';
-    $('gauge-chart').setAttribute('aria-label',`주변 공기보다 ${m.P.toFixed(1)} 파스칼 높음`);
-    $('strength').setAttribute('aria-valuetext',`빨라진 정도 ${s}퍼센트, 속력 ${m.v.toFixed(1)}미터 매 초, 주변보다 ${m.P.toFixed(1)}파스칼 높음`);
-    $('pause').textContent=state.paused?'▶ 재생':'Ⅱ 일시정지';$('pause').setAttribute('aria-pressed',String(state.paused));
-    $('blower-wind').style.opacity=s===0?'0':String(.35+.65*s/100);
-    $('blower-wind').style.animationDuration=(1.1-.85*s/100)+'s';$('blower-wind').style.animationPlayState=state.paused||s===0?'paused':'running';
-    $('blower-label').textContent=s===0?'후— 불어 보세요':s<65?'후— →':'후우— →';
-    const insight=s===0?'흐름이 없을 때 압력 P가 가장 큽니다':'v ↑ → <span class="energy-term"><span class="fraction" role="math" aria-label="2분의 1"><span aria-hidden="true">1</span><span aria-hidden="true">2</span></span>ρv²</span> ↑ → 그만큼 P ↓';
-    if($('insight').innerHTML!==insight)$('insight').innerHTML=insight;
-    document.querySelectorAll('[data-value]').forEach(button=>button.setAttribute('aria-pressed',String(Number(button.dataset.value)===s)));
-  }
-  function setStrength(value){state.strength=Math.max(0,Math.min(100,Number(value)));state.flashes=[];state.hits=[];state.hitStartedAt=state.time;update();render();}
   function step(dt){
     state.time+=dt;
-    const drawW=Math.max(1,width-20),drawH=Math.max(1,height-89);
+    const g=geom(),k=g.k;
     for(const p of state.points){
-      const velocity=particleVelocity(p),vx=velocity.vx/drawW,vy=velocity.vy/drawH;
-      const oldX=p.x,oldY=p.y;
-      p.x=((p.x+vx*dt)%1+1)%1;p.y+=vy*dt;
-      if(p.y<0||p.y>1){
-        const wall=p.y<0?0:1,hitAt=(wall-oldY)/vy;
-        const x=((oldX+vx*hitAt)%1+1)%1;
-        p.y=2*wall-p.y;p.uy=-p.uy;state.collisionCount++;
-        const strength=Math.max(.08,Math.abs(velocity.vy)/THERMAL_SPEED);
-        state.flashes.push({x,wall,time:state.time-dt+hitAt,strength});
-        state.hits.push(state.time-dt+hitAt);
+      // A carrier xc moves with the flow u (continuity keeps the density uniform). The random motion
+      // along the pipe is an offset that is gently pulled back toward the carrier, as in a gas whose
+      // molecules keep colliding; a free random walk would pile molecules up where the random speed is low.
+      // s is the position across the pipe (-1 top wall, +1 bottom wall), so the drift follows the streamlines.
+      const x=Math.min(1,Math.max(0,p.xc+p.ox)),hr=hRel(x),half=g.hW*hr/2;
+      const u=U_WIDE*k*DRIFT_DRAW/hRel(p.xc),uHere=U_WIDE*k/hr,c=Math.sqrt(Math.max(0,K2*k*k-uHere*uHere));
+      const before=p.xc;
+      p.xc+=u*dt/g.drawW;
+      if(before<GATE_WIDE&&p.xc>=GATE_WIDE){state.passWide++;p.glow=state.time;}
+      if(before<GATE_NARROW&&p.xc>=GATE_NARROW){state.passNarrow++;p.glow=state.time;}
+      p.ox+=(c*p.ux/g.drawW-p.ox/RELAX)*dt;
+      const vy=c*p.uy;p.s+=vy*dt/half;
+      if(p.s>1||p.s<-1){
+        const side=p.s>1?1:-1,hx=p.xc+p.ox,strength=Math.min(1,Math.abs(vy)/(C_WIDE*k));
+        p.s=2*side-p.s;p.uy=-p.uy;
+        state.flashes.push({x:Math.min(1,Math.max(0,hx)),side,time:state.time,strength:Math.max(.08,strength)});
+        // Momentum given to the wall ~ number of hits x strength of each hit: this is what pressure measures.
+        if(hx<WIDE_END)state.hits.push({time:state.time,wide:true,strength});
+        else if(hx>NARROW_START)state.hits.push({time:state.time,wide:false,strength});
       }
+      // A carrier leaving the narrow end re-enters at the inlet with the same flux
+      // (the overshoot shrinks by the speed ratio).
+      if(p.xc>1)p.xc=(p.xc-1)/AREA_RATIO;
     }
     collide(dt);
     state.flashes=state.flashes.filter(f=>state.time-f.time<.3);
-    state.hits=state.hits.filter(time=>state.time-time<HIT_WINDOW);
+    state.hits=state.hits.filter(h=>state.time-h.time<HIT_WINDOW);
+  }
+  // Wall hits (count x strength) per unit wall length, wide vs narrow, scaled to the larger of the two.
+  function hitShares(){
+    if(state.time-state.hitStartedAt<1.5)return null;
+    let w=0,n=0;for(const h of state.hits){if(h.wide)w+=h.strength;else n+=h.strength;}
+    const rw=w/WIDE_END,rn=n/(1-NARROW_START),max=Math.max(rw,rn);
+    return max>0?{wide:rw/max,narrow:rn/max}:null;
+  }
+  function label(letter,word,cx,y,size,color){
+    ctx.font=`800 ${size}px "Segoe UI",sans-serif`;const lw=ctx.measureText(letter).width;
+    ctx.font=`700 12px ${FONT}`;const ww=ctx.measureText(word).width;
+    const x0=cx-(lw+6+ww)/2;
+    ctx.textAlign='left';ctx.textBaseline='alphabetic';
+    ctx.font=`800 ${size}px "Segoe UI",sans-serif`;ctx.fillStyle=color;ctx.fillText(letter,x0,y);
+    ctx.font=`700 12px ${FONT}`;ctx.fillStyle='#6f8590';ctx.fillText(word,x0+lw+6,y);
+  }
+  function flowLabel(word,cx,y,size,len){
+    ctx.font=`800 ${size}px "Segoe UI",sans-serif`;const lw=ctx.measureText('v').width;
+    ctx.font=`700 12px ${FONT}`;const ww=ctx.measureText(word).width;
+    const x0=cx-(lw+8+len+8+ww)/2,ay=y-5,ax=x0+lw+8;
+    ctx.textAlign='left';ctx.textBaseline='alphabetic';
+    ctx.font=`800 ${size}px "Segoe UI",sans-serif`;ctx.fillStyle='#278dcc';ctx.fillText('v',x0,y);
+    ctx.strokeStyle='#3b8ab4';ctx.fillStyle='#3b8ab4';ctx.lineWidth=2.5;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(ax+len-3,ay);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(ax+len,ay);ctx.lineTo(ax+len-7,ay-4.5);ctx.lineTo(ax+len-7,ay+4.5);ctx.closePath();ctx.fill();
+    ctx.font=`700 12px ${FONT}`;ctx.fillStyle='#6f8590';ctx.fillText(word,ax+len+8,y);
   }
   function render(){
-    const m=model(),pad=10,top=42,bottom=height-47,drawW=width-pad*2,drawH=bottom-top;
-    const X=x=>pad+x*drawW;
+    const g=geom(),L=PAD,R=width-PAD,small=width<520;
     ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,width,height);
-    const g=ctx.createLinearGradient(0,top,0,bottom);g.addColorStop(0,'#edf7fc');g.addColorStop(.5,'#f9fcfe');g.addColorStop(1,'#edf7fc');ctx.fillStyle=g;ctx.fillRect(pad,top,drawW,drawH);
-    ctx.strokeStyle='#a5bdc9';ctx.lineWidth=5;ctx.lineCap='round';
-    for(const y of [top,bottom]){ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(width-pad,y);ctx.stroke();}
-    ctx.save();ctx.beginPath();ctx.rect(pad,top,drawW,drawH);ctx.clip();
-    for(const p of state.points){
-      const x=X(p.x),y=top+p.y*drawH;
-      ctx.fillStyle='#258bc5';ctx.beginPath();ctx.arc(x,y,p.r,0,Math.PI*2);ctx.fill();
+    const outline=()=>{
+      ctx.beginPath();ctx.moveTo(L,wallY(L,-1,g));ctx.lineTo(g.xa,wallY(g.xa,-1,g));ctx.lineTo(g.xb,wallY(g.xb,-1,g));ctx.lineTo(R,wallY(R,-1,g));
+      ctx.lineTo(R,wallY(R,1,g));ctx.lineTo(g.xb,wallY(g.xb,1,g));ctx.lineTo(g.xa,wallY(g.xa,1,g));ctx.lineTo(L,wallY(L,1,g));ctx.closePath();
+    };
+    outline();ctx.fillStyle='#f1f8fc';ctx.fill();
+    ctx.save();outline();ctx.clip();
+    ctx.save();ctx.strokeStyle='#19816d';ctx.globalAlpha=.6;ctx.lineWidth=1.6;ctx.setLineDash([5,5]);
+    for(const gx of [GATE_WIDE,GATE_NARROW]){
+      const x=L+gx*g.drawW;ctx.beginPath();ctx.moveTo(x,wallY(x,-1,g));ctx.lineTo(x,wallY(x,1,g));ctx.stroke();
     }
     ctx.restore();
+    for(const p of state.points){
+      const xf=p.xc+p.ox,x=L+xf*g.drawW,y=g.mid+p.s*g.hW*hRel(Math.min(1,Math.max(0,xf)))/2,glow=state.time-p.glow<GLOW_TIME;
+      if(glow){ctx.fillStyle='#bfe8da';ctx.beginPath();ctx.arc(x,y,6,0,Math.PI*2);ctx.fill();}
+      ctx.fillStyle=glow?'#14896c':'#258bc5';
+      ctx.beginPath();ctx.arc(x,y,glow?3.2:2.5,0,Math.PI*2);ctx.fill();
+    }
+    ctx.restore();
+    ctx.strokeStyle='#a5bdc9';ctx.lineWidth=5;ctx.lineCap='round';ctx.lineJoin='round';
+    for(const side of [-1,1]){
+      ctx.beginPath();ctx.moveTo(L,wallY(L,side,g));ctx.lineTo(g.xa,wallY(g.xa,side,g));ctx.lineTo(g.xb,wallY(g.xb,side,g));ctx.lineTo(R,wallY(R,side,g));ctx.stroke();
+    }
+    // Yellow marks come only from actual wall crossings; weaker hits are fainter.
     for(const f of state.flashes){
-      const alpha=Math.max(0,1-(state.time-f.time)/.3)*f.strength,x=X(f.x),y=f.wall?bottom:top;
-      ctx.save();ctx.globalAlpha=alpha;ctx.shadowColor='#ffce16';ctx.shadowBlur=8+f.strength*8;ctx.strokeStyle='#efbd0c';ctx.lineWidth=5+f.strength*3;ctx.beginPath();ctx.moveTo(Math.max(pad,x-7),y);ctx.lineTo(Math.min(width-pad,x+7),y);ctx.stroke();ctx.restore();
+      const x=L+f.x*g.drawW,a=Math.max(L,x-7),b=Math.min(R,x+7),alpha=Math.max(0,1-(state.time-f.time)/.3)*f.strength;
+      ctx.save();ctx.globalAlpha=alpha;ctx.shadowColor='#ffce16';ctx.shadowBlur=8+f.strength*8;ctx.strokeStyle='#efbd0c';ctx.lineWidth=5+f.strength*3;
+      ctx.beginPath();ctx.moveTo(a,wallY(a,f.side,g));ctx.lineTo(b,wallY(b,f.side,g));ctx.stroke();ctx.restore();
     }
-    ctx.font='11px "Malgun Gothic",sans-serif';ctx.textAlign='center';ctx.fillStyle='#8297a2';
-    if(m.v===0)ctx.fillText('바람이 없어도 분자는 사방으로 운동',width/2,22);
-    else for(const position of [.2,.5,.8]){
-      const cx=width*position,length=Math.min(width*.24,25+m.v*4),y=20;
-      ctx.strokeStyle='#3b8ab4';ctx.fillStyle='#3b8ab4';ctx.lineWidth=2+m.v*.1;ctx.beginPath();ctx.moveTo(cx-length/2,y);ctx.lineTo(cx+length/2,y);ctx.stroke();ctx.beginPath();ctx.moveTo(cx+length/2,y);ctx.lineTo(cx+length/2-6,y-4);ctx.lineTo(cx+length/2-6,y+4);ctx.closePath();ctx.fill();
-    }
-    ctx.font='10px "Malgun Gothic",sans-serif';ctx.fillStyle='#96a6af';ctx.fillText('변화는 잘 보이도록 크게 과장한 그림',width/2,height-18);
-    const rate=hitRate(),hits=rate===null?'—':String(Math.round(rate));
-    if($('hit-rate').textContent!==hits)$('hit-rate').textContent=hits;
-    // The bar compares with the rate the same molecules would have with no flow.
-    const still=state.points.reduce((sum,p)=>sum+Math.abs(p.uy),0)*THERMAL_SPEED/Math.max(1,height-89);
-    const fill=(rate===null?0:Math.round(Math.min(100,rate/still*100)))+'%';
-    if($('hit-fill').style.width!==fill)$('hit-fill').style.width=fill;
+    const cw=L+WIDE_END*g.drawW/2,cn=(g.xb+R)/2;
+    label('P','압력 큼',cw,g.band-12,small?28:36,'#ce7c37');
+    label('P','압력 작음',cn,g.band-12,small?15:18,'#ce7c37');
+    const lenW=small?18:32,yb=height-Math.round(g.band/2)+6;
+    flowLabel('느림',cw,yb,small?14:16,lenW);
+    flowLabel('빠름',cn,yb,small?24:30,lenW*AREA_RATIO);
+    const share=hitShares(),fw=share?Math.round(share.wide*100)+'%':'0%',fn=share?Math.round(share.narrow*100)+'%':'0%';
+    if($('hit-wide').style.width!==fw)$('hit-wide').style.width=fw;
+    if($('hit-narrow').style.width!==fn)$('hit-narrow').style.width=fn;
+    const pw=String(state.passWide),pn=String(state.passNarrow);
+    if($('pass-wide').textContent!==pw)$('pass-wide').textContent=pw;
+    if($('pass-narrow').textContent!==pn)$('pass-narrow').textContent=pn;
+  }
+  function update(){
+    $('pause').textContent=state.paused?'▶ 재생':'Ⅱ 일시정지';$('pause').setAttribute('aria-pressed',String(state.paused));
+    $('slow').textContent=state.slow?'보통 빠르기로':'느리게 보기 (1/10배)';$('slow').setAttribute('aria-pressed',String(state.slow));
+    const pw=pressureShare(1),pn=pressureShare(1/AREA_RATIO);
+    $('wide-p').style.width=pw*100+'%';$('wide-q').style.width=(1-pw)*100+'%';
+    $('narrow-p').style.width=pn*100+'%';$('narrow-q').style.width=(1-pn)*100+'%';
   }
   function resize(){const rect=canvas.getBoundingClientRect();width=rect.width;height=rect.height;dpr=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);render();}
-  function frame(now){if(last===null)last=now;const dt=Math.min(.05,(now-last)/1000);last=now;if(!state.paused&&!document.hidden){step(dt);render();}requestAnimationFrame(frame);}
-  $('strength').addEventListener('input',e=>setStrength(e.target.value));
-  document.querySelectorAll('[data-value]').forEach(button=>button.addEventListener('click',()=>setStrength(button.dataset.value)));
+  function frame(now){if(last===null)last=now;const dt=Math.min(.05,(now-last)/1000);last=now;if(!state.paused&&!document.hidden){step(dt*(state.slow?SLOW_FACTOR:1));render();}requestAnimationFrame(frame);}
+  $('slow').addEventListener('click',()=>{state.slow=!state.slow;last=null;update();});
   $('pause').addEventListener('click',()=>{state.paused=!state.paused;last=null;update();});
-  $('reset').addEventListener('click',()=>{state.strength=0;state.paused=reduced;last=null;seed();update();render();});
+  $('reset').addEventListener('click',()=>{state.paused=reduced;last=null;seed();update();render();});
   document.addEventListener('visibilitychange',()=>{last=null;});
   seed();update();new ResizeObserver(resize).observe(canvas);resize();requestAnimationFrame(frame);
 })();
