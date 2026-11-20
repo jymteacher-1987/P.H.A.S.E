@@ -402,7 +402,7 @@ window.EXPERIMENTS_DATA = {
         "question": "관이 좁아져 공기가 빨라진 곳의 압력은 넓은 곳과 어떻게 다를까요?",
         "focus": "초록 확인선을 지나가는 분자 수, 흐름의 빠르기, 벽 충돌(노란색 표시)의 횟수와 세기를 넓은 곳과 좁은 곳에서 비교해 보세요."
       },
-      "path": "experiments/bernoulli-principle.html?v=7a90d0da36",
+      "path": "experiments/bernoulli-principle.html?v=48346b04d6",
       "date": "2026-09-09",
       "tags": [
         "베르누이",
