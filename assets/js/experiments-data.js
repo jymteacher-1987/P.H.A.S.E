@@ -476,7 +476,7 @@ window.EXPERIMENTS_DATA = {
         "question": "오른쪽 빗면을 점점 눕히다가 완전히 수평으로 만들면 공은 어떻게 운동할까요?",
         "focus": "경사각을 60°에서 0°까지 줄이며 공이 올라간 높이와 이동 거리를 기록표에서 비교하고, 0°에서는 점 사이의 간격과 속도–시간 그래프를 살펴보세요."
       },
-      "path": "experiments/galileo-inclined-plane.html?v=8b9173a036",
+      "path": "experiments/galileo-inclined-plane.html?v=d3fbd66499",
       "date": "2026-11-28",
       "tags": [
         "갈릴레오",
