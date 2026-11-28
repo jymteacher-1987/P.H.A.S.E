@@ -181,7 +181,8 @@ function resetState(){
   rod = []; for (var k=0;k<N;k++) rod.push(T0);
   water = []; var cols = 10, rows = 8;
   for (var r=0;r<rows;r++) for (var c=0;c<cols;c++)
-    water.push({x:(c+0.5)/cols + (Math.random()-0.5)*0.04, y:(r+0.5)/rows + (Math.random()-0.5)*0.04, T:T0});
+    water.push({x:(c+0.5)/cols + (Math.random()-0.5)*0.04, y:(r+0.5)/rows + (Math.random()-0.5)*0.04, T:T0,
+      ja:Math.random()*6.28, jb:Math.random()*6.28, jf:4+Math.random()*4});   // ja, jb, jf: 그리기용 입자 운동
   wst = {S:0}; plate = {T:T0}; sens = [T0, T0, T0];
   $('heat').textContent = '♨ 가열 켜기'; $('heat').className = 'ctrlBtn heat';
   notes(); readout(); drawAll();
@@ -400,8 +401,10 @@ function draw1(){
     c.fillStyle=fill; c.fillRect(x0,lvl,ww,wh);
     var pr=Math.min(4,ww*.018,wh*.032);
     for(var k=0;k<water.length;k++){
-      var p=water[k], px=x0+p.x*ww, py=yB-p.y*wh;
-      // 계산된 위치를 그대로 좌표 변환하며 임의 흔들림을 더하지 않는다.
+      // 흐름에 실린 위치(계산값) 둘레에서, 가열 전에도 입자가 끊임없이 불규칙하게 운동한다(온도가 높을수록 활발).
+      var p=water[k], jq=Math.max(0,Math.min(1,(p.T-T0)/(TH-T0))), ja=.011+.012*jq;
+      var px=x0+(p.x+ja*(Math.sin(clock*p.jf+p.ja)+.6*Math.sin(clock*p.jf*1.73+p.jb))/1.6)*ww;
+      var py=yB-(p.y+ja*(Math.cos(clock*p.jf*1.19+p.jb)+.6*Math.sin(clock*p.jf*2.11+p.ja))/1.6)*wh;
       c.beginPath(); c.arc(px,py,pr,0,Math.PI*2); c.fillStyle=col(p.T); c.fill();
       c.beginPath(); c.arc(px-pr*.24,py-pr*.24,pr*.24,0,Math.PI*2); c.fillStyle='rgba(255,255,255,.6)'; c.fill();
     }
