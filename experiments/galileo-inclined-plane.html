@@ -108,8 +108,8 @@
         <span class="wide">아래 눈금 한 칸: 0.5 m</span>
       </div>
       <div class="status" id="status"></div>
-      <div class="cap">속력 – 시간 그래프 <span style="font-weight:600;color:#806b61">· 속력은 방향 없이 빠르기만 나타냅니다</span></div>
-      <div class="cv" id="graphBox"><canvas id="graph" aria-label="속력 시간 그래프"></canvas></div>
+      <div class="cap">속도 – 시간 그래프 <span style="font-weight:600;color:#806b61">· 길을 따라 오른쪽으로 갈 때 (+), 왼쪽으로 갈 때 (−)</span></div>
+      <div class="cv" id="graphBox"><canvas id="graph" aria-label="속도 시간 그래프"></canvas></div>
     </div>
 
     <div class="side" id="side">
@@ -231,7 +231,7 @@ function setStatus(){
   var m;
   if (!started) m = '‘공 놓기’를 누르면 공이 높이 ' + f2(H) + ' m에서 내려갑니다.';
   else if (thDeg === 0 && flatDone) m = '수평면에서 속력이 ' + f2(Math.abs(st.v)) + ' m/s로 변하지 않습니다. 이렇게 속력과 방향이 일정한 운동이 등속 직선 운동입니다.';
-  else if (thDeg === 0) m = '오른쪽에 올라갈 빗면이 없습니다. 수평면에서 점 사이의 간격과 속력이 어떻게 되는지 지켜보세요.';
+  else if (thDeg === 0) m = '오른쪽에 올라갈 빗면이 없습니다. 수평면에서 점 사이의 간격과 속도 그래프가 어떻게 되는지 지켜보세요.';
   else if (!turned) m = '공이 오른쪽 빗면을 얼마나 높이, 얼마나 멀리 올라가는지 보세요.';
   else {
     var p = tr.pos(turnS);
@@ -280,7 +280,7 @@ function advance(){
     nextDot += 0.1;
   }
   if (st.t + 1e-9 >= nextSamp){
-    samples.push([st.t, Math.abs(st.v), 0]); nextSamp += sampGap;
+    samples.push([st.t, st.v, 0]); nextSamp += sampGap;
     if (samples.length > 3000){
       var keep = []; for (var i=0;i<samples.length;i++) if (samples[i][2] || i%2 === 0) keep.push(samples[i]);
       samples = keep; sampGap *= 2;
@@ -397,13 +397,13 @@ function drawGraph(){
   var L = 28, Rm = 28, T = 18, Bm = 18, pw = W-L-Rm, ph = Hh-T-Bm;
   if (pw < 20 || ph < 20) return;
   var tmax = Math.max(4, Math.ceil(st.t + 0.001)), vmax = 4;
-  var X = function(t){ return L + pw*t/tmax; }, Y = function(v){ return T + ph*(1 - v/vmax); };
+  var X = function(t){ return L + pw*t/tmax; }, Y = function(v){ return T + ph*(0.5 - v/(2*vmax)); };
   c.font = '10px sans-serif'; c.lineWidth = 1;
   c.textAlign = 'right'; c.textBaseline = 'middle';
-  var vs = ph < 50 ? 2 : 1;
-  for (var v=0; v<=vmax; v+=vs){
+  var vs = ph < 50 ? 4 : 2;
+  for (var v=-vmax; v<=vmax; v+=vs){
     c.strokeStyle = v===0 ? '#a58b7f' : '#efe5df'; c.beginPath(); c.moveTo(L, Y(v)); c.lineTo(L+pw, Y(v)); c.stroke();
-    c.fillStyle = '#806b61'; c.fillText(String(v), L-5, Y(v));
+    c.fillStyle = '#806b61'; c.fillText(v < 0 ? '−' + (-v) : String(v), L-5, Y(v));
   }
   c.strokeStyle = '#a58b7f'; c.beginPath(); c.moveTo(L, T); c.lineTo(L, T+ph); c.stroke();
   c.textAlign = 'center'; c.textBaseline = 'top';
@@ -419,9 +419,9 @@ function drawGraph(){
     var sx = X(samples[i][0]), sy = Y(samples[i][1]);
     if (i) c.lineTo(sx, sy); else c.moveTo(sx, sy);
   }
-  c.lineTo(X(st.t), Y(Math.abs(st.v)));
+  c.lineTo(X(st.t), Y(st.v));
   c.strokeStyle = '#e5484d'; c.lineWidth = 2; c.lineJoin = 'round'; c.stroke();
-  c.beginPath(); c.arc(X(st.t), Y(Math.abs(st.v)), 3, 0, Math.PI*2); c.fillStyle = '#e5484d'; c.fill();
+  c.beginPath(); c.arc(X(st.t), Y(st.v), 3, 0, Math.PI*2); c.fillStyle = '#e5484d'; c.fill();
 }
 function drawAll(){ drawScene(); drawGraph(); }
 function resize(){ sc = fit(scene); gr = fit(graph); drawAll(); }
