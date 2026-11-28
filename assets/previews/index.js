@@ -177,6 +177,11 @@ window.PHASE_PREVIEWS = {
       "src": "assets/previews/school-rider-46a180f5c1.webp",
       "sourceHash": "01af2936b437a3df64c91b14b228ef1ab197bfd86f36b4626cf3b924e5a6a3e8",
       "bytes": 63480
+    },
+    "galileo-inclined-plane": {
+      "src": "assets/previews/galileo-inclined-plane-19b3c67455.webp",
+      "sourceHash": "648a38fd2fcf00cb43629306d198f4bcedca2e58ef164acb9ab55078d71b8141",
+      "bytes": 18794
     }
   }
 };
