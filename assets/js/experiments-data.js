@@ -495,7 +495,7 @@ window.EXPERIMENTS_DATA = {
         "question": "열이 이동하려면 반드시 물질이 있어야 할까요?",
         "focus": "가열했을 때 세 칸에서 입자가 어떻게 움직이는지 비교하고, 물질을 없앤 뒤 다시 가열해 어느 칸의 온도계가 오르는지 기록표로 확인해 보세요."
       },
-      "path": "experiments/heat-transfer-compare.html?v=fa3d923032",
+      "path": "experiments/heat-transfer-compare.html?v=d87c255985",
       "date": "2026-11-28",
       "tags": [
         "열의 이동",
