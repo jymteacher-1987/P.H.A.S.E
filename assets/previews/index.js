@@ -123,6 +123,11 @@ window.PHASE_PREVIEWS = {
       "sourceHash": "6edf934cb55a9aa87d52998ce7fc45c81c8a6a1c8f8a84ee01ae9f0a9ddd4735",
       "bytes": 44796
     },
+    "galileo-inclined-plane": {
+      "src": "assets/previews/galileo-inclined-plane-19b3c67455.webp",
+      "sourceHash": "648a38fd2fcf00cb43629306d198f4bcedca2e58ef164acb9ab55078d71b8141",
+      "bytes": 18794
+    },
     "hero-maker": {
       "src": "assets/previews/hero-maker-340c30230e.webp",
       "sourceHash": "7c9656631780fb0070804369ae1452bbbfa5d8a52b7203081db7cb3f54d94804",
@@ -178,10 +183,10 @@ window.PHASE_PREVIEWS = {
       "sourceHash": "01af2936b437a3df64c91b14b228ef1ab197bfd86f36b4626cf3b924e5a6a3e8",
       "bytes": 63480
     },
-    "galileo-inclined-plane": {
-      "src": "assets/previews/galileo-inclined-plane-19b3c67455.webp",
-      "sourceHash": "648a38fd2fcf00cb43629306d198f4bcedca2e58ef164acb9ab55078d71b8141",
-      "bytes": 18794
+    "heat-transfer-compare": {
+      "src": "assets/previews/heat-transfer-compare-aba18e7a21.webp",
+      "sourceHash": "82fdb2aec7e592ff80dfcabb972ac58cd2b70cfbce420dd247d85eab8ff8932f",
+      "bytes": 30008
     }
   }
 };
