@@ -128,6 +128,11 @@ window.PHASE_PREVIEWS = {
       "sourceHash": "648a38fd2fcf00cb43629306d198f4bcedca2e58ef164acb9ab55078d71b8141",
       "bytes": 18794
     },
+    "heat-transfer-compare": {
+      "src": "assets/previews/heat-transfer-compare-46a7693ef8.webp",
+      "sourceHash": "8c392870e1a18a6cac3598cbb29f46c188df35f58882b1cc5724162ff0d08d55",
+      "bytes": 29658
+    },
     "hero-maker": {
       "src": "assets/previews/hero-maker-340c30230e.webp",
       "sourceHash": "7c9656631780fb0070804369ae1452bbbfa5d8a52b7203081db7cb3f54d94804",
@@ -182,11 +187,6 @@ window.PHASE_PREVIEWS = {
       "src": "assets/previews/school-rider-46a180f5c1.webp",
       "sourceHash": "01af2936b437a3df64c91b14b228ef1ab197bfd86f36b4626cf3b924e5a6a3e8",
       "bytes": 63480
-    },
-    "heat-transfer-compare": {
-      "src": "assets/previews/heat-transfer-compare-aba18e7a21.webp",
-      "sourceHash": "82fdb2aec7e592ff80dfcabb972ac58cd2b70cfbce420dd247d85eab8ff8932f",
-      "bytes": 30008
     }
   }
 };
