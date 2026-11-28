@@ -51,17 +51,6 @@ jobs:
         run: |
           if [ "$FORCE" = "true" ]; then npm run previews -- --force; else npm run previews; fi
           npm run previews:check
-          npm test
-      - name: Save Safari test failure screenshots
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: safari-small-screen-failures
-          path: |
-            .preview-tmp/safari/
-            .preview-tmp/afterlight/
-            .preview-tmp/faraday/
-          if-no-files-found: ignore
       - name: Save images and cache versions
         id: save
         run: |
@@ -83,3 +72,16 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh api --method POST "repos/$GITHUB_REPOSITORY/pages/builds"
+      # 대표 사진은 위에서 먼저 저장한다. 전체 검사는 그 뒤에 돌려, 다른 활동의 검사 실패가 새 사진 저장을 막지 않게 한다.
+      - name: Run site tests
+        run: npm test
+      - name: Save Safari test failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: safari-small-screen-failures
+          path: |
+            .preview-tmp/safari/
+            .preview-tmp/afterlight/
+            .preview-tmp/faraday/
+          if-no-files-found: ignore
