@@ -342,5 +342,15 @@
         "wait": 800
       }
     ]
+  },
+  "galileo-inclined-plane": {
+    "steps": [
+      {
+        "click": "#go"
+      },
+      {
+        "wait": 1250
+      }
+    ]
   }
 }
