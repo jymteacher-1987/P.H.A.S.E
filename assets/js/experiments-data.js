@@ -485,6 +485,25 @@ window.EXPERIMENTS_DATA = {
         "등속 직선 운동",
         "사고 실험"
       ]
+    },
+    {
+      "id": "heat-transfer-compare",
+      "title": "열의 이동: 전도·대류·복사 비교",
+      "category": "thermal",
+      "description": "금속 막대, 물, 떨어져 있는 판을 나란히 가열하며 열이 전도, 대류, 복사로 이동하는 모습을 모형으로 비교하고, 물질을 없앴을 때 어떤 방식이 남는지 확인합니다.",
+      "lessonNote": {
+        "question": "열이 이동하려면 반드시 물질이 있어야 할까요?",
+        "focus": "가열했을 때 세 칸에서 입자가 어떻게 움직이는지 비교하고, 물질을 없앤 뒤 다시 가열해 어느 칸의 온도계가 오르는지 기록표로 확인해 보세요."
+      },
+      "path": "experiments/heat-transfer-compare.html?v=66acb918fd",
+      "date": "2026-11-28",
+      "tags": [
+        "열의 이동",
+        "전도",
+        "대류",
+        "복사",
+        "열전달"
+      ]
     }
   ],
   "plays": [

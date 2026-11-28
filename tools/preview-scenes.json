@@ -352,5 +352,15 @@
         "wait": 1250
       }
     ]
+  },
+  "heat-transfer-compare": {
+    "steps": [
+      {
+        "click": "#heat"
+      },
+      {
+        "wait": 4500
+      }
+    ]
   }
 }
